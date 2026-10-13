@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>PubSoft.Abp.AspNetCore</PackageId>
+    <Description>Optional ABP module integration for PubSoft ASP.NET Core services.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Volo.Abp.Core" Version="10.6.0" />
+    <ProjectReference Include="../../host/PubSoft.AspNetCore/PubSoft.AspNetCore.csproj" />
+  </ItemGroup>
+</Project>

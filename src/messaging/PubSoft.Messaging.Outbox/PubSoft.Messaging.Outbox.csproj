@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>PubSoft.Messaging.Outbox</PackageId>
+    <Description>EF Core outbox publication, leased delivery, and transactional inbox deduplication.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../data/PubSoft.EntityFrameworkCore/PubSoft.EntityFrameworkCore.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+  </ItemGroup>
+</Project>

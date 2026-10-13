@@ -1,0 +1,71 @@
+#nullable enable
+PubSoft.Logging.AppLogLevel
+PubSoft.Logging.AppLogLevel.Debug = 1 -> PubSoft.Logging.AppLogLevel
+PubSoft.Logging.AppLogLevel.Error = 4 -> PubSoft.Logging.AppLogLevel
+PubSoft.Logging.AppLogLevel.Fatal = 5 -> PubSoft.Logging.AppLogLevel
+PubSoft.Logging.AppLogLevel.Info = 2 -> PubSoft.Logging.AppLogLevel
+PubSoft.Logging.AppLogLevel.Trace = 0 -> PubSoft.Logging.AppLogLevel
+PubSoft.Logging.AppLogLevel.Warn = 3 -> PubSoft.Logging.AppLogLevel
+PubSoft.Logging.AppLogger
+PubSoft.Logging.AppLogger.AppLogger(System.Collections.Generic.IEnumerable<PubSoft.Logging.ILogSink!>! sinks, PubSoft.Logging.AppLogLevel minLevel = PubSoft.Logging.AppLogLevel.Info, int capacity = 8192, int batchSize = 128) -> void
+PubSoft.Logging.AppLogger.Debug(string! source, string! message) -> bool
+PubSoft.Logging.AppLogger.Error(string! source, string! message, System.Exception? exception = null) -> bool
+PubSoft.Logging.AppLogger.Fatal(string! source, string! message, System.Exception? exception = null) -> bool
+PubSoft.Logging.AppLogger.Info(string! source, string! message) -> bool
+PubSoft.Logging.AppLogger.Log(PubSoft.Logging.AppLogLevel level, string! source, string! message, string? exception = null, long traceId = 0, string? service = null, string? userId = null, string? environment = null, System.Collections.Generic.IReadOnlyDictionary<string!, object?>? context = null) -> bool
+PubSoft.Logging.AppLogger.MinLevel.get -> PubSoft.Logging.AppLogLevel
+PubSoft.Logging.AppLogger.MinLevel.set -> void
+PubSoft.Logging.AppLogger.Trace(string! source, string! message) -> bool
+PubSoft.Logging.AppLogger.Warn(string! source, string! message) -> bool
+PubSoft.Logging.AppLoggerProvider
+PubSoft.Logging.AppLoggerProvider.AppLoggerProvider(PubSoft.Logging.AppLogger! appLogger) -> void
+PubSoft.Logging.AppLoggerProvider.CreateLogger(string! categoryName) -> Microsoft.Extensions.Logging.ILogger!
+PubSoft.Logging.AppLoggerProvider.Dispose() -> void
+PubSoft.Logging.AppVersion
+PubSoft.Logging.AsyncBackbone<T>
+PubSoft.Logging.AsyncBackbone<T>.AsyncBackbone(string! name, int capacity, int batchSize = 32) -> void
+PubSoft.Logging.AsyncBackbone<T>.DisposeAsync() -> System.Threading.Tasks.ValueTask
+PubSoft.Logging.AsyncBackbone<T>.DrainAsync(System.TimeSpan timeout) -> System.Threading.Tasks.ValueTask
+PubSoft.Logging.AsyncBackbone<T>.PendingCount.get -> int
+PubSoft.Logging.AsyncBackbone<T>.PublishAsync(T item, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+PubSoft.Logging.AsyncBackbone<T>.TryPublish(T item) -> bool
+PubSoft.Logging.ConsoleLogSink
+PubSoft.Logging.ConsoleLogSink.ConsoleLogSink() -> void
+PubSoft.Logging.ConsoleLogSink.WriteBatchAsync(System.ReadOnlyMemory<PubSoft.Logging.LogEntry> entries, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+PubSoft.Logging.ILogSink
+PubSoft.Logging.ILogSink.WriteBatchAsync(System.ReadOnlyMemory<PubSoft.Logging.LogEntry> entries, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+PubSoft.Logging.JsonLogSink
+PubSoft.Logging.JsonLogSink.JsonLogSink(System.Func<System.ReadOnlyMemory<byte>, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>! output) -> void
+PubSoft.Logging.JsonLogSink.WriteBatchAsync(System.ReadOnlyMemory<PubSoft.Logging.LogEntry> entries, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+PubSoft.Logging.LogContext
+PubSoft.Logging.LogEntry
+PubSoft.Logging.LogEntry.Context.get -> System.Collections.Generic.IReadOnlyDictionary<string!, object?>?
+PubSoft.Logging.LogEntry.Environment.get -> string?
+PubSoft.Logging.LogEntry.ExceptionDetail.get -> string?
+PubSoft.Logging.LogEntry.HostName.get -> string?
+PubSoft.Logging.LogEntry.Level.get -> PubSoft.Logging.AppLogLevel
+PubSoft.Logging.LogEntry.LogEntry() -> void
+PubSoft.Logging.LogEntry.LogEntry(PubSoft.Logging.AppLogLevel level, string! source, string! message, string? exceptionDetail = null, long traceId = 0, string? service = null, string? serviceVersion = null, string? serviceInstanceId = null, string? spanId = null, string? userId = null, string? environment = null, string? hostName = null, System.Collections.Generic.IReadOnlyDictionary<string!, object?>? context = null) -> void
+PubSoft.Logging.LogEntry.Message.get -> string!
+PubSoft.Logging.LogEntry.Service.get -> string?
+PubSoft.Logging.LogEntry.ServiceInstanceId.get -> string?
+PubSoft.Logging.LogEntry.ServiceVersion.get -> string?
+PubSoft.Logging.LogEntry.Source.get -> string!
+PubSoft.Logging.LogEntry.SpanId.get -> string?
+PubSoft.Logging.LogEntry.TimestampUtc.get -> System.DateTimeOffset
+PubSoft.Logging.LogEntry.TraceId.get -> long
+PubSoft.Logging.LogEntry.UserId.get -> string?
+PubSoft.Logging.LoggingServiceCollectionExtensions
+abstract PubSoft.Logging.AsyncBackbone<T>.ProcessBatchAsync(System.ReadOnlyMemory<T> batch, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+static PubSoft.Logging.AppVersion.BuildDate.get -> string?
+static PubSoft.Logging.AppVersion.BuildTime.get -> string?
+static PubSoft.Logging.AppVersion.Full.get -> string!
+static PubSoft.Logging.AppVersion.Short.get -> string!
+static PubSoft.Logging.AppVersion.Version.get -> string!
+static PubSoft.Logging.LogContext.Clear() -> void
+static PubSoft.Logging.LogContext.GetCurrentContext() -> System.Collections.Generic.IReadOnlyDictionary<string!, object?>?
+static PubSoft.Logging.LogContext.PushProperties(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, object?>>! properties) -> System.IDisposable!
+static PubSoft.Logging.LogContext.PushProperty(string! key, object? value) -> System.IDisposable!
+static PubSoft.Logging.LoggingServiceCollectionExtensions.AddPubSoftLogging(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, PubSoft.Logging.AppLogLevel minLevel = PubSoft.Logging.AppLogLevel.Info, bool enableJsonSink = false) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Logging.LoggingServiceCollectionExtensions.AddPubSoftLogging(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, PubSoft.Logging.AppLogger! appLogger) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+virtual PubSoft.Logging.AsyncBackbone<T>.OnProcessingError(System.Exception! exception, int batchCount) -> void

@@ -1,0 +1,61 @@
+#nullable enable
+PubSoft.Notifications.INotificationChannel
+PubSoft.Notifications.INotificationChannel.Name.get -> string!
+PubSoft.Notifications.INotificationChannel.SendAsync(PubSoft.Notifications.NotificationMessage! message, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Notifications.NotificationResult!>!
+PubSoft.Notifications.NotificationDispatchReport
+PubSoft.Notifications.NotificationDispatchReport.<Clone>$() -> PubSoft.Notifications.NotificationDispatchReport!
+PubSoft.Notifications.NotificationDispatchReport.Deconstruct(out System.Collections.Generic.IReadOnlyDictionary<string!, PubSoft.Notifications.NotificationResult!>! Results) -> void
+PubSoft.Notifications.NotificationDispatchReport.Equals(PubSoft.Notifications.NotificationDispatchReport? other) -> bool
+PubSoft.Notifications.NotificationDispatchReport.NotificationDispatchReport(System.Collections.Generic.IReadOnlyDictionary<string!, PubSoft.Notifications.NotificationResult!>! Results) -> void
+PubSoft.Notifications.NotificationDispatchReport.Results.get -> System.Collections.Generic.IReadOnlyDictionary<string!, PubSoft.Notifications.NotificationResult!>!
+PubSoft.Notifications.NotificationDispatchReport.Results.init -> void
+PubSoft.Notifications.NotificationDispatchReport.Succeeded.get -> bool
+PubSoft.Notifications.NotificationDispatcher
+PubSoft.Notifications.NotificationDispatcher.DispatchAsync(string! channelName, PubSoft.Notifications.NotificationMessage! message, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Notifications.NotificationResult!>!
+PubSoft.Notifications.NotificationDispatcher.DispatchToAllAsync(PubSoft.Notifications.NotificationMessage! message, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Notifications.NotificationDispatchReport!>!
+PubSoft.Notifications.NotificationDispatcher.NotificationDispatcher(System.Collections.Generic.IEnumerable<PubSoft.Notifications.INotificationChannel!>! channels, Microsoft.Extensions.Options.IOptions<PubSoft.Notifications.NotificationOptions!>? options = null, Microsoft.Extensions.Logging.ILogger<PubSoft.Notifications.NotificationDispatcher!>? logger = null, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Notifications.NotificationMessage
+PubSoft.Notifications.NotificationMessage.Content.get -> string!
+PubSoft.Notifications.NotificationMessage.CorrelationId.get -> string?
+PubSoft.Notifications.NotificationMessage.NotificationMessage(string! content, System.Collections.Generic.IEnumerable<string!>? recipients = null, string? title = null, string? templateCode = null, System.Collections.Generic.IReadOnlyDictionary<string!, string!>? templateParameters = null, PubSoft.Notifications.NotificationSeverity severity = PubSoft.Notifications.NotificationSeverity.Info, string? source = null, string? correlationId = null) -> void
+PubSoft.Notifications.NotificationMessage.Recipients.get -> System.Collections.Generic.IReadOnlyList<string!>!
+PubSoft.Notifications.NotificationMessage.Severity.get -> PubSoft.Notifications.NotificationSeverity
+PubSoft.Notifications.NotificationMessage.Source.get -> string?
+PubSoft.Notifications.NotificationMessage.TemplateCode.get -> string?
+PubSoft.Notifications.NotificationMessage.TemplateParameters.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+PubSoft.Notifications.NotificationMessage.Title.get -> string?
+PubSoft.Notifications.NotificationOptions
+PubSoft.Notifications.NotificationOptions.DeduplicationWindow.get -> System.TimeSpan
+PubSoft.Notifications.NotificationOptions.DeduplicationWindow.set -> void
+PubSoft.Notifications.NotificationOptions.MaximumDeduplicationEntries.get -> int
+PubSoft.Notifications.NotificationOptions.MaximumDeduplicationEntries.set -> void
+PubSoft.Notifications.NotificationOptions.NotificationOptions() -> void
+PubSoft.Notifications.NotificationResult
+PubSoft.Notifications.NotificationResult.<Clone>$() -> PubSoft.Notifications.NotificationResult!
+PubSoft.Notifications.NotificationResult.Deconstruct(out bool Success, out string? Message, out string? ProviderMessageId) -> void
+PubSoft.Notifications.NotificationResult.Equals(PubSoft.Notifications.NotificationResult? other) -> bool
+PubSoft.Notifications.NotificationResult.Message.get -> string?
+PubSoft.Notifications.NotificationResult.Message.init -> void
+PubSoft.Notifications.NotificationResult.NotificationResult(bool Success, string? Message = null, string? ProviderMessageId = null) -> void
+PubSoft.Notifications.NotificationResult.ProviderMessageId.get -> string?
+PubSoft.Notifications.NotificationResult.ProviderMessageId.init -> void
+PubSoft.Notifications.NotificationResult.Success.get -> bool
+PubSoft.Notifications.NotificationResult.Success.init -> void
+PubSoft.Notifications.NotificationServiceCollectionExtensions
+PubSoft.Notifications.NotificationSeverity
+PubSoft.Notifications.NotificationSeverity.Critical = 2 -> PubSoft.Notifications.NotificationSeverity
+PubSoft.Notifications.NotificationSeverity.Info = 0 -> PubSoft.Notifications.NotificationSeverity
+PubSoft.Notifications.NotificationSeverity.Warning = 1 -> PubSoft.Notifications.NotificationSeverity
+override PubSoft.Notifications.NotificationDispatchReport.Equals(object? obj) -> bool
+override PubSoft.Notifications.NotificationDispatchReport.GetHashCode() -> int
+override PubSoft.Notifications.NotificationDispatchReport.ToString() -> string!
+override PubSoft.Notifications.NotificationResult.Equals(object? obj) -> bool
+override PubSoft.Notifications.NotificationResult.GetHashCode() -> int
+override PubSoft.Notifications.NotificationResult.ToString() -> string!
+static PubSoft.Notifications.NotificationDispatchReport.operator !=(PubSoft.Notifications.NotificationDispatchReport? left, PubSoft.Notifications.NotificationDispatchReport? right) -> bool
+static PubSoft.Notifications.NotificationDispatchReport.operator ==(PubSoft.Notifications.NotificationDispatchReport? left, PubSoft.Notifications.NotificationDispatchReport? right) -> bool
+static PubSoft.Notifications.NotificationResult.Fail(string! message) -> PubSoft.Notifications.NotificationResult!
+static PubSoft.Notifications.NotificationResult.Ok(string? providerMessageId = null) -> PubSoft.Notifications.NotificationResult!
+static PubSoft.Notifications.NotificationResult.operator !=(PubSoft.Notifications.NotificationResult? left, PubSoft.Notifications.NotificationResult? right) -> bool
+static PubSoft.Notifications.NotificationResult.operator ==(PubSoft.Notifications.NotificationResult? left, PubSoft.Notifications.NotificationResult? right) -> bool
+static PubSoft.Notifications.NotificationServiceCollectionExtensions.AddPubSoftNotifications(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Notifications.NotificationOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

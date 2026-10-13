@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>PubSoft.Monitoring.Scheduling</RootNamespace>
+    <PackageId>PubSoft.Monitoring.Scheduling</PackageId>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Version>$(PubSoftVersion)</Version>
+    <Description>Optional scheduler alert rules and job health integration for PubSoft.Monitoring.</Description>
+    <PackageTags>monitoring;scheduler;notifications;alerts</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../platform/PubSoft.Monitoring/PubSoft.Monitoring.csproj" />
+    <ProjectReference Include="../../platform/PubSoft.Scheduling/PubSoft.Scheduling.csproj" />
+    <ProjectReference Include="../../platform/PubSoft.Notifications/PubSoft.Notifications.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.12" />
+  </ItemGroup>
+</Project>

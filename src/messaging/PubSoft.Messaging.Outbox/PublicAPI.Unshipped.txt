@@ -1,0 +1,88 @@
+#nullable enable
+PubSoft.Messaging.Outbox.EfCoreInboxMessageProcessor<TDbContext>
+PubSoft.Messaging.Outbox.EfCoreInboxMessageProcessor<TDbContext>.EfCoreInboxMessageProcessor(TDbContext! dbContext, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Messaging.Outbox.EfCoreInboxMessageProcessor<TDbContext>.ProcessOnceAsync(string! consumerName, System.Guid messageId, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task!>! handler, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Messaging.Outbox.EfCoreOutboxPublisher<TDbContext>
+PubSoft.Messaging.Outbox.EfCoreOutboxPublisher<TDbContext>.EfCoreOutboxPublisher(TDbContext! dbContext, PubSoft.Messaging.Outbox.OutboxOptions? options = null, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Messaging.Outbox.EfCoreOutboxPublisher<TDbContext>.PublishAsync<TEvent>(TEvent event, string? targetModule = null, string? aggregateKey = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Guid>!
+PubSoft.Messaging.Outbox.EfCoreOutboxStore<TDbContext>
+PubSoft.Messaging.Outbox.EfCoreOutboxStore<TDbContext>.ClaimBatchAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<PubSoft.Messaging.Outbox.OutboxMessage!>!>!
+PubSoft.Messaging.Outbox.EfCoreOutboxStore<TDbContext>.EfCoreOutboxStore(TDbContext! dbContext, PubSoft.Messaging.Outbox.OutboxOptions? options = null, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Messaging.Outbox.EfCoreOutboxStore<TDbContext>.MarkDeliveredAsync(System.Guid messageId, System.Guid leaseToken, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Messaging.Outbox.EfCoreOutboxStore<TDbContext>.MarkFailedAsync(System.Guid messageId, System.Guid leaseToken, string! errorCode, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Messaging.Outbox.IInboxMessageProcessor
+PubSoft.Messaging.Outbox.IInboxMessageProcessor.ProcessOnceAsync(string! consumerName, System.Guid messageId, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task!>! handler, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Messaging.Outbox.IOutboxDispatcher
+PubSoft.Messaging.Outbox.IOutboxDispatcher.DispatchAsync(PubSoft.Messaging.Outbox.OutboxMessage! message, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Messaging.Outbox.IOutboxPublisher
+PubSoft.Messaging.Outbox.IOutboxPublisher.PublishAsync<TEvent>(TEvent event, string? targetModule = null, string? aggregateKey = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Guid>!
+PubSoft.Messaging.Outbox.IOutboxScopeProvider
+PubSoft.Messaging.Outbox.IOutboxScopeProvider.CreateScopesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<Microsoft.Extensions.DependencyInjection.AsyncServiceScope>!
+PubSoft.Messaging.Outbox.IOutboxStore
+PubSoft.Messaging.Outbox.IOutboxStore.ClaimBatchAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<PubSoft.Messaging.Outbox.OutboxMessage!>!>!
+PubSoft.Messaging.Outbox.IOutboxStore.MarkDeliveredAsync(System.Guid messageId, System.Guid leaseToken, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Messaging.Outbox.IOutboxStore.MarkFailedAsync(System.Guid messageId, System.Guid leaseToken, string! errorCode, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Messaging.Outbox.InboxOutboxDispatcher
+PubSoft.Messaging.Outbox.InboxOutboxDispatcher.DispatchAsync(PubSoft.Messaging.Outbox.OutboxMessage! message, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Messaging.Outbox.InboxOutboxDispatcher.InboxOutboxDispatcher(PubSoft.Messaging.Outbox.IInboxMessageProcessor! inboxProcessor) -> void
+PubSoft.Messaging.Outbox.InboxReceipt
+PubSoft.Messaging.Outbox.InboxReceipt.ConsumerName.get -> string!
+PubSoft.Messaging.Outbox.InboxReceipt.MessageId.get -> System.Guid
+PubSoft.Messaging.Outbox.InboxReceipt.ProcessedAt.get -> System.DateTimeOffset
+PubSoft.Messaging.Outbox.InboxReceipt.TenantId.get -> long?
+PubSoft.Messaging.Outbox.InboxReceipt.TenantId.set -> void
+PubSoft.Messaging.Outbox.InboxReceipt.TenantKey.get -> string!
+PubSoft.Messaging.Outbox.InboxRetentionCleanup<TDbContext>
+PubSoft.Messaging.Outbox.InboxRetentionCleanup<TDbContext>.DeleteProcessedBeforeAsync(System.TimeSpan retention, int batchSize = 500, string? tenantKey = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>!
+PubSoft.Messaging.Outbox.InboxRetentionCleanup<TDbContext>.InboxRetentionCleanup(TDbContext! dbContext, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Messaging.Outbox.OutboxBackgroundService
+PubSoft.Messaging.Outbox.OutboxBackgroundService.OutboxBackgroundService(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory! scopeFactory, PubSoft.Messaging.Outbox.OutboxOptions! options, Microsoft.Extensions.Logging.ILogger<PubSoft.Messaging.Outbox.OutboxBackgroundService!>? logger = null, PubSoft.Messaging.Outbox.IOutboxScopeProvider? outboxScopeProvider = null) -> void
+PubSoft.Messaging.Outbox.OutboxMessage
+PubSoft.Messaging.Outbox.OutboxMessage.AggregateKey.get -> string?
+PubSoft.Messaging.Outbox.OutboxMessage.AttemptCount.get -> int
+PubSoft.Messaging.Outbox.OutboxMessage.DeliveredAt.get -> System.DateTimeOffset?
+PubSoft.Messaging.Outbox.OutboxMessage.EventType.get -> string!
+PubSoft.Messaging.Outbox.OutboxMessage.Id.get -> System.Guid
+PubSoft.Messaging.Outbox.OutboxMessage.LastErrorCode.get -> string?
+PubSoft.Messaging.Outbox.OutboxMessage.LeaseExpiresAt.get -> System.DateTimeOffset?
+PubSoft.Messaging.Outbox.OutboxMessage.LeaseToken.get -> System.Guid?
+PubSoft.Messaging.Outbox.OutboxMessage.MaxAttempts.get -> int
+PubSoft.Messaging.Outbox.OutboxMessage.NextAttemptAt.get -> System.DateTimeOffset?
+PubSoft.Messaging.Outbox.OutboxMessage.OccurredAt.get -> System.DateTimeOffset
+PubSoft.Messaging.Outbox.OutboxMessage.PayloadJson.get -> string!
+PubSoft.Messaging.Outbox.OutboxMessage.Status.get -> PubSoft.Messaging.Outbox.OutboxMessageStatus
+PubSoft.Messaging.Outbox.OutboxMessage.TargetModule.get -> string?
+PubSoft.Messaging.Outbox.OutboxMessage.TenantId.get -> long?
+PubSoft.Messaging.Outbox.OutboxMessage.TenantId.set -> void
+PubSoft.Messaging.Outbox.OutboxMessageStatus
+PubSoft.Messaging.Outbox.OutboxMessageStatus.DeadLetter = 4 -> PubSoft.Messaging.Outbox.OutboxMessageStatus
+PubSoft.Messaging.Outbox.OutboxMessageStatus.Delivered = 2 -> PubSoft.Messaging.Outbox.OutboxMessageStatus
+PubSoft.Messaging.Outbox.OutboxMessageStatus.Pending = 0 -> PubSoft.Messaging.Outbox.OutboxMessageStatus
+PubSoft.Messaging.Outbox.OutboxMessageStatus.Processing = 1 -> PubSoft.Messaging.Outbox.OutboxMessageStatus
+PubSoft.Messaging.Outbox.OutboxMessageStatus.RetryScheduled = 3 -> PubSoft.Messaging.Outbox.OutboxMessageStatus
+PubSoft.Messaging.Outbox.OutboxModelBuilderExtensions
+PubSoft.Messaging.Outbox.OutboxOptions
+PubSoft.Messaging.Outbox.OutboxOptions.BaseRetryDelay.get -> System.TimeSpan
+PubSoft.Messaging.Outbox.OutboxOptions.BaseRetryDelay.set -> void
+PubSoft.Messaging.Outbox.OutboxOptions.BatchSize.get -> int
+PubSoft.Messaging.Outbox.OutboxOptions.BatchSize.set -> void
+PubSoft.Messaging.Outbox.OutboxOptions.LeaseDuration.get -> System.TimeSpan
+PubSoft.Messaging.Outbox.OutboxOptions.LeaseDuration.set -> void
+PubSoft.Messaging.Outbox.OutboxOptions.MaxAttempts.get -> int
+PubSoft.Messaging.Outbox.OutboxOptions.MaxAttempts.set -> void
+PubSoft.Messaging.Outbox.OutboxOptions.MaxRetryDelay.get -> System.TimeSpan
+PubSoft.Messaging.Outbox.OutboxOptions.MaxRetryDelay.set -> void
+PubSoft.Messaging.Outbox.OutboxOptions.MaximumPayloadCharacters.get -> int
+PubSoft.Messaging.Outbox.OutboxOptions.MaximumPayloadCharacters.set -> void
+PubSoft.Messaging.Outbox.OutboxOptions.OutboxOptions() -> void
+PubSoft.Messaging.Outbox.OutboxOptions.PollInterval.get -> System.TimeSpan
+PubSoft.Messaging.Outbox.OutboxOptions.PollInterval.set -> void
+PubSoft.Messaging.Outbox.OutboxProcessor
+PubSoft.Messaging.Outbox.OutboxProcessor.OutboxProcessor(PubSoft.Messaging.Outbox.IOutboxStore! store, PubSoft.Messaging.Outbox.IOutboxDispatcher! dispatcher, Microsoft.Extensions.Logging.ILogger<PubSoft.Messaging.Outbox.OutboxProcessor!>? logger = null) -> void
+PubSoft.Messaging.Outbox.OutboxProcessor.ProcessBatchAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>!
+PubSoft.Messaging.Outbox.OutboxServiceCollectionExtensions
+abstract PubSoft.Messaging.Outbox.InboxOutboxDispatcher.ConsumerName.get -> string!
+abstract PubSoft.Messaging.Outbox.InboxOutboxDispatcher.HandleMessageAsync(PubSoft.Messaging.Outbox.OutboxMessage! message, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+static PubSoft.Messaging.Outbox.OutboxModelBuilderExtensions.ConfigurePubSoftOutbox(this Microsoft.EntityFrameworkCore.ModelBuilder! modelBuilder) -> Microsoft.EntityFrameworkCore.ModelBuilder!
+static PubSoft.Messaging.Outbox.OutboxServiceCollectionExtensions.AddPubSoftOutbox<TDbContext>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Messaging.Outbox.OutboxOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Messaging.Outbox.OutboxServiceCollectionExtensions.AddPubSoftOutboxWorker(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

@@ -1,0 +1,121 @@
+#nullable enable
+PubSoft.Core.ApiResponse
+PubSoft.Core.ApiResponse.ApiResponse() -> void
+PubSoft.Core.ApiResponse<T>
+PubSoft.Core.ApiResponse<T>.ApiResponse() -> void
+PubSoft.Core.ApiResponse<T>.Code.get -> int
+PubSoft.Core.ApiResponse<T>.Code.set -> void
+PubSoft.Core.ApiResponse<T>.Data.get -> T?
+PubSoft.Core.ApiResponse<T>.Data.set -> void
+PubSoft.Core.ApiResponse<T>.Message.get -> string?
+PubSoft.Core.ApiResponse<T>.Message.set -> void
+PubSoft.Core.ApiResponse<T>.TraceId.get -> string?
+PubSoft.Core.ApiResponse<T>.TraceId.set -> void
+PubSoft.Core.DomainException
+PubSoft.Core.DomainException.DomainException(string! message) -> void
+PubSoft.Core.DomainException.DomainException(string! message, System.Exception! innerException) -> void
+PubSoft.Core.Gender
+PubSoft.Core.Gender.Female = 2 -> PubSoft.Core.Gender
+PubSoft.Core.Gender.Male = 1 -> PubSoft.Core.Gender
+PubSoft.Core.Gender.Unknown = 0 -> PubSoft.Core.Gender
+PubSoft.Core.Guard
+PubSoft.Core.ISpecification<T>
+PubSoft.Core.ISpecification<T>.Criteria.get -> System.Linq.Expressions.Expression<System.Func<T, bool>!>?
+PubSoft.Core.ISpecification<T>.GroupBy.get -> System.Linq.Expressions.Expression<System.Func<T, object!>!>?
+PubSoft.Core.ISpecification<T>.IncludeStrings.get -> System.Collections.Generic.List<string!>!
+PubSoft.Core.ISpecification<T>.Includes.get -> System.Collections.Generic.List<System.Linq.Expressions.Expression<System.Func<T, object!>!>!>!
+PubSoft.Core.ISpecification<T>.IsPagingEnabled.get -> bool
+PubSoft.Core.ISpecification<T>.OrderBy.get -> System.Linq.Expressions.Expression<System.Func<T, object!>!>?
+PubSoft.Core.ISpecification<T>.OrderByDescending.get -> System.Linq.Expressions.Expression<System.Func<T, object!>!>?
+PubSoft.Core.ISpecification<T>.Skip.get -> int
+PubSoft.Core.ISpecification<T>.Take.get -> int
+PubSoft.Core.Money
+PubSoft.Core.Money.AllocateBps(int bps) -> PubSoft.Core.Money
+PubSoft.Core.Money.AllocatePercent(decimal percent) -> PubSoft.Core.Money
+PubSoft.Core.Money.CompareTo(PubSoft.Core.Money other) -> int
+PubSoft.Core.Money.CompareTo(object? obj) -> int
+PubSoft.Core.Money.Equals(PubSoft.Core.Money other) -> bool
+PubSoft.Core.Money.Fen.get -> long
+PubSoft.Core.Money.IsNegative.get -> bool
+PubSoft.Core.Money.IsPositive.get -> bool
+PubSoft.Core.Money.IsZero.get -> bool
+PubSoft.Core.Money.Money() -> void
+PubSoft.Core.Money.Money(long fen) -> void
+PubSoft.Core.Money.ToYuan() -> decimal
+PubSoft.Core.PagedResultDto<T>
+PubSoft.Core.PagedResultDto<T>.Items.get -> System.Collections.Generic.List<T>!
+PubSoft.Core.PagedResultDto<T>.Items.set -> void
+PubSoft.Core.PagedResultDto<T>.PagedResultDto() -> void
+PubSoft.Core.PagedResultDto<T>.PagedResultDto(long totalCount, System.Collections.Generic.List<T>! items) -> void
+PubSoft.Core.PagedResultDto<T>.TotalCount.get -> long
+PubSoft.Core.PagedResultDto<T>.TotalCount.set -> void
+PubSoft.Core.Result<T>
+PubSoft.Core.Result<T>.Bind<TNext>(System.Func<T, PubSoft.Core.Result<TNext>>! selector) -> PubSoft.Core.Result<TNext>
+PubSoft.Core.Result<T>.Error.get -> PubSoft.Core.ResultError
+PubSoft.Core.Result<T>.IsOk.get -> bool
+PubSoft.Core.Result<T>.Map<TNext>(System.Func<T, TNext>! selector) -> PubSoft.Core.Result<TNext>
+PubSoft.Core.Result<T>.Result() -> void
+PubSoft.Core.Result<T>.Unwrap(T fallback) -> T
+PubSoft.Core.Result<T>.Value.get -> T
+PubSoft.Core.ResultError
+PubSoft.Core.ResultError.Code.get -> string!
+PubSoft.Core.ResultError.Message.get -> string!
+PubSoft.Core.ResultError.ResultError() -> void
+PubSoft.Core.ResultError.ResultError(string! code, string! message) -> void
+PubSoft.Core.SnowflakeIdGenerator
+PubSoft.Core.SnowflakeIdGenerator.NextId() -> long
+PubSoft.Core.SnowflakeIdGenerator.SnowflakeIdGenerator(long workerId) -> void
+PubSoft.Core.SnowflakeIdGenerator.SnowflakeIdGenerator(long workerId, System.TimeProvider! timeProvider) -> void
+PubSoft.Core.Specification<T>
+PubSoft.Core.Specification<T>.AddInclude(System.Linq.Expressions.Expression<System.Func<T!, object!>!>! includeExpression) -> void
+PubSoft.Core.Specification<T>.AddInclude(string! includeString) -> void
+PubSoft.Core.Specification<T>.ApplyGroupBy(System.Linq.Expressions.Expression<System.Func<T!, object!>!>! groupByExpression) -> void
+PubSoft.Core.Specification<T>.ApplyOrderBy(System.Linq.Expressions.Expression<System.Func<T!, object!>!>! orderByExpression) -> void
+PubSoft.Core.Specification<T>.ApplyOrderByDescending(System.Linq.Expressions.Expression<System.Func<T!, object!>!>! orderByDescendingExpression) -> void
+PubSoft.Core.Specification<T>.ApplyPaging(int skip, int take) -> void
+PubSoft.Core.Specification<T>.Criteria.get -> System.Linq.Expressions.Expression<System.Func<T!, bool>!>?
+PubSoft.Core.Specification<T>.GroupBy.get -> System.Linq.Expressions.Expression<System.Func<T!, object!>!>?
+PubSoft.Core.Specification<T>.IncludeStrings.get -> System.Collections.Generic.List<string!>!
+PubSoft.Core.Specification<T>.Includes.get -> System.Collections.Generic.List<System.Linq.Expressions.Expression<System.Func<T!, object!>!>!>!
+PubSoft.Core.Specification<T>.IsPagingEnabled.get -> bool
+PubSoft.Core.Specification<T>.OrderBy.get -> System.Linq.Expressions.Expression<System.Func<T!, object!>!>?
+PubSoft.Core.Specification<T>.OrderByDescending.get -> System.Linq.Expressions.Expression<System.Func<T!, object!>!>?
+PubSoft.Core.Specification<T>.Skip.get -> int
+PubSoft.Core.Specification<T>.Specification() -> void
+PubSoft.Core.Specification<T>.Specification(System.Linq.Expressions.Expression<System.Func<T!, bool>!>! criteria) -> void
+PubSoft.Core.Specification<T>.Take.get -> int
+override PubSoft.Core.Money.Equals(object? obj) -> bool
+override PubSoft.Core.Money.GetHashCode() -> int
+override PubSoft.Core.Money.ToString() -> string!
+override PubSoft.Core.Result<T>.ToString() -> string!
+override PubSoft.Core.ResultError.ToString() -> string!
+static PubSoft.Core.ApiResponse.Fail(int code, string! message, string? traceId = null) -> PubSoft.Core.ApiResponse!
+static PubSoft.Core.ApiResponse.Success(string? traceId = null) -> PubSoft.Core.ApiResponse!
+static PubSoft.Core.ApiResponse<T>.Fail(int code, string! message, string? traceId = null) -> PubSoft.Core.ApiResponse<T>!
+static PubSoft.Core.ApiResponse<T>.Success(T data, string? traceId = null) -> PubSoft.Core.ApiResponse<T>!
+static PubSoft.Core.Guard.EnumDefined<T>(T value, string? name = null) -> T
+static PubSoft.Core.Guard.FlagsDefined<T>(T value, string? name = null) -> T
+static PubSoft.Core.Guard.MaxLength(string! value, int maxLength, string? name = null) -> string!
+static PubSoft.Core.Guard.NotEmpty(string? value, string? name = null) -> string!
+static PubSoft.Core.Guard.NotNull(string? value, string? name = null) -> string!
+static PubSoft.Core.Guard.Phone(string! value) -> string!
+static PubSoft.Core.Money.FromFen(long fen) -> PubSoft.Core.Money
+static PubSoft.Core.Money.FromYuan(decimal yuan) -> PubSoft.Core.Money
+static PubSoft.Core.Money.Max(PubSoft.Core.Money a, PubSoft.Core.Money b) -> PubSoft.Core.Money
+static PubSoft.Core.Money.Min(PubSoft.Core.Money a, PubSoft.Core.Money b) -> PubSoft.Core.Money
+static PubSoft.Core.Money.Zero.get -> PubSoft.Core.Money
+static PubSoft.Core.Money.operator !=(PubSoft.Core.Money a, PubSoft.Core.Money b) -> bool
+static PubSoft.Core.Money.operator *(PubSoft.Core.Money a, int multiplier) -> PubSoft.Core.Money
+static PubSoft.Core.Money.operator *(PubSoft.Core.Money a, long multiplier) -> PubSoft.Core.Money
+static PubSoft.Core.Money.operator +(PubSoft.Core.Money a, PubSoft.Core.Money b) -> PubSoft.Core.Money
+static PubSoft.Core.Money.operator -(PubSoft.Core.Money a) -> PubSoft.Core.Money
+static PubSoft.Core.Money.operator -(PubSoft.Core.Money a, PubSoft.Core.Money b) -> PubSoft.Core.Money
+static PubSoft.Core.Money.operator <(PubSoft.Core.Money a, PubSoft.Core.Money b) -> bool
+static PubSoft.Core.Money.operator <=(PubSoft.Core.Money a, PubSoft.Core.Money b) -> bool
+static PubSoft.Core.Money.operator ==(PubSoft.Core.Money a, PubSoft.Core.Money b) -> bool
+static PubSoft.Core.Money.operator >(PubSoft.Core.Money a, PubSoft.Core.Money b) -> bool
+static PubSoft.Core.Money.operator >=(PubSoft.Core.Money a, PubSoft.Core.Money b) -> bool
+static PubSoft.Core.Result<T>.Fail(PubSoft.Core.ResultError error) -> PubSoft.Core.Result<T>
+static PubSoft.Core.Result<T>.Fail(string! code, string! message) -> PubSoft.Core.Result<T>
+static PubSoft.Core.Result<T>.Ok(T value) -> PubSoft.Core.Result<T>
+static PubSoft.Core.Result<T>.implicit operator PubSoft.Core.Result<T>(T value) -> PubSoft.Core.Result<T>

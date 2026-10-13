@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      PUBSOFT_REDIS: localhost:7000,abortConnect=false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Secret scan
+        run: |
+          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest \
+            git --no-banner --redact /repo
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Start Redis Cluster
+        run: bash scripts/start-redis-cluster.sh
+      - name: Restore
+        run: dotnet restore PubSoft.sln
+      - name: Test
+        run: dotnet test PubSoft.sln --no-restore --configuration Release
+      - name: Pack
+        run: dotnet pack PubSoft.sln --no-restore --configuration Release
+      - name: Verify packed package consumer
+        run: bash scripts/verify-package-consumer.sh
+      - name: Verify Native AOT consumer
+        run: bash scripts/verify-aot-consumer.sh
+      - name: Check vulnerable dependencies
+        run: dotnet list PubSoft.sln package --vulnerable --include-transitive
+      - name: Stop Redis Cluster
+        if: always()
+        run: docker stop pubsoft-test-redis-cluster || true

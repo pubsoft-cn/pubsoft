@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>PubSoft.AspNetCore</PackageId>
+    <Description>Optional ASP.NET Core adapters for PubSoft security and auditing.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../security/PubSoft.Authentication/PubSoft.Authentication.csproj" />
+    <ProjectReference Include="../../security/PubSoft.Authorization/PubSoft.Authorization.csproj" />
+    <ProjectReference Include="../../data/PubSoft.Auditing/PubSoft.Auditing.csproj" />
+    <ProjectReference Include="../../core/PubSoft.Core/PubSoft.Core.csproj" />
+    <ProjectReference Include="../../core/PubSoft.Domain/PubSoft.Domain.csproj" />
+    <ProjectReference Include="../../platform/PubSoft.Monitoring/PubSoft.Monitoring.csproj" />
+    <ProjectReference Include="../../security/PubSoft.Security/PubSoft.Security.csproj" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+</Project>

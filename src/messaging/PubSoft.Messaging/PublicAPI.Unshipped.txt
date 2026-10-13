@@ -1,0 +1,19 @@
+#nullable enable
+PubSoft.Messaging.IMessageHandler<TMessage>
+PubSoft.Messaging.IMessageHandler<TMessage>.HandleAsync(TMessage! message, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Messaging.IMessagePublisher
+PubSoft.Messaging.IMessagePublisher.PublishAsync(string! topic, PubSoft.Messaging.MessageEnvelope! envelope, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Messaging.MessageDispatcher
+PubSoft.Messaging.MessageDispatcher.DispatchAsync(PubSoft.Messaging.MessageEnvelope! envelope, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Messaging.MessageDispatcher.MessageDispatcher(System.Text.Json.JsonSerializerOptions? serializerOptions = null) -> void
+PubSoft.Messaging.MessageDispatcher.Register<TMessage>(string! messageType, PubSoft.Messaging.IMessageHandler<TMessage!>! handler) -> void
+PubSoft.Messaging.MessageEnvelope
+PubSoft.Messaging.MessageEnvelope.DeserializePayload<TPayload>(System.Text.Json.JsonSerializerOptions? serializerOptions = null) -> TPayload?
+PubSoft.Messaging.MessageEnvelope.MessageEnvelope(string! messageId, string! messageType, System.Text.Json.JsonElement payload, System.DateTimeOffset occurredAt, string? source = null, string? target = null) -> void
+PubSoft.Messaging.MessageEnvelope.MessageId.get -> string!
+PubSoft.Messaging.MessageEnvelope.MessageType.get -> string!
+PubSoft.Messaging.MessageEnvelope.OccurredAt.get -> System.DateTimeOffset
+PubSoft.Messaging.MessageEnvelope.Payload.get -> System.Text.Json.JsonElement
+PubSoft.Messaging.MessageEnvelope.Source.get -> string?
+PubSoft.Messaging.MessageEnvelope.Target.get -> string?
+static PubSoft.Messaging.MessageEnvelope.Create<TPayload>(string! messageId, string! messageType, TPayload payload, System.DateTimeOffset occurredAt, string? source = null, string? target = null, System.Text.Json.JsonSerializerOptions? serializerOptions = null) -> PubSoft.Messaging.MessageEnvelope!

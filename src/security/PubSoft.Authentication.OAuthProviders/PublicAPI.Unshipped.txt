@@ -1,0 +1,286 @@
+#nullable enable
+PubSoft.OAuth.AlipayOAuthException
+PubSoft.OAuth.AlipayOAuthException.AlipayOAuthException(string! code, string! message) -> void
+PubSoft.OAuth.AlipayOAuthException.Code.get -> string!
+PubSoft.OAuth.AlipayOAuthProvider
+PubSoft.OAuth.AlipayOAuthProvider.AlipayOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! configProvider, System.Net.Http.HttpClient! httpClient, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.AlipayOAuthProvider!>? logger = null) -> void
+PubSoft.OAuth.AppleOAuthProvider
+PubSoft.OAuth.AppleOAuthProvider.AppleOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! cp, System.Net.Http.HttpClient! hc, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.AppleOAuthProvider!>? l = null) -> void
+PubSoft.OAuth.BaiduOAuthProvider
+PubSoft.OAuth.BaiduOAuthProvider.BaiduOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! cp, System.Net.Http.HttpClient! hc, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.BaiduOAuthProvider!>? l = null) -> void
+PubSoft.OAuth.DingTalkOAuthProvider
+PubSoft.OAuth.DingTalkOAuthProvider.DingTalkOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! configProvider, System.Net.Http.HttpClient! httpClient, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.DingTalkOAuthProvider!>? logger = null) -> void
+PubSoft.OAuth.DouyinOAuthProvider
+PubSoft.OAuth.DouyinOAuthProvider.DouyinOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! cp, System.Net.Http.HttpClient! hc, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.DouyinOAuthProvider!>? l = null) -> void
+PubSoft.OAuth.GenericOAuthProvider
+PubSoft.OAuth.GenericOAuthProvider.GenericOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! configProvider, System.Net.Http.HttpClient! httpClient, Microsoft.Extensions.Logging.ILogger? logger = null) -> void
+PubSoft.OAuth.GitHubOAuthProvider
+PubSoft.OAuth.GitHubOAuthProvider.GitHubOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! cp, System.Net.Http.HttpClient! hc, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.GitHubOAuthProvider!>? l = null) -> void
+PubSoft.OAuth.GitLabOAuthProvider
+PubSoft.OAuth.GitLabOAuthProvider.GitLabOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! cp, System.Net.Http.HttpClient! hc, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.GitLabOAuthProvider!>? l = null) -> void
+PubSoft.OAuth.GiteeOAuthProvider
+PubSoft.OAuth.GiteeOAuthProvider.GiteeOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! cp, System.Net.Http.HttpClient! hc, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.GiteeOAuthProvider!>? l = null) -> void
+PubSoft.OAuth.GoogleOAuthProvider
+PubSoft.OAuth.GoogleOAuthProvider.GoogleOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! cp, System.Net.Http.HttpClient! hc, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.GoogleOAuthProvider!>? l = null) -> void
+PubSoft.OAuth.HuaweiOAuthProvider
+PubSoft.OAuth.HuaweiOAuthProvider.HuaweiOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! cp, System.Net.Http.HttpClient! hc, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.HuaweiOAuthProvider!>? l = null) -> void
+PubSoft.OAuth.IOAuthChannelConfigProvider
+PubSoft.OAuth.IOAuthChannelConfigProvider.GetByAppIdAsync(string! appId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthChannelConfig?>!
+PubSoft.OAuth.IOAuthChannelConfigProvider.GetDefaultAsync(string! provider, string! channelType, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthChannelConfig?>!
+PubSoft.OAuth.IOAuthChannelConfigProvider.ListAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<PubSoft.OAuth.OAuthChannelConfig!>!>!
+PubSoft.OAuth.IOAuthChannelConfigProvider.ListByProviderAsync(string! provider, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<PubSoft.OAuth.OAuthChannelConfig!>!>!
+PubSoft.OAuth.IOAuthProvider
+PubSoft.OAuth.IOAuthProvider.ExchangeCodeAsync(string! appId, string! code, string? channelType = null, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthCodeExchangeResult!>!
+PubSoft.OAuth.IOAuthProvider.GetAuthorizeUrlAsync(PubSoft.OAuth.OAuthAuthorizeUrlRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthAuthorizeUrlResult!>!
+PubSoft.OAuth.IOAuthProvider.GetPhoneNumberAsync(string! appId, string! code, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthPhoneResult!>!
+PubSoft.OAuth.IOAuthProvider.GetUserInfoAsync(string! appId, string! accessToken, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthUserInfoResult!>!
+PubSoft.OAuth.IOAuthProvider.Provider.get -> string!
+PubSoft.OAuth.IOAuthProvider.SupportsChannelType(string! channelType) -> bool
+PubSoft.OAuth.IOAuthProviderRegistry
+PubSoft.OAuth.IOAuthProviderRegistry.GetAllProviders() -> System.Collections.Generic.IReadOnlyList<PubSoft.OAuth.IOAuthProvider!>!
+PubSoft.OAuth.IOAuthProviderRegistry.GetProvider(string! provider) -> PubSoft.OAuth.IOAuthProvider?
+PubSoft.OAuth.IWeChatAccessTokenProvider
+PubSoft.OAuth.IWeChatAccessTokenProvider.GetAsync(string! appId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.WeChatAccessTokenResult!>!
+PubSoft.OAuth.MicrosoftOAuthProvider
+PubSoft.OAuth.MicrosoftOAuthProvider.MicrosoftOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! cp, System.Net.Http.HttpClient! hc, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.MicrosoftOAuthProvider!>? l = null) -> void
+PubSoft.OAuth.OAuthAuthorizeUrlRequest
+PubSoft.OAuth.OAuthAuthorizeUrlRequest.AppId.get -> string!
+PubSoft.OAuth.OAuthAuthorizeUrlRequest.AppId.set -> void
+PubSoft.OAuth.OAuthAuthorizeUrlRequest.ChannelType.get -> string!
+PubSoft.OAuth.OAuthAuthorizeUrlRequest.ChannelType.set -> void
+PubSoft.OAuth.OAuthAuthorizeUrlRequest.CodeChallenge.get -> string?
+PubSoft.OAuth.OAuthAuthorizeUrlRequest.CodeChallenge.set -> void
+PubSoft.OAuth.OAuthAuthorizeUrlRequest.OAuthAuthorizeUrlRequest() -> void
+PubSoft.OAuth.OAuthAuthorizeUrlRequest.Provider.get -> string!
+PubSoft.OAuth.OAuthAuthorizeUrlRequest.Provider.set -> void
+PubSoft.OAuth.OAuthAuthorizeUrlRequest.RedirectUri.get -> string?
+PubSoft.OAuth.OAuthAuthorizeUrlRequest.RedirectUri.set -> void
+PubSoft.OAuth.OAuthAuthorizeUrlRequest.Scope.get -> string?
+PubSoft.OAuth.OAuthAuthorizeUrlRequest.Scope.set -> void
+PubSoft.OAuth.OAuthAuthorizeUrlRequest.State.get -> string?
+PubSoft.OAuth.OAuthAuthorizeUrlRequest.State.set -> void
+PubSoft.OAuth.OAuthAuthorizeUrlResult
+PubSoft.OAuth.OAuthAuthorizeUrlResult.AppId.get -> string?
+PubSoft.OAuth.OAuthAuthorizeUrlResult.AppId.set -> void
+PubSoft.OAuth.OAuthAuthorizeUrlResult.AuthorizeUrl.get -> string!
+PubSoft.OAuth.OAuthAuthorizeUrlResult.AuthorizeUrl.set -> void
+PubSoft.OAuth.OAuthAuthorizeUrlResult.Message.get -> string?
+PubSoft.OAuth.OAuthAuthorizeUrlResult.Message.set -> void
+PubSoft.OAuth.OAuthAuthorizeUrlResult.OAuthAuthorizeUrlResult() -> void
+PubSoft.OAuth.OAuthAuthorizeUrlResult.State.get -> string?
+PubSoft.OAuth.OAuthAuthorizeUrlResult.State.set -> void
+PubSoft.OAuth.OAuthAuthorizeUrlResult.Success.get -> bool
+PubSoft.OAuth.OAuthAuthorizeUrlResult.Success.set -> void
+PubSoft.OAuth.OAuthChannelConfig
+PubSoft.OAuth.OAuthChannelConfig.AppId.get -> string!
+PubSoft.OAuth.OAuthChannelConfig.AppId.set -> void
+PubSoft.OAuth.OAuthChannelConfig.AppSecret.get -> string?
+PubSoft.OAuth.OAuthChannelConfig.AppSecret.set -> void
+PubSoft.OAuth.OAuthChannelConfig.ChannelType.get -> string!
+PubSoft.OAuth.OAuthChannelConfig.ChannelType.set -> void
+PubSoft.OAuth.OAuthChannelConfig.ExtraJson.get -> string?
+PubSoft.OAuth.OAuthChannelConfig.ExtraJson.set -> void
+PubSoft.OAuth.OAuthChannelConfig.Id.get -> long
+PubSoft.OAuth.OAuthChannelConfig.Id.set -> void
+PubSoft.OAuth.OAuthChannelConfig.IsDefault.get -> bool
+PubSoft.OAuth.OAuthChannelConfig.IsDefault.set -> void
+PubSoft.OAuth.OAuthChannelConfig.Name.get -> string!
+PubSoft.OAuth.OAuthChannelConfig.Name.set -> void
+PubSoft.OAuth.OAuthChannelConfig.OAuthChannelConfig() -> void
+PubSoft.OAuth.OAuthChannelConfig.Provider.get -> string!
+PubSoft.OAuth.OAuthChannelConfig.Provider.set -> void
+PubSoft.OAuth.OAuthChannelConfig.RedirectUri.get -> string?
+PubSoft.OAuth.OAuthChannelConfig.RedirectUri.set -> void
+PubSoft.OAuth.OAuthChannelTypes
+PubSoft.OAuth.OAuthCodeExchangeResult
+PubSoft.OAuth.OAuthCodeExchangeResult.AccessToken.get -> string?
+PubSoft.OAuth.OAuthCodeExchangeResult.AccessToken.set -> void
+PubSoft.OAuth.OAuthCodeExchangeResult.AvatarUrl.get -> string?
+PubSoft.OAuth.OAuthCodeExchangeResult.AvatarUrl.set -> void
+PubSoft.OAuth.OAuthCodeExchangeResult.Message.get -> string?
+PubSoft.OAuth.OAuthCodeExchangeResult.Message.set -> void
+PubSoft.OAuth.OAuthCodeExchangeResult.NickName.get -> string?
+PubSoft.OAuth.OAuthCodeExchangeResult.NickName.set -> void
+PubSoft.OAuth.OAuthCodeExchangeResult.OAuthCodeExchangeResult() -> void
+PubSoft.OAuth.OAuthCodeExchangeResult.OpenId.get -> string!
+PubSoft.OAuth.OAuthCodeExchangeResult.OpenId.set -> void
+PubSoft.OAuth.OAuthCodeExchangeResult.RefreshToken.get -> string?
+PubSoft.OAuth.OAuthCodeExchangeResult.RefreshToken.set -> void
+PubSoft.OAuth.OAuthCodeExchangeResult.SessionKey.get -> string?
+PubSoft.OAuth.OAuthCodeExchangeResult.SessionKey.set -> void
+PubSoft.OAuth.OAuthCodeExchangeResult.Success.get -> bool
+PubSoft.OAuth.OAuthCodeExchangeResult.Success.set -> void
+PubSoft.OAuth.OAuthCodeExchangeResult.UnionId.get -> string?
+PubSoft.OAuth.OAuthCodeExchangeResult.UnionId.set -> void
+PubSoft.OAuth.OAuthCodeExchangeResult.UserId.get -> string?
+PubSoft.OAuth.OAuthCodeExchangeResult.UserId.set -> void
+PubSoft.OAuth.OAuthPhoneResult
+PubSoft.OAuth.OAuthPhoneResult.CountryCode.get -> string?
+PubSoft.OAuth.OAuthPhoneResult.CountryCode.set -> void
+PubSoft.OAuth.OAuthPhoneResult.Message.get -> string?
+PubSoft.OAuth.OAuthPhoneResult.Message.set -> void
+PubSoft.OAuth.OAuthPhoneResult.OAuthPhoneResult() -> void
+PubSoft.OAuth.OAuthPhoneResult.PhoneNumber.get -> string?
+PubSoft.OAuth.OAuthPhoneResult.PhoneNumber.set -> void
+PubSoft.OAuth.OAuthPhoneResult.PurePhoneNumber.get -> string?
+PubSoft.OAuth.OAuthPhoneResult.PurePhoneNumber.set -> void
+PubSoft.OAuth.OAuthPhoneResult.Success.get -> bool
+PubSoft.OAuth.OAuthPhoneResult.Success.set -> void
+PubSoft.OAuth.OAuthProviderBase
+PubSoft.OAuth.OAuthProviderBase.FetchJsonAsync(string! url, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+PubSoft.OAuth.OAuthProviderBase.OAuthProviderBase(PubSoft.OAuth.IOAuthChannelConfigProvider! configProvider, System.Net.Http.HttpClient! httpClient, Microsoft.Extensions.Logging.ILogger? logger = null) -> void
+PubSoft.OAuth.OAuthProviderBase.PostJsonAsync(string! url, System.Net.Http.HttpContent! body, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+PubSoft.OAuth.OAuthProviderBase.SendJsonAsync(System.Net.Http.HttpRequestMessage! request, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+PubSoft.OAuth.OAuthProviderNames
+PubSoft.OAuth.OAuthProviderRegistry
+PubSoft.OAuth.OAuthProviderRegistry.GetAllProviders() -> System.Collections.Generic.IReadOnlyList<PubSoft.OAuth.IOAuthProvider!>!
+PubSoft.OAuth.OAuthProviderRegistry.GetProvider(string! provider) -> PubSoft.OAuth.IOAuthProvider?
+PubSoft.OAuth.OAuthProviderRegistry.OAuthProviderRegistry(System.Collections.Generic.IEnumerable<PubSoft.OAuth.IOAuthProvider!>! providers) -> void
+PubSoft.OAuth.OAuthProviderServiceCollectionExtensions
+PubSoft.OAuth.OAuthUserInfoResult
+PubSoft.OAuth.OAuthUserInfoResult.AvatarUrl.get -> string?
+PubSoft.OAuth.OAuthUserInfoResult.AvatarUrl.set -> void
+PubSoft.OAuth.OAuthUserInfoResult.City.get -> string?
+PubSoft.OAuth.OAuthUserInfoResult.City.set -> void
+PubSoft.OAuth.OAuthUserInfoResult.Email.get -> string?
+PubSoft.OAuth.OAuthUserInfoResult.Email.set -> void
+PubSoft.OAuth.OAuthUserInfoResult.Gender.get -> string?
+PubSoft.OAuth.OAuthUserInfoResult.Gender.set -> void
+PubSoft.OAuth.OAuthUserInfoResult.Message.get -> string?
+PubSoft.OAuth.OAuthUserInfoResult.Message.set -> void
+PubSoft.OAuth.OAuthUserInfoResult.NickName.get -> string?
+PubSoft.OAuth.OAuthUserInfoResult.NickName.set -> void
+PubSoft.OAuth.OAuthUserInfoResult.OAuthUserInfoResult() -> void
+PubSoft.OAuth.OAuthUserInfoResult.OpenId.get -> string!
+PubSoft.OAuth.OAuthUserInfoResult.OpenId.set -> void
+PubSoft.OAuth.OAuthUserInfoResult.PhoneNumber.get -> string?
+PubSoft.OAuth.OAuthUserInfoResult.PhoneNumber.set -> void
+PubSoft.OAuth.OAuthUserInfoResult.Province.get -> string?
+PubSoft.OAuth.OAuthUserInfoResult.Province.set -> void
+PubSoft.OAuth.OAuthUserInfoResult.Success.get -> bool
+PubSoft.OAuth.OAuthUserInfoResult.Success.set -> void
+PubSoft.OAuth.OAuthUserInfoResult.UnionId.get -> string?
+PubSoft.OAuth.OAuthUserInfoResult.UnionId.set -> void
+PubSoft.OAuth.OAuthUserInfoResult.UserId.get -> string?
+PubSoft.OAuth.OAuthUserInfoResult.UserId.set -> void
+PubSoft.OAuth.QQOAuthProvider
+PubSoft.OAuth.QQOAuthProvider.QQOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! cp, System.Net.Http.HttpClient! hc, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.QQOAuthProvider!>? l = null) -> void
+PubSoft.OAuth.TaobaoOAuthProvider
+PubSoft.OAuth.TaobaoOAuthProvider.TaobaoOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! cp, System.Net.Http.HttpClient! hc, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.TaobaoOAuthProvider!>? l = null) -> void
+PubSoft.OAuth.ToutiaoOAuthProvider
+PubSoft.OAuth.ToutiaoOAuthProvider.ToutiaoOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! cp, System.Net.Http.HttpClient! hc, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.ToutiaoOAuthProvider!>? l = null) -> void
+PubSoft.OAuth.TwitterOAuthProvider
+PubSoft.OAuth.TwitterOAuthProvider.TwitterOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! cp, System.Net.Http.HttpClient! hc, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.TwitterOAuthProvider!>? l = null) -> void
+PubSoft.OAuth.WeChatAccessTokenProvider
+PubSoft.OAuth.WeChatAccessTokenProvider.GetAsync(string! appId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.WeChatAccessTokenResult!>!
+PubSoft.OAuth.WeChatAccessTokenProvider.WeChatAccessTokenProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! configProvider, System.Net.Http.HttpClient! httpClient, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.WeChatAccessTokenProvider!>? logger = null) -> void
+PubSoft.OAuth.WeChatAccessTokenResult
+PubSoft.OAuth.WeChatAccessTokenResult.AccessToken.get -> string!
+PubSoft.OAuth.WeChatAccessTokenResult.AccessToken.set -> void
+PubSoft.OAuth.WeChatAccessTokenResult.Message.get -> string?
+PubSoft.OAuth.WeChatAccessTokenResult.Message.set -> void
+PubSoft.OAuth.WeChatAccessTokenResult.Success.get -> bool
+PubSoft.OAuth.WeChatAccessTokenResult.Success.set -> void
+PubSoft.OAuth.WeChatAccessTokenResult.WeChatAccessTokenResult() -> void
+PubSoft.OAuth.WeChatOAuthProvider
+PubSoft.OAuth.WeChatOAuthProvider.WeChatOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! configProvider, PubSoft.OAuth.IWeChatAccessTokenProvider! accessTokenProvider, System.Net.Http.HttpClient! httpClient, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.WeChatOAuthProvider!>? logger = null) -> void
+PubSoft.OAuth.WeComOAuthProvider
+PubSoft.OAuth.WeComOAuthProvider.WeComOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! configProvider, System.Net.Http.HttpClient! httpClient, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.WeComOAuthProvider!>? logger = null) -> void
+PubSoft.OAuth.WeiboOAuthProvider
+PubSoft.OAuth.WeiboOAuthProvider.WeiboOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! cp, System.Net.Http.HttpClient! hc, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.WeiboOAuthProvider!>? l = null) -> void
+PubSoft.OAuth.XiaomiOAuthProvider
+PubSoft.OAuth.XiaomiOAuthProvider.XiaomiOAuthProvider(PubSoft.OAuth.IOAuthChannelConfigProvider! cp, System.Net.Http.HttpClient! hc, Microsoft.Extensions.Logging.ILogger<PubSoft.OAuth.XiaomiOAuthProvider!>? l = null) -> void
+abstract PubSoft.OAuth.GenericOAuthProvider.AuthorizeEndpoint.get -> string!
+abstract PubSoft.OAuth.GenericOAuthProvider.TokenEndpoint.get -> string!
+abstract PubSoft.OAuth.GenericOAuthProvider.UserInfoEndpoint.get -> string!
+abstract PubSoft.OAuth.OAuthProviderBase.ExchangeCodeAsync(string! appId, string! code, string? channelType = null, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthCodeExchangeResult!>!
+abstract PubSoft.OAuth.OAuthProviderBase.GetAuthorizeUrlAsync(PubSoft.OAuth.OAuthAuthorizeUrlRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthAuthorizeUrlResult!>!
+abstract PubSoft.OAuth.OAuthProviderBase.GetUserInfoAsync(string! appId, string! accessToken, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthUserInfoResult!>!
+abstract PubSoft.OAuth.OAuthProviderBase.Provider.get -> string!
+const PubSoft.OAuth.OAuthChannelTypes.MiniProgram = "MiniProgram" -> string!
+const PubSoft.OAuth.OAuthChannelTypes.OfficialAccount = "OfficialAccount" -> string!
+const PubSoft.OAuth.OAuthChannelTypes.OpenPlatform = "OpenPlatform" -> string!
+const PubSoft.OAuth.OAuthChannelTypes.Web = "Web" -> string!
+const PubSoft.OAuth.OAuthProviderNames.Alipay = "Alipay" -> string!
+const PubSoft.OAuth.OAuthProviderNames.Apple = "Apple" -> string!
+const PubSoft.OAuth.OAuthProviderNames.Baidu = "Baidu" -> string!
+const PubSoft.OAuth.OAuthProviderNames.Custom = "Custom" -> string!
+const PubSoft.OAuth.OAuthProviderNames.DingTalk = "DingTalk" -> string!
+const PubSoft.OAuth.OAuthProviderNames.Douyin = "Douyin" -> string!
+const PubSoft.OAuth.OAuthProviderNames.GitHub = "GitHub" -> string!
+const PubSoft.OAuth.OAuthProviderNames.GitLab = "GitLab" -> string!
+const PubSoft.OAuth.OAuthProviderNames.Gitee = "Gitee" -> string!
+const PubSoft.OAuth.OAuthProviderNames.Google = "Google" -> string!
+const PubSoft.OAuth.OAuthProviderNames.Huawei = "Huawei" -> string!
+const PubSoft.OAuth.OAuthProviderNames.Microsoft = "Microsoft" -> string!
+const PubSoft.OAuth.OAuthProviderNames.QQ = "QQ" -> string!
+const PubSoft.OAuth.OAuthProviderNames.Taobao = "Taobao" -> string!
+const PubSoft.OAuth.OAuthProviderNames.Toutiao = "Toutiao" -> string!
+const PubSoft.OAuth.OAuthProviderNames.Twitter = "Twitter" -> string!
+const PubSoft.OAuth.OAuthProviderNames.WeChat = "WeChat" -> string!
+const PubSoft.OAuth.OAuthProviderNames.WeCom = "WeCom" -> string!
+const PubSoft.OAuth.OAuthProviderNames.Weibo = "Weibo" -> string!
+const PubSoft.OAuth.OAuthProviderNames.Xiaomi = "Xiaomi" -> string!
+override PubSoft.OAuth.AlipayOAuthProvider.ExchangeCodeAsync(string! appId, string! code, string? channelType = null, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthCodeExchangeResult!>!
+override PubSoft.OAuth.AlipayOAuthProvider.GetAuthorizeUrlAsync(PubSoft.OAuth.OAuthAuthorizeUrlRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthAuthorizeUrlResult!>!
+override PubSoft.OAuth.AlipayOAuthProvider.GetPhoneNumberAsync(string! appId, string! code, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthPhoneResult!>!
+override PubSoft.OAuth.AlipayOAuthProvider.GetUserInfoAsync(string! appId, string! accessToken, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthUserInfoResult!>!
+override PubSoft.OAuth.AlipayOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.AlipayOAuthProvider.SupportsChannelType(string! channelType) -> bool
+override PubSoft.OAuth.AppleOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.BaiduOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.DingTalkOAuthProvider.ExchangeCodeAsync(string! appId, string! code, string? channelType = null, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthCodeExchangeResult!>!
+override PubSoft.OAuth.DingTalkOAuthProvider.GetAuthorizeUrlAsync(PubSoft.OAuth.OAuthAuthorizeUrlRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthAuthorizeUrlResult!>!
+override PubSoft.OAuth.DingTalkOAuthProvider.GetUserInfoAsync(string! appId, string! accessToken, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthUserInfoResult!>!
+override PubSoft.OAuth.DingTalkOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.DingTalkOAuthProvider.SupportsChannelType(string! channelType) -> bool
+override PubSoft.OAuth.DouyinOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.GenericOAuthProvider.ExchangeCodeAsync(string! appId, string! code, string? channelType = null, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthCodeExchangeResult!>!
+override PubSoft.OAuth.GenericOAuthProvider.GetAuthorizeUrlAsync(PubSoft.OAuth.OAuthAuthorizeUrlRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthAuthorizeUrlResult!>!
+override PubSoft.OAuth.GenericOAuthProvider.GetUserInfoAsync(string! appId, string! accessToken, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthUserInfoResult!>!
+override PubSoft.OAuth.GenericOAuthProvider.SupportsChannelType(string! channelType) -> bool
+override PubSoft.OAuth.GitHubOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.GitLabOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.GiteeOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.GoogleOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.HuaweiOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.MicrosoftOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.QQOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.TaobaoOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.ToutiaoOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.TwitterOAuthProvider.GetAuthorizeUrlAsync(PubSoft.OAuth.OAuthAuthorizeUrlRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthAuthorizeUrlResult!>!
+override PubSoft.OAuth.TwitterOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.WeChatOAuthProvider.ExchangeCodeAsync(string! appId, string! code, string? channelType = null, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthCodeExchangeResult!>!
+override PubSoft.OAuth.WeChatOAuthProvider.GetAuthorizeUrlAsync(PubSoft.OAuth.OAuthAuthorizeUrlRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthAuthorizeUrlResult!>!
+override PubSoft.OAuth.WeChatOAuthProvider.GetPhoneNumberAsync(string! appId, string! code, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthPhoneResult!>!
+override PubSoft.OAuth.WeChatOAuthProvider.GetUserInfoAsync(string! appId, string! accessToken, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthUserInfoResult!>!
+override PubSoft.OAuth.WeChatOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.WeChatOAuthProvider.SupportsChannelType(string! channelType) -> bool
+override PubSoft.OAuth.WeComOAuthProvider.ExchangeCodeAsync(string! appId, string! code, string? channelType = null, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthCodeExchangeResult!>!
+override PubSoft.OAuth.WeComOAuthProvider.GetAuthorizeUrlAsync(PubSoft.OAuth.OAuthAuthorizeUrlRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthAuthorizeUrlResult!>!
+override PubSoft.OAuth.WeComOAuthProvider.GetUserInfoAsync(string! appId, string! accessToken, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthUserInfoResult!>!
+override PubSoft.OAuth.WeComOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.WeComOAuthProvider.SupportsChannelType(string! channelType) -> bool
+override PubSoft.OAuth.WeiboOAuthProvider.Provider.get -> string!
+override PubSoft.OAuth.XiaomiOAuthProvider.Provider.get -> string!
+readonly PubSoft.OAuth.OAuthProviderBase.ConfigProvider -> PubSoft.OAuth.IOAuthChannelConfigProvider!
+readonly PubSoft.OAuth.OAuthProviderBase.HttpClient -> System.Net.Http.HttpClient!
+readonly PubSoft.OAuth.OAuthProviderBase.Logger -> Microsoft.Extensions.Logging.ILogger?
+static PubSoft.OAuth.OAuthAuthorizeUrlResult.Fail(string! message) -> PubSoft.OAuth.OAuthAuthorizeUrlResult!
+static PubSoft.OAuth.OAuthCodeExchangeResult.Fail(string! message) -> PubSoft.OAuth.OAuthCodeExchangeResult!
+static PubSoft.OAuth.OAuthCodeExchangeResult.Ok(string! openId) -> PubSoft.OAuth.OAuthCodeExchangeResult!
+static PubSoft.OAuth.OAuthPhoneResult.Fail(string! message) -> PubSoft.OAuth.OAuthPhoneResult!
+static PubSoft.OAuth.OAuthProviderBase.GetInt(System.Text.Json.JsonElement elem, string! name, int defaultValue = 0) -> int
+static PubSoft.OAuth.OAuthProviderBase.GetString(System.Text.Json.JsonElement elem, string! name) -> string?
+static PubSoft.OAuth.OAuthProviderNames.IsKnown(string! provider) -> bool
+static PubSoft.OAuth.OAuthProviderServiceCollectionExtensions.AddPubSoftOAuthProviders(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Resilience.Http.HttpResilienceOptions!>? configureResilience = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.OAuth.OAuthProviderServiceCollectionExtensions.AddPubSoftOAuthProviders<TConfigProvider>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Resilience.Http.HttpResilienceOptions!>? configureResilience = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.OAuth.OAuthUserInfoResult.Fail(string! message) -> PubSoft.OAuth.OAuthUserInfoResult!
+static PubSoft.OAuth.WeChatAccessTokenResult.Fail(string! msg) -> PubSoft.OAuth.WeChatAccessTokenResult!
+static PubSoft.OAuth.WeChatAccessTokenResult.Ok(string! token) -> PubSoft.OAuth.WeChatAccessTokenResult!
+static readonly PubSoft.OAuth.OAuthProviderNames.BuiltIn -> string![]!
+virtual PubSoft.OAuth.GenericOAuthProvider.DefaultScope.get -> string!
+virtual PubSoft.OAuth.GenericOAuthProvider.FetchUserInfoAsync(string! accessToken, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthUserInfoResult!>!
+virtual PubSoft.OAuth.OAuthProviderBase.GetPhoneNumberAsync(string! appId, string! code, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthPhoneResult!>!
+virtual PubSoft.OAuth.OAuthProviderBase.ResolveConfigAsync(string! appId, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthChannelConfig!>!
+virtual PubSoft.OAuth.OAuthProviderBase.SupportsChannelType(string! channelType) -> bool

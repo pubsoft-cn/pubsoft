@@ -1,0 +1,15 @@
+#nullable enable
+PubSoft.Resilience.Http.HttpResilienceOptions
+PubSoft.Resilience.Http.HttpResilienceOptions.CircuitBreaker.get -> PubSoft.Resilience.CircuitBreakerOptions?
+PubSoft.Resilience.Http.HttpResilienceOptions.CircuitBreaker.set -> void
+PubSoft.Resilience.Http.HttpResilienceOptions.HttpResilienceOptions() -> void
+PubSoft.Resilience.Http.HttpResilienceOptions.PerAttemptTimeout.get -> System.TimeSpan
+PubSoft.Resilience.Http.HttpResilienceOptions.PerAttemptTimeout.set -> void
+PubSoft.Resilience.Http.HttpResilienceOptions.Retry.get -> PubSoft.Resilience.RetryPolicy?
+PubSoft.Resilience.Http.HttpResilienceOptions.Retry.set -> void
+PubSoft.Resilience.Http.HttpResilienceOptions.Timeout.get -> System.TimeSpan
+PubSoft.Resilience.Http.HttpResilienceOptions.Timeout.set -> void
+PubSoft.Resilience.Http.HttpResilienceServiceCollectionExtensions
+PubSoft.Resilience.Http.PubSoftHttpResilienceHandler
+PubSoft.Resilience.Http.PubSoftHttpResilienceHandler.PubSoftHttpResilienceHandler(PubSoft.Resilience.Http.HttpResilienceOptions! options, PubSoft.Resilience.CircuitBreaker? circuitBreaker = null, Microsoft.Extensions.Logging.ILogger<PubSoft.Resilience.Http.PubSoftHttpResilienceHandler!>? logger = null) -> void
+static PubSoft.Resilience.Http.HttpResilienceServiceCollectionExtensions.AddPubSoftHttpResilience(this Microsoft.Extensions.DependencyInjection.IHttpClientBuilder! builder, System.Action<PubSoft.Resilience.Http.HttpResilienceOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!

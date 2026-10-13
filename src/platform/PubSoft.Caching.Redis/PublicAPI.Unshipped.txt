@@ -1,0 +1,39 @@
+#nullable enable
+PubSoft.Caching.Redis.CachingRedisServiceCollectionExtensions
+PubSoft.Caching.Redis.IFencedLockHandle
+PubSoft.Caching.Redis.IFencedLockHandle.ExtendAsync(System.TimeSpan expiry, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Caching.Redis.IFencedLockHandle.FencingToken.get -> long
+PubSoft.Caching.Redis.IFencedLockHandle.Key.get -> string!
+PubSoft.Caching.Redis.RedisCache
+PubSoft.Caching.Redis.RedisCache.ExistsAsync(string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Caching.Redis.RedisCache.GetAsync<T>(string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<T?>!
+PubSoft.Caching.Redis.RedisCache.GetManyAsync<T>(System.Collections.Generic.IEnumerable<string!>! keys, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.Dictionary<string!, T?>!>!
+PubSoft.Caching.Redis.RedisCache.GetOrSetAsync<T>(string! key, System.Func<System.Threading.Tasks.Task<T!>!>! factory, System.TimeSpan? expiry = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<T!>!
+PubSoft.Caching.Redis.RedisCache.RedisCache(StackExchange.Redis.IConnectionMultiplexer! connection, PubSoft.Caching.Redis.RedisCacheOptions? options = null) -> void
+PubSoft.Caching.Redis.RedisCache.RemoveAsync(string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Caching.Redis.RedisCache.RemoveByPatternAsync(string! pattern, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Caching.Redis.RedisCache.RemoveManyAsync(System.Collections.Generic.IEnumerable<string!>! keys, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Caching.Redis.RedisCache.SetAsync<T>(string! key, T! value, System.TimeSpan? expiry = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Caching.Redis.RedisCache.SetManyAsync<T>(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, T!>>! items, System.TimeSpan? expiry = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Caching.Redis.RedisCacheOptions
+PubSoft.Caching.Redis.RedisCacheOptions.Database.get -> int
+PubSoft.Caching.Redis.RedisCacheOptions.Database.set -> void
+PubSoft.Caching.Redis.RedisCacheOptions.KeyPrefix.get -> string!
+PubSoft.Caching.Redis.RedisCacheOptions.KeyPrefix.set -> void
+PubSoft.Caching.Redis.RedisCacheOptions.RedisCacheOptions() -> void
+PubSoft.Caching.Redis.RedisCacheOptions.SerializerOptions.get -> System.Text.Json.JsonSerializerOptions!
+PubSoft.Caching.Redis.RedisCacheOptions.SerializerOptions.set -> void
+PubSoft.Caching.Redis.RedisDistributedLock
+PubSoft.Caching.Redis.RedisDistributedLock.AcquireAsync(string! key, System.TimeSpan expiry, System.TimeSpan? waitTimeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.IAsyncDisposable?>!
+PubSoft.Caching.Redis.RedisDistributedLock.RedisDistributedLock(StackExchange.Redis.IConnectionMultiplexer! connection, PubSoft.Caching.Redis.RedisDistributedLockOptions? options = null, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Caching.Redis.RedisDistributedLockOptions
+PubSoft.Caching.Redis.RedisDistributedLockOptions.Database.get -> int
+PubSoft.Caching.Redis.RedisDistributedLockOptions.Database.set -> void
+PubSoft.Caching.Redis.RedisDistributedLockOptions.FenceRetention.get -> System.TimeSpan
+PubSoft.Caching.Redis.RedisDistributedLockOptions.FenceRetention.set -> void
+PubSoft.Caching.Redis.RedisDistributedLockOptions.KeyPrefix.get -> string!
+PubSoft.Caching.Redis.RedisDistributedLockOptions.KeyPrefix.set -> void
+PubSoft.Caching.Redis.RedisDistributedLockOptions.RedisDistributedLockOptions() -> void
+PubSoft.Caching.Redis.RedisDistributedLockServiceCollectionExtensions
+static PubSoft.Caching.Redis.CachingRedisServiceCollectionExtensions.AddPubSoftRedisCache(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, StackExchange.Redis.IConnectionMultiplexer! connection, System.Action<PubSoft.Caching.Redis.RedisCacheOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Caching.Redis.RedisDistributedLockServiceCollectionExtensions.AddPubSoftRedisDistributedLock(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, StackExchange.Redis.IConnectionMultiplexer! connection, System.Action<PubSoft.Caching.Redis.RedisDistributedLockOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>PubSoft.Abp.Core</PackageId>
+    <Description>Optional ABP module integration for PubSoft core services.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Volo.Abp.Core" Version="10.6.0" />
+    <ProjectReference Include="../../core/PubSoft.Core/PubSoft.Core.csproj" />
+  </ItemGroup>
+</Project>

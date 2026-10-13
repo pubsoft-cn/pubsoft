@@ -1,0 +1,30 @@
+#nullable enable
+PubSoft.Scheduling.EntityFrameworkCore.EfCoreStateStore<TDbContext>
+PubSoft.Scheduling.EntityFrameworkCore.EfCoreStateStore<TDbContext>.EfCoreStateStore(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory! scopeFactory, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Scheduling.EntityFrameworkCore.EfCoreStateStore<TDbContext>.GetCustomStateAsync<T>(string! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<T?>!
+PubSoft.Scheduling.EntityFrameworkCore.EfCoreStateStore<TDbContext>.GetLastResultAsync(string! jobName, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<PubSoft.Scheduling.JobResult?>!
+PubSoft.Scheduling.EntityFrameworkCore.EfCoreStateStore<TDbContext>.RemoveCustomStateAsync(string! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+PubSoft.Scheduling.EntityFrameworkCore.EfCoreStateStore<TDbContext>.SetCustomStateAsync<T>(string! key, T! value, System.TimeSpan? expiry, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+PubSoft.Scheduling.EntityFrameworkCore.EfCoreStateStore<TDbContext>.UpdateStateAsync(string! jobName, PubSoft.Scheduling.JobResult! result, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateModelBuilderExtensions
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.ExpiresAt.get -> System.DateTimeOffset?
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.ExpiresAt.set -> void
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.Id.get -> long
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.Id.set -> void
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.Key.get -> string!
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.Key.set -> void
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.KeyHash.get -> string!
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.KeyHash.set -> void
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.SchedulerStateRecord() -> void
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.TenantId.get -> long?
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.TenantId.set -> void
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.TenantScope.get -> string!
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.TenantScope.set -> void
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.UpdatedAt.get -> System.DateTimeOffset
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.UpdatedAt.set -> void
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.ValueJson.get -> string!
+PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateRecord.ValueJson.set -> void
+PubSoft.Scheduling.EntityFrameworkCore.SchedulingEntityFrameworkCoreServiceCollectionExtensions
+static PubSoft.Scheduling.EntityFrameworkCore.SchedulerStateModelBuilderExtensions.ConfigurePubSoftSchedulerState(this Microsoft.EntityFrameworkCore.ModelBuilder! modelBuilder) -> Microsoft.EntityFrameworkCore.ModelBuilder!
+static PubSoft.Scheduling.EntityFrameworkCore.SchedulingEntityFrameworkCoreServiceCollectionExtensions.AddPubSoftEfCoreSchedulerStateStore<TDbContext>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

@@ -1,0 +1,169 @@
+#nullable enable
+PubSoft.AspNetCore.AuditMiddleware
+PubSoft.AspNetCore.AuditMiddleware.AuditMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, PubSoft.AspNetCore.AuditMiddlewareOptions? options = null) -> void
+PubSoft.AspNetCore.AuditMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
+PubSoft.AspNetCore.AuditMiddlewareExtensions
+PubSoft.AspNetCore.AuditMiddlewareOptions
+PubSoft.AspNetCore.AuditMiddlewareOptions.AuditMiddlewareOptions() -> void
+PubSoft.AspNetCore.AuditMiddlewareOptions.CaptureActor.get -> bool
+PubSoft.AspNetCore.AuditMiddlewareOptions.CaptureActor.set -> void
+PubSoft.AspNetCore.AuditMiddlewareOptions.CaptureClientIp.get -> bool
+PubSoft.AspNetCore.AuditMiddlewareOptions.CaptureClientIp.set -> void
+PubSoft.AspNetCore.AuditMiddlewareOptions.CaptureUserAgent.get -> bool
+PubSoft.AspNetCore.AuditMiddlewareOptions.CaptureUserAgent.set -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialAuthorizationExtensions
+PubSoft.AspNetCore.Authentication.ClientCredentialEndpointFilter
+PubSoft.AspNetCore.Authentication.ClientCredentialEndpointFilter.ClientCredentialEndpointFilter() -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialEndpointFilter.InvokeAsync(Microsoft.AspNetCore.Http.EndpointFilterInvocationContext! context, Microsoft.AspNetCore.Http.EndpointFilterDelegate! next) -> System.Threading.Tasks.ValueTask<object?>
+PubSoft.AspNetCore.Authentication.ClientCredentialMvcAuthorizationFilter
+PubSoft.AspNetCore.Authentication.ClientCredentialMvcAuthorizationFilter.ClientCredentialMvcAuthorizationFilter() -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialMvcAuthorizationFilter.OnActionExecutionAsync(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext! context, Microsoft.AspNetCore.Mvc.Filters.ActionExecutionDelegate! next) -> System.Threading.Tasks.Task!
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.CallerTypeClaimType.get -> string!
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.CallerTypeClaimType.set -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.CallerTypeMachine.get -> string!
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.CallerTypeMachine.set -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.ClientCredentialOptions() -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.ClientIdClaimType.get -> string!
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.ClientIdClaimType.set -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.ClientIdHeader.get -> string!
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.ClientIdHeader.set -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.ClientSecretHeader.get -> string!
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.ClientSecretHeader.set -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult
+PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.Claims.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>?
+PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.Claims.init -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.ClientCredentialVerificationResult() -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.ClientId.get -> string?
+PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.ClientId.init -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.Success.get -> bool
+PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.Success.init -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.TenantId.get -> long?
+PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.TenantId.init -> void
+PubSoft.AspNetCore.Authentication.IClientCredentialVerifier
+PubSoft.AspNetCore.Authentication.IClientCredentialVerifier.VerifyAsync(string! clientId, string! clientSecret, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult!>!
+PubSoft.AspNetCore.Authentication.PrincipalSnapshotServiceCollectionExtensions
+PubSoft.AspNetCore.Authentication.RequireClientCredentialAttribute
+PubSoft.AspNetCore.Authentication.RequireClientCredentialAttribute.AllowAuthenticatedUser.get -> bool
+PubSoft.AspNetCore.Authentication.RequireClientCredentialAttribute.AllowAuthenticatedUser.set -> void
+PubSoft.AspNetCore.Authentication.RequireClientCredentialAttribute.RequireClientCredentialAttribute() -> void
+PubSoft.AspNetCore.Authorization.PermissionEndpointFilter
+PubSoft.AspNetCore.Authorization.PermissionEndpointFilter.InvokeAsync(Microsoft.AspNetCore.Http.EndpointFilterInvocationContext! context, Microsoft.AspNetCore.Http.EndpointFilterDelegate! next) -> System.Threading.Tasks.ValueTask<object?>
+PubSoft.AspNetCore.Authorization.PermissionEndpointFilter.PermissionEndpointFilter(PubSoft.Authentication.IAuthenticatedSubjectAccessor! subjectAccessor, PubSoft.Domain.ITenantContext! tenantContext, PubSoft.Authorization.PermissionAuthorizationService! authorizationService) -> void
+PubSoft.AspNetCore.Authorization.PermissionEndpointFilterExtensions
+PubSoft.AspNetCore.Authorization.PermissionMvcAuthorizationExtensions
+PubSoft.AspNetCore.Authorization.PermissionMvcAuthorizationFilter
+PubSoft.AspNetCore.Authorization.PermissionMvcAuthorizationFilter.OnAuthorizationAsync(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext! context) -> System.Threading.Tasks.Task!
+PubSoft.AspNetCore.Authorization.PermissionMvcAuthorizationFilter.PermissionMvcAuthorizationFilter(PubSoft.Authentication.IAuthenticatedSubjectAccessor! subjectAccessor, PubSoft.Domain.ITenantContext! tenantContext, PubSoft.Authorization.PermissionAuthorizationService! authorizationService) -> void
+PubSoft.AspNetCore.DevelopmentOnlyAttribute
+PubSoft.AspNetCore.DevelopmentOnlyAttribute.DevelopmentOnlyAttribute() -> void
+PubSoft.AspNetCore.DevelopmentOnlyControllerConvention
+PubSoft.AspNetCore.DevelopmentOnlyControllerConvention.Apply(Microsoft.AspNetCore.Mvc.ApplicationModels.ApplicationModel! application) -> void
+PubSoft.AspNetCore.DevelopmentOnlyControllerConvention.DevelopmentOnlyControllerConvention(Microsoft.Extensions.Hosting.IHostEnvironment! environment) -> void
+PubSoft.AspNetCore.DevelopmentOnlyControllerConventionExtensions
+PubSoft.AspNetCore.ExceptionHandlingMiddleware
+PubSoft.AspNetCore.ExceptionHandlingMiddleware.ExceptionHandlingMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, Microsoft.Extensions.Logging.ILogger<PubSoft.AspNetCore.ExceptionHandlingMiddleware!>! logger, Microsoft.Extensions.Hosting.IHostEnvironment! environment) -> void
+PubSoft.AspNetCore.ExceptionHandlingMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
+PubSoft.AspNetCore.ExceptionHandlingMiddlewareExtensions
+PubSoft.AspNetCore.HealthEndpointRouteBuilderExtensions
+PubSoft.AspNetCore.HmacValidationMiddleware
+PubSoft.AspNetCore.HmacValidationMiddleware.HmacValidationMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, PubSoft.AspNetCore.IAppSecretResolver! secretResolver, PubSoft.Security.HmacSignatureValidator! validator, Microsoft.Extensions.Options.IOptions<PubSoft.AspNetCore.HmacValidationOptions!>! options) -> void
+PubSoft.AspNetCore.HmacValidationMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
+PubSoft.AspNetCore.HmacValidationOptions
+PubSoft.AspNetCore.HmacValidationOptions.ExcludedPathPrefixes.get -> string![]!
+PubSoft.AspNetCore.HmacValidationOptions.ExcludedPathPrefixes.set -> void
+PubSoft.AspNetCore.HmacValidationOptions.HmacValidationOptions() -> void
+PubSoft.AspNetCore.HmacValidationOptions.MaximumBodyBytes.get -> int
+PubSoft.AspNetCore.HmacValidationOptions.MaximumBodyBytes.set -> void
+PubSoft.AspNetCore.HmacValidationOptions.RequireBodyHash.get -> bool
+PubSoft.AspNetCore.HmacValidationOptions.RequireBodyHash.set -> void
+PubSoft.AspNetCore.HmacValidationServiceCollectionExtensions
+PubSoft.AspNetCore.IAppSecretResolver
+PubSoft.AspNetCore.IAppSecretResolver.ResolveSecretAsync(string! appId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<string?>
+PubSoft.AspNetCore.IpNormalizer
+PubSoft.AspNetCore.PubSoftRateLimitPolicy
+PubSoft.AspNetCore.PubSoftRateLimitPolicy.CountFailuresOnly.get -> bool
+PubSoft.AspNetCore.PubSoftRateLimitPolicy.Name.get -> string!
+PubSoft.AspNetCore.PubSoftRateLimitPolicy.PubSoftRateLimitPolicy(PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions! options) -> void
+PubSoft.AspNetCore.PubSoftRateLimitPolicyExtensions
+PubSoft.AspNetCore.PubSoftRateLimitPolicyMiddleware
+PubSoft.AspNetCore.PubSoftRateLimitPolicyMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
+PubSoft.AspNetCore.PubSoftRateLimitPolicyMiddleware.PubSoftRateLimitPolicyMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, System.Collections.Generic.IEnumerable<PubSoft.AspNetCore.PubSoftRateLimitPolicy!>! policies) -> void
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.AppliesTo.get -> System.Func<Microsoft.AspNetCore.Http.HttpContext!, bool>!
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.AppliesTo.set -> void
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.CountFailuresOnly.get -> bool
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.CountFailuresOnly.set -> void
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.IdentifierSelector.get -> System.Func<Microsoft.AspNetCore.Http.HttpContext!, string?>!
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.IdentifierSelector.set -> void
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.IsFailureResponse.get -> System.Func<int, bool>!
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.IsFailureResponse.set -> void
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.MaxIdentifiers.get -> int
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.MaxIdentifiers.set -> void
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.Name.get -> string!
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.Name.set -> void
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.PubSoftRateLimitPolicyOptions() -> void
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.RequestsPerWindow.get -> int
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.RequestsPerWindow.set -> void
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.WindowSize.get -> System.TimeSpan
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.WindowSize.set -> void
+PubSoft.AspNetCore.PubSoftRateLimitingExtensions
+PubSoft.AspNetCore.PubSoftRateLimitingMiddleware
+PubSoft.AspNetCore.PubSoftRateLimitingMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
+PubSoft.AspNetCore.PubSoftRateLimitingMiddleware.PubSoftRateLimitingMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, PubSoft.Security.RateLimiter! rateLimiter) -> void
+PubSoft.AspNetCore.PubSoftRequestSaveChanges
+PubSoft.AspNetCore.PubSoftRequestSaveChanges.PubSoftRequestSaveChanges() -> void
+PubSoft.AspNetCore.PubSoftRequestSaveChanges.Register(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task!>! saveCallback) -> void
+PubSoft.AspNetCore.PubSoftRequestSaveChanges.RegisterServiceParticipants(System.Collections.Generic.IEnumerable<PubSoft.Domain.IPubSoftSaveParticipant!>! participants) -> void
+PubSoft.AspNetCore.PubSoftRequestSaveChanges.SaveAllAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.AspNetCore.PubSoftRequestSaveChangesExtensions
+PubSoft.AspNetCore.PubSoftRequestSaveChangesMiddleware
+PubSoft.AspNetCore.PubSoftRequestSaveChangesMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
+PubSoft.AspNetCore.PubSoftRequestSaveChangesMiddleware.PubSoftRequestSaveChangesMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next) -> void
+PubSoft.AspNetCore.SecurityHeadersMiddleware
+PubSoft.AspNetCore.SecurityHeadersMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
+PubSoft.AspNetCore.SecurityHeadersMiddleware.SecurityHeadersMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, PubSoft.AspNetCore.SecurityHeadersOptions? options = null) -> void
+PubSoft.AspNetCore.SecurityHeadersMiddlewareExtensions
+PubSoft.AspNetCore.SecurityHeadersOptions
+PubSoft.AspNetCore.SecurityHeadersOptions.ContentSecurityPolicy.get -> string!
+PubSoft.AspNetCore.SecurityHeadersOptions.ContentSecurityPolicy.set -> void
+PubSoft.AspNetCore.SecurityHeadersOptions.EnableHstsInDevelopment.get -> bool
+PubSoft.AspNetCore.SecurityHeadersOptions.EnableHstsInDevelopment.set -> void
+PubSoft.AspNetCore.SecurityHeadersOptions.Enabled.get -> bool
+PubSoft.AspNetCore.SecurityHeadersOptions.Enabled.set -> void
+PubSoft.AspNetCore.SecurityHeadersOptions.PermissionsPolicy.get -> string!
+PubSoft.AspNetCore.SecurityHeadersOptions.PermissionsPolicy.set -> void
+PubSoft.AspNetCore.SecurityHeadersOptions.ReferrerPolicy.get -> string!
+PubSoft.AspNetCore.SecurityHeadersOptions.ReferrerPolicy.set -> void
+PubSoft.AspNetCore.SecurityHeadersOptions.SecurityHeadersOptions() -> void
+PubSoft.AspNetCore.SecurityHeadersOptions.StrictTransportSecurity.get -> string?
+PubSoft.AspNetCore.SecurityHeadersOptions.StrictTransportSecurity.set -> void
+PubSoft.AspNetCore.SecurityHeadersOptions.XContentTypeOptions.get -> string!
+PubSoft.AspNetCore.SecurityHeadersOptions.XContentTypeOptions.set -> void
+PubSoft.AspNetCore.SecurityHeadersOptions.XFrameOptions.get -> string!
+PubSoft.AspNetCore.SecurityHeadersOptions.XFrameOptions.set -> void
+const PubSoft.AspNetCore.HealthEndpointRouteBuilderExtensions.DefaultPath = "/health" -> string!
+static PubSoft.AspNetCore.AuditMiddlewareExtensions.UsePubSoftAudit(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, PubSoft.AspNetCore.AuditMiddlewareOptions? options = null) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+static PubSoft.AspNetCore.Authentication.ClientCredentialAuthorizationExtensions.AddPubSoftClientCredential(this Microsoft.AspNetCore.Builder.RouteHandlerBuilder! endpoint) -> Microsoft.AspNetCore.Builder.RouteHandlerBuilder!
+static PubSoft.AspNetCore.Authentication.ClientCredentialAuthorizationExtensions.AddPubSoftClientCredential(this Microsoft.AspNetCore.Routing.RouteGroupBuilder! group) -> Microsoft.AspNetCore.Routing.RouteGroupBuilder!
+static PubSoft.AspNetCore.Authentication.ClientCredentialAuthorizationExtensions.AddPubSoftClientCredentialAuthorization(this Microsoft.Extensions.DependencyInjection.IMvcBuilder! mvcBuilder) -> Microsoft.Extensions.DependencyInjection.IMvcBuilder!
+static PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.Fail() -> PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult!
+static PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.Ok(string! clientId, long? tenantId = null, System.Collections.Generic.IReadOnlyDictionary<string!, string!>? claims = null) -> PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult!
+static PubSoft.AspNetCore.Authentication.PrincipalSnapshotServiceCollectionExtensions.AddAuthenticatedSubjectAccessor(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! subjectClaimType, string! trustedIssuer, string? tenantClaimType = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.AspNetCore.Authentication.PrincipalSnapshotServiceCollectionExtensions.AddPrincipalSnapshotAccessor(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.AspNetCore.Authorization.PermissionEndpointFilterExtensions.AddPubSoftPermissionAuthorization(this Microsoft.AspNetCore.Builder.RouteHandlerBuilder! endpoint) -> Microsoft.AspNetCore.Builder.RouteHandlerBuilder!
+static PubSoft.AspNetCore.Authorization.PermissionEndpointFilterExtensions.AddPubSoftPermissionAuthorization(this Microsoft.AspNetCore.Routing.RouteGroupBuilder! group) -> Microsoft.AspNetCore.Routing.RouteGroupBuilder!
+static PubSoft.AspNetCore.Authorization.PermissionMvcAuthorizationExtensions.AddPubSoftPermissionAuthorization(this Microsoft.Extensions.DependencyInjection.IMvcBuilder! mvcBuilder) -> Microsoft.Extensions.DependencyInjection.IMvcBuilder!
+static PubSoft.AspNetCore.DevelopmentOnlyControllerConventionExtensions.AddPubSoftDevelopmentOnlyControllerConvention(this Microsoft.Extensions.DependencyInjection.IMvcBuilder! builder, Microsoft.Extensions.Hosting.IHostEnvironment! environment) -> Microsoft.Extensions.DependencyInjection.IMvcBuilder!
+static PubSoft.AspNetCore.ExceptionHandlingMiddlewareExtensions.UsePubSoftExceptionHandling(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+static PubSoft.AspNetCore.HealthEndpointRouteBuilderExtensions.MapPubSoftHealthEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder! endpoints, string! pattern = "/health") -> Microsoft.AspNetCore.Builder.IEndpointConventionBuilder!
+static PubSoft.AspNetCore.HmacValidationServiceCollectionExtensions.AddPubSoftHmacValidation(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.AspNetCore.HmacValidationOptions!>? configure = null, System.Action<PubSoft.Security.HmacSignatureOptions!>? configureSignature = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.AspNetCore.HmacValidationServiceCollectionExtensions.UsePubSoftHmacValidation(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+static PubSoft.AspNetCore.IpNormalizer.Normalize(string? ip) -> string!
+static PubSoft.AspNetCore.PubSoftRateLimitPolicyExtensions.AddPubSoftRateLimitPolicy(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.AspNetCore.PubSoftRateLimitPolicyExtensions.UsePubSoftRateLimitPolicies(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+static PubSoft.AspNetCore.PubSoftRateLimitingExtensions.AddPubSoftRateLimiting(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Security.RateLimiterOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.AspNetCore.PubSoftRateLimitingExtensions.UsePubSoftRateLimiting(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+static PubSoft.AspNetCore.PubSoftRequestSaveChangesExtensions.AddPubSoftRequestSaveChanges(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.AspNetCore.PubSoftRequestSaveChangesExtensions.UsePubSoftRequestSaveChanges(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+static PubSoft.AspNetCore.SecurityHeadersMiddlewareExtensions.UsePubSoftSecurityHeaders(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, PubSoft.AspNetCore.SecurityHeadersOptions? options = null) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!

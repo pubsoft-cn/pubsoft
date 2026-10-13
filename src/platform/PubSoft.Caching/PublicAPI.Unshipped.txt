@@ -1,0 +1,41 @@
+#nullable enable
+PubSoft.Caching.CachingServiceCollectionExtensions
+PubSoft.Caching.ICache
+PubSoft.Caching.ICache.ExistsAsync(string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Caching.ICache.GetAsync<T>(string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<T?>!
+PubSoft.Caching.ICache.GetManyAsync<T>(System.Collections.Generic.IEnumerable<string!>! keys, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.Dictionary<string!, T?>!>!
+PubSoft.Caching.ICache.GetOrSetAsync<T>(string! key, System.Func<System.Threading.Tasks.Task<T!>!>! factory, System.TimeSpan? expiry = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<T!>!
+PubSoft.Caching.ICache.RemoveAsync(string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Caching.ICache.RemoveByPatternAsync(string! pattern, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Caching.ICache.RemoveManyAsync(System.Collections.Generic.IEnumerable<string!>! keys, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Caching.ICache.SetAsync<T>(string! key, T! value, System.TimeSpan? expiry = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Caching.ICache.SetManyAsync<T>(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, T!>>! items, System.TimeSpan? expiry = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Caching.IDistributedLock
+PubSoft.Caching.IDistributedLock.AcquireAsync(string! key, System.TimeSpan expiry, System.TimeSpan? waitTimeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.IAsyncDisposable?>!
+PubSoft.Caching.InProcessDistributedLock
+PubSoft.Caching.InProcessDistributedLock.AcquireAsync(string! key, System.TimeSpan expiry, System.TimeSpan? waitTimeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.IAsyncDisposable?>!
+PubSoft.Caching.InProcessDistributedLock.Dispose() -> void
+PubSoft.Caching.InProcessDistributedLock.InProcessDistributedLock(System.TimeProvider? timeProvider = null, int maxEntries = 4096) -> void
+PubSoft.Caching.MemoryCache
+PubSoft.Caching.MemoryCache.CacheStatistics
+PubSoft.Caching.MemoryCache.CacheStatistics.CacheStatistics() -> void
+PubSoft.Caching.MemoryCache.CacheStatistics.ExpiredEntries.get -> int
+PubSoft.Caching.MemoryCache.CacheStatistics.ExpiredEntries.init -> void
+PubSoft.Caching.MemoryCache.CacheStatistics.SizeLimit.get -> int
+PubSoft.Caching.MemoryCache.CacheStatistics.SizeLimit.init -> void
+PubSoft.Caching.MemoryCache.CacheStatistics.TotalEntries.get -> int
+PubSoft.Caching.MemoryCache.CacheStatistics.TotalEntries.init -> void
+PubSoft.Caching.MemoryCache.Dispose() -> void
+PubSoft.Caching.MemoryCache.ExistsAsync(string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Caching.MemoryCache.GetAsync<T>(string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<T?>!
+PubSoft.Caching.MemoryCache.GetManyAsync<T>(System.Collections.Generic.IEnumerable<string!>! keys, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.Dictionary<string!, T?>!>!
+PubSoft.Caching.MemoryCache.GetOrSetAsync<T>(string! key, System.Func<System.Threading.Tasks.Task<T!>!>! factory, System.TimeSpan? expiry = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<T!>!
+PubSoft.Caching.MemoryCache.GetStatistics() -> PubSoft.Caching.MemoryCache.CacheStatistics!
+PubSoft.Caching.MemoryCache.MemoryCache(System.TimeSpan? cleanupInterval = null, int maxSize = 10000) -> void
+PubSoft.Caching.MemoryCache.RemoveAsync(string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Caching.MemoryCache.RemoveByPatternAsync(string! pattern, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Caching.MemoryCache.RemoveManyAsync(System.Collections.Generic.IEnumerable<string!>! keys, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Caching.MemoryCache.SetAsync<T>(string! key, T! value, System.TimeSpan? expiry = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Caching.MemoryCache.SetManyAsync<T>(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, T!>>! items, System.TimeSpan? expiry = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+static PubSoft.Caching.CachingServiceCollectionExtensions.AddPubSoftInProcessDistributedLock(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, int maxEntries = 4096) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Caching.CachingServiceCollectionExtensions.AddPubSoftMemoryCache(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.TimeSpan? cleanupInterval = null, int maxSize = 10000) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

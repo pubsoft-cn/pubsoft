@@ -1,0 +1,35 @@
+#nullable enable
+PubSoft.Testing.DelegateSaveParticipant
+PubSoft.Testing.DelegateSaveParticipant.DelegateSaveParticipant(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<int>!>! save) -> void
+PubSoft.Testing.DelegateSaveParticipant.SaveChangesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>!
+PubSoft.Testing.FixedMemberScopeContext
+PubSoft.Testing.FixedMemberScopeContext.<Clone>$() -> PubSoft.Testing.FixedMemberScopeContext!
+PubSoft.Testing.FixedMemberScopeContext.Deconstruct(out long? MemberId, out bool IsMemberScoped) -> void
+PubSoft.Testing.FixedMemberScopeContext.Equals(PubSoft.Testing.FixedMemberScopeContext? other) -> bool
+PubSoft.Testing.FixedMemberScopeContext.FixedMemberScopeContext(long? MemberId, bool IsMemberScoped = true) -> void
+PubSoft.Testing.FixedMemberScopeContext.IsMemberScoped.get -> bool
+PubSoft.Testing.FixedMemberScopeContext.IsMemberScoped.init -> void
+PubSoft.Testing.FixedMemberScopeContext.MemberId.get -> long?
+PubSoft.Testing.FixedMemberScopeContext.MemberId.init -> void
+PubSoft.Testing.FixedTenantContext
+PubSoft.Testing.FixedTenantContext.<Clone>$() -> PubSoft.Testing.FixedTenantContext!
+PubSoft.Testing.FixedTenantContext.Deconstruct(out long? TenantId) -> void
+PubSoft.Testing.FixedTenantContext.Equals(PubSoft.Testing.FixedTenantContext? other) -> bool
+PubSoft.Testing.FixedTenantContext.FixedTenantContext(long? TenantId) -> void
+PubSoft.Testing.FixedTenantContext.TenantId.get -> long?
+PubSoft.Testing.FixedTenantContext.TenantId.init -> void
+PubSoft.Testing.TestTimeProvider
+PubSoft.Testing.TestTimeProvider.Advance(System.TimeSpan delta) -> void
+PubSoft.Testing.TestTimeProvider.SetUtcNow(System.DateTimeOffset utcNow) -> void
+PubSoft.Testing.TestTimeProvider.TestTimeProvider(System.DateTimeOffset utcNow) -> void
+override PubSoft.Testing.FixedMemberScopeContext.Equals(object? obj) -> bool
+override PubSoft.Testing.FixedMemberScopeContext.GetHashCode() -> int
+override PubSoft.Testing.FixedMemberScopeContext.ToString() -> string!
+override PubSoft.Testing.FixedTenantContext.Equals(object? obj) -> bool
+override PubSoft.Testing.FixedTenantContext.GetHashCode() -> int
+override PubSoft.Testing.FixedTenantContext.ToString() -> string!
+override PubSoft.Testing.TestTimeProvider.GetUtcNow() -> System.DateTimeOffset
+static PubSoft.Testing.FixedMemberScopeContext.operator !=(PubSoft.Testing.FixedMemberScopeContext? left, PubSoft.Testing.FixedMemberScopeContext? right) -> bool
+static PubSoft.Testing.FixedMemberScopeContext.operator ==(PubSoft.Testing.FixedMemberScopeContext? left, PubSoft.Testing.FixedMemberScopeContext? right) -> bool
+static PubSoft.Testing.FixedTenantContext.operator !=(PubSoft.Testing.FixedTenantContext? left, PubSoft.Testing.FixedTenantContext? right) -> bool
+static PubSoft.Testing.FixedTenantContext.operator ==(PubSoft.Testing.FixedTenantContext? left, PubSoft.Testing.FixedTenantContext? right) -> bool

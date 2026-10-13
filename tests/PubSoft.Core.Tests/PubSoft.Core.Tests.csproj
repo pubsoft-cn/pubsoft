@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
+    <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.9" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../../src/security/PubSoft.Authentication/PubSoft.Authentication.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Identity/PubSoft.Identity.csproj" />
+    <ProjectReference Include="../../src/security/PubSoft.Authentication.Jwt.AspNetCore/PubSoft.Authentication.Jwt.AspNetCore.csproj" />
+    <ProjectReference Include="../../src/security/PubSoft.Authentication.Jwt/PubSoft.Authentication.Jwt.csproj" />
+    <ProjectReference Include="../../src/security/PubSoft.Authentication.OAuthProviders/PubSoft.Authentication.OAuthProviders.csproj" />
+    <ProjectReference Include="../../src/security/PubSoft.Authorization/PubSoft.Authorization.csproj" />
+    <ProjectReference Include="../../src/host/PubSoft.Abp.Core/PubSoft.Abp.Core.csproj" />
+    <ProjectReference Include="../../src/host/PubSoft.Abp.AspNetCore/PubSoft.Abp.AspNetCore.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Core/PubSoft.Core.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Domain/PubSoft.Domain.csproj" />
+    <ProjectReference Include="../../src/testing/PubSoft.Testing/PubSoft.Testing.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Resilience/PubSoft.Resilience.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Resilience.Http/PubSoft.Resilience.Http.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Caching/PubSoft.Caching.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Caching.Redis/PubSoft.Caching.Redis.csproj" />
+    <ProjectReference Include="../../src/security/PubSoft.Security/PubSoft.Security.csproj" />
+    <ProjectReference Include="../../src/security/PubSoft.Security.Redis/PubSoft.Security.Redis.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Cryptography/PubSoft.Cryptography.csproj" />
+    <ProjectReference Include="../../src/host/PubSoft.AspNetCore/PubSoft.AspNetCore.csproj" />
+    <ProjectReference Include="../../src/data/PubSoft.Auditing/PubSoft.Auditing.csproj" />
+    <ProjectReference Include="../../src/data/PubSoft.Auditing.Outbox/PubSoft.Auditing.Outbox.csproj" />
+    <ProjectReference Include="../../src/data/PubSoft.EntityFrameworkCore/PubSoft.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Events/PubSoft.Events.csproj" />
+    <ProjectReference Include="../../src/messaging/PubSoft.Messaging.Outbox/PubSoft.Messaging.Outbox.csproj" />
+    <ProjectReference Include="../../src/messaging/PubSoft.Messaging/PubSoft.Messaging.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Logging/PubSoft.Logging.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Notifications/PubSoft.Notifications.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Mapping/PubSoft.Mapping.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Monitoring/PubSoft.Monitoring.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Monitoring.Scheduling/PubSoft.Monitoring.Scheduling.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.MultiTenancy/PubSoft.MultiTenancy.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Scheduling/PubSoft.Scheduling.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Scheduling.EntityFrameworkCore/PubSoft.Scheduling.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Scheduling.Http/PubSoft.Scheduling.Http.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Tokens/PubSoft.Tokens.csproj" />
+  </ItemGroup>
+</Project>

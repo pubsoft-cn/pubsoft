@@ -1,0 +1,109 @@
+#nullable enable
+PubSoft.Scheduling.ExecutorRegistry
+PubSoft.Scheduling.ExecutorRegistry.ExecutorRegistry(System.Collections.Generic.IEnumerable<PubSoft.Scheduling.IJobExecutor!>! executors) -> void
+PubSoft.Scheduling.ExecutorRegistry.Register(PubSoft.Scheduling.IJobExecutor! executor) -> void
+PubSoft.Scheduling.ExecutorRegistry.Resolve(string! executorType) -> PubSoft.Scheduling.IJobExecutor?
+PubSoft.Scheduling.IExecutorRegistry
+PubSoft.Scheduling.IExecutorRegistry.Register(PubSoft.Scheduling.IJobExecutor! executor) -> void
+PubSoft.Scheduling.IExecutorRegistry.Resolve(string! executorType) -> PubSoft.Scheduling.IJobExecutor?
+PubSoft.Scheduling.IJobExecutor
+PubSoft.Scheduling.IJobExecutor.ExecuteAsync(PubSoft.Scheduling.ScheduledJob! job, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<PubSoft.Scheduling.JobResult!>!
+PubSoft.Scheduling.IJobExecutor.Type.get -> string!
+PubSoft.Scheduling.IResultProcessor
+PubSoft.Scheduling.IResultProcessor.Name.get -> string!
+PubSoft.Scheduling.IResultProcessor.ProcessAsync(PubSoft.Scheduling.ScheduledJob! job, PubSoft.Scheduling.JobResult! result, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+PubSoft.Scheduling.IResultProcessorRegistry
+PubSoft.Scheduling.IResultProcessorRegistry.Register(PubSoft.Scheduling.IResultProcessor! processor) -> void
+PubSoft.Scheduling.IResultProcessorRegistry.Resolve(string! name) -> PubSoft.Scheduling.IResultProcessor?
+PubSoft.Scheduling.IStateStore
+PubSoft.Scheduling.IStateStore.GetCustomStateAsync<T>(string! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<T?>!
+PubSoft.Scheduling.IStateStore.GetLastResultAsync(string! jobName, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<PubSoft.Scheduling.JobResult?>!
+PubSoft.Scheduling.IStateStore.RemoveCustomStateAsync(string! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+PubSoft.Scheduling.IStateStore.SetCustomStateAsync<T>(string! key, T! value, System.TimeSpan? expiry, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+PubSoft.Scheduling.IStateStore.UpdateStateAsync(string! jobName, PubSoft.Scheduling.JobResult! result, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+PubSoft.Scheduling.JobResult
+PubSoft.Scheduling.JobResult.DelayMs.get -> int
+PubSoft.Scheduling.JobResult.DelayMs.init -> void
+PubSoft.Scheduling.JobResult.ErrorMessage.get -> string?
+PubSoft.Scheduling.JobResult.ErrorMessage.init -> void
+PubSoft.Scheduling.JobResult.ExecutedAt.get -> System.DateTimeOffset
+PubSoft.Scheduling.JobResult.ExecutedAt.init -> void
+PubSoft.Scheduling.JobResult.JobResult() -> void
+PubSoft.Scheduling.JobResult.Metadata.get -> System.Collections.Generic.Dictionary<string!, object?>!
+PubSoft.Scheduling.JobResult.Metadata.init -> void
+PubSoft.Scheduling.JobResult.StatusCode.get -> int
+PubSoft.Scheduling.JobResult.StatusCode.init -> void
+PubSoft.Scheduling.JobResult.Success.get -> bool
+PubSoft.Scheduling.JobResult.Success.init -> void
+PubSoft.Scheduling.LoggingResultProcessor
+PubSoft.Scheduling.LoggingResultProcessor.LoggingResultProcessor(Microsoft.Extensions.Logging.ILogger<PubSoft.Scheduling.LoggingResultProcessor!>? logger = null) -> void
+PubSoft.Scheduling.LoggingResultProcessor.Name.get -> string!
+PubSoft.Scheduling.LoggingResultProcessor.ProcessAsync(PubSoft.Scheduling.ScheduledJob! job, PubSoft.Scheduling.JobResult! result, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+PubSoft.Scheduling.MemoryStateStore
+PubSoft.Scheduling.MemoryStateStore.GetCustomStateAsync<T>(string! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<T?>!
+PubSoft.Scheduling.MemoryStateStore.GetLastResultAsync(string! jobName, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<PubSoft.Scheduling.JobResult?>!
+PubSoft.Scheduling.MemoryStateStore.MemoryStateStore(System.TimeProvider? timeProvider = null, Microsoft.Extensions.Logging.ILogger<PubSoft.Scheduling.MemoryStateStore!>? logger = null) -> void
+PubSoft.Scheduling.MemoryStateStore.RemoveCustomStateAsync(string! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+PubSoft.Scheduling.MemoryStateStore.SetCustomStateAsync<T>(string! key, T! value, System.TimeSpan? expiry, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+PubSoft.Scheduling.MemoryStateStore.UpdateStateAsync(string! jobName, PubSoft.Scheduling.JobResult! result, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+PubSoft.Scheduling.ResultProcessorRegistry
+PubSoft.Scheduling.ResultProcessorRegistry.Register(PubSoft.Scheduling.IResultProcessor! processor) -> void
+PubSoft.Scheduling.ResultProcessorRegistry.Resolve(string! name) -> PubSoft.Scheduling.IResultProcessor?
+PubSoft.Scheduling.ResultProcessorRegistry.ResultProcessorRegistry(System.Collections.Generic.IEnumerable<PubSoft.Scheduling.IResultProcessor!>! processors) -> void
+PubSoft.Scheduling.ScheduleMask
+PubSoft.Scheduling.ScheduleMask.DaysOfMonth.get -> uint
+PubSoft.Scheduling.ScheduleMask.DaysOfWeek.get -> byte
+PubSoft.Scheduling.ScheduleMask.Hours.get -> uint
+PubSoft.Scheduling.ScheduleMask.IsValid.get -> bool
+PubSoft.Scheduling.ScheduleMask.Matches(System.DateTimeOffset timestamp) -> bool
+PubSoft.Scheduling.ScheduleMask.Minutes.get -> ulong
+PubSoft.Scheduling.ScheduleMask.Months.get -> ushort
+PubSoft.Scheduling.ScheduleMask.NextRun(System.DateTimeOffset from) -> System.DateTimeOffset?
+PubSoft.Scheduling.ScheduleMask.ScheduleMask() -> void
+PubSoft.Scheduling.ScheduleMask.ScheduleMask(ulong seconds, ulong minutes, uint hours, uint daysOfMonth, ushort months, byte daysOfWeek) -> void
+PubSoft.Scheduling.ScheduleMask.Seconds.get -> ulong
+PubSoft.Scheduling.ScheduleMasks
+PubSoft.Scheduling.ScheduledJob
+PubSoft.Scheduling.ScheduledJob.Enabled.get -> bool
+PubSoft.Scheduling.ScheduledJob.Enabled.set -> void
+PubSoft.Scheduling.ScheduledJob.ExecutorConfig.get -> System.Text.Json.JsonElement
+PubSoft.Scheduling.ScheduledJob.ExecutorConfig.set -> void
+PubSoft.Scheduling.ScheduledJob.ExecutorType.get -> string!
+PubSoft.Scheduling.ScheduledJob.ExecutorType.set -> void
+PubSoft.Scheduling.ScheduledJob.Name.get -> string!
+PubSoft.Scheduling.ScheduledJob.Name.set -> void
+PubSoft.Scheduling.ScheduledJob.ResultProcessorConfig.get -> System.Text.Json.JsonElement
+PubSoft.Scheduling.ScheduledJob.ResultProcessorConfig.set -> void
+PubSoft.Scheduling.ScheduledJob.ResultProcessors.get -> System.Collections.Generic.List<string!>!
+PubSoft.Scheduling.ScheduledJob.ResultProcessors.set -> void
+PubSoft.Scheduling.ScheduledJob.Schedule.get -> PubSoft.Scheduling.ScheduleMask
+PubSoft.Scheduling.ScheduledJob.Schedule.set -> void
+PubSoft.Scheduling.ScheduledJob.ScheduledJob() -> void
+PubSoft.Scheduling.SchedulerEngine
+PubSoft.Scheduling.SchedulerEngine.RunDueJobsAsync(PubSoft.Scheduling.SchedulerOptions! options, System.DateTimeOffset timestamp, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Scheduling.SchedulerEngine.SchedulerEngine(PubSoft.Scheduling.IExecutorRegistry! executors, PubSoft.Scheduling.IResultProcessorRegistry! processors, PubSoft.Scheduling.IStateStore! state, Microsoft.Extensions.Logging.ILogger<PubSoft.Scheduling.SchedulerEngine!>? logger = null) -> void
+PubSoft.Scheduling.SchedulerHostedService
+PubSoft.Scheduling.SchedulerHostedService.SchedulerHostedService(PubSoft.Scheduling.SchedulerEngine! engine, Microsoft.Extensions.Options.IOptionsMonitor<PubSoft.Scheduling.SchedulerOptions!>! options, System.TimeProvider! timeProvider, Microsoft.Extensions.Logging.ILogger<PubSoft.Scheduling.SchedulerHostedService!>? logger = null) -> void
+PubSoft.Scheduling.SchedulerOptions
+PubSoft.Scheduling.SchedulerOptions.ErrorDelay.get -> System.TimeSpan
+PubSoft.Scheduling.SchedulerOptions.ErrorDelay.set -> void
+PubSoft.Scheduling.SchedulerOptions.Jobs.get -> System.Collections.Generic.List<PubSoft.Scheduling.ScheduledJob!>!
+PubSoft.Scheduling.SchedulerOptions.Jobs.set -> void
+PubSoft.Scheduling.SchedulerOptions.LoopInterval.get -> System.TimeSpan
+PubSoft.Scheduling.SchedulerOptions.LoopInterval.set -> void
+PubSoft.Scheduling.SchedulerOptions.MaxConcurrentJobs.get -> int
+PubSoft.Scheduling.SchedulerOptions.MaxConcurrentJobs.set -> void
+PubSoft.Scheduling.SchedulerOptions.SchedulerOptions() -> void
+PubSoft.Scheduling.SchedulerServiceCollectionExtensions
+static PubSoft.Scheduling.ScheduleMask.EveryDay.get -> PubSoft.Scheduling.ScheduleMask
+static PubSoft.Scheduling.ScheduleMask.EveryHour.get -> PubSoft.Scheduling.ScheduleMask
+static PubSoft.Scheduling.ScheduleMask.EveryMinute.get -> PubSoft.Scheduling.ScheduleMask
+static PubSoft.Scheduling.ScheduleMask.EverySecond.get -> PubSoft.Scheduling.ScheduleMask
+static PubSoft.Scheduling.ScheduleMasks.DailyAt(int hour, int minute = 0, int second = 0) -> PubSoft.Scheduling.ScheduleMask
+static PubSoft.Scheduling.ScheduleMasks.EveryHours(int interval) -> PubSoft.Scheduling.ScheduleMask
+static PubSoft.Scheduling.ScheduleMasks.EveryMinutes(int interval) -> PubSoft.Scheduling.ScheduleMask
+static PubSoft.Scheduling.ScheduleMasks.EverySeconds(int interval) -> PubSoft.Scheduling.ScheduleMask
+static PubSoft.Scheduling.ScheduleMasks.WeeklyAt(System.DayOfWeek day, int hour, int minute = 0, int second = 0) -> PubSoft.Scheduling.ScheduleMask
+static PubSoft.Scheduling.SchedulerServiceCollectionExtensions.AddExecutor<TExecutor>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Scheduling.SchedulerServiceCollectionExtensions.AddPubSoftScheduler(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Scheduling.SchedulerOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Scheduling.SchedulerServiceCollectionExtensions.AddResultProcessor<TProcessor>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

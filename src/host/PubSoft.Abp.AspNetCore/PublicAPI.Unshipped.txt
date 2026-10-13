@@ -1,0 +1,6 @@
+#nullable enable
+PubSoft.Abp.AspNetCore.PubSoftAbpAspNetCoreModule
+PubSoft.Abp.AspNetCore.PubSoftAbpAspNetCoreModule.PubSoftAbpAspNetCoreModule() -> void
+PubSoft.Abp.AspNetCore.PubSoftAbpAspNetCoreServiceCollectionExtensions
+override PubSoft.Abp.AspNetCore.PubSoftAbpAspNetCoreModule.ConfigureServices(Volo.Abp.Modularity.ServiceConfigurationContext! context) -> void
+static PubSoft.Abp.AspNetCore.PubSoftAbpAspNetCoreServiceCollectionExtensions.AddPubSoftAbpAspNetCore(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

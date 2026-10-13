@@ -1,0 +1,211 @@
+#nullable enable
+PubSoft.Domain.AggregateRoot<TKey>
+PubSoft.Domain.AggregateRoot<TKey>.AggregateRoot() -> void
+PubSoft.Domain.AmbientMemberScopeContext
+PubSoft.Domain.AmbientMemberScopeContext.AmbientMemberScopeContext() -> void
+PubSoft.Domain.AmbientMemberScopeContext.Change(long? memberId, bool isMemberScoped = true) -> System.IDisposable!
+PubSoft.Domain.AmbientMemberScopeContext.IsMemberScoped.get -> bool
+PubSoft.Domain.AmbientMemberScopeContext.MemberId.get -> long?
+PubSoft.Domain.AmbientTenantContext
+PubSoft.Domain.AmbientTenantContext.AmbientTenantContext() -> void
+PubSoft.Domain.AmbientTenantContext.Change(long? tenantId) -> System.IDisposable!
+PubSoft.Domain.AmbientTenantContext.TenantId.get -> long?
+PubSoft.Domain.AuditedAggregateRoot
+PubSoft.Domain.AuditedAggregateRoot.AuditedAggregateRoot() -> void
+PubSoft.Domain.AuditedAggregateRoot.CreationTime.get -> System.DateTime
+PubSoft.Domain.AuditedAggregateRoot.CreationTime.set -> void
+PubSoft.Domain.AuditedAggregateRoot.CreatorId.get -> long?
+PubSoft.Domain.AuditedAggregateRoot.CreatorId.set -> void
+PubSoft.Domain.AuditedAggregateRoot.LastModificationTime.get -> System.DateTime?
+PubSoft.Domain.AuditedAggregateRoot.LastModificationTime.set -> void
+PubSoft.Domain.AuditedAggregateRoot.LastModifierId.get -> long?
+PubSoft.Domain.AuditedAggregateRoot.LastModifierId.set -> void
+PubSoft.Domain.AuditedAggregateRoot.TenantId.get -> long?
+PubSoft.Domain.AuditedAggregateRoot.TenantId.set -> void
+PubSoft.Domain.AuditedEntity<TKey>
+PubSoft.Domain.AuditedEntity<TKey>.AuditedEntity() -> void
+PubSoft.Domain.AuditedEntity<TKey>.CreationTime.get -> System.DateTime
+PubSoft.Domain.AuditedEntity<TKey>.CreationTime.set -> void
+PubSoft.Domain.AuditedEntity<TKey>.CreatorId.get -> long?
+PubSoft.Domain.AuditedEntity<TKey>.CreatorId.set -> void
+PubSoft.Domain.AuditedEntity<TKey>.LastModificationTime.get -> System.DateTime?
+PubSoft.Domain.AuditedEntity<TKey>.LastModificationTime.set -> void
+PubSoft.Domain.AuditedEntity<TKey>.LastModifierId.get -> long?
+PubSoft.Domain.AuditedEntity<TKey>.LastModifierId.set -> void
+PubSoft.Domain.CreationAuditedAggregateRoot
+PubSoft.Domain.CreationAuditedAggregateRoot.CreationAuditedAggregateRoot() -> void
+PubSoft.Domain.CreationAuditedAggregateRoot.CreationTime.get -> System.DateTime
+PubSoft.Domain.CreationAuditedAggregateRoot.CreationTime.set -> void
+PubSoft.Domain.CreationAuditedAggregateRoot.CreatorId.get -> long?
+PubSoft.Domain.CreationAuditedAggregateRoot.CreatorId.set -> void
+PubSoft.Domain.CreationAuditedAggregateRoot.TenantId.get -> long?
+PubSoft.Domain.CreationAuditedAggregateRoot.TenantId.set -> void
+PubSoft.Domain.CreationAuditedEntity<TKey>
+PubSoft.Domain.CreationAuditedEntity<TKey>.CreationAuditedEntity() -> void
+PubSoft.Domain.CreationAuditedEntity<TKey>.CreationTime.get -> System.DateTime
+PubSoft.Domain.CreationAuditedEntity<TKey>.CreationTime.set -> void
+PubSoft.Domain.CreationAuditedEntity<TKey>.CreatorId.get -> long?
+PubSoft.Domain.CreationAuditedEntity<TKey>.CreatorId.set -> void
+PubSoft.Domain.DataScopeAccessEvaluator
+PubSoft.Domain.DataScopeAccessEvaluator.CanAccess(string! dimension, long scopeId, System.Collections.Generic.IEnumerable<PubSoft.Domain.DataScopeDimension!>? roleScopes) -> bool
+PubSoft.Domain.DataScopeAccessEvaluator.DataScopeAccessEvaluator(PubSoft.Domain.IDataScopeDimensionRegistry! dimensions) -> void
+PubSoft.Domain.DataScopeAccessEvaluator.GetAllowedIds(string! dimension, System.Collections.Generic.IEnumerable<PubSoft.Domain.DataScopeDimension!>? roleScopes) -> System.Collections.Generic.IReadOnlyList<long>?
+PubSoft.Domain.DataScopeDimension
+PubSoft.Domain.DataScopeDimension.AllowedIds.get -> System.Collections.Generic.IReadOnlyList<long>!
+PubSoft.Domain.DataScopeDimension.CurrentId.get -> long?
+PubSoft.Domain.DataScopeDimension.DataScopeDimension(string! name, bool isAll, System.Collections.Generic.IEnumerable<long>? allowedIds = null, long? currentId = null) -> void
+PubSoft.Domain.DataScopeDimension.IsAll.get -> bool
+PubSoft.Domain.DataScopeDimension.Name.get -> string!
+PubSoft.Domain.DataScopeDimensionRegistry
+PubSoft.Domain.DataScopeDimensionRegistry.Add(string! dimension) -> void
+PubSoft.Domain.DataScopeDimensionRegistry.Contains(string! dimension) -> bool
+PubSoft.Domain.DataScopeDimensionRegistry.DataScopeDimensionRegistry() -> void
+PubSoft.Domain.DataScopeDimensionRegistry.Dimensions.get -> System.Collections.Generic.IReadOnlyList<string!>!
+PubSoft.Domain.Entity<TKey>
+PubSoft.Domain.Entity<TKey>.Entity() -> void
+PubSoft.Domain.Entity<TKey>.Id.get -> TKey
+PubSoft.Domain.Entity<TKey>.Id.set -> void
+PubSoft.Domain.FullAuditedAggregateRoot
+PubSoft.Domain.FullAuditedAggregateRoot.CreationTime.get -> System.DateTime
+PubSoft.Domain.FullAuditedAggregateRoot.CreationTime.set -> void
+PubSoft.Domain.FullAuditedAggregateRoot.CreatorId.get -> long?
+PubSoft.Domain.FullAuditedAggregateRoot.CreatorId.set -> void
+PubSoft.Domain.FullAuditedAggregateRoot.DeleterId.get -> long?
+PubSoft.Domain.FullAuditedAggregateRoot.DeleterId.set -> void
+PubSoft.Domain.FullAuditedAggregateRoot.DeletionTime.get -> System.DateTime?
+PubSoft.Domain.FullAuditedAggregateRoot.DeletionTime.set -> void
+PubSoft.Domain.FullAuditedAggregateRoot.FullAuditedAggregateRoot() -> void
+PubSoft.Domain.FullAuditedAggregateRoot.IsDeleted.get -> bool
+PubSoft.Domain.FullAuditedAggregateRoot.IsDeleted.set -> void
+PubSoft.Domain.FullAuditedAggregateRoot.LastModificationTime.get -> System.DateTime?
+PubSoft.Domain.FullAuditedAggregateRoot.LastModificationTime.set -> void
+PubSoft.Domain.FullAuditedAggregateRoot.LastModifierId.get -> long?
+PubSoft.Domain.FullAuditedAggregateRoot.LastModifierId.set -> void
+PubSoft.Domain.FullAuditedAggregateRoot.TenantId.get -> long?
+PubSoft.Domain.FullAuditedAggregateRoot.TenantId.set -> void
+PubSoft.Domain.FullAuditedEntity<TKey>
+PubSoft.Domain.FullAuditedEntity<TKey>.CreationTime.get -> System.DateTime
+PubSoft.Domain.FullAuditedEntity<TKey>.CreationTime.set -> void
+PubSoft.Domain.FullAuditedEntity<TKey>.CreatorId.get -> long?
+PubSoft.Domain.FullAuditedEntity<TKey>.CreatorId.set -> void
+PubSoft.Domain.FullAuditedEntity<TKey>.DeleterId.get -> long?
+PubSoft.Domain.FullAuditedEntity<TKey>.DeleterId.set -> void
+PubSoft.Domain.FullAuditedEntity<TKey>.DeletionTime.get -> System.DateTime?
+PubSoft.Domain.FullAuditedEntity<TKey>.DeletionTime.set -> void
+PubSoft.Domain.FullAuditedEntity<TKey>.FullAuditedEntity() -> void
+PubSoft.Domain.FullAuditedEntity<TKey>.IsDeleted.get -> bool
+PubSoft.Domain.FullAuditedEntity<TKey>.IsDeleted.set -> void
+PubSoft.Domain.FullAuditedEntity<TKey>.LastModificationTime.get -> System.DateTime?
+PubSoft.Domain.FullAuditedEntity<TKey>.LastModificationTime.set -> void
+PubSoft.Domain.FullAuditedEntity<TKey>.LastModifierId.get -> long?
+PubSoft.Domain.FullAuditedEntity<TKey>.LastModifierId.set -> void
+PubSoft.Domain.IDataScopeDimensionRegistry
+PubSoft.Domain.IDataScopeDimensionRegistry.Add(string! dimension) -> void
+PubSoft.Domain.IDataScopeDimensionRegistry.Contains(string! dimension) -> bool
+PubSoft.Domain.IDataScopeDimensionRegistry.Dimensions.get -> System.Collections.Generic.IReadOnlyList<string!>!
+PubSoft.Domain.IMemberScopeContext
+PubSoft.Domain.IMemberScopeContext.IsMemberScoped.get -> bool
+PubSoft.Domain.IMemberScopeContext.MemberId.get -> long?
+PubSoft.Domain.IMemberScoped
+PubSoft.Domain.IMemberScoped.MemberId.get -> long?
+PubSoft.Domain.IMemberScoped.MemberId.set -> void
+PubSoft.Domain.IMultiTenant
+PubSoft.Domain.IMultiTenant.TenantId.get -> long?
+PubSoft.Domain.IMultiTenant.TenantId.set -> void
+PubSoft.Domain.IPubSoftSaveParticipant
+PubSoft.Domain.IPubSoftSaveParticipant.SaveChangesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>!
+PubSoft.Domain.IReadOnlyRepository<TEntity, TKey>
+PubSoft.Domain.IReadOnlyRepository<TEntity, TKey>.FindAsync(TKey id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TEntity?>!
+PubSoft.Domain.IReadOnlyRepository<TEntity, TKey>.GetQueryableAsync() -> System.Threading.Tasks.Task<System.Linq.IQueryable<TEntity!>!>!
+PubSoft.Domain.IRepository<TEntity, TKey>
+PubSoft.Domain.IRepository<TEntity, TKey>.DeleteAsync(TEntity! entity, bool autoSave = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Domain.IRepository<TEntity, TKey>.DeleteAsync(TKey id, bool autoSave = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Domain.IRepository<TEntity, TKey>.FindAsync(TKey id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TEntity?>!
+PubSoft.Domain.IRepository<TEntity, TKey>.GetAsync(TKey id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TEntity!>!
+PubSoft.Domain.IRepository<TEntity, TKey>.GetQueryableAsync() -> System.Threading.Tasks.Task<System.Linq.IQueryable<TEntity!>!>!
+PubSoft.Domain.IRepository<TEntity, TKey>.InsertAsync(TEntity! entity, bool autoSave = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TEntity!>!
+PubSoft.Domain.IRepository<TEntity, TKey>.InsertManyAsync(System.Collections.Generic.IEnumerable<TEntity!>! entities, bool autoSave = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Domain.IRepository<TEntity, TKey>.SaveChangesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Domain.IRepository<TEntity, TKey>.UpdateAsync(TEntity! entity, bool autoSave = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TEntity!>!
+PubSoft.Domain.IRepository<TEntity, TKey>.UpdateManyAsync(System.Collections.Generic.IEnumerable<TEntity!>! entities, bool autoSave = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Domain.IRoleDataScopeProvider
+PubSoft.Domain.IRoleDataScopeProvider.GetRoleScopesAsync(long subjectId, long? tenantId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<PubSoft.Domain.DataScopeDimension!>!>!
+PubSoft.Domain.ISoftDelete
+PubSoft.Domain.ISoftDelete.DeleterId.get -> long?
+PubSoft.Domain.ISoftDelete.DeleterId.set -> void
+PubSoft.Domain.ISoftDelete.DeletionTime.get -> System.DateTime?
+PubSoft.Domain.ISoftDelete.DeletionTime.set -> void
+PubSoft.Domain.ISoftDelete.IsDeleted.get -> bool
+PubSoft.Domain.ISoftDelete.IsDeleted.set -> void
+PubSoft.Domain.ITenantContext
+PubSoft.Domain.ITenantContext.TenantId.get -> long?
+PubSoft.Domain.PermissionGrantRecord
+PubSoft.Domain.PermissionGrantRecord.CustomPermissionName.get -> string?
+PubSoft.Domain.PermissionGrantRecord.CustomPermissionName.set -> void
+PubSoft.Domain.PermissionGrantRecord.ExtensionFlags.get -> uint
+PubSoft.Domain.PermissionGrantRecord.ExtensionFlags.set -> void
+PubSoft.Domain.PermissionGrantRecord.Flags.get -> byte
+PubSoft.Domain.PermissionGrantRecord.Flags.set -> void
+PubSoft.Domain.PermissionGrantRecord.ModuleKey.get -> string!
+PubSoft.Domain.PermissionGrantRecord.ModuleKey.set -> void
+PubSoft.Domain.PermissionGrantRecord.PermissionGrantRecord(long id, long roleId, string! moduleKey, long? tenantId = null, byte flags = 0, uint extensionFlags = 0, string? customPermissionName = null) -> void
+PubSoft.Domain.PermissionGrantRecord.RoleId.get -> long
+PubSoft.Domain.PermissionGrantRecord.RoleId.set -> void
+PubSoft.Domain.PermissionGrantRecord.SetPermissions(byte flags, uint extensionFlags, string? customPermissionName) -> void
+PubSoft.Domain.PermissionGrantRecord.TenantId.get -> long?
+PubSoft.Domain.PermissionGrantRecord.TenantId.set -> void
+PubSoft.Domain.PermissionModule
+PubSoft.Domain.PermissionModule.AvailableFlags.get -> byte
+PubSoft.Domain.PermissionModule.ClientCode.get -> string!
+PubSoft.Domain.PermissionModule.CreationTime.get -> System.DateTime
+PubSoft.Domain.PermissionModule.CustomPermissionsJson.get -> string?
+PubSoft.Domain.PermissionModule.Description.get -> string?
+PubSoft.Domain.PermissionModule.DisplayName.get -> string!
+PubSoft.Domain.PermissionModule.IsEnabled.get -> bool
+PubSoft.Domain.PermissionModule.IsEnabled.set -> void
+PubSoft.Domain.PermissionModule.ModuleKey.get -> string!
+PubSoft.Domain.PermissionModule.PermissionModule(long id, string! clientCode, string! moduleKey, string! displayName, long? tenantId = null, byte availableFlags = 63, string? description = null, string? customPermissionsJson = null, int sortOrder = 0) -> void
+PubSoft.Domain.PermissionModule.SortOrder.get -> int
+PubSoft.Domain.PermissionModule.TenantId.get -> long?
+PubSoft.Domain.PermissionModule.TenantId.set -> void
+PubSoft.Domain.PermissionModule.Update(string! displayName, string? description, byte? availableFlags, string? customPermissionsJson, int? sortOrder) -> void
+PubSoft.Domain.PermissionModule.UpdatedAt.get -> System.DateTime?
+PubSoft.Domain.PermissionRole
+PubSoft.Domain.PermissionRole.ClientCode.get -> string!
+PubSoft.Domain.PermissionRole.ClientCode.set -> void
+PubSoft.Domain.PermissionRole.IsEnabled.get -> bool
+PubSoft.Domain.PermissionRole.IsEnabled.set -> void
+PubSoft.Domain.PermissionRole.Name.get -> string!
+PubSoft.Domain.PermissionRole.Name.set -> void
+PubSoft.Domain.PermissionRole.PermissionRole() -> void
+PubSoft.Domain.PermissionRole.PermissionRole(long id, string! name, long? tenantId = null, string! clientCode = "") -> void
+PubSoft.Domain.PermissionRole.TenantId.get -> long?
+PubSoft.Domain.PermissionRole.TenantId.set -> void
+PubSoft.Domain.RoleDataScope
+PubSoft.Domain.RoleDataScope.Dimension.get -> string!
+PubSoft.Domain.RoleDataScope.Dimension.set -> void
+PubSoft.Domain.RoleDataScope.IsAll.get -> bool
+PubSoft.Domain.RoleDataScope.IsAll.set -> void
+PubSoft.Domain.RoleDataScope.RoleDataScope() -> void
+PubSoft.Domain.RoleDataScope.RoleDataScope(long id, long roleId, string! dimension, long scopeId, long? tenantId = null, bool isAll = false) -> void
+PubSoft.Domain.RoleDataScope.RoleId.get -> long
+PubSoft.Domain.RoleDataScope.RoleId.set -> void
+PubSoft.Domain.RoleDataScope.ScopeId.get -> long
+PubSoft.Domain.RoleDataScope.ScopeId.set -> void
+PubSoft.Domain.RoleDataScope.TenantId.get -> long?
+PubSoft.Domain.RoleDataScope.TenantId.set -> void
+PubSoft.Domain.SubjectPermissionRole
+PubSoft.Domain.SubjectPermissionRole.ClientCode.get -> string!
+PubSoft.Domain.SubjectPermissionRole.ClientCode.set -> void
+PubSoft.Domain.SubjectPermissionRole.RoleId.get -> long
+PubSoft.Domain.SubjectPermissionRole.RoleId.set -> void
+PubSoft.Domain.SubjectPermissionRole.SubjectId.get -> long
+PubSoft.Domain.SubjectPermissionRole.SubjectId.set -> void
+PubSoft.Domain.SubjectPermissionRole.SubjectPermissionRole() -> void
+PubSoft.Domain.SubjectPermissionRole.SubjectPermissionRole(long id, long subjectId, long roleId, long? tenantId = null, string! clientCode = "") -> void
+PubSoft.Domain.SubjectPermissionRole.TenantId.get -> long?
+PubSoft.Domain.SubjectPermissionRole.TenantId.set -> void
+override PubSoft.Domain.Entity<TKey>.Equals(object? obj) -> bool
+override PubSoft.Domain.Entity<TKey>.GetHashCode() -> int
+static PubSoft.Domain.Entity<TKey>.operator !=(PubSoft.Domain.Entity<TKey>? a, PubSoft.Domain.Entity<TKey>? b) -> bool
+static PubSoft.Domain.Entity<TKey>.operator ==(PubSoft.Domain.Entity<TKey>? a, PubSoft.Domain.Entity<TKey>? b) -> bool

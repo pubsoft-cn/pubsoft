@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>PubSoft.Authorization</PackageId>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Description>Framework-independent permission definitions and catalog for PubSoft applications.</Description>
+  </PropertyGroup>
+</Project>

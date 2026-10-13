@@ -1,0 +1,59 @@
+#nullable enable
+PubSoft.Outbound.ContractJsonDeserializer
+PubSoft.Outbound.ContractRequestBuilder
+PubSoft.Outbound.ContractResponseMapper
+PubSoft.Outbound.DictionaryResponseMapper
+PubSoft.Outbound.ExternalOutboundSdk
+PubSoft.Outbound.ExternalOutboundSdk.ExecuteAsync<TRequest, TResponse>(TRequest request, long tenantId, string! profileId = "default", System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResponse>!
+PubSoft.Outbound.ExternalOutboundSdk.ExternalOutboundSdk(PubSoft.Contracts.IOutboundEngine! engine) -> void
+PubSoft.Outbound.IOutboundContractRegistry
+PubSoft.Outbound.IOutboundContractRegistry.Contracts.get -> System.Collections.Generic.IReadOnlyList<PubSoft.Contracts.ApiContractMetadata!>!
+PubSoft.Outbound.IOutboundContractRegistry.FindByOperationId(string! operationId) -> PubSoft.Contracts.ApiContractMetadata?
+PubSoft.Outbound.IOutboundContractRegistry.GetMetadata(System.Type! requestType) -> PubSoft.Contracts.ApiContractMetadata!
+PubSoft.Outbound.IOutboundContractRegistry.ScanAssembly(System.Reflection.Assembly! assembly) -> void
+PubSoft.Outbound.JsonValueConverter
+PubSoft.Outbound.OutboundContractMetadataResolver
+PubSoft.Outbound.OutboundContractOptions
+PubSoft.Outbound.OutboundContractOptions.Assemblies.get -> System.Collections.Generic.List<System.Reflection.Assembly!>!
+PubSoft.Outbound.OutboundContractOptions.NamingPolicy.get -> PubSoft.Contracts.INamingPolicy!
+PubSoft.Outbound.OutboundContractOptions.NamingPolicy.set -> void
+PubSoft.Outbound.OutboundContractOptions.OutboundContractOptions() -> void
+PubSoft.Outbound.OutboundContractRegistry
+PubSoft.Outbound.OutboundContractRegistry.Contracts.get -> System.Collections.Generic.IReadOnlyList<PubSoft.Contracts.ApiContractMetadata!>!
+PubSoft.Outbound.OutboundContractRegistry.FindByOperationId(string! operationId) -> PubSoft.Contracts.ApiContractMetadata?
+PubSoft.Outbound.OutboundContractRegistry.GetMetadata(System.Type! requestType) -> PubSoft.Contracts.ApiContractMetadata!
+PubSoft.Outbound.OutboundContractRegistry.OutboundContractRegistry() -> void
+PubSoft.Outbound.OutboundContractRegistry.OutboundContractRegistry(PubSoft.Contracts.INamingPolicy! namingPolicy) -> void
+PubSoft.Outbound.OutboundContractRegistry.ScanAssembly(System.Reflection.Assembly! assembly) -> void
+PubSoft.Outbound.OutboundEngine
+PubSoft.Outbound.OutboundEngine.ExecuteAsync<TRequest, TResponse>(TRequest request, string! profileId, long tenantId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResponse>!
+PubSoft.Outbound.OutboundEngine.OutboundEngine(System.Collections.Generic.IEnumerable<PubSoft.Contracts.IOutboundProvider!>! providers, PubSoft.Outbound.IOutboundContractRegistry! registry) -> void
+PubSoft.Outbound.OutboundServiceCollectionExtensions
+PubSoft.Outbound.RequiredFieldValidator
+static PubSoft.Outbound.ContractJsonDeserializer.Deserialize(System.Text.Json.JsonDocument! document, System.Type! targetType, PubSoft.Contracts.INamingPolicy! namingPolicy) -> object!
+static PubSoft.Outbound.ContractRequestBuilder.BuildParams(object! request) -> System.Collections.Generic.Dictionary<string!, string?>!
+static PubSoft.Outbound.ContractRequestBuilder.BuildParams(object! request, PubSoft.Contracts.INamingPolicy! namingPolicy) -> System.Collections.Generic.Dictionary<string!, string?>!
+static PubSoft.Outbound.ContractRequestBuilder.BuildParams(object! request, PubSoft.Contracts.INamingPolicy! namingPolicy, params PubSoft.Contracts.FieldSource[]! excludeSources) -> System.Collections.Generic.Dictionary<string!, string?>!
+static PubSoft.Outbound.ContractRequestBuilder.BuildParams(object! request, params PubSoft.Contracts.FieldSource[]! excludeSources) -> System.Collections.Generic.Dictionary<string!, string?>!
+static PubSoft.Outbound.ContractRequestBuilder.BuildParamsObject(object! request) -> System.Collections.Generic.Dictionary<string!, object?>!
+static PubSoft.Outbound.ContractRequestBuilder.BuildParamsObject(object! request, PubSoft.Contracts.INamingPolicy! namingPolicy) -> System.Collections.Generic.Dictionary<string!, object?>!
+static PubSoft.Outbound.ContractRequestBuilder.BuildParamsObject(object! request, PubSoft.Contracts.INamingPolicy! namingPolicy, params PubSoft.Contracts.FieldSource[]! excludeSources) -> System.Collections.Generic.Dictionary<string!, object?>!
+static PubSoft.Outbound.ContractRequestBuilder.BuildParamsObject(object! request, params PubSoft.Contracts.FieldSource[]! excludeSources) -> System.Collections.Generic.Dictionary<string!, object?>!
+static PubSoft.Outbound.ContractResponseMapper.Map(System.Type! responseType, System.Text.Json.JsonElement jsonElement) -> object!
+static PubSoft.Outbound.ContractResponseMapper.Map(System.Type! responseType, System.Text.Json.JsonElement jsonElement, PubSoft.Contracts.INamingPolicy! namingPolicy) -> object!
+static PubSoft.Outbound.ContractResponseMapper.Map<T>(System.Text.Json.JsonElement jsonElement) -> T
+static PubSoft.Outbound.ContractResponseMapper.Map<T>(System.Text.Json.JsonElement jsonElement, PubSoft.Contracts.INamingPolicy! namingPolicy) -> T
+static PubSoft.Outbound.DictionaryResponseMapper.Map(System.Type! responseType, System.Collections.Generic.IReadOnlyDictionary<string!, string!>! fields, PubSoft.Contracts.INamingPolicy! namingPolicy) -> object!
+static PubSoft.Outbound.DictionaryResponseMapper.Map<T>(System.Collections.Generic.IReadOnlyDictionary<string!, string!>! fields, PubSoft.Contracts.INamingPolicy! namingPolicy) -> T
+static PubSoft.Outbound.JsonValueConverter.Convert(System.Text.Json.JsonElement element, System.Type! targetType) -> object?
+static PubSoft.Outbound.JsonValueConverter.GetAmountFen(System.Text.Json.JsonElement root, params string![]! names) -> long?
+static PubSoft.Outbound.JsonValueConverter.GetRawJson(System.Text.Json.JsonElement root, params string![]! names) -> string?
+static PubSoft.Outbound.JsonValueConverter.GetString(System.Text.Json.JsonElement root, params string![]! names) -> string?
+static PubSoft.Outbound.JsonValueConverter.ParseRoot(string? resultJson) -> System.Text.Json.JsonElement?
+static PubSoft.Outbound.OutboundContractMetadataResolver.Resolve(System.Type! requestType) -> PubSoft.Contracts.ApiContractMetadata!
+static PubSoft.Outbound.OutboundContractMetadataResolver.Resolve(System.Type! requestType, PubSoft.Contracts.INamingPolicy? namingPolicy) -> PubSoft.Contracts.ApiContractMetadata!
+static PubSoft.Outbound.OutboundContractMetadataResolver.RoutePath(PubSoft.Contracts.ApiContractMetadata! metadata, string! profileId = "default") -> string!
+static PubSoft.Outbound.OutboundContractMetadataResolver.RoutePath<TRequest>(string! profileId = "default") -> string!
+static PubSoft.Outbound.OutboundServiceCollectionExtensions.AddExternalOutboundSdk(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Outbound.OutboundServiceCollectionExtensions.AddOutboundContracts(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Outbound.OutboundContractOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Outbound.RequiredFieldValidator.Validate(object! request) -> string?

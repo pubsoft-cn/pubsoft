@@ -1,0 +1,205 @@
+#nullable enable
+PubSoft.Auditing.AuditActorContext
+PubSoft.Auditing.AuditActorContext.<Clone>$() -> PubSoft.Auditing.AuditActorContext!
+PubSoft.Auditing.AuditActorContext.AuditActorContext(string? SubjectId, string? DisplayName, bool? IsAdministrator = null) -> void
+PubSoft.Auditing.AuditActorContext.Deconstruct(out string? SubjectId, out string? DisplayName, out bool? IsAdministrator) -> void
+PubSoft.Auditing.AuditActorContext.DisplayName.get -> string?
+PubSoft.Auditing.AuditActorContext.DisplayName.init -> void
+PubSoft.Auditing.AuditActorContext.Equals(PubSoft.Auditing.AuditActorContext? other) -> bool
+PubSoft.Auditing.AuditActorContext.IsAdministrator.get -> bool?
+PubSoft.Auditing.AuditActorContext.IsAdministrator.init -> void
+PubSoft.Auditing.AuditActorContext.SubjectId.get -> string?
+PubSoft.Auditing.AuditActorContext.SubjectId.init -> void
+PubSoft.Auditing.AuditBusinessContext
+PubSoft.Auditing.AuditBusinessContext.<Clone>$() -> PubSoft.Auditing.AuditBusinessContext!
+PubSoft.Auditing.AuditBusinessContext.Action.get -> string?
+PubSoft.Auditing.AuditBusinessContext.Action.init -> void
+PubSoft.Auditing.AuditBusinessContext.AuditBusinessContext(string? Category = null, string? Action = null, string? TargetType = null, string? TargetId = null, string? TargetName = null, string? Detail = null) -> void
+PubSoft.Auditing.AuditBusinessContext.Category.get -> string?
+PubSoft.Auditing.AuditBusinessContext.Category.init -> void
+PubSoft.Auditing.AuditBusinessContext.Deconstruct(out string? Category, out string? Action, out string? TargetType, out string? TargetId, out string? TargetName, out string? Detail) -> void
+PubSoft.Auditing.AuditBusinessContext.Detail.get -> string?
+PubSoft.Auditing.AuditBusinessContext.Detail.init -> void
+PubSoft.Auditing.AuditBusinessContext.Equals(PubSoft.Auditing.AuditBusinessContext? other) -> bool
+PubSoft.Auditing.AuditBusinessContext.TargetId.get -> string?
+PubSoft.Auditing.AuditBusinessContext.TargetId.init -> void
+PubSoft.Auditing.AuditBusinessContext.TargetName.get -> string?
+PubSoft.Auditing.AuditBusinessContext.TargetName.init -> void
+PubSoft.Auditing.AuditBusinessContext.TargetType.get -> string?
+PubSoft.Auditing.AuditBusinessContext.TargetType.init -> void
+PubSoft.Auditing.AuditChangeCollector
+PubSoft.Auditing.AuditChangeCollector.Add(PubSoft.Auditing.AuditEntityChange! change) -> void
+PubSoft.Auditing.AuditChangeCollector.AddRange(System.Collections.Generic.IReadOnlyCollection<PubSoft.Auditing.AuditEntityChange!>! changes) -> void
+PubSoft.Auditing.AuditChangeCollector.AuditChangeCollector(PubSoft.Auditing.AuditChangeCollectorOptions? options = null) -> void
+PubSoft.Auditing.AuditChangeCollector.Clear() -> void
+PubSoft.Auditing.AuditChangeCollector.GetSnapshot() -> System.Collections.Generic.IReadOnlyList<PubSoft.Auditing.AuditEntityChange!>!
+PubSoft.Auditing.AuditChangeCollectorOptions
+PubSoft.Auditing.AuditChangeCollectorOptions.AuditChangeCollectorOptions() -> void
+PubSoft.Auditing.AuditChangeCollectorOptions.CaptureValues.get -> bool
+PubSoft.Auditing.AuditChangeCollectorOptions.CaptureValues.set -> void
+PubSoft.Auditing.AuditChangeCollectorOptions.CloneAndValidate() -> PubSoft.Auditing.AuditChangeCollectorOptions!
+PubSoft.Auditing.AuditChangeCollectorOptions.IgnoredEntityTypes.get -> System.Collections.Generic.HashSet<string!>!
+PubSoft.Auditing.AuditChangeCollectorOptions.IgnoredEntityTypes.set -> void
+PubSoft.Auditing.AuditChangeCollectorOptions.MaxChangedPropertiesPerEntity.get -> int
+PubSoft.Auditing.AuditChangeCollectorOptions.MaxChangedPropertiesPerEntity.set -> void
+PubSoft.Auditing.AuditChangeCollectorOptions.MaxChanges.get -> int
+PubSoft.Auditing.AuditChangeCollectorOptions.MaxChanges.set -> void
+PubSoft.Auditing.AuditChangeCollectorOptions.MaxStringValueLength.get -> int
+PubSoft.Auditing.AuditChangeCollectorOptions.MaxStringValueLength.set -> void
+PubSoft.Auditing.AuditChangeCollectorOptions.SensitiveProperties.get -> System.Collections.Generic.HashSet<string!>!
+PubSoft.Auditing.AuditChangeCollectorOptions.SensitiveProperties.set -> void
+PubSoft.Auditing.AuditChangeKind
+PubSoft.Auditing.AuditChangeKind.Created = 0 -> PubSoft.Auditing.AuditChangeKind
+PubSoft.Auditing.AuditChangeKind.Deleted = 2 -> PubSoft.Auditing.AuditChangeKind
+PubSoft.Auditing.AuditChangeKind.Updated = 1 -> PubSoft.Auditing.AuditChangeKind
+PubSoft.Auditing.AuditEntityChange
+PubSoft.Auditing.AuditEntityChange.<Clone>$() -> PubSoft.Auditing.AuditEntityChange!
+PubSoft.Auditing.AuditEntityChange.AuditEntityChange(string! EntityType, string! EntityId, PubSoft.Auditing.AuditChangeKind Kind, System.DateTimeOffset ChangedAt, System.Collections.Generic.IReadOnlyList<PubSoft.Auditing.AuditPropertyChange!>! Properties) -> void
+PubSoft.Auditing.AuditEntityChange.ChangedAt.get -> System.DateTimeOffset
+PubSoft.Auditing.AuditEntityChange.ChangedAt.init -> void
+PubSoft.Auditing.AuditEntityChange.Deconstruct(out string! EntityType, out string! EntityId, out PubSoft.Auditing.AuditChangeKind Kind, out System.DateTimeOffset ChangedAt, out System.Collections.Generic.IReadOnlyList<PubSoft.Auditing.AuditPropertyChange!>! Properties) -> void
+PubSoft.Auditing.AuditEntityChange.EntityId.get -> string!
+PubSoft.Auditing.AuditEntityChange.EntityId.init -> void
+PubSoft.Auditing.AuditEntityChange.EntityType.get -> string!
+PubSoft.Auditing.AuditEntityChange.EntityType.init -> void
+PubSoft.Auditing.AuditEntityChange.Equals(PubSoft.Auditing.AuditEntityChange? other) -> bool
+PubSoft.Auditing.AuditEntityChange.Kind.get -> PubSoft.Auditing.AuditChangeKind
+PubSoft.Auditing.AuditEntityChange.Kind.init -> void
+PubSoft.Auditing.AuditEntityChange.Properties.get -> System.Collections.Generic.IReadOnlyList<PubSoft.Auditing.AuditPropertyChange!>!
+PubSoft.Auditing.AuditEntityChange.Properties.init -> void
+PubSoft.Auditing.AuditLogEntry
+PubSoft.Auditing.AuditLogEntry.<Clone>$() -> PubSoft.Auditing.AuditLogEntry!
+PubSoft.Auditing.AuditLogEntry.Actor.get -> PubSoft.Auditing.AuditActorContext?
+PubSoft.Auditing.AuditLogEntry.Actor.init -> void
+PubSoft.Auditing.AuditLogEntry.AuditLogEntry(PubSoft.Auditing.AuditBusinessContext! Business, PubSoft.Auditing.AuditActorContext? Actor = null, bool Success = true, string? FailureCode = null, System.TimeSpan? Duration = null, System.Collections.Generic.IReadOnlyDictionary<string!, string!>? Metrics = null) -> void
+PubSoft.Auditing.AuditLogEntry.Business.get -> PubSoft.Auditing.AuditBusinessContext!
+PubSoft.Auditing.AuditLogEntry.Business.init -> void
+PubSoft.Auditing.AuditLogEntry.Deconstruct(out PubSoft.Auditing.AuditBusinessContext! Business, out PubSoft.Auditing.AuditActorContext? Actor, out bool Success, out string? FailureCode, out System.TimeSpan? Duration, out System.Collections.Generic.IReadOnlyDictionary<string!, string!>? Metrics) -> void
+PubSoft.Auditing.AuditLogEntry.Duration.get -> System.TimeSpan?
+PubSoft.Auditing.AuditLogEntry.Duration.init -> void
+PubSoft.Auditing.AuditLogEntry.Equals(PubSoft.Auditing.AuditLogEntry? other) -> bool
+PubSoft.Auditing.AuditLogEntry.FailureCode.get -> string?
+PubSoft.Auditing.AuditLogEntry.FailureCode.init -> void
+PubSoft.Auditing.AuditLogEntry.Metrics.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>?
+PubSoft.Auditing.AuditLogEntry.Metrics.init -> void
+PubSoft.Auditing.AuditLogEntry.Success.get -> bool
+PubSoft.Auditing.AuditLogEntry.Success.init -> void
+PubSoft.Auditing.AuditLogWriter
+PubSoft.Auditing.AuditLogWriter.AuditLogWriter(PubSoft.Auditing.IAuditSnapshotSink! sink, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Auditing.AuditLogWriter.WriteAsync(PubSoft.Auditing.AuditLogEntry! entry, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Auditing.AuditPropertyChange
+PubSoft.Auditing.AuditPropertyChange.<Clone>$() -> PubSoft.Auditing.AuditPropertyChange!
+PubSoft.Auditing.AuditPropertyChange.AuditPropertyChange(string! Name, System.Text.Json.JsonElement? OldValue, System.Text.Json.JsonElement? NewValue) -> void
+PubSoft.Auditing.AuditPropertyChange.Deconstruct(out string! Name, out System.Text.Json.JsonElement? OldValue, out System.Text.Json.JsonElement? NewValue) -> void
+PubSoft.Auditing.AuditPropertyChange.Equals(PubSoft.Auditing.AuditPropertyChange? other) -> bool
+PubSoft.Auditing.AuditPropertyChange.Name.get -> string!
+PubSoft.Auditing.AuditPropertyChange.Name.init -> void
+PubSoft.Auditing.AuditPropertyChange.NewValue.get -> System.Text.Json.JsonElement?
+PubSoft.Auditing.AuditPropertyChange.NewValue.init -> void
+PubSoft.Auditing.AuditPropertyChange.OldValue.get -> System.Text.Json.JsonElement?
+PubSoft.Auditing.AuditPropertyChange.OldValue.init -> void
+PubSoft.Auditing.AuditRequestContext
+PubSoft.Auditing.AuditRequestContext.<Clone>$() -> PubSoft.Auditing.AuditRequestContext!
+PubSoft.Auditing.AuditRequestContext.Actor.get -> PubSoft.Auditing.AuditActorContext?
+PubSoft.Auditing.AuditRequestContext.Actor.init -> void
+PubSoft.Auditing.AuditRequestContext.AuditRequestContext(System.DateTimeOffset StartedAt, string? HttpMethod, string? RequestPath, string? ClientIp = null, string? UserAgent = null, PubSoft.Auditing.AuditActorContext? Actor = null) -> void
+PubSoft.Auditing.AuditRequestContext.ClientIp.get -> string?
+PubSoft.Auditing.AuditRequestContext.ClientIp.init -> void
+PubSoft.Auditing.AuditRequestContext.Deconstruct(out System.DateTimeOffset StartedAt, out string? HttpMethod, out string? RequestPath, out string? ClientIp, out string? UserAgent, out PubSoft.Auditing.AuditActorContext? Actor) -> void
+PubSoft.Auditing.AuditRequestContext.Equals(PubSoft.Auditing.AuditRequestContext? other) -> bool
+PubSoft.Auditing.AuditRequestContext.HttpMethod.get -> string?
+PubSoft.Auditing.AuditRequestContext.HttpMethod.init -> void
+PubSoft.Auditing.AuditRequestContext.RequestPath.get -> string?
+PubSoft.Auditing.AuditRequestContext.RequestPath.init -> void
+PubSoft.Auditing.AuditRequestContext.StartedAt.get -> System.DateTimeOffset
+PubSoft.Auditing.AuditRequestContext.StartedAt.init -> void
+PubSoft.Auditing.AuditRequestContext.UserAgent.get -> string?
+PubSoft.Auditing.AuditRequestContext.UserAgent.init -> void
+PubSoft.Auditing.AuditRequestSnapshot
+PubSoft.Auditing.AuditRequestSnapshot.<Clone>$() -> PubSoft.Auditing.AuditRequestSnapshot!
+PubSoft.Auditing.AuditRequestSnapshot.AuditRequestSnapshot(PubSoft.Auditing.AuditRequestContext! Request, PubSoft.Auditing.AuditBusinessContext! Business, bool Success, int StatusCode, string? FailureCode, System.TimeSpan Duration, System.Collections.Generic.IReadOnlyList<PubSoft.Auditing.AuditEntityChange!>! Changes) -> void
+PubSoft.Auditing.AuditRequestSnapshot.Business.get -> PubSoft.Auditing.AuditBusinessContext!
+PubSoft.Auditing.AuditRequestSnapshot.Business.init -> void
+PubSoft.Auditing.AuditRequestSnapshot.Changes.get -> System.Collections.Generic.IReadOnlyList<PubSoft.Auditing.AuditEntityChange!>!
+PubSoft.Auditing.AuditRequestSnapshot.Changes.init -> void
+PubSoft.Auditing.AuditRequestSnapshot.Deconstruct(out PubSoft.Auditing.AuditRequestContext! Request, out PubSoft.Auditing.AuditBusinessContext! Business, out bool Success, out int StatusCode, out string? FailureCode, out System.TimeSpan Duration, out System.Collections.Generic.IReadOnlyList<PubSoft.Auditing.AuditEntityChange!>! Changes) -> void
+PubSoft.Auditing.AuditRequestSnapshot.Duration.get -> System.TimeSpan
+PubSoft.Auditing.AuditRequestSnapshot.Duration.init -> void
+PubSoft.Auditing.AuditRequestSnapshot.Equals(PubSoft.Auditing.AuditRequestSnapshot? other) -> bool
+PubSoft.Auditing.AuditRequestSnapshot.FailureCode.get -> string?
+PubSoft.Auditing.AuditRequestSnapshot.FailureCode.init -> void
+PubSoft.Auditing.AuditRequestSnapshot.Request.get -> PubSoft.Auditing.AuditRequestContext!
+PubSoft.Auditing.AuditRequestSnapshot.Request.init -> void
+PubSoft.Auditing.AuditRequestSnapshot.StatusCode.get -> int
+PubSoft.Auditing.AuditRequestSnapshot.StatusCode.init -> void
+PubSoft.Auditing.AuditRequestSnapshot.Success.get -> bool
+PubSoft.Auditing.AuditRequestSnapshot.Success.init -> void
+PubSoft.Auditing.AuditScope
+PubSoft.Auditing.AuditScope.AuditScope(PubSoft.Auditing.IAuditChangeCollector! collector, PubSoft.Auditing.AuditScopeOptions? options = null, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Auditing.AuditScope.Finalize(bool success, int statusCode) -> PubSoft.Auditing.AuditRequestSnapshot?
+PubSoft.Auditing.AuditScope.Initialize(PubSoft.Auditing.AuditRequestContext! request) -> void
+PubSoft.Auditing.AuditScope.IsEnabled.get -> bool
+PubSoft.Auditing.AuditScope.IsFinalizing.get -> bool
+PubSoft.Auditing.AuditScope.MarkFailure(string? failureCode = null) -> void
+PubSoft.Auditing.AuditScope.SetBusiness(string? category = null, string? action = null, string? targetType = null, string? targetId = null, string? targetName = null, string? detail = null) -> void
+PubSoft.Auditing.AuditScopeOptions
+PubSoft.Auditing.AuditScopeOptions.AuditGetRequests.get -> bool
+PubSoft.Auditing.AuditScopeOptions.AuditGetRequests.set -> void
+PubSoft.Auditing.AuditScopeOptions.AuditScopeOptions() -> void
+PubSoft.Auditing.AuditScopeOptions.Enabled.get -> bool
+PubSoft.Auditing.AuditScopeOptions.Enabled.set -> void
+PubSoft.Auditing.AuditValueSerializer
+PubSoft.Auditing.IAuditActorAccessor
+PubSoft.Auditing.IAuditActorAccessor.GetCurrentActor() -> PubSoft.Auditing.AuditActorContext?
+PubSoft.Auditing.IAuditChangeCollector
+PubSoft.Auditing.IAuditChangeCollector.Add(PubSoft.Auditing.AuditEntityChange! change) -> void
+PubSoft.Auditing.IAuditChangeCollector.AddRange(System.Collections.Generic.IReadOnlyCollection<PubSoft.Auditing.AuditEntityChange!>! changes) -> void
+PubSoft.Auditing.IAuditChangeCollector.Clear() -> void
+PubSoft.Auditing.IAuditChangeCollector.GetSnapshot() -> System.Collections.Generic.IReadOnlyList<PubSoft.Auditing.AuditEntityChange!>!
+PubSoft.Auditing.IAuditLogWriter
+PubSoft.Auditing.IAuditLogWriter.WriteAsync(PubSoft.Auditing.AuditLogEntry! entry, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Auditing.IAuditScope
+PubSoft.Auditing.IAuditScope.Finalize(bool success, int statusCode) -> PubSoft.Auditing.AuditRequestSnapshot?
+PubSoft.Auditing.IAuditScope.Initialize(PubSoft.Auditing.AuditRequestContext! request) -> void
+PubSoft.Auditing.IAuditScope.IsEnabled.get -> bool
+PubSoft.Auditing.IAuditScope.IsFinalizing.get -> bool
+PubSoft.Auditing.IAuditScope.MarkFailure(string? failureCode = null) -> void
+PubSoft.Auditing.IAuditScope.SetBusiness(string? category = null, string? action = null, string? targetType = null, string? targetId = null, string? targetName = null, string? detail = null) -> void
+PubSoft.Auditing.IAuditSnapshotSink
+PubSoft.Auditing.IAuditSnapshotSink.WriteAsync(PubSoft.Auditing.AuditRequestSnapshot! snapshot, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+override PubSoft.Auditing.AuditActorContext.Equals(object? obj) -> bool
+override PubSoft.Auditing.AuditActorContext.GetHashCode() -> int
+override PubSoft.Auditing.AuditActorContext.ToString() -> string!
+override PubSoft.Auditing.AuditBusinessContext.Equals(object? obj) -> bool
+override PubSoft.Auditing.AuditBusinessContext.GetHashCode() -> int
+override PubSoft.Auditing.AuditBusinessContext.ToString() -> string!
+override PubSoft.Auditing.AuditEntityChange.Equals(object? obj) -> bool
+override PubSoft.Auditing.AuditEntityChange.GetHashCode() -> int
+override PubSoft.Auditing.AuditEntityChange.ToString() -> string!
+override PubSoft.Auditing.AuditLogEntry.Equals(object? obj) -> bool
+override PubSoft.Auditing.AuditLogEntry.GetHashCode() -> int
+override PubSoft.Auditing.AuditLogEntry.ToString() -> string!
+override PubSoft.Auditing.AuditPropertyChange.Equals(object? obj) -> bool
+override PubSoft.Auditing.AuditPropertyChange.GetHashCode() -> int
+override PubSoft.Auditing.AuditPropertyChange.ToString() -> string!
+override PubSoft.Auditing.AuditRequestContext.Equals(object? obj) -> bool
+override PubSoft.Auditing.AuditRequestContext.GetHashCode() -> int
+override PubSoft.Auditing.AuditRequestContext.ToString() -> string!
+override PubSoft.Auditing.AuditRequestSnapshot.Equals(object? obj) -> bool
+override PubSoft.Auditing.AuditRequestSnapshot.GetHashCode() -> int
+override PubSoft.Auditing.AuditRequestSnapshot.ToString() -> string!
+static PubSoft.Auditing.AuditActorContext.operator !=(PubSoft.Auditing.AuditActorContext? left, PubSoft.Auditing.AuditActorContext? right) -> bool
+static PubSoft.Auditing.AuditActorContext.operator ==(PubSoft.Auditing.AuditActorContext? left, PubSoft.Auditing.AuditActorContext? right) -> bool
+static PubSoft.Auditing.AuditBusinessContext.operator !=(PubSoft.Auditing.AuditBusinessContext? left, PubSoft.Auditing.AuditBusinessContext? right) -> bool
+static PubSoft.Auditing.AuditBusinessContext.operator ==(PubSoft.Auditing.AuditBusinessContext? left, PubSoft.Auditing.AuditBusinessContext? right) -> bool
+static PubSoft.Auditing.AuditEntityChange.operator !=(PubSoft.Auditing.AuditEntityChange? left, PubSoft.Auditing.AuditEntityChange? right) -> bool
+static PubSoft.Auditing.AuditEntityChange.operator ==(PubSoft.Auditing.AuditEntityChange? left, PubSoft.Auditing.AuditEntityChange? right) -> bool
+static PubSoft.Auditing.AuditLogEntry.operator !=(PubSoft.Auditing.AuditLogEntry? left, PubSoft.Auditing.AuditLogEntry? right) -> bool
+static PubSoft.Auditing.AuditLogEntry.operator ==(PubSoft.Auditing.AuditLogEntry? left, PubSoft.Auditing.AuditLogEntry? right) -> bool
+static PubSoft.Auditing.AuditPropertyChange.operator !=(PubSoft.Auditing.AuditPropertyChange? left, PubSoft.Auditing.AuditPropertyChange? right) -> bool
+static PubSoft.Auditing.AuditPropertyChange.operator ==(PubSoft.Auditing.AuditPropertyChange? left, PubSoft.Auditing.AuditPropertyChange? right) -> bool
+static PubSoft.Auditing.AuditRequestContext.operator !=(PubSoft.Auditing.AuditRequestContext? left, PubSoft.Auditing.AuditRequestContext? right) -> bool
+static PubSoft.Auditing.AuditRequestContext.operator ==(PubSoft.Auditing.AuditRequestContext? left, PubSoft.Auditing.AuditRequestContext? right) -> bool
+static PubSoft.Auditing.AuditRequestSnapshot.operator !=(PubSoft.Auditing.AuditRequestSnapshot? left, PubSoft.Auditing.AuditRequestSnapshot? right) -> bool
+static PubSoft.Auditing.AuditRequestSnapshot.operator ==(PubSoft.Auditing.AuditRequestSnapshot? left, PubSoft.Auditing.AuditRequestSnapshot? right) -> bool
+static PubSoft.Auditing.AuditValueSerializer.Serialize(object? value, int maxStringLength) -> System.Text.Json.JsonElement?

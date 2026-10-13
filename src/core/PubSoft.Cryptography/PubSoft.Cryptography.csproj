@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>PubSoft.Cryptography</PackageId>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Description>Authenticated encryption primitives with explicit key-ring integration.</Description>
+  </PropertyGroup>
+</Project>

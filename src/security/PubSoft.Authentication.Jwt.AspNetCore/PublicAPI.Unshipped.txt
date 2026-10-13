@@ -1,0 +1,23 @@
+#nullable enable
+PubSoft.Authentication.Jwt.AspNetCore.JwtBearerAuthenticationExtensions
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.Audience.get -> string!
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.Audience.set -> void
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.BackchannelTimeout.get -> System.TimeSpan
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.BackchannelTimeout.set -> void
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.ClockSkew.get -> System.TimeSpan
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.ClockSkew.set -> void
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.Issuer.get -> string!
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.Issuer.set -> void
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.JwksJson.get -> string!
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.JwksJson.set -> void
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.MetadataAddress.get -> string!
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.MetadataAddress.set -> void
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.NameClaimType.get -> string!
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.NameClaimType.set -> void
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.PubSoftJwtBearerOptions() -> void
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.RequireHttpsMetadata.get -> bool
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.RequireHttpsMetadata.set -> void
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.RoleClaimType.get -> string!
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.RoleClaimType.set -> void
+static PubSoft.Authentication.Jwt.AspNetCore.JwtBearerAuthenticationExtensions.AddPubSoftJwtBearer(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! builder, System.Action<PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions!>! configure, string! scheme = "Bearer") -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!

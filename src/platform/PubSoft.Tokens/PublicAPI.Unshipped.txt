@@ -1,0 +1,52 @@
+#nullable enable
+PubSoft.Tokens.HttpTokenProvider
+PubSoft.Tokens.HttpTokenProvider.GetTokenAsync(string! credentialKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string?>!
+PubSoft.Tokens.HttpTokenProvider.HttpTokenProvider(System.Net.Http.IHttpClientFactory! httpClientFactory, PubSoft.Caching.ICache! cache, Microsoft.Extensions.Options.IOptionsMonitor<PubSoft.Tokens.TokenManagerOptions!>! options, System.TimeProvider? timeProvider = null, Microsoft.Extensions.Logging.ILogger<PubSoft.Tokens.HttpTokenProvider!>? logger = null) -> void
+PubSoft.Tokens.HttpTokenProvider.InvalidateAsync(string! credentialKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Tokens.ITokenProvider
+PubSoft.Tokens.ITokenProvider.GetTokenAsync(string! credentialKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string?>!
+PubSoft.Tokens.ITokenProvider.InvalidateAsync(string! credentialKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Tokens.TokenCredential
+PubSoft.Tokens.TokenCredential.Body.get -> string!
+PubSoft.Tokens.TokenCredential.Body.set -> void
+PubSoft.Tokens.TokenCredential.Expiry.get -> System.TimeSpan
+PubSoft.Tokens.TokenCredential.Expiry.set -> void
+PubSoft.Tokens.TokenCredential.ExpiryPath.get -> string?
+PubSoft.Tokens.TokenCredential.ExpiryPath.set -> void
+PubSoft.Tokens.TokenCredential.Headers.get -> System.Collections.Generic.Dictionary<string!, string!>!
+PubSoft.Tokens.TokenCredential.Headers.set -> void
+PubSoft.Tokens.TokenCredential.Method.get -> string!
+PubSoft.Tokens.TokenCredential.Method.set -> void
+PubSoft.Tokens.TokenCredential.RefreshBefore.get -> System.TimeSpan
+PubSoft.Tokens.TokenCredential.RefreshBefore.set -> void
+PubSoft.Tokens.TokenCredential.Timeout.get -> System.TimeSpan
+PubSoft.Tokens.TokenCredential.Timeout.set -> void
+PubSoft.Tokens.TokenCredential.TokenCredential() -> void
+PubSoft.Tokens.TokenCredential.TokenPath.get -> string!
+PubSoft.Tokens.TokenCredential.TokenPath.set -> void
+PubSoft.Tokens.TokenCredential.Url.get -> string!
+PubSoft.Tokens.TokenCredential.Url.set -> void
+PubSoft.Tokens.TokenDelegatingHandler
+PubSoft.Tokens.TokenDelegatingHandler.TokenDelegatingHandler(PubSoft.Tokens.ITokenProvider! tokenProvider, Microsoft.Extensions.Options.IOptions<PubSoft.Tokens.TokenHandlerOptions!>! options) -> void
+PubSoft.Tokens.TokenDelegatingHandler.TokenDelegatingHandler(PubSoft.Tokens.ITokenProvider! tokenProvider, Microsoft.Extensions.Options.IOptions<PubSoft.Tokens.TokenHandlerOptions!>! options, string? credentialKey, string? headerName, string? headerPrefix) -> void
+PubSoft.Tokens.TokenHandlerOptions
+PubSoft.Tokens.TokenHandlerOptions.DefaultCredentialKey.get -> string?
+PubSoft.Tokens.TokenHandlerOptions.DefaultCredentialKey.set -> void
+PubSoft.Tokens.TokenHandlerOptions.DefaultHeaderName.get -> string?
+PubSoft.Tokens.TokenHandlerOptions.DefaultHeaderName.set -> void
+PubSoft.Tokens.TokenHandlerOptions.DefaultHeaderPrefix.get -> string?
+PubSoft.Tokens.TokenHandlerOptions.DefaultHeaderPrefix.set -> void
+PubSoft.Tokens.TokenHandlerOptions.TokenHandlerOptions() -> void
+PubSoft.Tokens.TokenManagerOptions
+PubSoft.Tokens.TokenManagerOptions.Credentials.get -> System.Collections.Generic.Dictionary<string!, PubSoft.Tokens.TokenCredential!>!
+PubSoft.Tokens.TokenManagerOptions.Credentials.set -> void
+PubSoft.Tokens.TokenManagerOptions.TokenManagerOptions() -> void
+PubSoft.Tokens.TokenRequestOptions
+PubSoft.Tokens.TokenServiceCollectionExtensions
+const PubSoft.Tokens.HttpTokenProvider.HttpClientName = "PubSoft.Tokens" -> string!
+static PubSoft.Tokens.TokenRequestOptions.EnableTokenUnauthorizedRetry(this System.Net.Http.HttpRequestMessage! request) -> System.Net.Http.HttpRequestMessage!
+static PubSoft.Tokens.TokenRequestOptions.SetTokenCredentialKey(this System.Net.Http.HttpRequestMessage! request, string! credentialKey) -> System.Net.Http.HttpRequestMessage!
+static PubSoft.Tokens.TokenRequestOptions.SetTokenHeaderName(this System.Net.Http.HttpRequestMessage! request, string! headerName) -> System.Net.Http.HttpRequestMessage!
+static PubSoft.Tokens.TokenRequestOptions.SetTokenHeaderPrefix(this System.Net.Http.HttpRequestMessage! request, string! prefix) -> System.Net.Http.HttpRequestMessage!
+static PubSoft.Tokens.TokenServiceCollectionExtensions.AddPubSoftTokens(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Tokens.TokenManagerOptions!>? configure = null, System.Action<PubSoft.Tokens.TokenHandlerOptions!>? configureHandler = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Tokens.TokenServiceCollectionExtensions.AddTokenHandler(this Microsoft.Extensions.DependencyInjection.IHttpClientBuilder! builder, string! credentialKey, string? headerName = null, string? headerPrefix = null) -> Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!

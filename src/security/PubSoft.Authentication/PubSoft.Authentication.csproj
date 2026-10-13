@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>PubSoft.Authentication</PackageId>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Description>Framework-neutral authentication principal snapshot contracts for PubSoft.</Description>
+  </PropertyGroup>
+</Project>

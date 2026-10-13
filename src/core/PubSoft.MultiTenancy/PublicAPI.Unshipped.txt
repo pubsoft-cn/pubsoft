@@ -1,0 +1,53 @@
+#nullable enable
+PubSoft.MultiTenancy.CreateTenantInput
+PubSoft.MultiTenancy.CreateTenantInput.Code.get -> string!
+PubSoft.MultiTenancy.CreateTenantInput.Code.set -> void
+PubSoft.MultiTenancy.CreateTenantInput.CreateTenantInput() -> void
+PubSoft.MultiTenancy.CreateTenantInput.Description.get -> string?
+PubSoft.MultiTenancy.CreateTenantInput.Description.set -> void
+PubSoft.MultiTenancy.CreateTenantInput.DisplayName.get -> string?
+PubSoft.MultiTenancy.CreateTenantInput.DisplayName.set -> void
+PubSoft.MultiTenancy.CreateTenantInput.Name.get -> string!
+PubSoft.MultiTenancy.CreateTenantInput.Name.set -> void
+PubSoft.MultiTenancy.ITenantAppService
+PubSoft.MultiTenancy.ITenantAppService.CreateAsync(PubSoft.MultiTenancy.CreateTenantInput! input) -> System.Threading.Tasks.Task<PubSoft.MultiTenancy.TenantDto!>!
+PubSoft.MultiTenancy.ITenantAppService.DeleteAsync(long id) -> System.Threading.Tasks.Task!
+PubSoft.MultiTenancy.ITenantAppService.GetAsync(long id) -> System.Threading.Tasks.Task<PubSoft.MultiTenancy.TenantDto!>!
+PubSoft.MultiTenancy.ITenantAppService.GetListAsync() -> System.Threading.Tasks.Task<System.Collections.Generic.List<PubSoft.MultiTenancy.TenantDto!>!>!
+PubSoft.MultiTenancy.ITenantAppService.UpdateAsync(long id, PubSoft.MultiTenancy.UpdateTenantInput! input) -> System.Threading.Tasks.Task<PubSoft.MultiTenancy.TenantDto!>!
+PubSoft.MultiTenancy.Tenant
+PubSoft.MultiTenancy.Tenant.Code.get -> string!
+PubSoft.MultiTenancy.Tenant.CreationTime.get -> System.DateTime
+PubSoft.MultiTenancy.Tenant.Description.get -> string?
+PubSoft.MultiTenancy.Tenant.DisplayName.get -> string!
+PubSoft.MultiTenancy.Tenant.IsEnabled.get -> bool
+PubSoft.MultiTenancy.Tenant.Name.get -> string!
+PubSoft.MultiTenancy.Tenant.SetEnabled(bool isEnabled) -> void
+PubSoft.MultiTenancy.Tenant.Tenant(long id, string! code, string! name, string? displayName = null, string? description = null) -> void
+PubSoft.MultiTenancy.Tenant.Update(string! name, string? displayName, string? description) -> void
+PubSoft.MultiTenancy.TenantDto
+PubSoft.MultiTenancy.TenantDto.Code.get -> string!
+PubSoft.MultiTenancy.TenantDto.Code.set -> void
+PubSoft.MultiTenancy.TenantDto.CreationTime.get -> System.DateTime
+PubSoft.MultiTenancy.TenantDto.CreationTime.set -> void
+PubSoft.MultiTenancy.TenantDto.Description.get -> string?
+PubSoft.MultiTenancy.TenantDto.Description.set -> void
+PubSoft.MultiTenancy.TenantDto.DisplayName.get -> string!
+PubSoft.MultiTenancy.TenantDto.DisplayName.set -> void
+PubSoft.MultiTenancy.TenantDto.Id.get -> long
+PubSoft.MultiTenancy.TenantDto.Id.set -> void
+PubSoft.MultiTenancy.TenantDto.IsEnabled.get -> bool
+PubSoft.MultiTenancy.TenantDto.IsEnabled.set -> void
+PubSoft.MultiTenancy.TenantDto.Name.get -> string!
+PubSoft.MultiTenancy.TenantDto.Name.set -> void
+PubSoft.MultiTenancy.TenantDto.TenantDto() -> void
+PubSoft.MultiTenancy.UpdateTenantInput
+PubSoft.MultiTenancy.UpdateTenantInput.Description.get -> string?
+PubSoft.MultiTenancy.UpdateTenantInput.Description.set -> void
+PubSoft.MultiTenancy.UpdateTenantInput.DisplayName.get -> string?
+PubSoft.MultiTenancy.UpdateTenantInput.DisplayName.set -> void
+PubSoft.MultiTenancy.UpdateTenantInput.IsEnabled.get -> bool
+PubSoft.MultiTenancy.UpdateTenantInput.IsEnabled.set -> void
+PubSoft.MultiTenancy.UpdateTenantInput.Name.get -> string!
+PubSoft.MultiTenancy.UpdateTenantInput.Name.set -> void
+PubSoft.MultiTenancy.UpdateTenantInput.UpdateTenantInput() -> void

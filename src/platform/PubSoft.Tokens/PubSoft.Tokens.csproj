@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>PubSoft.Tokens</RootNamespace>
+    <PackageId>PubSoft.Tokens</PackageId>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Version>$(PubSoftVersion)</Version>
+    <Description>Configurable OAuth token acquisition, caching, and replay-safe bearer injection.</Description>
+    <PackageTags>oauth;token;bearer;delegating-handler</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../platform/PubSoft.Caching/PubSoft.Caching.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.12" />
+  </ItemGroup>
+</Project>

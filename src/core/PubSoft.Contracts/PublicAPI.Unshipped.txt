@@ -1,0 +1,107 @@
+#nullable enable
+PubSoft.Contracts.ApiContractMetadata
+PubSoft.Contracts.ApiContractMetadata.Aliases.get -> System.Collections.Generic.IReadOnlyList<string!>!
+PubSoft.Contracts.ApiContractMetadata.Aliases.init -> void
+PubSoft.Contracts.ApiContractMetadata.ApiContractMetadata() -> void
+PubSoft.Contracts.ApiContractMetadata.NamingPolicy.get -> PubSoft.Contracts.INamingPolicy!
+PubSoft.Contracts.ApiContractMetadata.NamingPolicy.init -> void
+PubSoft.Contracts.ApiContractMetadata.OperationId.get -> string!
+PubSoft.Contracts.ApiContractMetadata.OperationId.init -> void
+PubSoft.Contracts.ApiContractMetadata.RequestType.get -> System.Type!
+PubSoft.Contracts.ApiContractMetadata.RequestType.init -> void
+PubSoft.Contracts.ApiContractMetadata.ResponseType.get -> System.Type!
+PubSoft.Contracts.ApiContractMetadata.ResponseType.init -> void
+PubSoft.Contracts.ApiContractMetadata.RouteAction.get -> string!
+PubSoft.Contracts.ApiContractMetadata.RouteAction.init -> void
+PubSoft.Contracts.ApiContractMetadata.RoutePrefix.get -> string!
+PubSoft.Contracts.ApiContractMetadata.RoutePrefix.init -> void
+PubSoft.Contracts.ApiContractMetadata.RouteSuffix.get -> string!
+PubSoft.Contracts.ApiContractMetadata.RouteSuffix.init -> void
+PubSoft.Contracts.ApiContractMetadata.Verb.get -> PubSoft.Contracts.ApiHttpVerb
+PubSoft.Contracts.ApiContractMetadata.Verb.init -> void
+PubSoft.Contracts.ApiFieldAttribute
+PubSoft.Contracts.ApiFieldAttribute.ApiFieldAttribute() -> void
+PubSoft.Contracts.ApiFieldAttribute.ApiFieldAttribute(string! name) -> void
+PubSoft.Contracts.ApiFieldAttribute.Behavior.get -> PubSoft.Contracts.EmitBehavior
+PubSoft.Contracts.ApiFieldAttribute.Behavior.set -> void
+PubSoft.Contracts.ApiFieldAttribute.Emit.get -> PubSoft.Contracts.EmitBehavior
+PubSoft.Contracts.ApiFieldAttribute.Emit.set -> void
+PubSoft.Contracts.ApiFieldAttribute.Flatten.get -> bool
+PubSoft.Contracts.ApiFieldAttribute.Flatten.set -> void
+PubSoft.Contracts.ApiFieldAttribute.IsEncrypted.get -> bool
+PubSoft.Contracts.ApiFieldAttribute.IsEncrypted.set -> void
+PubSoft.Contracts.ApiFieldAttribute.IsRequired.get -> bool
+PubSoft.Contracts.ApiFieldAttribute.IsRequired.set -> void
+PubSoft.Contracts.ApiFieldAttribute.Name.get -> string!
+PubSoft.Contracts.ApiFieldAttribute.Order.get -> int
+PubSoft.Contracts.ApiFieldAttribute.Order.set -> void
+PubSoft.Contracts.ApiFieldAttribute.Source.get -> PubSoft.Contracts.FieldSource
+PubSoft.Contracts.ApiFieldAttribute.Source.set -> void
+PubSoft.Contracts.ApiHttpVerb
+PubSoft.Contracts.ApiHttpVerb.Delete = 3 -> PubSoft.Contracts.ApiHttpVerb
+PubSoft.Contracts.ApiHttpVerb.Get = 0 -> PubSoft.Contracts.ApiHttpVerb
+PubSoft.Contracts.ApiHttpVerb.Post = 1 -> PubSoft.Contracts.ApiHttpVerb
+PubSoft.Contracts.ApiHttpVerb.Put = 2 -> PubSoft.Contracts.ApiHttpVerb
+PubSoft.Contracts.ApiOperationAttribute
+PubSoft.Contracts.ApiOperationAttribute.Aliases.get -> string![]!
+PubSoft.Contracts.ApiOperationAttribute.Aliases.init -> void
+PubSoft.Contracts.ApiOperationAttribute.ApiOperationAttribute(string! operationId) -> void
+PubSoft.Contracts.ApiOperationAttribute.OperationId.get -> string!
+PubSoft.Contracts.ApiOperationAttribute.Verb.get -> PubSoft.Contracts.ApiHttpVerb
+PubSoft.Contracts.ApiOperationAttribute.Verb.init -> void
+PubSoft.Contracts.CamelCaseNamingPolicy
+PubSoft.Contracts.CamelCaseNamingPolicy.CamelCaseNamingPolicy() -> void
+PubSoft.Contracts.CamelCaseNamingPolicy.ConvertName(string! propertyName) -> string!
+PubSoft.Contracts.EmitBehavior
+PubSoft.Contracts.EmitBehavior.Always = 0 -> PubSoft.Contracts.EmitBehavior
+PubSoft.Contracts.EmitBehavior.IgnoreIfDefault = 2 -> PubSoft.Contracts.EmitBehavior
+PubSoft.Contracts.EmitBehavior.IgnoreIfNull = 1 -> PubSoft.Contracts.EmitBehavior
+PubSoft.Contracts.FieldSource
+PubSoft.Contracts.FieldSource.Auto = 0 -> PubSoft.Contracts.FieldSource
+PubSoft.Contracts.FieldSource.Body = 4 -> PubSoft.Contracts.FieldSource
+PubSoft.Contracts.FieldSource.Header = 5 -> PubSoft.Contracts.FieldSource
+PubSoft.Contracts.FieldSource.Path = 2 -> PubSoft.Contracts.FieldSource
+PubSoft.Contracts.FieldSource.Query = 3 -> PubSoft.Contracts.FieldSource
+PubSoft.Contracts.FieldSource.RouteParam = 1 -> PubSoft.Contracts.FieldSource
+PubSoft.Contracts.Guard
+PubSoft.Contracts.IApiRequest
+PubSoft.Contracts.IApiRequest<TResponse>
+PubSoft.Contracts.IContractNormalizer
+PubSoft.Contracts.IContractNormalizer.Normalize() -> void
+PubSoft.Contracts.IContractValidator
+PubSoft.Contracts.IContractValidator.Validate() -> bool
+PubSoft.Contracts.IContractValidator.Validate(out string? error) -> bool
+PubSoft.Contracts.INamingPolicy
+PubSoft.Contracts.INamingPolicy.ConvertName(string! propertyName) -> string!
+PubSoft.Contracts.IOutboundEngine
+PubSoft.Contracts.IOutboundEngine.ExecuteAsync<TRequest, TResponse>(TRequest request, string! profileId, long tenantId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResponse>!
+PubSoft.Contracts.IOutboundProvider
+PubSoft.Contracts.IOutboundProvider.CanExecute(string! operationId) -> bool
+PubSoft.Contracts.IOutboundProvider.ExecuteAsync(string! operationId, object! request, PubSoft.Contracts.OutboundProviderContext! context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<object!>!
+PubSoft.Contracts.IOutboundProvider.ProviderName.get -> string!
+PubSoft.Contracts.IOutboundSdk
+PubSoft.Contracts.IOutboundSdk.ExecuteAsync<TRequest, TResponse>(TRequest request, long tenantId, string! profileId = "default", System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResponse>!
+PubSoft.Contracts.OutboundProviderContext
+PubSoft.Contracts.OutboundProviderContext.OperationId.get -> string!
+PubSoft.Contracts.OutboundProviderContext.OperationId.set -> void
+PubSoft.Contracts.OutboundProviderContext.OutboundProviderContext() -> void
+PubSoft.Contracts.OutboundProviderContext.ProfileId.get -> string!
+PubSoft.Contracts.OutboundProviderContext.ProfileId.set -> void
+PubSoft.Contracts.OutboundProviderContext.TenantId.get -> long
+PubSoft.Contracts.OutboundProviderContext.TenantId.set -> void
+PubSoft.Contracts.PascalCaseNamingPolicy
+PubSoft.Contracts.PascalCaseNamingPolicy.ConvertName(string! propertyName) -> string!
+PubSoft.Contracts.PascalCaseNamingPolicy.PascalCaseNamingPolicy() -> void
+PubSoft.Contracts.SnakeCaseNamingPolicy
+PubSoft.Contracts.SnakeCaseNamingPolicy.ConvertName(string! propertyName) -> string!
+PubSoft.Contracts.SnakeCaseNamingPolicy.SnakeCaseNamingPolicy() -> void
+static PubSoft.Contracts.Guard.IsValid(params string?[]! errors) -> bool
+static PubSoft.Contracts.Guard.Positive(string! name, decimal value) -> string?
+static PubSoft.Contracts.Guard.Positive(string! name, long value) -> string?
+static PubSoft.Contracts.Guard.Required(string! name, string? value) -> string?
+static PubSoft.Contracts.Guard.RequiredAmount(string! name, string? value) -> string?
+static PubSoft.Contracts.Guard.RequiredAny(string! name, params string?[]! values) -> string?
+static PubSoft.Contracts.Guard.TryValidate(out string? error, params string?[]! errors) -> bool
+static readonly PubSoft.Contracts.CamelCaseNamingPolicy.Instance -> PubSoft.Contracts.CamelCaseNamingPolicy!
+static readonly PubSoft.Contracts.PascalCaseNamingPolicy.Instance -> PubSoft.Contracts.PascalCaseNamingPolicy!
+static readonly PubSoft.Contracts.SnakeCaseNamingPolicy.Instance -> PubSoft.Contracts.SnakeCaseNamingPolicy!

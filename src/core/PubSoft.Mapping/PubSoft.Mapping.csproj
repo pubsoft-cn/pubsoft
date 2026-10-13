@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>PubSoft.Mapping</RootNamespace>
+    <PackageId>PubSoft.Mapping</PackageId>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Version>$(PubSoftVersion)</Version>
+    <Description>Lightweight expression-compiled object mapping with no external dependencies.</Description>
+    <PackageTags>mapping;object-mapper;expression-tree</PackageTags>
+  </PropertyGroup>
+</Project>

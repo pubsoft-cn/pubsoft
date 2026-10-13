@@ -1,0 +1,16 @@
+#nullable enable
+PubSoft.Security.Redis.RedisNonceStore
+PubSoft.Security.Redis.RedisNonceStore.RedisNonceStore(StackExchange.Redis.IConnectionMultiplexer! connection, PubSoft.Security.Redis.RedisNonceStoreOptions? options = null, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Security.Redis.RedisNonceStore.TryUseAsync(string! scope, string! nonce, System.DateTimeOffset expiresAt, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<bool>
+PubSoft.Security.Redis.RedisNonceStoreOptions
+PubSoft.Security.Redis.RedisNonceStoreOptions.Database.get -> int
+PubSoft.Security.Redis.RedisNonceStoreOptions.Database.set -> void
+PubSoft.Security.Redis.RedisNonceStoreOptions.KeyPrefix.get -> string!
+PubSoft.Security.Redis.RedisNonceStoreOptions.KeyPrefix.set -> void
+PubSoft.Security.Redis.RedisNonceStoreOptions.MaxNonceLength.get -> int
+PubSoft.Security.Redis.RedisNonceStoreOptions.MaxNonceLength.set -> void
+PubSoft.Security.Redis.RedisNonceStoreOptions.MaxScopeLength.get -> int
+PubSoft.Security.Redis.RedisNonceStoreOptions.MaxScopeLength.set -> void
+PubSoft.Security.Redis.RedisNonceStoreOptions.RedisNonceStoreOptions() -> void
+PubSoft.Security.Redis.RedisNonceStoreServiceCollectionExtensions
+static PubSoft.Security.Redis.RedisNonceStoreServiceCollectionExtensions.AddPubSoftRedisNonceStore(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, StackExchange.Redis.IConnectionMultiplexer! connection, System.Action<PubSoft.Security.Redis.RedisNonceStoreOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

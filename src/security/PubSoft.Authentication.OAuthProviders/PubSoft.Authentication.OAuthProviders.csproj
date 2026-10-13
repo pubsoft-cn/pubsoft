@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>PubSoft.OAuth</RootNamespace>
+    <PackageId>PubSoft.Authentication.OAuthProviders</PackageId>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Description>Unified OAuth provider integrations (WeChat, Alipay, WeCom, DingTalk, QQ, GitHub, Gitee, Baidu, Weibo, Apple, Douyin, Toutiao, Taobao, Huawei, Xiaomi, Microsoft, Google, GitLab, Twitter) built on HttpClient with PubSoft resilience. Channel credentials are supplied by the host via IOAuthChannelConfigProvider.</Description>
+    <PackageTags>oauth;providers;wechat;alipay;wecom;dingtalk;qq;github;apple;google;microsoft</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../platform/PubSoft.Resilience.Http/PubSoft.Resilience.Http.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
+  </ItemGroup>
+</Project>

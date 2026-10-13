@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>PubSoft.Testing</PackageId>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Description>Test doubles for PubSoft contracts: fixed scope contexts and a controllable TimeProvider.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../core/PubSoft.Domain/PubSoft.Domain.csproj" />
+  </ItemGroup>
+</Project>

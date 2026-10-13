@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>PubSoft.Resilience.Http</RootNamespace>
+    <PackageId>PubSoft.Resilience.Http</PackageId>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Description>Optional HttpClient resilience handler for PubSoft retry and circuit-breaker policies.</Description>
+    <PackageTags>httpclient;resilience;retry;circuit-breaker</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../core/PubSoft.Resilience/PubSoft.Resilience.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+  </ItemGroup>
+</Project>

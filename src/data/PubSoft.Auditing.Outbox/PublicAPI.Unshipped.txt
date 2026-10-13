@@ -1,0 +1,21 @@
+#nullable enable
+PubSoft.Auditing.Outbox.AuditOutboxServiceCollectionExtensions
+PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent
+PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent.<Clone>$() -> PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent!
+PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent.AuditSnapshotOutboxEvent(int SchemaVersion, PubSoft.Auditing.AuditRequestSnapshot! Snapshot) -> void
+PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent.Deconstruct(out int SchemaVersion, out PubSoft.Auditing.AuditRequestSnapshot! Snapshot) -> void
+PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent.Equals(PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent? other) -> bool
+PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent.SchemaVersion.get -> int
+PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent.SchemaVersion.init -> void
+PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent.Snapshot.get -> PubSoft.Auditing.AuditRequestSnapshot!
+PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent.Snapshot.init -> void
+PubSoft.Auditing.Outbox.OutboxAuditSnapshotSink<TDbContext>
+PubSoft.Auditing.Outbox.OutboxAuditSnapshotSink<TDbContext>.OutboxAuditSnapshotSink(TDbContext! dbContext, PubSoft.Messaging.Outbox.IOutboxPublisher! outboxPublisher) -> void
+PubSoft.Auditing.Outbox.OutboxAuditSnapshotSink<TDbContext>.WriteAsync(PubSoft.Auditing.AuditRequestSnapshot! snapshot, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+const PubSoft.Auditing.Outbox.OutboxAuditSnapshotSink<TDbContext>.TargetModule = "PubSoft.Auditing" -> string!
+override PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent.Equals(object? obj) -> bool
+override PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent.GetHashCode() -> int
+override PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent.ToString() -> string!
+static PubSoft.Auditing.Outbox.AuditOutboxServiceCollectionExtensions.AddPubSoftAuditOutbox<TDbContext>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent.operator !=(PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent? left, PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent? right) -> bool
+static PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent.operator ==(PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent? left, PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent? right) -> bool

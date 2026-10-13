@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>PubSoft.Auditing.Outbox</PackageId>
+    <Description>Optional Outbox forwarding for PubSoft.Auditing snapshots.</Description>
+    <PackageTags>auditing;outbox;messaging;efcore</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../data/PubSoft.Auditing/PubSoft.Auditing.csproj" />
+    <ProjectReference Include="../../data/PubSoft.EntityFrameworkCore/PubSoft.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="../../messaging/PubSoft.Messaging.Outbox/PubSoft.Messaging.Outbox.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+  </ItemGroup>
+</Project>

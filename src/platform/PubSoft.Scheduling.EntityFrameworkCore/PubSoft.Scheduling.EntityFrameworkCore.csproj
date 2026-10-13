@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>PubSoft.Scheduling.EntityFrameworkCore</PackageId>
+    <Description>Optional EF Core persistence for PubSoft.Scheduling state.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../platform/PubSoft.Scheduling/PubSoft.Scheduling.csproj" />
+    <ProjectReference Include="../../data/PubSoft.EntityFrameworkCore/PubSoft.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="../../core/PubSoft.Domain/PubSoft.Domain.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+  </ItemGroup>
+</Project>

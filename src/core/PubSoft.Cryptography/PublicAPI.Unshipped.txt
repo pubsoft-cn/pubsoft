@@ -1,0 +1,29 @@
+#nullable enable
+PubSoft.Cryptography.AesGcmEncryptor
+PubSoft.Cryptography.AesGcmEncryptor.AesGcmEncryptor(PubSoft.Cryptography.IEncryptionKeyRing! keyRing) -> void
+PubSoft.Cryptography.AesGcmEncryptor.Decrypt(string! envelope, System.ReadOnlySpan<byte> additionalAuthenticatedData = default(System.ReadOnlySpan<byte>)) -> string!
+PubSoft.Cryptography.AesGcmEncryptor.Encrypt(string! plaintext, System.ReadOnlySpan<byte> additionalAuthenticatedData = default(System.ReadOnlySpan<byte>)) -> string!
+PubSoft.Cryptography.CredentialEncryptionService
+PubSoft.Cryptography.CredentialEncryptionService.CredentialEncryptionService(PubSoft.Cryptography.AesGcmEncryptor! encryptor, string! legacyKeyMaterial) -> void
+PubSoft.Cryptography.CredentialEncryptionService.Decrypt(string! ciphertext, System.ReadOnlySpan<byte> additionalAuthenticatedData = default(System.ReadOnlySpan<byte>)) -> PubSoft.Cryptography.DecryptedCredential!
+PubSoft.Cryptography.CredentialEncryptionService.Dispose() -> void
+PubSoft.Cryptography.CredentialEncryptionService.Encrypt(string! plaintext, System.ReadOnlySpan<byte> additionalAuthenticatedData = default(System.ReadOnlySpan<byte>)) -> string!
+PubSoft.Cryptography.DecryptedCredential
+PubSoft.Cryptography.DecryptedCredential.<Clone>$() -> PubSoft.Cryptography.DecryptedCredential!
+PubSoft.Cryptography.DecryptedCredential.Deconstruct(out string! Plaintext, out bool RequiresReEncryption, out string? ReplacementCiphertext) -> void
+PubSoft.Cryptography.DecryptedCredential.DecryptedCredential(string! Plaintext, bool RequiresReEncryption, string? ReplacementCiphertext) -> void
+PubSoft.Cryptography.DecryptedCredential.Equals(PubSoft.Cryptography.DecryptedCredential? other) -> bool
+PubSoft.Cryptography.DecryptedCredential.Plaintext.get -> string!
+PubSoft.Cryptography.DecryptedCredential.Plaintext.init -> void
+PubSoft.Cryptography.DecryptedCredential.ReplacementCiphertext.get -> string?
+PubSoft.Cryptography.DecryptedCredential.ReplacementCiphertext.init -> void
+PubSoft.Cryptography.DecryptedCredential.RequiresReEncryption.get -> bool
+PubSoft.Cryptography.DecryptedCredential.RequiresReEncryption.init -> void
+PubSoft.Cryptography.IEncryptionKeyRing
+PubSoft.Cryptography.IEncryptionKeyRing.ActiveKeyId.get -> string!
+PubSoft.Cryptography.IEncryptionKeyRing.TryGetKey(string! keyId, out System.ReadOnlyMemory<byte> key) -> bool
+override PubSoft.Cryptography.DecryptedCredential.Equals(object? obj) -> bool
+override PubSoft.Cryptography.DecryptedCredential.GetHashCode() -> int
+override PubSoft.Cryptography.DecryptedCredential.ToString() -> string!
+static PubSoft.Cryptography.DecryptedCredential.operator !=(PubSoft.Cryptography.DecryptedCredential? left, PubSoft.Cryptography.DecryptedCredential? right) -> bool
+static PubSoft.Cryptography.DecryptedCredential.operator ==(PubSoft.Cryptography.DecryptedCredential? left, PubSoft.Cryptography.DecryptedCredential? right) -> bool

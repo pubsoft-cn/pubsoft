@@ -1,0 +1,11 @@
+#nullable enable
+PubSoft.Mapping.MappingBuilder<TSource, TDestination>
+PubSoft.Mapping.MappingBuilder<TSource, TDestination>.Const<TProperty>(System.Linq.Expressions.Expression<System.Func<TDestination, TProperty>!>! destinationProperty, TProperty value) -> PubSoft.Mapping.MappingBuilder<TSource, TDestination>!
+PubSoft.Mapping.MappingBuilder<TSource, TDestination>.Ignore<TProperty>(System.Linq.Expressions.Expression<System.Func<TDestination, TProperty>!>! destinationProperty) -> PubSoft.Mapping.MappingBuilder<TSource, TDestination>!
+PubSoft.Mapping.MappingBuilder<TSource, TDestination>.Map<TSourceProperty, TDestinationProperty>(System.Linq.Expressions.Expression<System.Func<TDestination, TDestinationProperty>!>! destinationProperty, System.Linq.Expressions.Expression<System.Func<TSource, TSourceProperty>!>! sourceExpression) -> PubSoft.Mapping.MappingBuilder<TSource, TDestination>!
+PubSoft.Mapping.MappingBuilder<TSource, TDestination>.MappingBuilder() -> void
+PubSoft.Mapping.ObjectMapper
+static PubSoft.Mapping.ObjectMapper.Convert<TSource, TDestination>(System.Func<TSource, TDestination>! converter) -> void
+static PubSoft.Mapping.ObjectMapper.Map<TSource, TDestination>(TSource source) -> TDestination
+static PubSoft.Mapping.ObjectMapper.MapList<TSource, TDestination>(System.Collections.Generic.IEnumerable<TSource>! source) -> System.Collections.Generic.List<TDestination>!
+static PubSoft.Mapping.ObjectMapper.Register<TSource, TDestination>(System.Action<PubSoft.Mapping.MappingBuilder<TSource, TDestination>!>? configure = null) -> void

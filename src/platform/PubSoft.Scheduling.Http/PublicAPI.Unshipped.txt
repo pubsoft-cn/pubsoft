@@ -1,0 +1,47 @@
+#nullable enable
+PubSoft.Scheduling.Http.HttpExecutorConfig
+PubSoft.Scheduling.Http.HttpExecutorConfig.AllowUnsafeRetries.get -> bool
+PubSoft.Scheduling.Http.HttpExecutorConfig.AllowUnsafeRetries.set -> void
+PubSoft.Scheduling.Http.HttpExecutorConfig.Body.get -> string!
+PubSoft.Scheduling.Http.HttpExecutorConfig.Body.set -> void
+PubSoft.Scheduling.Http.HttpExecutorConfig.ExpectStatusCodes.get -> int[]!
+PubSoft.Scheduling.Http.HttpExecutorConfig.ExpectStatusCodes.set -> void
+PubSoft.Scheduling.Http.HttpExecutorConfig.Headers.get -> System.Collections.Generic.Dictionary<string!, string!>!
+PubSoft.Scheduling.Http.HttpExecutorConfig.Headers.set -> void
+PubSoft.Scheduling.Http.HttpExecutorConfig.HttpExecutorConfig() -> void
+PubSoft.Scheduling.Http.HttpExecutorConfig.Method.get -> string!
+PubSoft.Scheduling.Http.HttpExecutorConfig.Method.set -> void
+PubSoft.Scheduling.Http.HttpExecutorConfig.Retry.get -> PubSoft.Resilience.RetryPolicy?
+PubSoft.Scheduling.Http.HttpExecutorConfig.Retry.set -> void
+PubSoft.Scheduling.Http.HttpExecutorConfig.Timeout.get -> System.TimeSpan?
+PubSoft.Scheduling.Http.HttpExecutorConfig.Timeout.set -> void
+PubSoft.Scheduling.Http.HttpExecutorConfig.Token.get -> PubSoft.Scheduling.Http.TokenRef?
+PubSoft.Scheduling.Http.HttpExecutorConfig.Token.set -> void
+PubSoft.Scheduling.Http.HttpExecutorConfig.Url.get -> string!
+PubSoft.Scheduling.Http.HttpExecutorConfig.Url.set -> void
+PubSoft.Scheduling.Http.HttpExecutorOptions
+PubSoft.Scheduling.Http.HttpExecutorOptions.CircuitFailureThreshold.get -> int
+PubSoft.Scheduling.Http.HttpExecutorOptions.CircuitFailureThreshold.set -> void
+PubSoft.Scheduling.Http.HttpExecutorOptions.CircuitOpenTimeout.get -> System.TimeSpan
+PubSoft.Scheduling.Http.HttpExecutorOptions.CircuitOpenTimeout.set -> void
+PubSoft.Scheduling.Http.HttpExecutorOptions.DefaultTimeout.get -> System.TimeSpan
+PubSoft.Scheduling.Http.HttpExecutorOptions.DefaultTimeout.set -> void
+PubSoft.Scheduling.Http.HttpExecutorOptions.HttpExecutorOptions() -> void
+PubSoft.Scheduling.Http.HttpExecutorServiceCollectionExtensions
+PubSoft.Scheduling.Http.ProbeExecutor
+PubSoft.Scheduling.Http.ProbeExecutor.ExecuteAsync(PubSoft.Scheduling.ScheduledJob! job, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<PubSoft.Scheduling.JobResult!>!
+PubSoft.Scheduling.Http.ProbeExecutor.ProbeExecutor(System.Net.Http.IHttpClientFactory! httpClientFactory, Microsoft.Extensions.Options.IOptions<PubSoft.Scheduling.Http.HttpExecutorOptions!>! options, PubSoft.Tokens.ITokenProvider? tokenProvider = null, Microsoft.Extensions.Logging.ILogger<PubSoft.Scheduling.Http.ProbeExecutor!>? logger = null) -> void
+PubSoft.Scheduling.Http.ProbeExecutor.Type.get -> string!
+PubSoft.Scheduling.Http.ResilientExecutor
+PubSoft.Scheduling.Http.ResilientExecutor.ExecuteAsync(PubSoft.Scheduling.ScheduledJob! job, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<PubSoft.Scheduling.JobResult!>!
+PubSoft.Scheduling.Http.ResilientExecutor.ResilientExecutor(System.Net.Http.IHttpClientFactory! httpClientFactory, Microsoft.Extensions.Options.IOptions<PubSoft.Scheduling.Http.HttpExecutorOptions!>! options, PubSoft.Resilience.CircuitBreaker! circuitBreaker, PubSoft.Tokens.ITokenProvider? tokenProvider = null, Microsoft.Extensions.Logging.ILogger<PubSoft.Scheduling.Http.ResilientExecutor!>? logger = null) -> void
+PubSoft.Scheduling.Http.ResilientExecutor.Type.get -> string!
+PubSoft.Scheduling.Http.TokenRef
+PubSoft.Scheduling.Http.TokenRef.CredentialKey.get -> string!
+PubSoft.Scheduling.Http.TokenRef.CredentialKey.set -> void
+PubSoft.Scheduling.Http.TokenRef.HeaderName.get -> string!
+PubSoft.Scheduling.Http.TokenRef.HeaderName.set -> void
+PubSoft.Scheduling.Http.TokenRef.HeaderPrefix.get -> string!
+PubSoft.Scheduling.Http.TokenRef.HeaderPrefix.set -> void
+PubSoft.Scheduling.Http.TokenRef.TokenRef() -> void
+static PubSoft.Scheduling.Http.HttpExecutorServiceCollectionExtensions.AddPubSoftHttpExecutors(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Scheduling.Http.HttpExecutorOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

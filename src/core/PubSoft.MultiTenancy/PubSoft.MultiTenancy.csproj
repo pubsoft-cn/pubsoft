@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>PubSoft.MultiTenancy</PackageId>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Description>Framework-independent tenant model and management contracts for PubSoft.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../core/PubSoft.Domain/PubSoft.Domain.csproj" />
+  </ItemGroup>
+</Project>

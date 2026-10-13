@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>PubSoft.Caching.Redis</PackageId>
+    <Description>Optional Redis implementation of PubSoft.Caching contracts.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
+    <ProjectReference Include="../../platform/PubSoft.Caching/PubSoft.Caching.csproj" />
+  </ItemGroup>
+</Project>

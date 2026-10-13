@@ -1,0 +1,25 @@
+#nullable enable
+PubSoft.Identity.IIdentityUser
+PubSoft.Identity.IIdentityUser.Id.get -> long
+PubSoft.Identity.IIdentityUser.Name.get -> string!
+PubSoft.Identity.IIdentityUser.PhoneNumber.get -> string?
+PubSoft.Identity.IIdentityUser.UserName.get -> string!
+PubSoft.Identity.IdentityUser
+PubSoft.Identity.IdentityUser.IdentityUser(long id, string! userName, long? tenantId = null, string? name = null) -> void
+PubSoft.Identity.IdentityUser.Name.get -> string!
+PubSoft.Identity.IdentityUser.NormalizedUserName.get -> string!
+PubSoft.Identity.IdentityUser.PasswordHash.get -> string?
+PubSoft.Identity.IdentityUser.PhoneNumber.get -> string?
+PubSoft.Identity.IdentityUser.PhoneNumberConfirmed.get -> bool
+PubSoft.Identity.IdentityUser.RemovePassword() -> void
+PubSoft.Identity.IdentityUser.SecurityStamp.get -> string!
+PubSoft.Identity.IdentityUser.SetPasswordHash(string! passwordHash) -> void
+PubSoft.Identity.IdentityUser.SetUserName(string! userName) -> void
+PubSoft.Identity.IdentityUser.UpdateProfile(string! name, string? phoneNumber, bool phoneNumberConfirmed) -> void
+PubSoft.Identity.IdentityUser.UserName.get -> string!
+PubSoft.Identity.IdentityUserSnapshot
+PubSoft.Identity.IdentityUserSnapshot.Id.get -> long
+PubSoft.Identity.IdentityUserSnapshot.Name.get -> string!
+PubSoft.Identity.IdentityUserSnapshot.PhoneNumber.get -> string?
+PubSoft.Identity.IdentityUserSnapshot.UserName.get -> string!
+static PubSoft.Identity.IdentityUserSnapshot.FromUser(PubSoft.Identity.IIdentityUser! user) -> PubSoft.Identity.IdentityUserSnapshot!

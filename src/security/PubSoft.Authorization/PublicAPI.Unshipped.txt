@@ -1,0 +1,112 @@
+#nullable enable
+PubSoft.Authorization.AutoPermissionOptions
+PubSoft.Authorization.AutoPermissionOptions.AutoPermissionOptions() -> void
+PubSoft.Authorization.AutoPermissionOptions.EnforceDerived.get -> bool
+PubSoft.Authorization.AutoPermissionOptions.EnforceDerived.set -> void
+PubSoft.Authorization.AutoPermissionOptions.RouteModuleMap.get -> System.Collections.Generic.Dictionary<string!, string!>!
+PubSoft.Authorization.IPermissionDefinitionProvider
+PubSoft.Authorization.IPermissionDefinitionProvider.GetDefinitions() -> System.Collections.Generic.IReadOnlyList<PubSoft.Authorization.PermissionDefinition!>!
+PubSoft.Authorization.IPermissionGrantProvider
+PubSoft.Authorization.IPermissionGrantProvider.GetGrantsAsync(long subjectId, long? tenantId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<PubSoft.Authorization.PermissionGrant!>!>!
+PubSoft.Authorization.IPermissionGrantProvider.GetGrantsAsync(long subjectId, long? tenantId, string! clientCode, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<PubSoft.Authorization.PermissionGrant!>!>!
+PubSoft.Authorization.IPermissionModuleProvider
+PubSoft.Authorization.IPermissionModuleProvider.All.get -> System.Collections.Generic.IReadOnlyCollection<string!>!
+PubSoft.Authorization.IPermissionModuleProvider.GetDescription(string! moduleKey) -> string?
+PubSoft.Authorization.IPermissionModuleProvider.GetDisplayName(string! moduleKey) -> string!
+PubSoft.Authorization.PermissionAuthorizationService
+PubSoft.Authorization.PermissionAuthorizationService.IsCustomPermissionGrantedAsync(long subjectId, long? tenantId, string! clientCode, string! moduleKey, string! permissionName, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Authorization.PermissionAuthorizationService.IsCustomPermissionGrantedAsync(long subjectId, long? tenantId, string! moduleKey, string! permissionName, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Authorization.PermissionAuthorizationService.IsExtensionPermissionGrantedAsync(long subjectId, long? tenantId, string! clientCode, string! moduleKey, uint requiredExtensionFlags, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Authorization.PermissionAuthorizationService.IsExtensionPermissionGrantedAsync(long subjectId, long? tenantId, string! moduleKey, uint requiredExtensionFlags, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Authorization.PermissionAuthorizationService.IsGrantedAsync(long subjectId, long? tenantId, string! clientCode, string! moduleKey, PubSoft.Authorization.PermissionFlags requiredFlags, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Authorization.PermissionAuthorizationService.IsGrantedAsync(long subjectId, long? tenantId, string! moduleKey, PubSoft.Authorization.PermissionFlags requiredFlags, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Authorization.PermissionAuthorizationService.PermissionAuthorizationService(PubSoft.Authorization.PermissionDefinitionRegistry! definitions, PubSoft.Authorization.IPermissionGrantProvider! grants) -> void
+PubSoft.Authorization.PermissionDefinition
+PubSoft.Authorization.PermissionDefinition.<Clone>$() -> PubSoft.Authorization.PermissionDefinition!
+PubSoft.Authorization.PermissionDefinition.ApiPaths.get -> System.Collections.Generic.IReadOnlyList<string!>!
+PubSoft.Authorization.PermissionDefinition.ApiPaths.init -> void
+PubSoft.Authorization.PermissionDefinition.ClientCode.get -> string!
+PubSoft.Authorization.PermissionDefinition.ClientCode.init -> void
+PubSoft.Authorization.PermissionDefinition.Description.get -> string?
+PubSoft.Authorization.PermissionDefinition.Description.init -> void
+PubSoft.Authorization.PermissionDefinition.DisplayName.get -> string!
+PubSoft.Authorization.PermissionDefinition.DisplayName.init -> void
+PubSoft.Authorization.PermissionDefinition.Equals(PubSoft.Authorization.PermissionDefinition? other) -> bool
+PubSoft.Authorization.PermissionDefinition.ExtFlag.get -> uint
+PubSoft.Authorization.PermissionDefinition.ExtFlag.init -> void
+PubSoft.Authorization.PermissionDefinition.Flags.get -> PubSoft.Authorization.PermissionFlags
+PubSoft.Authorization.PermissionDefinition.Flags.init -> void
+PubSoft.Authorization.PermissionDefinition.FrontendRoutes.get -> System.Collections.Generic.IReadOnlyList<string!>!
+PubSoft.Authorization.PermissionDefinition.FrontendRoutes.init -> void
+PubSoft.Authorization.PermissionDefinition.IsExtPermission.get -> bool
+PubSoft.Authorization.PermissionDefinition.IsExtPermission.init -> void
+PubSoft.Authorization.PermissionDefinition.ModuleKey.get -> string!
+PubSoft.Authorization.PermissionDefinition.ModuleKey.init -> void
+PubSoft.Authorization.PermissionDefinition.PermissionDefinition() -> void
+PubSoft.Authorization.PermissionDefinitionRegistry
+PubSoft.Authorization.PermissionDefinitionRegistry.AllDefinitions.get -> System.Collections.Generic.IReadOnlyList<PubSoft.Authorization.PermissionDefinition!>!
+PubSoft.Authorization.PermissionDefinitionRegistry.GetByApiPath(string! httpMethod, string! path) -> System.Collections.Generic.IReadOnlyList<PubSoft.Authorization.PermissionDefinition!>!
+PubSoft.Authorization.PermissionDefinitionRegistry.GetByFrontendRoute(string! route) -> System.Collections.Generic.IReadOnlyList<PubSoft.Authorization.PermissionDefinition!>!
+PubSoft.Authorization.PermissionDefinitionRegistry.GetByModule(string! moduleKey) -> System.Collections.Generic.IReadOnlyList<PubSoft.Authorization.PermissionDefinition!>!
+PubSoft.Authorization.PermissionDefinitionRegistry.GetByModule(string! moduleKey, string! clientCode) -> System.Collections.Generic.IReadOnlyList<PubSoft.Authorization.PermissionDefinition!>!
+PubSoft.Authorization.PermissionDefinitionRegistry.PermissionDefinitionRegistry(System.Collections.Generic.IEnumerable<PubSoft.Authorization.IPermissionDefinitionProvider!>! providers) -> void
+PubSoft.Authorization.PermissionExemptAttribute
+PubSoft.Authorization.PermissionExemptAttribute.PermissionExemptAttribute() -> void
+PubSoft.Authorization.PermissionFlags
+PubSoft.Authorization.PermissionFlags.All = PubSoft.Authorization.PermissionFlags.Query | PubSoft.Authorization.PermissionFlags.Create | PubSoft.Authorization.PermissionFlags.Modify | PubSoft.Authorization.PermissionFlags.Delete | PubSoft.Authorization.PermissionFlags.Audit | PubSoft.Authorization.PermissionFlags.Custom -> PubSoft.Authorization.PermissionFlags
+PubSoft.Authorization.PermissionFlags.Audit = 16 -> PubSoft.Authorization.PermissionFlags
+PubSoft.Authorization.PermissionFlags.Create = 2 -> PubSoft.Authorization.PermissionFlags
+PubSoft.Authorization.PermissionFlags.Custom = 32 -> PubSoft.Authorization.PermissionFlags
+PubSoft.Authorization.PermissionFlags.Delete = 8 -> PubSoft.Authorization.PermissionFlags
+PubSoft.Authorization.PermissionFlags.Modify = 4 -> PubSoft.Authorization.PermissionFlags
+PubSoft.Authorization.PermissionFlags.None = 0 -> PubSoft.Authorization.PermissionFlags
+PubSoft.Authorization.PermissionFlags.Query = 1 -> PubSoft.Authorization.PermissionFlags
+PubSoft.Authorization.PermissionGrant
+PubSoft.Authorization.PermissionGrant.ClientCode.get -> string!
+PubSoft.Authorization.PermissionGrant.CustomPermissions.get -> System.Collections.Generic.IReadOnlyList<string!>!
+PubSoft.Authorization.PermissionGrant.ExtensionFlags.get -> uint
+PubSoft.Authorization.PermissionGrant.Flags.get -> PubSoft.Authorization.PermissionFlags
+PubSoft.Authorization.PermissionGrant.ModuleKey.get -> string!
+PubSoft.Authorization.PermissionGrant.PermissionGrant(long? tenantId, string! moduleKey, PubSoft.Authorization.PermissionFlags flags, uint extensionFlags = 0, System.Collections.Generic.IEnumerable<string!>? customPermissions = null, string! clientCode = "") -> void
+PubSoft.Authorization.PermissionGrant.TenantId.get -> long?
+PubSoft.Authorization.PermissionModuleAttribute
+PubSoft.Authorization.PermissionModuleAttribute.ClientCode.get -> string!
+PubSoft.Authorization.PermissionModuleAttribute.Description.get -> string?
+PubSoft.Authorization.PermissionModuleAttribute.Description.set -> void
+PubSoft.Authorization.PermissionModuleAttribute.DisplayName.get -> string?
+PubSoft.Authorization.PermissionModuleAttribute.DisplayName.set -> void
+PubSoft.Authorization.PermissionModuleAttribute.ModuleKey.get -> string!
+PubSoft.Authorization.PermissionModuleAttribute.PermissionModuleAttribute(string! moduleKey, string! clientCode = "") -> void
+PubSoft.Authorization.PermissionModuleAttribute.SortOrder.get -> int
+PubSoft.Authorization.PermissionModuleAttribute.SortOrder.set -> void
+PubSoft.Authorization.PermissionModuleRegistry
+PubSoft.Authorization.PermissionModuleRegistry.AllModules.get -> string![]!
+PubSoft.Authorization.PermissionModuleRegistry.GetDescription(string! moduleKey) -> string?
+PubSoft.Authorization.PermissionModuleRegistry.GetDisplayName(string! moduleKey) -> string!
+PubSoft.Authorization.PermissionModuleRegistry.PermissionModuleRegistry() -> void
+PubSoft.Authorization.PermissionModuleRegistry.PermissionModuleRegistry(System.Collections.Generic.IEnumerable<PubSoft.Authorization.IPermissionModuleProvider!>! providers) -> void
+PubSoft.Authorization.PermissionModuleRegistry.Register(PubSoft.Authorization.IPermissionModuleProvider! provider) -> void
+PubSoft.Authorization.PermissionRequirementDeriver
+PubSoft.Authorization.RequireCustomPermissionAttribute
+PubSoft.Authorization.RequireCustomPermissionAttribute.ClientCode.get -> string!
+PubSoft.Authorization.RequireCustomPermissionAttribute.ModuleKey.get -> string!
+PubSoft.Authorization.RequireCustomPermissionAttribute.PermissionName.get -> string!
+PubSoft.Authorization.RequireCustomPermissionAttribute.RequireCustomPermissionAttribute(string! moduleKey, string! permissionName, string! clientCode = "") -> void
+PubSoft.Authorization.RequireExtPermissionAttribute
+PubSoft.Authorization.RequireExtPermissionAttribute.ClientCode.get -> string!
+PubSoft.Authorization.RequireExtPermissionAttribute.ExtFlag.get -> uint
+PubSoft.Authorization.RequireExtPermissionAttribute.ModuleKey.get -> string!
+PubSoft.Authorization.RequireExtPermissionAttribute.RequireExtPermissionAttribute(string! moduleKey, uint extFlag, string! clientCode = "") -> void
+PubSoft.Authorization.RequirePermissionAttribute
+PubSoft.Authorization.RequirePermissionAttribute.ClientCode.get -> string!
+PubSoft.Authorization.RequirePermissionAttribute.Flags.get -> PubSoft.Authorization.PermissionFlags
+PubSoft.Authorization.RequirePermissionAttribute.ModuleKey.get -> string!
+PubSoft.Authorization.RequirePermissionAttribute.RequirePermissionAttribute(string! moduleKey, PubSoft.Authorization.PermissionFlags flags, string! clientCode = "") -> void
+override PubSoft.Authorization.PermissionDefinition.Equals(object? obj) -> bool
+override PubSoft.Authorization.PermissionDefinition.GetHashCode() -> int
+override PubSoft.Authorization.PermissionDefinition.ToString() -> string!
+static PubSoft.Authorization.PermissionDefinition.operator !=(PubSoft.Authorization.PermissionDefinition? left, PubSoft.Authorization.PermissionDefinition? right) -> bool
+static PubSoft.Authorization.PermissionDefinition.operator ==(PubSoft.Authorization.PermissionDefinition? left, PubSoft.Authorization.PermissionDefinition? right) -> bool
+static PubSoft.Authorization.PermissionRequirementDeriver.DeriveFlags(string? httpMethod, string? actionName) -> PubSoft.Authorization.PermissionFlags
+static PubSoft.Authorization.PermissionRequirementDeriver.ResolveModuleKey(string? controllerName, string? routeTemplate, string? pinnedModuleKey, PubSoft.Authorization.PermissionModuleRegistry? registry, System.Collections.Generic.IReadOnlyDictionary<string!, string!>? routeModuleMap = null) -> string?
+static PubSoft.Authorization.PermissionRequirementDeriver.ToSnakeCase(string! name) -> string!

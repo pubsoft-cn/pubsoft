@@ -1,0 +1,304 @@
+using System.Collections.Concurrent;
+using System.Net;
+using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using PubSoft.Resilience;
+using PubSoft.Scheduling;
+using PubSoft.Scheduling.Http;
+using PubSoft.Tokens;
+using Xunit;
+
+namespace PubSoft.Core.Tests;
+
+public sealed class SchedulingHttpTests
+{
+    [Fact]
+    public async Task ProbeSendsConfiguredRequestAndUsesTokenAsynchronously()
+    {
+        var handler = new RecordingHandler(HttpStatusCode.OK);
+        var tokens = new RecordingTokenProvider("token-value");
+        var executor = CreateProbe(handler, tokens);
+        var job = CreateJob(new HttpExecutorConfig
+        {
+            Method = "POST",
+            Url = "https://service.test/probe",
+            Body = "{\"check\":true}",
+            Token = new TokenRef
+            {
+                CredentialKey = "service",
+                HeaderName = "X-Service-Token",
+                HeaderPrefix = "Token "
+            }
+        });
+
+        var result = await executor.ExecuteAsync(job, default);
+
+        Assert.True(result.Success);
+        Assert.Equal(200, result.StatusCode);
+        Assert.Equal("POST", handler.Methods.Single());
+        Assert.Equal("{\"check\":true}", handler.Bodies.Single());
+        Assert.Equal("Token token-value", handler.TokenHeaders.Single());
+        Assert.Equal("service", tokens.RequestedKeys.Single());
+    }
+
+    [Fact]
+    public async Task ProbeNeverRetriesEvenWhenRetryPolicyIsConfigured()
+    {
+        var handler = new RecordingHandler(HttpStatusCode.ServiceUnavailable, HttpStatusCode.OK);
+        var executor = CreateProbe(handler);
+        var job = CreateJob(new HttpExecutorConfig
+        {
+            Url = "https://service.test/probe",
+            Retry = new RetryPolicy { MaxRetries = 2, InitialDelay = TimeSpan.Zero }
+        });
+
+        var result = await executor.ExecuteAsync(job, default);
+
+        Assert.False(result.Success);
+        Assert.Equal((int)HttpStatusCode.ServiceUnavailable, result.StatusCode);
+        Assert.Equal(1, handler.RequestCount);
+    }
+
+    [Fact]
+    public async Task ProbeDistinguishesEndpointTimeoutFromCallerCancellation()
+    {
+        var timeoutHandler = new RecordingHandler(async cancellationToken =>
+        {
+            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+            return new HttpResponseMessage(HttpStatusCode.OK);
+        });
+        var timeoutExecutor = CreateProbe(timeoutHandler);
+        var timeoutJob = CreateJob(new HttpExecutorConfig
+        {
+            Url = "https://service.test/timeout",
+            Timeout = TimeSpan.FromMilliseconds(20)
+        });
+
+        var timeoutResult = await timeoutExecutor.ExecuteAsync(timeoutJob, default);
+
+        Assert.False(timeoutResult.Success);
+        Assert.Equal("timeout", timeoutResult.ErrorMessage);
+
+        var cancelHandler = new RecordingHandler(async cancellationToken =>
+        {
+            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+            return new HttpResponseMessage(HttpStatusCode.OK);
+        });
+        var cancelExecutor = CreateProbe(cancelHandler);
+        using var cancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(20));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => cancelExecutor.ExecuteAsync(
+            CreateJob(new HttpExecutorConfig { Url = "https://service.test/cancel" }), cancellation.Token));
+    }
+
+    [Fact]
+    public async Task ResilientExecutorRetriesRetryableStatusAndReturnsSuccess()
+    {
+        var handler = new RecordingHandler(HttpStatusCode.ServiceUnavailable, HttpStatusCode.OK);
+        var executor = CreateResilient(handler);
+        var job = CreateJob(new HttpExecutorConfig
+        {
+            Url = "https://service.test/action",
+            Retry = new RetryPolicy { MaxRetries = 1, InitialDelay = TimeSpan.FromMilliseconds(30) }
+        });
+
+        var result = await executor.ExecuteAsync(job, default);
+
+        Assert.True(result.Success);
+        Assert.Equal((int)HttpStatusCode.OK, result.StatusCode);
+        Assert.Equal(2, handler.RequestCount);
+        Assert.True(result.DelayMs >= 20);
+    }
+
+    [Fact]
+    public async Task ResilientExecutorDoesNotRetryPostUnlessUnsafeRetriesAreAllowed()
+    {
+        var defaultHandler = new RecordingHandler(HttpStatusCode.ServiceUnavailable, HttpStatusCode.OK);
+        var defaultExecutor = CreateResilient(defaultHandler);
+        var retry = new RetryPolicy { MaxRetries = 1, InitialDelay = TimeSpan.Zero };
+        var defaultResult = await defaultExecutor.ExecuteAsync(CreateJob(new HttpExecutorConfig
+        {
+            Method = "POST",
+            Url = "https://service.test/action",
+            Body = "{\"action\":true}",
+            Retry = retry
+        }), default);
+
+        Assert.False(defaultResult.Success);
+        Assert.Equal(1, defaultHandler.RequestCount);
+        Assert.Equal("{\"action\":true}", defaultHandler.Bodies.Single());
+
+        var optInHandler = new RecordingHandler(HttpStatusCode.ServiceUnavailable, HttpStatusCode.OK);
+        var optInExecutor = CreateResilient(optInHandler);
+        var optInResult = await optInExecutor.ExecuteAsync(CreateJob(new HttpExecutorConfig
+        {
+            Method = "POST",
+            Url = "https://service.test/action",
+            Body = "{\"action\":true}",
+            Retry = retry,
+            AllowUnsafeRetries = true
+        }), default);
+
+        Assert.True(optInResult.Success);
+        Assert.Equal(2, optInHandler.RequestCount);
+        Assert.All(optInHandler.Bodies, body => Assert.Equal("{\"action\":true}", body));
+    }
+
+    [Fact]
+    public async Task ResilientExecutorOpensCircuitAfterFailedExecution()
+    {
+        var handler = new RecordingHandler(HttpStatusCode.ServiceUnavailable, HttpStatusCode.OK);
+        var executor = CreateResilient(handler, new HttpExecutorOptions { CircuitFailureThreshold = 1 });
+        var job = CreateJob(new HttpExecutorConfig { Url = "https://service.test/action" });
+
+        var first = await executor.ExecuteAsync(job, default);
+        var second = await executor.ExecuteAsync(job, default);
+
+        Assert.False(first.Success);
+        Assert.Equal("circuit open", second.ErrorMessage);
+        Assert.Equal(1, handler.RequestCount);
+    }
+
+    [Fact]
+    public async Task CallerCancellationReleasesHalfOpenCircuitProbe()
+    {
+        var breaker = new CircuitBreaker
+        {
+            Options = new CircuitBreakerOptions
+            {
+                FailureThreshold = 1,
+                OpenTimeout = TimeSpan.FromMilliseconds(20)
+            }
+        };
+        var handler = new RecordingHandler(
+            HttpStatusCode.ServiceUnavailable,
+            (Func<CancellationToken, Task<HttpResponseMessage>>)(async cancellationToken =>
+            {
+                await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+                return new HttpResponseMessage(HttpStatusCode.OK);
+            }),
+            HttpStatusCode.OK);
+        var executor = new ResilientExecutor(
+            new TestHttpClientFactory(handler),
+            Options.Create(new HttpExecutorOptions()),
+            breaker);
+        var job = CreateJob(new HttpExecutorConfig { Url = "https://service.test/circuit" });
+        await executor.ExecuteAsync(job, default);
+        await Task.Delay(30);
+
+        using var cancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(20));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => executor.ExecuteAsync(job, cancellation.Token));
+
+        var recovered = await executor.ExecuteAsync(job, default);
+        Assert.True(recovered.Success);
+        Assert.Equal(3, handler.RequestCount);
+    }
+
+    [Fact]
+    public async Task InvalidOrCredentialBearingUrlsAreRejectedWithoutSending()
+    {
+        var handler = new RecordingHandler(HttpStatusCode.OK);
+        var executor = CreateProbe(handler);
+        var job = CreateJob(new HttpExecutorConfig { Url = "https://user:password@service.test/action" });
+
+        var result = await executor.ExecuteAsync(job, default);
+
+        Assert.False(result.Success);
+        Assert.Equal("Invalid HttpExecutorConfig", result.ErrorMessage);
+        Assert.Equal(0, handler.RequestCount);
+    }
+
+    [Fact]
+    public void RegistrationAddsBothExecutorsAndValidatesOptions()
+    {
+        var services = new ServiceCollection();
+        services.AddPubSoftHttpExecutors(options => options.DefaultTimeout = TimeSpan.FromSeconds(3));
+        using var provider = services.BuildServiceProvider();
+
+        var executors = provider.GetServices<IJobExecutor>().ToArray();
+        Assert.Contains(executors, executor => executor.Type == "Http.Probe");
+        Assert.Contains(executors, executor => executor.Type == "Http.Resilient");
+        Assert.Equal(TimeSpan.FromSeconds(3), provider.GetRequiredService<IOptions<HttpExecutorOptions>>().Value.DefaultTimeout);
+    }
+
+    private static ProbeExecutor CreateProbe(HttpMessageHandler handler, ITokenProvider? tokenProvider = null)
+        => new(new TestHttpClientFactory(handler), Options.Create(new HttpExecutorOptions()), tokenProvider);
+
+    private static ResilientExecutor CreateResilient(
+        HttpMessageHandler handler,
+        HttpExecutorOptions? options = null)
+    {
+        options ??= new HttpExecutorOptions();
+        return new ResilientExecutor(
+            new TestHttpClientFactory(handler),
+            Options.Create(options),
+            new CircuitBreaker
+            {
+                Options = new CircuitBreakerOptions
+                {
+                    FailureThreshold = options.CircuitFailureThreshold,
+                    OpenTimeout = options.CircuitOpenTimeout
+                }
+            });
+    }
+
+    private static ScheduledJob CreateJob(HttpExecutorConfig config)
+        => new() { ExecutorConfig = JsonSerializer.SerializeToElement(config) };
+
+    private sealed class TestHttpClientFactory(HttpMessageHandler handler) : IHttpClientFactory
+    {
+        public HttpClient CreateClient(string name) => new(handler, disposeHandler: false);
+    }
+
+    private sealed class RecordingTokenProvider(string? token) : ITokenProvider
+    {
+        public ConcurrentQueue<string> RequestedKeys { get; } = new();
+
+        public Task<string?> GetTokenAsync(string credentialKey, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            RequestedKeys.Enqueue(credentialKey);
+            return Task.FromResult(token);
+        }
+
+        public Task InvalidateAsync(string credentialKey, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+    }
+
+    private sealed class RecordingHandler : HttpMessageHandler
+    {
+        private readonly Func<CancellationToken, Task<HttpResponseMessage>> _responseFactory;
+        private int _requestCount;
+
+        public RecordingHandler(params object[] responses)
+        {
+            _responseFactory = cancellationToken =>
+            {
+                var response = responses[Math.Min(RequestCount - 1, responses.Length - 1)];
+                return response switch
+                {
+                    HttpStatusCode status => Task.FromResult(new HttpResponseMessage(status)),
+                    Func<CancellationToken, Task<HttpResponseMessage>> factory => factory(cancellationToken),
+                    _ => throw new InvalidOperationException("Unexpected HTTP test response.")
+                };
+            };
+        }
+
+        public RecordingHandler(Func<CancellationToken, Task<HttpResponseMessage>> responseFactory)
+            => _responseFactory = responseFactory;
+
+        public int RequestCount => Volatile.Read(ref _requestCount);
+        public ConcurrentQueue<string> Methods { get; } = new();
+        public ConcurrentQueue<string?> Bodies { get; } = new();
+        public ConcurrentQueue<string?> TokenHeaders { get; } = new();
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            Interlocked.Increment(ref _requestCount);
+            Methods.Enqueue(request.Method.Method);
+            Bodies.Enqueue(request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken));
+            TokenHeaders.Enqueue(request.Headers.TryGetValues("X-Service-Token", out var values) ? values.Single() : null);
+            return await _responseFactory(cancellationToken);
+        }
+    }
+}

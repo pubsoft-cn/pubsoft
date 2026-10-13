@@ -1,0 +1,127 @@
+#nullable enable
+PubSoft.Security.DataMaskingOptions
+PubSoft.Security.DataMaskingOptions.BankCardMaskChar.get -> char
+PubSoft.Security.DataMaskingOptions.BankCardMaskChar.set -> void
+PubSoft.Security.DataMaskingOptions.BankCardSuffixVisibleDigits.get -> int
+PubSoft.Security.DataMaskingOptions.BankCardSuffixVisibleDigits.set -> void
+PubSoft.Security.DataMaskingOptions.DataMaskingOptions() -> void
+PubSoft.Security.DataMaskingOptions.EmailMaskChar.get -> char
+PubSoft.Security.DataMaskingOptions.EmailMaskChar.set -> void
+PubSoft.Security.DataMaskingOptions.EmailPrefixVisibleChars.get -> int
+PubSoft.Security.DataMaskingOptions.EmailPrefixVisibleChars.set -> void
+PubSoft.Security.DataMaskingOptions.GeneralMaskChar.get -> char
+PubSoft.Security.DataMaskingOptions.GeneralMaskChar.set -> void
+PubSoft.Security.DataMaskingOptions.IdCardMaskChar.get -> char
+PubSoft.Security.DataMaskingOptions.IdCardMaskChar.set -> void
+PubSoft.Security.DataMaskingOptions.IdCardPrefixVisibleDigits.get -> int
+PubSoft.Security.DataMaskingOptions.IdCardPrefixVisibleDigits.set -> void
+PubSoft.Security.DataMaskingOptions.IdCardSuffixVisibleDigits.get -> int
+PubSoft.Security.DataMaskingOptions.IdCardSuffixVisibleDigits.set -> void
+PubSoft.Security.DataMaskingOptions.PhoneMaskChar.get -> char
+PubSoft.Security.DataMaskingOptions.PhoneMaskChar.set -> void
+PubSoft.Security.DataMaskingOptions.PhoneSuffixVisibleDigits.get -> int
+PubSoft.Security.DataMaskingOptions.PhoneSuffixVisibleDigits.set -> void
+PubSoft.Security.DataMaskingService
+PubSoft.Security.DataMaskingService.DataMaskingService(PubSoft.Security.DataMaskingOptions? options = null) -> void
+PubSoft.Security.DataMaskingService.MaskAddress(string? address) -> string!
+PubSoft.Security.DataMaskingService.MaskBankCard(string? bankCard) -> string!
+PubSoft.Security.DataMaskingService.MaskComplete(string? value) -> string!
+PubSoft.Security.DataMaskingService.MaskEmail(string? email) -> string!
+PubSoft.Security.DataMaskingService.MaskGeneric(string? value, int prefixLength = 2, int suffixLength = 2) -> string!
+PubSoft.Security.DataMaskingService.MaskIdCard(string? idCard) -> string!
+PubSoft.Security.DataMaskingService.MaskName(string? name) -> string!
+PubSoft.Security.DataMaskingService.MaskPhoneNumber(string? phone) -> string!
+PubSoft.Security.HmacSignatureHeaders
+PubSoft.Security.HmacSignatureOptions
+PubSoft.Security.HmacSignatureOptions.HmacSignatureOptions() -> void
+PubSoft.Security.HmacSignatureOptions.MaxAppIdLength.get -> int
+PubSoft.Security.HmacSignatureOptions.MaxAppIdLength.set -> void
+PubSoft.Security.HmacSignatureOptions.MaxNonceLength.get -> int
+PubSoft.Security.HmacSignatureOptions.MaxNonceLength.set -> void
+PubSoft.Security.HmacSignatureOptions.MaxTimestampSkewSeconds.get -> int
+PubSoft.Security.HmacSignatureOptions.MaxTimestampSkewSeconds.set -> void
+PubSoft.Security.HmacSignatureResult
+PubSoft.Security.HmacSignatureResult.AppId.get -> string?
+PubSoft.Security.HmacSignatureResult.AppId.init -> void
+PubSoft.Security.HmacSignatureResult.Error.get -> string?
+PubSoft.Security.HmacSignatureResult.Error.init -> void
+PubSoft.Security.HmacSignatureResult.HmacSignatureResult() -> void
+PubSoft.Security.HmacSignatureResult.IsValid.get -> bool
+PubSoft.Security.HmacSignatureResult.IsValid.init -> void
+PubSoft.Security.HmacSignatureValidator
+PubSoft.Security.HmacSignatureValidator.HmacSignatureValidator(PubSoft.Security.INonceStore! nonceStore, PubSoft.Security.HmacSignatureOptions? options = null, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Security.HmacSignatureValidator.ValidateAsync(string? appId, string? signature, string? timestamp, string? nonce, string? method, string? path, string? bodyHash, string? secret, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.Security.HmacSignatureResult!>
+PubSoft.Security.INonceStore
+PubSoft.Security.INonceStore.TryUseAsync(string! scope, string! nonce, System.DateTimeOffset expiresAt, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<bool>
+PubSoft.Security.MemoryNonceStore
+PubSoft.Security.MemoryNonceStore.MemoryNonceStore(int maxEntries = 100000, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Security.MemoryNonceStore.TryUseAsync(string! scope, string! nonce, System.DateTimeOffset expiresAt, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<bool>
+PubSoft.Security.PasswordHasher
+PubSoft.Security.PasswordVerificationResult
+PubSoft.Security.PasswordVerificationResult.Deconstruct(out bool Succeeded, out string? ReplacementHash) -> void
+PubSoft.Security.PasswordVerificationResult.Equals(PubSoft.Security.PasswordVerificationResult other) -> bool
+PubSoft.Security.PasswordVerificationResult.PasswordVerificationResult() -> void
+PubSoft.Security.PasswordVerificationResult.PasswordVerificationResult(bool Succeeded, string? ReplacementHash) -> void
+PubSoft.Security.PasswordVerificationResult.ReplacementHash.get -> string?
+PubSoft.Security.PasswordVerificationResult.ReplacementHash.init -> void
+PubSoft.Security.PasswordVerificationResult.Succeeded.get -> bool
+PubSoft.Security.PasswordVerificationResult.Succeeded.init -> void
+PubSoft.Security.RateLimitResult
+PubSoft.Security.RateLimitResult.IsAllowed.get -> bool
+PubSoft.Security.RateLimitResult.IsAllowed.init -> void
+PubSoft.Security.RateLimitResult.RateLimitResult() -> void
+PubSoft.Security.RateLimitResult.RejectionReason.get -> string?
+PubSoft.Security.RateLimitResult.RejectionReason.init -> void
+PubSoft.Security.RateLimitResult.RemainingRequests.get -> int
+PubSoft.Security.RateLimitResult.RemainingRequests.init -> void
+PubSoft.Security.RateLimitResult.ResetTime.get -> System.DateTime
+PubSoft.Security.RateLimitResult.ResetTime.init -> void
+PubSoft.Security.RateLimiter
+PubSoft.Security.RateLimiter.CheckByIpAddress(string? ipAddress) -> PubSoft.Security.RateLimitResult!
+PubSoft.Security.RateLimiter.CheckByUserId(long userId) -> PubSoft.Security.RateLimitResult!
+PubSoft.Security.RateLimiter.CheckRateLimit(string? identifier) -> PubSoft.Security.RateLimitResult!
+PubSoft.Security.RateLimiter.CheckRateLimit(string? identifier, bool countRequest) -> PubSoft.Security.RateLimitResult!
+PubSoft.Security.RateLimiter.CleanupExpiredEntries() -> void
+PubSoft.Security.RateLimiter.GetStats() -> PubSoft.Security.RateLimiter.RateLimitStats!
+PubSoft.Security.RateLimiter.RateLimitStats
+PubSoft.Security.RateLimiter.RateLimitStats.ActiveIdentifiers.get -> int
+PubSoft.Security.RateLimiter.RateLimitStats.ActiveIdentifiers.init -> void
+PubSoft.Security.RateLimiter.RateLimitStats.RateLimitStats() -> void
+PubSoft.Security.RateLimiter.RateLimitStats.TotalIdentifiers.get -> int
+PubSoft.Security.RateLimiter.RateLimitStats.TotalIdentifiers.init -> void
+PubSoft.Security.RateLimiter.RateLimitStats.TotalRequests.get -> int
+PubSoft.Security.RateLimiter.RateLimitStats.TotalRequests.init -> void
+PubSoft.Security.RateLimiter.RateLimiter(PubSoft.Security.RateLimiterOptions? options = null, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Security.RateLimiter.ResetRateLimit(string? identifier) -> void
+PubSoft.Security.RateLimiterOptions
+PubSoft.Security.RateLimiterOptions.Enabled.get -> bool
+PubSoft.Security.RateLimiterOptions.Enabled.set -> void
+PubSoft.Security.RateLimiterOptions.LimitByIpAddress.get -> bool
+PubSoft.Security.RateLimiterOptions.LimitByIpAddress.set -> void
+PubSoft.Security.RateLimiterOptions.LimitByUserId.get -> bool
+PubSoft.Security.RateLimiterOptions.LimitByUserId.set -> void
+PubSoft.Security.RateLimiterOptions.MaxIdentifiers.get -> int
+PubSoft.Security.RateLimiterOptions.MaxIdentifiers.set -> void
+PubSoft.Security.RateLimiterOptions.RateLimiterOptions() -> void
+PubSoft.Security.RateLimiterOptions.RequestsPerWindow.get -> int
+PubSoft.Security.RateLimiterOptions.RequestsPerWindow.set -> void
+PubSoft.Security.RateLimiterOptions.WindowSize.get -> System.TimeSpan
+PubSoft.Security.RateLimiterOptions.WindowSize.set -> void
+const PubSoft.Security.HmacSignatureHeaders.AppId = "X-Fend-App-Id" -> string!
+const PubSoft.Security.HmacSignatureHeaders.Nonce = "X-Fend-Nonce" -> string!
+const PubSoft.Security.HmacSignatureHeaders.Signature = "X-Fend-Signature" -> string!
+const PubSoft.Security.HmacSignatureHeaders.Timestamp = "X-Fend-Timestamp" -> string!
+const PubSoft.Security.PasswordHasher.DefaultIterations = 600000 -> int
+override PubSoft.Security.PasswordVerificationResult.GetHashCode() -> int
+static PubSoft.Security.HmacSignatureValidator.BuildSignature(string! secret, string! method, string! path, string! timestamp, string! nonce, string? bodyHash = null) -> string!
+static PubSoft.Security.HmacSignatureValidator.ComputeBodyHash(System.IO.Stream! body) -> string!
+static PubSoft.Security.HmacSignatureValidator.ComputeBodyHash(byte[]! body) -> string!
+static PubSoft.Security.HmacSignatureValidator.ComputeHmacSha256(string! key, string! data) -> string!
+static PubSoft.Security.PasswordHasher.Hash(string! password, int iterations = 600000) -> string!
+static PubSoft.Security.PasswordHasher.NeedsRehash(string? storedHash) -> bool
+static PubSoft.Security.PasswordHasher.Verify(string! password, string? storedHash) -> bool
+static PubSoft.Security.PasswordHasher.VerifyAndRehash(string! password, string? storedHash) -> PubSoft.Security.PasswordVerificationResult
+static PubSoft.Security.PasswordVerificationResult.operator !=(PubSoft.Security.PasswordVerificationResult left, PubSoft.Security.PasswordVerificationResult right) -> bool
+static PubSoft.Security.PasswordVerificationResult.operator ==(PubSoft.Security.PasswordVerificationResult left, PubSoft.Security.PasswordVerificationResult right) -> bool
+~override PubSoft.Security.PasswordVerificationResult.Equals(object obj) -> bool
+~override PubSoft.Security.PasswordVerificationResult.ToString() -> string

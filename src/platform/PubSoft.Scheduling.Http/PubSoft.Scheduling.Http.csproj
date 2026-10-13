@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>PubSoft.Scheduling.Http</RootNamespace>
+    <PackageId>PubSoft.Scheduling.Http</PackageId>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Version>$(PubSoftVersion)</Version>
+    <Description>Optional HTTP probe and resilient executors for PubSoft.Scheduling.</Description>
+    <PackageTags>scheduler;http;probe;retry;circuit-breaker</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../platform/PubSoft.Scheduling/PubSoft.Scheduling.csproj" />
+    <ProjectReference Include="../../core/PubSoft.Resilience/PubSoft.Resilience.csproj" />
+    <ProjectReference Include="../../platform/PubSoft.Tokens/PubSoft.Tokens.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.12" />
+  </ItemGroup>
+</Project>

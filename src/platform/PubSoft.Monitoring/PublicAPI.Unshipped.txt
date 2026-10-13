@@ -1,0 +1,76 @@
+#nullable enable
+PubSoft.Monitoring.AppHealthCheckResult
+PubSoft.Monitoring.AppHealthCheckResult.AppHealthCheckResult() -> void
+PubSoft.Monitoring.AppHealthCheckResult.AppHealthCheckResult(PubSoft.Monitoring.AppHealthStatus Status, string? Description = null) -> void
+PubSoft.Monitoring.AppHealthCheckResult.Deconstruct(out PubSoft.Monitoring.AppHealthStatus Status, out string? Description) -> void
+PubSoft.Monitoring.AppHealthCheckResult.Description.get -> string?
+PubSoft.Monitoring.AppHealthCheckResult.Description.init -> void
+PubSoft.Monitoring.AppHealthCheckResult.Equals(PubSoft.Monitoring.AppHealthCheckResult other) -> bool
+PubSoft.Monitoring.AppHealthCheckResult.Status.get -> PubSoft.Monitoring.AppHealthStatus
+PubSoft.Monitoring.AppHealthCheckResult.Status.init -> void
+PubSoft.Monitoring.AppHealthStatus
+PubSoft.Monitoring.AppHealthStatus.Degraded = 1 -> PubSoft.Monitoring.AppHealthStatus
+PubSoft.Monitoring.AppHealthStatus.Healthy = 0 -> PubSoft.Monitoring.AppHealthStatus
+PubSoft.Monitoring.AppHealthStatus.Unhealthy = 2 -> PubSoft.Monitoring.AppHealthStatus
+PubSoft.Monitoring.CachedHealthCheckAggregator
+PubSoft.Monitoring.CachedHealthCheckAggregator.CachedHealthCheckAggregator(System.Collections.Generic.IEnumerable<PubSoft.Monitoring.IAppHealthCheck!>! checks, System.TimeSpan? healthyCacheDuration = null, System.TimeSpan? unhealthyCacheDuration = null, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Monitoring.CachedHealthCheckAggregator.CheckAllAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<(string! Name, PubSoft.Monitoring.AppHealthCheckResult Result)>!>!
+PubSoft.Monitoring.CachedHealthCheckAggregator.GetOverallStatusAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Monitoring.AppHealthStatus>!
+PubSoft.Monitoring.CachedHealthCheckAggregator.InvalidateCache() -> void
+PubSoft.Monitoring.HealthCheckAggregator
+PubSoft.Monitoring.HealthCheckAggregator.CheckAllAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<(string! Name, PubSoft.Monitoring.AppHealthCheckResult Result)>!>!
+PubSoft.Monitoring.HealthCheckAggregator.GetOverallStatusAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Monitoring.AppHealthStatus>!
+PubSoft.Monitoring.HealthCheckAggregator.HealthCheckAggregator(System.Collections.Generic.IEnumerable<PubSoft.Monitoring.IAppHealthCheck!>! checks) -> void
+PubSoft.Monitoring.HttpProbeHealthCheck
+PubSoft.Monitoring.HttpProbeHealthCheck.CheckAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Monitoring.ProbeHealth>!
+PubSoft.Monitoring.HttpProbeHealthCheck.HttpProbeHealthCheck(System.Net.Http.IHttpClientFactory! httpClientFactory, Microsoft.Extensions.Options.IOptions<PubSoft.Monitoring.MonitoringOptions!>! options, Microsoft.Extensions.Logging.ILogger<PubSoft.Monitoring.HttpProbeHealthCheck!>? logger = null) -> void
+PubSoft.Monitoring.IAppHealthCheck
+PubSoft.Monitoring.IAppHealthCheck.CheckAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.Monitoring.AppHealthCheckResult>
+PubSoft.Monitoring.IAppHealthCheck.Name.get -> string!
+PubSoft.Monitoring.IProbeHealthCheck
+PubSoft.Monitoring.IProbeHealthCheck.CheckAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Monitoring.ProbeHealth>!
+PubSoft.Monitoring.MonitoringErrorCategory
+PubSoft.Monitoring.MonitoringErrorCategory.Network = 0 -> PubSoft.Monitoring.MonitoringErrorCategory
+PubSoft.Monitoring.MonitoringErrorCategory.Other = 3 -> PubSoft.Monitoring.MonitoringErrorCategory
+PubSoft.Monitoring.MonitoringErrorCategory.Protocol = 2 -> PubSoft.Monitoring.MonitoringErrorCategory
+PubSoft.Monitoring.MonitoringErrorCategory.Timeout = 1 -> PubSoft.Monitoring.MonitoringErrorCategory
+PubSoft.Monitoring.MonitoringMetrics
+PubSoft.Monitoring.MonitoringMetrics.Dispose() -> void
+PubSoft.Monitoring.MonitoringMetrics.MonitoringMetrics() -> void
+PubSoft.Monitoring.MonitoringMetrics.RecordBackendConnections(int count) -> void
+PubSoft.Monitoring.MonitoringMetrics.RecordError(PubSoft.Monitoring.MonitoringErrorCategory category) -> void
+PubSoft.Monitoring.MonitoringMetrics.RecordRequest(int statusCode) -> void
+PubSoft.Monitoring.MonitoringMetrics.RecordRequestDuration(System.TimeSpan duration) -> void
+PubSoft.Monitoring.MonitoringOptions
+PubSoft.Monitoring.MonitoringOptions.MinProbeSuccessRatio.get -> double
+PubSoft.Monitoring.MonitoringOptions.MinProbeSuccessRatio.set -> void
+PubSoft.Monitoring.MonitoringOptions.MonitoringOptions() -> void
+PubSoft.Monitoring.MonitoringOptions.ProbeTargets.get -> System.Collections.Generic.List<string!>!
+PubSoft.Monitoring.MonitoringOptions.ProbeTargets.set -> void
+PubSoft.Monitoring.MonitoringOptions.ProbeTimeout.get -> System.TimeSpan
+PubSoft.Monitoring.MonitoringOptions.ProbeTimeout.set -> void
+PubSoft.Monitoring.MonitoringServiceCollectionExtensions
+PubSoft.Monitoring.ParallelHealthCheckAggregator
+PubSoft.Monitoring.ParallelHealthCheckAggregator.CheckAllAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<(string! Name, PubSoft.Monitoring.AppHealthCheckResult Result)>!>!
+PubSoft.Monitoring.ParallelHealthCheckAggregator.GetOverallStatusAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Monitoring.AppHealthStatus>!
+PubSoft.Monitoring.ParallelHealthCheckAggregator.ParallelHealthCheckAggregator(System.Collections.Generic.IEnumerable<PubSoft.Monitoring.IAppHealthCheck!>! checks, System.TimeSpan? timeout = null, int maxConcurrency = 8) -> void
+PubSoft.Monitoring.ProbeHealth
+PubSoft.Monitoring.ProbeHealth.Degraded = 2 -> PubSoft.Monitoring.ProbeHealth
+PubSoft.Monitoring.ProbeHealth.Healthy = 0 -> PubSoft.Monitoring.ProbeHealth
+PubSoft.Monitoring.ProbeHealth.Unreachable = 1 -> PubSoft.Monitoring.ProbeHealth
+const PubSoft.Monitoring.MonitoringMetrics.MeterName = "PubSoft.Monitoring" -> string!
+const PubSoft.Monitoring.MonitoringOptions.HttpClientName = "PubSoft.Monitoring.Probe" -> string!
+override PubSoft.Monitoring.AppHealthCheckResult.GetHashCode() -> int
+static PubSoft.Monitoring.AppHealthCheckResult.Degraded(string! description) -> PubSoft.Monitoring.AppHealthCheckResult
+static PubSoft.Monitoring.AppHealthCheckResult.Healthy(string? description = null) -> PubSoft.Monitoring.AppHealthCheckResult
+static PubSoft.Monitoring.AppHealthCheckResult.Unhealthy(string! description) -> PubSoft.Monitoring.AppHealthCheckResult
+static PubSoft.Monitoring.AppHealthCheckResult.operator !=(PubSoft.Monitoring.AppHealthCheckResult left, PubSoft.Monitoring.AppHealthCheckResult right) -> bool
+static PubSoft.Monitoring.AppHealthCheckResult.operator ==(PubSoft.Monitoring.AppHealthCheckResult left, PubSoft.Monitoring.AppHealthCheckResult right) -> bool
+static PubSoft.Monitoring.MonitoringServiceCollectionExtensions.AddPubSoftCachedHealthChecks(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.TimeSpan? healthyCacheDuration = null, System.TimeSpan? unhealthyCacheDuration = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Monitoring.MonitoringServiceCollectionExtensions.AddPubSoftHealthCheck<TCheck>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Monitoring.MonitoringServiceCollectionExtensions.AddPubSoftHealthChecks(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Monitoring.MonitoringServiceCollectionExtensions.AddPubSoftMonitoring(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Monitoring.MonitoringOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Monitoring.MonitoringServiceCollectionExtensions.AddPubSoftMonitoringMetrics(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Monitoring.MonitoringServiceCollectionExtensions.AddPubSoftParallelHealthChecks(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.TimeSpan? timeout = null, int maxConcurrency = 8) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+~override PubSoft.Monitoring.AppHealthCheckResult.Equals(object obj) -> bool
+~override PubSoft.Monitoring.AppHealthCheckResult.ToString() -> string

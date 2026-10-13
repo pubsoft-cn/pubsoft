@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>PubSoft.Authentication.Jwt</PackageId>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Description>Explicit-key RS256 JWT signing, validation, JWKS export, and refresh-token primitives.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.22.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.22.0" />
+  </ItemGroup>
+</Project>

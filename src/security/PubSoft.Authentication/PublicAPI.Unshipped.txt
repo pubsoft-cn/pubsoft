@@ -1,0 +1,45 @@
+#nullable enable
+PubSoft.Authentication.AuthenticatedSubject
+PubSoft.Authentication.AuthenticatedSubject.<Clone>$() -> PubSoft.Authentication.AuthenticatedSubject!
+PubSoft.Authentication.AuthenticatedSubject.AuthenticatedSubject(long SubjectId, long? TenantId) -> void
+PubSoft.Authentication.AuthenticatedSubject.Deconstruct(out long SubjectId, out long? TenantId) -> void
+PubSoft.Authentication.AuthenticatedSubject.Equals(PubSoft.Authentication.AuthenticatedSubject? other) -> bool
+PubSoft.Authentication.AuthenticatedSubject.SubjectId.get -> long
+PubSoft.Authentication.AuthenticatedSubject.SubjectId.init -> void
+PubSoft.Authentication.AuthenticatedSubject.TenantId.get -> long?
+PubSoft.Authentication.AuthenticatedSubject.TenantId.init -> void
+PubSoft.Authentication.AuthenticatedSubjectResolver
+PubSoft.Authentication.AuthenticatedSubjectResolver.AuthenticatedSubjectResolver(string! subjectClaimType, string! trustedIssuer, string? tenantClaimType = null) -> void
+PubSoft.Authentication.AuthenticatedSubjectResolver.Resolve(PubSoft.Authentication.PrincipalSnapshot! snapshot) -> PubSoft.Authentication.AuthenticatedSubject?
+PubSoft.Authentication.IAuthenticatedSubjectAccessor
+PubSoft.Authentication.IAuthenticatedSubjectAccessor.GetCurrent() -> PubSoft.Authentication.AuthenticatedSubject?
+PubSoft.Authentication.IPrincipalSnapshotAccessor
+PubSoft.Authentication.IPrincipalSnapshotAccessor.GetCurrent() -> PubSoft.Authentication.PrincipalSnapshot?
+PubSoft.Authentication.PrincipalClaim
+PubSoft.Authentication.PrincipalClaim.<Clone>$() -> PubSoft.Authentication.PrincipalClaim!
+PubSoft.Authentication.PrincipalClaim.Deconstruct(out string! Type, out string! Value, out string! ValueType, out string! Issuer) -> void
+PubSoft.Authentication.PrincipalClaim.Equals(PubSoft.Authentication.PrincipalClaim? other) -> bool
+PubSoft.Authentication.PrincipalClaim.Issuer.get -> string!
+PubSoft.Authentication.PrincipalClaim.Issuer.init -> void
+PubSoft.Authentication.PrincipalClaim.PrincipalClaim(string! Type, string! Value, string! ValueType, string! Issuer) -> void
+PubSoft.Authentication.PrincipalClaim.Type.get -> string!
+PubSoft.Authentication.PrincipalClaim.Type.init -> void
+PubSoft.Authentication.PrincipalClaim.Value.get -> string!
+PubSoft.Authentication.PrincipalClaim.Value.init -> void
+PubSoft.Authentication.PrincipalClaim.ValueType.get -> string!
+PubSoft.Authentication.PrincipalClaim.ValueType.init -> void
+PubSoft.Authentication.PrincipalSnapshot
+PubSoft.Authentication.PrincipalSnapshot.Claims.get -> System.Collections.Generic.IReadOnlyList<PubSoft.Authentication.PrincipalClaim!>!
+PubSoft.Authentication.PrincipalSnapshot.IsAuthenticated.get -> bool
+PubSoft.Authentication.PrincipalSnapshot.PrincipalSnapshot(bool isAuthenticated, System.Collections.Generic.IEnumerable<PubSoft.Authentication.PrincipalClaim!>! claims) -> void
+override PubSoft.Authentication.AuthenticatedSubject.Equals(object? obj) -> bool
+override PubSoft.Authentication.AuthenticatedSubject.GetHashCode() -> int
+override PubSoft.Authentication.AuthenticatedSubject.ToString() -> string!
+override PubSoft.Authentication.PrincipalClaim.Equals(object? obj) -> bool
+override PubSoft.Authentication.PrincipalClaim.GetHashCode() -> int
+override PubSoft.Authentication.PrincipalClaim.ToString() -> string!
+static PubSoft.Authentication.AuthenticatedSubject.operator !=(PubSoft.Authentication.AuthenticatedSubject? left, PubSoft.Authentication.AuthenticatedSubject? right) -> bool
+static PubSoft.Authentication.AuthenticatedSubject.operator ==(PubSoft.Authentication.AuthenticatedSubject? left, PubSoft.Authentication.AuthenticatedSubject? right) -> bool
+static PubSoft.Authentication.PrincipalClaim.operator !=(PubSoft.Authentication.PrincipalClaim? left, PubSoft.Authentication.PrincipalClaim? right) -> bool
+static PubSoft.Authentication.PrincipalClaim.operator ==(PubSoft.Authentication.PrincipalClaim? left, PubSoft.Authentication.PrincipalClaim? right) -> bool
+static PubSoft.Authentication.PrincipalSnapshot.FromClaimsPrincipal(System.Security.Claims.ClaimsPrincipal! principal) -> PubSoft.Authentication.PrincipalSnapshot!

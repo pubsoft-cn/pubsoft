@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>PubSoft.Identity</PackageId>
+    <IsAotCompatible>true</IsAotCompatible>
+      <Description>Framework-independent identity user model and profile contracts for PubSoft.</Description>
+  </PropertyGroup>
+   <ItemGroup>
+     <ProjectReference Include="../../core/PubSoft.Domain/PubSoft.Domain.csproj" />
+   </ItemGroup>
+</Project>
