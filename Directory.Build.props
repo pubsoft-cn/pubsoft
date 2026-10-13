@@ -6,8 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
-    <PubSoftVersion>0.1.0</PubSoftVersion>
+    <!-- Internal-validation releases carry a prerelease suffix so they never
+         collide with the eventual stable public version. Bump the counter per
+         validation drop; drop the suffix entirely for the public stable release. -->
+    <PubSoftVersion>0.1.0-alpha.1</PubSoftVersion>
     <Version>$(PubSoftVersion)</Version>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/pubsoft-cn/pubsoft</RepositoryUrl>
     <Authors>PubSoft Contributors</Authors>
     <Company>PubSoft</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

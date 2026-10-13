@@ -34,3 +34,8 @@ restore → Release build (warnings treated strictly) → full test suite → de
 ## Environment-Gated Tests
 
 `[RedisFact]`/`[MySql84Fact]` tests skip automatically when `PUBSOFT_REDIS`/`PUBSOFT_MYSQL` are unset. Current baseline: 443 passed / 19 environment-skipped. Coverage guarantees apply only to the tested Redis/MySQL scenarios.
+
+## Release Stages
+
+- **Internal validation**: `$(PubSoftVersion)` carries a `-alpha.N` suffix. Pack to a feed directory consumed via a `local-dev` NuGet source; prerelease packages never appear as stable, so business validation never claims a version number the public release needs.
+- **Public release**: drop the prerelease suffix, bump the stable version, and publish to NuGet.org after the repository goes public. `RepositoryUrl` is already embedded in package metadata.

@@ -33,3 +33,8 @@ restore → Release 构建（警告即失败倾向）→ 全量测试 → 包依
 ## 环境门控测试
 
 `PUBSOFT_REDIS` / `PUBSOFT_MYSQL` 未设置时对应集成测试（`[RedisFact]`/`[MySql84Fact]`）自动跳过；当前基线 443 通过 / 19 环境跳过。覆盖 provider 只保证测过的 Redis/MySQL 场景。
+
+## 发布阶段
+
+- **内部验证**：`$(PubSoftVersion)` 带 `-alpha.N` 后缀。打包到 feed 目录，经消费方 `local-dev` NuGet 源接入；prerelease 包不作为稳定版出现，业务验证不会占用正式发布所需版本号。
+- **公开发布**：去掉 prerelease 后缀、提升稳定版本号，仓库转公开后发往 NuGet.org。`RepositoryUrl` 已嵌入包元数据。
