@@ -13,6 +13,8 @@ public sealed class PubSoftJwtBearerOptions
     public string Audience { get; set; } = string.Empty;
     public string JwksJson { get; set; } = string.Empty;
     public string MetadataAddress { get; set; } = string.Empty;
+    public byte[]? SymmetricKey { get; set; }
+    public string SymmetricKeyId { get; set; } = string.Empty;
     public bool RequireHttpsMetadata { get; set; } = true;
     public TimeSpan BackchannelTimeout { get; set; } = TimeSpan.FromSeconds(15);
     public TimeSpan ClockSkew { get; set; } = TimeSpan.FromSeconds(5);
@@ -35,9 +37,24 @@ public static class JwtBearerAuthenticationExtensions
         configure(options);
         ValidateCommonOptions(options);
         var useRemoteMetadata = !string.IsNullOrWhiteSpace(options.MetadataAddress);
-        if (useRemoteMetadata == !string.IsNullOrWhiteSpace(options.JwksJson))
-            throw new ArgumentException("Configure exactly one of static JWKS or remote metadata address.", nameof(configure));
-        var keys = useRemoteMetadata ? [] : ParsePublicSigningKeys(options.JwksJson);
+        var useStaticJwks = !string.IsNullOrWhiteSpace(options.JwksJson);
+        var useSymmetricKey = options.SymmetricKey is { Length: > 0 };
+        if ((useRemoteMetadata ? 1 : 0) + (useStaticJwks ? 1 : 0) + (useSymmetricKey ? 1 : 0) != 1)
+            throw new ArgumentException(
+                "Configure exactly one of static JWKS, remote metadata address, or symmetric key.",
+                nameof(configure));
+
+        JsonWebKey[] keys = useStaticJwks ? ParsePublicSigningKeys(options.JwksJson) : [];
+        SymmetricSecurityKey? symmetricKey = null;
+        if (useSymmetricKey)
+        {
+            if (options.SymmetricKey!.Length < 32)
+                throw new ArgumentException("Symmetric key must contain at least 256 bits.", nameof(options.SymmetricKey));
+            symmetricKey = new SymmetricSecurityKey(options.SymmetricKey)
+            {
+                KeyId = string.IsNullOrWhiteSpace(options.SymmetricKeyId) ? null : options.SymmetricKeyId
+            };
+        }
 
         return builder.AddJwtBearer(scheme, bearerOptions =>
         {
@@ -59,16 +76,22 @@ public static class JwtBearerAuthenticationExtensions
                 RequireSignedTokens = true,
                 RequireExpirationTime = true,
                 ValidateLifetime = true,
-                ValidAlgorithms = [SecurityAlgorithms.RsaSha256],
+                ValidAlgorithms = useSymmetricKey
+                    ? [SecurityAlgorithms.HmacSha256]
+                    : [SecurityAlgorithms.RsaSha256],
                 ClockSkew = options.ClockSkew,
                 TryAllIssuerSigningKeys = false,
                 NameClaimType = options.NameClaimType,
                 RoleClaimType = options.RoleClaimType,
-                IssuerSigningKeyResolver = useRemoteMetadata
-                    ? (_, _, keyId, validationParameters) => ResolveSigningKeys(
-                        keyId,
-                        validationParameters.IssuerSigningKeys ?? [])
-                    : (_, _, keyId, _) => ResolveSigningKeys(keyId, keys)
+                IssuerSigningKeyResolver = useSymmetricKey
+                    ? (_, _, keyId, _) => string.IsNullOrWhiteSpace(keyId)
+                        ? [symmetricKey!]
+                        : symmetricKey!.KeyId == keyId ? [symmetricKey] : []
+                    : useRemoteMetadata
+                        ? (_, _, keyId, validationParameters) => ResolveSigningKeys(
+                            keyId,
+                            validationParameters.IssuerSigningKeys ?? [])
+                        : (_, _, keyId, _) => ResolveSigningKeys(keyId, keys)
             };
         });
     }

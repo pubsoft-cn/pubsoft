@@ -20,4 +20,8 @@ PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.RequireHttpsMetada
 PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.RequireHttpsMetadata.set -> void
 PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.RoleClaimType.get -> string!
 PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.RoleClaimType.set -> void
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.SymmetricKey.get -> byte[]?
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.SymmetricKey.set -> void
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.SymmetricKeyId.get -> string!
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.SymmetricKeyId.set -> void
 static PubSoft.Authentication.Jwt.AspNetCore.JwtBearerAuthenticationExtensions.AddPubSoftJwtBearer(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! builder, System.Action<PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions!>! configure, string! scheme = "Bearer") -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!

@@ -164,6 +164,87 @@ public sealed class JwtBearerAuthenticationTests
         }));
     }
 
+
+    [Fact]
+    public async Task SymmetricModeValidatesHs256TokenIssuedByMatchingKey()
+    {
+        using var key = JwtSigning.CreateSymmetricKey("sym-1");
+        var services = new ServiceCollection();
+        services.AddAuthentication().AddPubSoftJwtBearer(options =>
+        {
+            options.Issuer = "issuer";
+            options.Audience = "api";
+            options.SymmetricKey = ((Microsoft.IdentityModel.Tokens.SymmetricSecurityKey)key.SecurityKey).Key;
+            options.SymmetricKeyId = "sym-1";
+        });
+
+        using var serviceProvider = services.BuildServiceProvider();
+        var bearer = serviceProvider.GetRequiredService<IOptionsMonitor<JwtBearerOptions>>()
+            .Get(JwtBearerDefaults.AuthenticationScheme);
+        var parameters = bearer.TokenValidationParameters;
+
+        Assert.Equal([SecurityAlgorithms.HmacSha256], parameters.ValidAlgorithms);
+
+        var token = JwtSigning.CreateAccessToken(key, "issuer", "api",
+            new Dictionary<string, string> { ["sub"] = "42" }, TimeSpan.FromMinutes(5));
+        var handler = new JwtSecurityTokenHandler();
+        var result = await handler.ValidateTokenAsync(token, parameters);
+
+        Assert.True(result.IsValid);
+        Assert.Contains(result.ClaimsIdentity.Claims, c => c.Value == "42");
+    }
+
+    [Fact]
+    public async Task SymmetricModeRejectsWrongKeyAndCrossAlgorithm()
+    {
+        using var good = JwtSigning.CreateSymmetricKey("sym-1");
+        using var other = JwtSigning.CreateSymmetricKey("sym-2");
+        var services = new ServiceCollection();
+        services.AddAuthentication().AddPubSoftJwtBearer(options =>
+        {
+            options.Issuer = "issuer";
+            options.Audience = "api";
+            options.SymmetricKey = ((Microsoft.IdentityModel.Tokens.SymmetricSecurityKey)good.SecurityKey).Key;
+            options.SymmetricKeyId = "sym-1";
+        });
+
+        using var serviceProvider = services.BuildServiceProvider();
+        var parameters = serviceProvider.GetRequiredService<IOptionsMonitor<JwtBearerOptions>>()
+            .Get(JwtBearerDefaults.AuthenticationScheme).TokenValidationParameters;
+        var handler = new JwtSecurityTokenHandler();
+
+        var wrongKeyToken = JwtSigning.CreateAccessToken(other, "issuer", "api",
+            new Dictionary<string, string> { ["sub"] = "1" }, TimeSpan.FromMinutes(5));
+        var wrongKey = await handler.ValidateTokenAsync(wrongKeyToken, parameters);
+        Assert.False(wrongKey.IsValid);
+
+        using var rsa = JwtSigning.CreateRsaKey("rsa-1");
+        var rs256Token = JwtSigning.CreateAccessToken(rsa, "issuer", "api",
+            new Dictionary<string, string> { ["sub"] = "1" }, TimeSpan.FromMinutes(5));
+        var crossAlg = await handler.ValidateTokenAsync(rs256Token, parameters);
+        Assert.False(crossAlg.IsValid);
+    }
+
+    [Fact]
+    public void SymmetricModeRejectsWeakKeyAndConflictingModes()
+    {
+        var services = new ServiceCollection();
+
+        Assert.Throws<ArgumentException>(() => services.AddAuthentication().AddPubSoftJwtBearer(options =>
+        {
+            options.Issuer = "issuer";
+            options.Audience = "api";
+            options.SymmetricKey = new byte[16];   // 128 bits < 256 required
+        }));
+        Assert.Throws<ArgumentException>(() => services.AddAuthentication().AddPubSoftJwtBearer(options =>
+        {
+            options.Issuer = "issuer";
+            options.Audience = "api";
+            options.SymmetricKey = new byte[32];
+            options.JwksJson = "{}";
+        }));
+    }
+
     private static JwtBearerOptions CreateBearerOptions(string jwksJson)
     {
         var services = new ServiceCollection();
