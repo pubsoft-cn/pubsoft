@@ -20,6 +20,8 @@ jobs:
         run: |
           docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest \
             git --no-banner --redact /repo
+      - name: Internal identifier scan
+        run: bash scripts/check-internal-identifiers.sh
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
