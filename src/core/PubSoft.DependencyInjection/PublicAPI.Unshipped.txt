@@ -1,0 +1,10 @@
+#nullable enable
+PubSoft.DependencyInjection.ConventionalServiceCollectionExtensions
+PubSoft.DependencyInjection.IScopedDependency
+PubSoft.DependencyInjection.ISingletonDependency
+PubSoft.DependencyInjection.ITransientDependency
+static PubSoft.DependencyInjection.ConventionalServiceCollectionExtensions.AddConventionalServices(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Func<System.Type!, bool>? predicate, params System.Reflection.Assembly![]! assemblies) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.DependencyInjection.ConventionalServiceCollectionExtensions.AddConventionalServices(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, params System.Reflection.Assembly![]! assemblies) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+PubSoft.DependencyInjection.ExposeServicesAttribute
+PubSoft.DependencyInjection.ExposeServicesAttribute.ExposeServicesAttribute(params System.Type![]! serviceTypes) -> void
+PubSoft.DependencyInjection.ExposeServicesAttribute.ServiceTypes -> System.Type![]!

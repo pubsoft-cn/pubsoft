@@ -48,6 +48,9 @@
   "PubSoft.Contracts": [],
   "PubSoft.Core": [],
   "PubSoft.Cryptography": [],
+  "PubSoft.DependencyInjection": [
+    "Microsoft.Extensions.DependencyInjection.Abstractions"
+  ],
   "PubSoft.Domain": [],
   "PubSoft.Edge": [
     "PubSoft.Edge.Core"

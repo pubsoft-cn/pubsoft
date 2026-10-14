@@ -27,3 +27,7 @@ override PubSoft.Cryptography.DecryptedCredential.GetHashCode() -> int
 override PubSoft.Cryptography.DecryptedCredential.ToString() -> string!
 static PubSoft.Cryptography.DecryptedCredential.operator !=(PubSoft.Cryptography.DecryptedCredential? left, PubSoft.Cryptography.DecryptedCredential? right) -> bool
 static PubSoft.Cryptography.DecryptedCredential.operator ==(PubSoft.Cryptography.DecryptedCredential? left, PubSoft.Cryptography.DecryptedCredential? right) -> bool
+PubSoft.Cryptography.AesEncryptor
+static PubSoft.Cryptography.AesEncryptor.Decrypt(string! encrypted, string! masterKey) -> string!
+static PubSoft.Cryptography.AesEncryptor.Encrypt(string! plaintext, string! masterKey) -> string!
+static PubSoft.Cryptography.AesEncryptor.GenerateSecretKey() -> string!

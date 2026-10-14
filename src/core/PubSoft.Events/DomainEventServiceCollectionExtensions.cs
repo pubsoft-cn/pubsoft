@@ -23,3 +23,17 @@ public static class DomainEventServiceCollectionExtensions
         return services;
     }
 }
+/// <summary>Domain event handler registration helpers.</summary>
+public static class DomainEventHandlerServiceCollectionExtensions
+{
+    /// <summary>Registers a scoped domain event handler for <typeparamref name="TEvent"/>.</summary>
+    public static IServiceCollection AddPubSoftDomainEventHandler<TEvent, THandler>(this IServiceCollection services)
+        where TEvent : IDomainEvent
+        where THandler : class, IDomainEventHandler<TEvent>
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        services.AddScoped<THandler>();
+        services.AddScoped<IDomainEventHandler<TEvent>, THandler>();
+        return services;
+    }
+}

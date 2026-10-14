@@ -81,6 +81,16 @@ PubSoft.AspNetCore.HmacValidationServiceCollectionExtensions
 PubSoft.AspNetCore.IAppSecretResolver
 PubSoft.AspNetCore.IAppSecretResolver.ResolveSecretAsync(string! appId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<string?>
 PubSoft.AspNetCore.IpNormalizer
+PubSoft.AspNetCore.PubSoftApplicationService
+PubSoft.AspNetCore.PubSoftApplicationService.Logger.get -> Microsoft.Extensions.Logging.ILogger!
+PubSoft.AspNetCore.PubSoftApplicationService.PubSoftApplicationService() -> void
+PubSoft.AspNetCore.PubSoftApplicationService.PubSoftApplicationService(System.IServiceProvider! serviceProvider) -> void
+PubSoft.AspNetCore.PubSoftController
+PubSoft.AspNetCore.PubSoftController.PubSoftController(PubSoft.Authentication.IAuthenticatedSubjectAccessor? subjectAccessor) -> void
+PubSoft.AspNetCore.PubSoftController.SubjectAccessor.get -> PubSoft.Authentication.IAuthenticatedSubjectAccessor?
+PubSoft.AspNetCore.PubSoftControllerBase
+PubSoft.AspNetCore.PubSoftControllerBase.Logger.get -> Microsoft.Extensions.Logging.ILogger!
+PubSoft.AspNetCore.PubSoftControllerBase.PubSoftControllerBase() -> void
 PubSoft.AspNetCore.PubSoftRateLimitPolicy
 PubSoft.AspNetCore.PubSoftRateLimitPolicy.CountFailuresOnly.get -> bool
 PubSoft.AspNetCore.PubSoftRateLimitPolicy.Name.get -> string!
