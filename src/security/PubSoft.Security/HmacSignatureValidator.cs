@@ -57,6 +57,7 @@ public sealed class HmacSignatureValidator
         string? nonce,
         string? method,
         string? path,
+        string? queryString,
         string? bodyHash,
         string? secret,
         CancellationToken cancellationToken = default)
@@ -83,7 +84,7 @@ public sealed class HmacSignatureValidator
         if (!TryParseSignature(signature, out var suppliedSignature))
             return Invalid("invalid_signature");
 
-        var stringToSign = BuildStringToSign(method, path, timestamp, nonce, bodyHash);
+        var stringToSign = BuildStringToSign(method, path, queryString, timestamp, nonce, bodyHash);
         var expectedSignature = ComputeHmacSha256Bytes(secret, stringToSign);
         var signatureMatches = CryptographicOperations.FixedTimeEquals(suppliedSignature, expectedSignature);
         CryptographicOperations.ZeroMemory(suppliedSignature);
@@ -132,13 +133,16 @@ public sealed class HmacSignatureValidator
         string path,
         string timestamp,
         string nonce,
+        string? queryString = null,
         string? bodyHash = null)
-        => ComputeHmacSha256(secret, BuildStringToSign(method, path, timestamp, nonce, bodyHash));
+        => ComputeHmacSha256(secret, BuildStringToSign(method, path, queryString, timestamp, nonce, bodyHash));
 
-    private static string BuildStringToSign(string method, string path, string timestamp, string nonce, string? bodyHash)
-        => bodyHash is null
-            ? $"{method}\n{path}\n{timestamp}\n{nonce}"
-            : $"{method}\n{path}\n{timestamp}\n{nonce}\n{bodyHash}";
+    /// <summary>
+    /// 规范化签名串：query 以 "?" 开头的原始串（含 '?'）按原样入签 — 签名约束 query 参数，
+    /// 防止已签名请求的查询参数被篡改。空 query 统一写 ""（不占行位）。
+    /// </summary>
+    private static string BuildStringToSign(string method, string path, string? queryString, string timestamp, string nonce, string? bodyHash)
+        => $"{method}\n{path}{queryString ?? ""}\n{timestamp}\n{nonce}\n{bodyHash ?? ""}";
 
     private static byte[] ComputeHmacSha256Bytes(string key, string data)
     {

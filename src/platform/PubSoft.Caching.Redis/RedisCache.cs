@@ -12,6 +12,7 @@ public sealed class RedisCache : ICache
     private readonly int _database;
     private readonly string _keyPrefix;
     private readonly JsonSerializerOptions _serializerOptions;
+    private readonly int _maxValueBytes;
 
     public RedisCache(IConnectionMultiplexer connection, RedisCacheOptions? options = null)
     {
@@ -28,6 +29,9 @@ public sealed class RedisCache : ICache
         _database = options.Database;
         _keyPrefix = options.KeyPrefix;
         _serializerOptions = new JsonSerializerOptions(options.SerializerOptions);
+        if (options.MaxValueBytes < 1024)
+            throw new ArgumentOutOfRangeException(nameof(options.MaxValueBytes), "MaxValueBytes must be at least 1024.");
+        _maxValueBytes = options.MaxValueBytes;
     }
 
     private IDatabase Database => _connection.GetDatabase(_database);
@@ -48,6 +52,8 @@ public sealed class RedisCache : ICache
         ValidateValue(value);
         ValidateExpiry(expiry);
         var json = JsonSerializer.Serialize(value, _serializerOptions);
+        if (Encoding.UTF8.GetByteCount(json) > _maxValueBytes)
+            throw new ArgumentOutOfRangeException(nameof(value), $"Serialized cache value exceeds {_maxValueBytes} bytes.");
         await Database.StringSetAsync(PhysicalKey(key), json, expiry)
             .WaitAsync(cancellationToken).ConfigureAwait(false);
     }

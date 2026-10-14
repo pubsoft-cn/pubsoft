@@ -6,6 +6,9 @@ namespace PubSoft.Caching;
 
 public sealed class MemoryCache : ICache, IDisposable
 {
+    /// <summary>单值上限——字符串 4 Mi 字符 / 二进制 4 MiB，防止单条缓存耗尽内存。</summary>
+    private const int MaxValueChars = 4_194_304;
+    private const int MaxValueBytes = 4_194_304;
     private readonly ConcurrentDictionary<string, CacheEntry> _cache = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, Lazy<Task<object?>>> _factoryTasks = new(StringComparer.Ordinal);
     private readonly Timer _cleanupTimer;
@@ -249,6 +252,14 @@ public sealed class MemoryCache : ICache, IDisposable
     private static void ValidateValue<T>(T value) where T : class
     {
         if (value is null) throw new ArgumentNullException(nameof(value));
+        // 内存缓存同样限值上限——string/byte[] 可直接度量；其余托管对象由 _maxSize 条目数封顶兜底
+        switch (value)
+        {
+            case string s when s.Length > MaxValueChars:
+                throw new ArgumentOutOfRangeException(nameof(value), $"String cache value exceeds {MaxValueChars} characters.");
+            case byte[] b when b.Length > MaxValueBytes:
+                throw new ArgumentOutOfRangeException(nameof(value), $"Binary cache value exceeds {MaxValueBytes} bytes.");
+        }
     }
 
     private static void ValidatePattern(string pattern)

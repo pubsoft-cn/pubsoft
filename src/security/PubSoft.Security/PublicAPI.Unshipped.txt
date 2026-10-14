@@ -50,7 +50,7 @@ PubSoft.Security.HmacSignatureResult.IsValid.get -> bool
 PubSoft.Security.HmacSignatureResult.IsValid.init -> void
 PubSoft.Security.HmacSignatureValidator
 PubSoft.Security.HmacSignatureValidator.HmacSignatureValidator(PubSoft.Security.INonceStore! nonceStore, PubSoft.Security.HmacSignatureOptions? options = null, System.TimeProvider? timeProvider = null) -> void
-PubSoft.Security.HmacSignatureValidator.ValidateAsync(string? appId, string? signature, string? timestamp, string? nonce, string? method, string? path, string? bodyHash, string? secret, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.Security.HmacSignatureResult!>
+PubSoft.Security.HmacSignatureValidator.ValidateAsync(string? appId, string? signature, string? timestamp, string? nonce, string? method, string? path, string? queryString, string? bodyHash, string? secret, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.Security.HmacSignatureResult!>
 PubSoft.Security.INonceStore
 PubSoft.Security.INonceStore.TryUseAsync(string! scope, string! nonce, System.DateTimeOffset expiresAt, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<bool>
 PubSoft.Security.MemoryNonceStore
@@ -113,7 +113,7 @@ const PubSoft.Security.HmacSignatureHeaders.Signature = "X-Fend-Signature" -> st
 const PubSoft.Security.HmacSignatureHeaders.Timestamp = "X-Fend-Timestamp" -> string!
 const PubSoft.Security.PasswordHasher.DefaultIterations = 600000 -> int
 override PubSoft.Security.PasswordVerificationResult.GetHashCode() -> int
-static PubSoft.Security.HmacSignatureValidator.BuildSignature(string! secret, string! method, string! path, string! timestamp, string! nonce, string? bodyHash = null) -> string!
+static PubSoft.Security.HmacSignatureValidator.BuildSignature(string! secret, string! method, string! path, string! timestamp, string! nonce, string? queryString = null, string? bodyHash = null) -> string!
 static PubSoft.Security.HmacSignatureValidator.ComputeBodyHash(System.IO.Stream! body) -> string!
 static PubSoft.Security.HmacSignatureValidator.ComputeBodyHash(byte[]! body) -> string!
 static PubSoft.Security.HmacSignatureValidator.ComputeHmacSha256(string! key, string! data) -> string!

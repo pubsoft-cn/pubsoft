@@ -19,7 +19,9 @@ public sealed class AlertRuleProcessor : IResultProcessor
     private readonly AlertProcessorOptions _options;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<AlertRuleProcessor>? _logger;
+    /// <summary>job 级互斥锁表——按 jobKey 哈希键控；上限封顶 + 空闲项惰性清理，防止按 jobName 无界增长。</summary>
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _jobLocks = new(StringComparer.Ordinal);
+    private const int MaxJobLocks = 4_096;
 
     public AlertRuleProcessor(
         IStateStore stateStore,
@@ -51,7 +53,7 @@ public sealed class AlertRuleProcessor : IResultProcessor
         ArgumentException.ThrowIfNullOrWhiteSpace(job.Name);
 
         var jobKey = GetStableKey(job.Name);
-        var jobLock = _jobLocks.GetOrAdd(jobKey, static _ => new SemaphoreSlim(1, 1));
+        var jobLock = GetJobLock(jobKey);
         await jobLock.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
@@ -237,6 +239,24 @@ public sealed class AlertRuleProcessor : IResultProcessor
 
     private Task SetStateAsync<T>(string key, T value, CancellationToken cancellationToken) where T : struct
         => _stateStore.SetCustomStateAsync(key, new StateValue<T>(value), null, cancellationToken);
+
+    /// <summary>获取/新建 job 锁——满载时先清理未持有的空闲信号量，仍满载则临时锁（不阻塞流程，仅并发隔离失效）。</summary>
+    private SemaphoreSlim GetJobLock(string jobKey)
+    {
+        if (_jobLocks.TryGetValue(jobKey, out var existing))
+            return existing;
+        if (_jobLocks.Count >= MaxJobLocks)
+            EvictIdleJobLocks();
+        return _jobLocks.GetOrAdd(jobKey, static _ => new SemaphoreSlim(1, 1));
+    }
+
+    /// <summary>清理未占用（CurrentCount==1）的 idle 锁条目——持锁中的条目跳过。</summary>
+    private void EvictIdleJobLocks()
+    {
+        foreach (var pair in _jobLocks)
+            if (pair.Value.CurrentCount == 1)
+                _jobLocks.TryRemove(pair);
+    }
 
     private static string GetStableKey(string value)
         => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value)));

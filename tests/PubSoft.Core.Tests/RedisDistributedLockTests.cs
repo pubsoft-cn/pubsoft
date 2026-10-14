@@ -1,4 +1,5 @@
 using PubSoft.Caching;
+using System.Collections.Generic;
 using PubSoft.Caching.Redis;
 using StackExchange.Redis;
 using Xunit;
@@ -30,8 +31,19 @@ public sealed class RedisDistributedLockTests
 
         public async ValueTask DisposeAsync()
         {
-            await Connection.GetDatabase().ScriptEvaluateAsync(
-                $"return redis.call('DEL', unpack(redis.call('KEYS', '{Prefix}*')))", []);
+            // 集群模式逐节点 SCAN+DEL——KEYS+unpack 在 cluster 下不可用（跨 slot 报错）
+            var db = Connection.GetDatabase();
+            foreach (var endpoint in Connection.GetEndPoints())
+            {
+                var server = Connection.GetServer(endpoint);
+                var keys = server.KeysAsync(pattern: Prefix + "*");
+                var batch = db.CreateBatch();
+                var tasks = new List<Task>();
+                await foreach (var key in keys)
+                    tasks.Add(batch.KeyDeleteAsync(key));
+                batch.Execute();
+                await Task.WhenAll(tasks);
+            }
             await Connection.CloseAsync();
             Connection.Dispose();
         }

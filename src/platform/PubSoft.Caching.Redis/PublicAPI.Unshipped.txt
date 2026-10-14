@@ -20,6 +20,8 @@ PubSoft.Caching.Redis.RedisCacheOptions.Database.get -> int
 PubSoft.Caching.Redis.RedisCacheOptions.Database.set -> void
 PubSoft.Caching.Redis.RedisCacheOptions.KeyPrefix.get -> string!
 PubSoft.Caching.Redis.RedisCacheOptions.KeyPrefix.set -> void
+PubSoft.Caching.Redis.RedisCacheOptions.MaxValueBytes.get -> int
+PubSoft.Caching.Redis.RedisCacheOptions.MaxValueBytes.set -> void
 PubSoft.Caching.Redis.RedisCacheOptions.RedisCacheOptions() -> void
 PubSoft.Caching.Redis.RedisCacheOptions.SerializerOptions.get -> System.Text.Json.JsonSerializerOptions!
 PubSoft.Caching.Redis.RedisCacheOptions.SerializerOptions.set -> void
