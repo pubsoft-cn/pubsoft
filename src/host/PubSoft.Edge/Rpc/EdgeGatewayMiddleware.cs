@@ -105,6 +105,16 @@ public sealed class EdgeGatewayMiddleware
             return;
         }
 
+        // Per-client scheme pinning (registered clients cannot downgrade to a weaker scheme).
+        var schemePolicy = context.RequestServices.GetService<IEdgeSchemePolicy>();
+        var allowedScheme = schemePolicy?.GetAllowedScheme(request.ClientId);
+        if (allowedScheme.HasValue && request.Scheme != allowedScheme.Value)
+        {
+            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.SchemeNotAccepted,
+                $"clientId={request.ClientId} only accepts scheme={allowedScheme.Value}"));
+            return;
+        }
+
         var handlerSchemes = GetHandlerSchemes(handler);
         if (!handlerSchemes.Contains(request.Scheme) && request.Scheme != EdgeAuthScheme.None)
         {
@@ -250,6 +260,16 @@ public sealed class EdgeGatewayMiddleware
         context.Response.StatusCode = 200;
         await JsonSerializer.SerializeAsync(context.Response.Body, response, EdgeJsonOptions.Default, context.RequestAborted);
     }
+}
+
+/// <summary>
+/// Optional per-clientId scheme pinning — when registered, a client may only use the declared
+/// scheme (downgrade protection). Null = unrestricted.
+/// </summary>
+public interface IEdgeSchemePolicy
+{
+    /// <summary>Returns the pinned scheme for a clientId, or null to allow any scheme.</summary>
+    EdgeAuthScheme? GetAllowedScheme(string clientId);
 }
 
 /// <summary>
