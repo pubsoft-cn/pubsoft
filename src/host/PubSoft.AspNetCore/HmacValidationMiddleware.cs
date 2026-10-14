@@ -15,8 +15,10 @@ public interface IAppSecretResolver
 
 public sealed class HmacValidationOptions
 {
+    /// <summary>豁免路径前缀——按路径段边界匹配（"/health" 只豁免 "/health" 与 "/health/..."，不放行 "/healthz-x"）。</summary>
     public string[] ExcludedPathPrefixes { get; set; } = [];
-    public bool RequireBodyHash { get; set; }
+    /// <summary>请求体 SHA-256 是否入签——默认开启；GET/空 body 用固定空体哈希，不豁免。</summary>
+    public bool RequireBodyHash { get; set; } = true;
     public int MaximumBodyBytes { get; set; } = 1_048_576;
 }
 
@@ -67,8 +69,7 @@ public sealed class HmacValidationMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         var path = context.Request.Path.Value ?? string.Empty;
-        if (_options.ExcludedPathPrefixes.Any(prefix =>
-                !string.IsNullOrEmpty(prefix) && path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+        if (_options.ExcludedPathPrefixes.Any(prefix => IsExcludedPath(path, prefix)))
         {
             await _next(context).ConfigureAwait(false);
             return;
@@ -100,7 +101,8 @@ public sealed class HmacValidationMiddleware
 
         if (string.IsNullOrEmpty(secret))
         {
-            await Reject(context, StatusCodes.Status401Unauthorized, "invalid_app_id").ConfigureAwait(false);
+            // 与签名不匹配返回同一错误码——避免 appId 存在性枚举 oracle
+            await Reject(context, StatusCodes.Status401Unauthorized, "signature_mismatch").ConfigureAwait(false);
             return;
         }
 
@@ -131,6 +133,7 @@ public sealed class HmacValidationMiddleware
             nonce,
             context.Request.Method,
             path,
+            context.Request.QueryString.Value,
             bodyHash,
             secret,
             context.RequestAborted).ConfigureAwait(false);
@@ -143,6 +146,15 @@ public sealed class HmacValidationMiddleware
 
         context.Items["PubSoft.AppId"] = appId;
         await _next(context).ConfigureAwait(false);
+    }
+
+    /// <summary>路径段边界感知的前缀匹配——"/api" 豁免 "/api" 与 "/api/..."，不放行 "/apixyz"。</summary>
+    private static bool IsExcludedPath(string path, string prefix)
+    {
+        if (string.IsNullOrEmpty(prefix)) return false;
+        if (path.Equals(prefix, StringComparison.OrdinalIgnoreCase)) return true;
+        if (!path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) return false;
+        return prefix[^1] == '/' || path.Length > prefix.Length && path[prefix.Length] == '/';
     }
 
     private static async Task<string> ComputeBodyHashAsync(HttpRequest request, int maximumBytes, CancellationToken cancellationToken)

@@ -22,8 +22,8 @@ if (!limiter.CheckRateLimit("consumer").IsAllowed || limiter.CheckRateLimit("con
 var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 var signature = HmacSignatureValidator.BuildSignature("secret", "GET", "/", timestamp, "nonce");
 var validator = new HmacSignatureValidator(new MemoryNonceStore());
-var valid = await validator.ValidateAsync("consumer", signature, timestamp, "nonce", "GET", "/", null, "secret");
-var replay = await validator.ValidateAsync("consumer", signature, timestamp, "nonce", "GET", "/", null, "secret");
+var valid = await validator.ValidateAsync("consumer", signature, timestamp, "nonce", "GET", "/", null, null, "secret");
+var replay = await validator.ValidateAsync("consumer", signature, timestamp, "nonce", "GET", "/", null, null, "secret");
 if (!valid.IsValid || replay.Error != "nonce_replayed")
     throw new InvalidOperationException("HMAC nonce consumer check failed.");
 

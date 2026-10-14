@@ -42,6 +42,8 @@ public sealed class InProcessDistributedLock : IDistributedLock, IDisposable
     }
 
     private readonly ConcurrentDictionary<string, LockEntry> _entries = new(StringComparer.Ordinal);
+    /// <summary>新条目插入门闩——容量检查 + TryAdd 必须原子化，否则满载时可并发越过上限。</summary>
+    private readonly object _entryGate = new();
     private readonly TimeProvider _timeProvider;
     private readonly int _maxEntries;
     private long _nextToken;
@@ -132,12 +134,19 @@ public sealed class InProcessDistributedLock : IDistributedLock, IDisposable
         if (_entries.TryGetValue(key, out var existing))
             return existing;
 
-        if (_entries.Count >= _maxEntries)
-            EvictIdleEntries();
-        if (_entries.Count >= _maxEntries)
-            return null;
+        // 命中未中才进 gate——容量检查 + TryAdd 原子化
+        lock (_entryGate)
+        {
+            if (_entries.TryGetValue(key, out existing))
+                return existing;
+            if (_entries.Count >= _maxEntries)
+                EvictIdleEntries();
+            if (_entries.Count >= _maxEntries)
+                return null;
 
-        return _entries.GetOrAdd(key, static _ => new LockEntry());
+            var entry = new LockEntry();
+            return _entries.TryAdd(key, entry) ? entry : null;
+        }
     }
 
     private void EvictIdleEntries()

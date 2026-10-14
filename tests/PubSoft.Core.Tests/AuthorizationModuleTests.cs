@@ -12,7 +12,8 @@ public sealed class AuthorizationModuleTests
     [InlineData("PUT", "Read", PermissionFlags.Modify)]
     [InlineData("PATCH", "Read", PermissionFlags.Modify)]
     [InlineData("OPTIONS", "Read", PermissionFlags.Custom)]
-    [InlineData(null, null, PermissionFlags.Query)]
+    // 缺失 method 归并到最强权限——不归并为最弱 Query 防放行未声明写操作
+    [InlineData(null, null, PermissionFlags.Custom)]
     public void DeriveFlagsUsesHttpVerbDefaults(string? method, string? actionName, PermissionFlags expected)
     {
         Assert.Equal(expected, PermissionRequirementDeriver.DeriveFlags(method, actionName));

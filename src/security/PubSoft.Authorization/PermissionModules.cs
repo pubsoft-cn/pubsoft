@@ -168,7 +168,8 @@ public static class PermissionRequirementDeriver
 
     public static PermissionFlags DeriveFlags(string? httpMethod, string? actionName)
     {
-        switch (httpMethod?.ToUpperInvariant() ?? "GET")
+        // 缺失/未知 method 一律按最强权限（Custom）处理——缺省归并到最弱 Query 会放行本该受管控的写操作。
+        switch (httpMethod?.ToUpperInvariant())
         {
             case "GET":
             case "HEAD":

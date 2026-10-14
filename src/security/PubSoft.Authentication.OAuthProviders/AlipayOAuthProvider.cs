@@ -163,7 +163,11 @@ public sealed class AlipayOAuthProvider : OAuthProviderBase
         var formData = new FormUrlEncodedContent(paramDict);
         var sw = Stopwatch.StartNew();
         var resp = await HttpClient.PostAsync(gatewayUrl, formData, ct).ConfigureAwait(false);
+        if (resp.Content.Headers.ContentLength > 1_048_576)
+            throw new InvalidDataException("Alipay response exceeded 1 MiB");
         var respBytes = await resp.Content.ReadAsByteArrayAsync(ct).ConfigureAwait(false);
+        if (respBytes.Length > 1_048_576)
+            throw new InvalidDataException("Alipay response exceeded 1 MiB");
         sw.Stop();
         Logger?.LogInformation("Alipay {Method} appId={AppId} elapsed={Elapsed}ms", method, appId, sw.ElapsedMilliseconds);
 

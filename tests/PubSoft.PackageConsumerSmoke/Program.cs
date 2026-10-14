@@ -203,7 +203,7 @@ var signatureValidator = new HmacSignatureValidator(nonceStore);
 var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 var nonce = "consumer-nonce";
 var signature = HmacSignatureValidator.BuildSignature("consumer-secret", "GET", "/", timestamp, nonce);
-if (!(await signatureValidator.ValidateAsync("consumer-app", signature, timestamp, nonce, "GET", "/", null, "consumer-secret")).IsValid)
+if (!(await signatureValidator.ValidateAsync("consumer-app", signature, timestamp, nonce, "GET", "/", null, null, "consumer-secret")).IsValid)
     throw new InvalidOperationException("HMAC validator package smoke check failed.");
 
 using var cache = new MemoryCache();

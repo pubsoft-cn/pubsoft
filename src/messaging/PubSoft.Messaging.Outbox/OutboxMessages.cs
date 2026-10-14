@@ -46,15 +46,19 @@ public sealed class OutboxMessage : IMultiTenant
         DateTimeOffset occurredAt,
         int maxAttempts)
     {
+        // 列上限对齐 OnModelCreating——超长原样入库会整批 SaveChanges 失败，宁可截断留痕
         Id = id;
-        EventType = eventType;
+        EventType = Truncate(eventType, 512)!;
         PayloadJson = payloadJson;
-        TargetModule = targetModule;
-        AggregateKey = aggregateKey;
+        TargetModule = Truncate(targetModule, 128);
+        AggregateKey = Truncate(aggregateKey, 256);
         OccurredAt = occurredAt;
         Status = OutboxMessageStatus.Pending;
         MaxAttempts = maxAttempts;
     }
+
+    private static string? Truncate(string? value, int maxLength)
+        => value is null || value.Length <= maxLength ? value : value[..maxLength];
 
     internal void AcquireLease(Guid leaseToken, DateTimeOffset now, TimeSpan leaseDuration)
     {

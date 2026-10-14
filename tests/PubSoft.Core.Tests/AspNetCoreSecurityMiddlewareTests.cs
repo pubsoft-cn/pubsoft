@@ -36,7 +36,7 @@ public sealed class AspNetCoreSecurityMiddlewareTests
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
         var bodyHash = HmacSignatureValidator.ComputeBodyHash(Encoding.UTF8.GetBytes(body));
         SetSignatureHeaders(context, timestamp, "nonce-1", HmacSignatureValidator.BuildSignature(
-            secret, "GET", "/resource", timestamp, "nonce-1", bodyHash));
+            secret, "GET", "/resource", timestamp, "nonce-1", bodyHash: bodyHash));
         var nextCalled = false;
         var middleware = CreateHmacMiddleware(_ =>
         {
@@ -69,7 +69,8 @@ public sealed class AspNetCoreSecurityMiddlewareTests
     {
         var context = CreateContext();
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
-        var signature = HmacSignatureValidator.BuildSignature("app secret", "GET", "/resource", timestamp, "same-nonce");
+        var emptyBodyHash = HmacSignatureValidator.ComputeBodyHash(Array.Empty<byte>());
+        var signature = HmacSignatureValidator.BuildSignature("app secret", "GET", "/resource", timestamp, "same-nonce", bodyHash: emptyBodyHash);
         SetSignatureHeaders(context, timestamp, "same-nonce", signature);
         var validator = new HmacSignatureValidator(new MemoryNonceStore());
         var nextCount = 0;

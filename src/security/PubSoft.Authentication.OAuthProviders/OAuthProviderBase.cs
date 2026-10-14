@@ -50,10 +50,13 @@ public abstract class OAuthProviderBase : IOAuthProvider
     public virtual Task<OAuthPhoneResult> GetPhoneNumberAsync(string appId, string code, CancellationToken ct = default)
         => Task.FromResult(OAuthPhoneResult.Fail("This provider does not support phone-number retrieval"));
 
+    /// <summary>上游响应体大小上限 — 异常/恶意提供方不得向内存灌入无限数据（1 MiB 足够任何 OAuth JSON 载荷）。</summary>
+    private const int MaxResponseBytes = 1_048_576;
+
     /// <summary>GET a URL and parse the JSON body without any serializer metadata.</summary>
     protected async Task<JsonElement> FetchJsonAsync(string url, CancellationToken ct)
     {
-        var text = await HttpClient.GetStringAsync(url, ct).ConfigureAwait(false);
+        var text = await ReadBoundedStringAsync(await HttpClient.GetAsync(url, ct).ConfigureAwait(false), ct).ConfigureAwait(false);
         using var doc = JsonDocument.Parse(text);
         return doc.RootElement.Clone();
     }
@@ -62,7 +65,7 @@ public abstract class OAuthProviderBase : IOAuthProvider
     protected async Task<JsonElement> PostJsonAsync(string url, HttpContent body, CancellationToken ct)
     {
         using var response = await HttpClient.PostAsync(url, body, ct).ConfigureAwait(false);
-        var text = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+        var text = await ReadBoundedStringAsync(response, ct).ConfigureAwait(false);
         using var doc = JsonDocument.Parse(text);
         return doc.RootElement.Clone();
     }
@@ -71,9 +74,32 @@ public abstract class OAuthProviderBase : IOAuthProvider
     protected async Task<JsonElement> SendJsonAsync(HttpRequestMessage request, CancellationToken ct)
     {
         using var response = await HttpClient.SendAsync(request, ct).ConfigureAwait(false);
-        var text = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+        var text = await ReadBoundedStringAsync(response, ct).ConfigureAwait(false);
         using var doc = JsonDocument.Parse(text);
         return doc.RootElement.Clone();
+    }
+
+    /// <summary>响应体限长读取——超限抛 InvalidDataException，拒绝把整条上游负载读进内存。</summary>
+    private static async Task<string> ReadBoundedStringAsync(HttpResponseMessage response, CancellationToken ct)
+    {
+        using (response)
+        {
+            if (response.Content.Headers.ContentLength > MaxResponseBytes)
+                throw new InvalidDataException($"OAuth provider response exceeded {MaxResponseBytes} bytes");
+            await using var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+            using var reader = new StreamReader(stream);
+            var buffer = new char[8192];
+            var builder = new System.Text.StringBuilder();
+            int total = 0, read;
+            while ((read = await reader.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
+            {
+                total += read;
+                if (total > MaxResponseBytes)
+                    throw new InvalidDataException($"OAuth provider response exceeded {MaxResponseBytes} bytes");
+                builder.Append(buffer, 0, read);
+            }
+            return builder.ToString();
+        }
     }
 
     /// <summary>Extracts a string field; numeric and boolean JSON values are returned as their raw text
