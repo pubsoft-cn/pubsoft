@@ -177,3 +177,5 @@ static PubSoft.AspNetCore.PubSoftRateLimitingExtensions.UsePubSoftRateLimiting(t
 static PubSoft.AspNetCore.PubSoftRequestSaveChangesExtensions.AddPubSoftRequestSaveChanges(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.PubSoftRequestSaveChangesExtensions.UsePubSoftRequestSaveChanges(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
 static PubSoft.AspNetCore.SecurityHeadersMiddlewareExtensions.UsePubSoftSecurityHeaders(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, PubSoft.AspNetCore.SecurityHeadersOptions? options = null) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+PubSoft.AspNetCore.PubSoftSecurityExtensions
+static PubSoft.AspNetCore.PubSoftSecurityExtensions.AddPubSoftSecurity(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration? configuration) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
