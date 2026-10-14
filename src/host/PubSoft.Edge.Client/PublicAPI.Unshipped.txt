@@ -1,0 +1,18 @@
+#nullable enable
+PubSoft.Edge.EdgeClient
+PubSoft.Edge.EdgeClient.BuildRequest(string! method, object? parameters) -> PubSoft.Edge.EdgeRpcRequest!
+PubSoft.Edge.EdgeClient.EdgeClient(System.Net.Http.HttpClient! http, string! clientId, PubSoft.Edge.EdgeAuthScheme scheme = PubSoft.Edge.EdgeAuthScheme.None, string! path = "/rpc") -> void
+PubSoft.Edge.EdgeClient.EdgeClient(System.Net.Http.HttpClient! http, string! clientId, string! secretKey, PubSoft.Edge.EdgeAuthScheme scheme = PubSoft.Edge.EdgeAuthScheme.Hmac, string! path = "/rpc") -> void
+PubSoft.Edge.EdgeClient.EdgeClient(System.Net.Http.HttpClient! http, string! clientId, string! sessionKey) -> void
+PubSoft.Edge.EdgeClient.EdgeClient(System.Net.Http.HttpClient! http, string! clientId, string! sessionKey, string! path) -> void
+PubSoft.Edge.EdgeClient.GetSignPayload(string! method, object? parameters) -> string?
+PubSoft.Edge.EdgeClient.InvokeAsync<T>(string! method, object? parameters, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<T?>!
+PubSoft.Edge.EdgeClient.InvokeVoidAsync(string! method, object? parameters, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Edge.EdgeClient.LastRequestId.get -> string?
+PubSoft.Edge.EdgeClientExtensions
+PubSoft.Edge.EdgeRpcException
+PubSoft.Edge.EdgeRpcException.Code.get -> string!
+PubSoft.Edge.EdgeRpcException.EdgeRpcException(string! code, string! message, string! method) -> void
+PubSoft.Edge.EdgeRpcException.Method.get -> string!
+static PubSoft.Edge.EdgeClientExtensions.AddEdgeClient(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! baseUrl, string! clientId, string! secretKey, System.TimeSpan? timeout = null, PubSoft.Edge.EdgeAuthScheme scheme = PubSoft.Edge.EdgeAuthScheme.Hmac) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Edge.EdgeClientExtensions.AddEdgeClientWithSession(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! baseUrl, string! clientId, string! sessionKey, System.TimeSpan? timeout = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

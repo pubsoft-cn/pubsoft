@@ -1,0 +1,117 @@
+#nullable enable
+PubSoft.Edge.EdgeAuthScheme
+PubSoft.Edge.EdgeAuthScheme.Hmac = 0 -> PubSoft.Edge.EdgeAuthScheme
+PubSoft.Edge.EdgeAuthScheme.Md5 = 3 -> PubSoft.Edge.EdgeAuthScheme
+PubSoft.Edge.EdgeAuthScheme.None = 2 -> PubSoft.Edge.EdgeAuthScheme
+PubSoft.Edge.EdgeAuthScheme.Session = 1 -> PubSoft.Edge.EdgeAuthScheme
+PubSoft.Edge.EdgeError
+PubSoft.Edge.EdgeErrorCodes
+PubSoft.Edge.EdgeJsonOptions
+PubSoft.Edge.EdgeRpcRequest
+PubSoft.Edge.EdgeRpcRequest.ClientId.get -> string!
+PubSoft.Edge.EdgeRpcRequest.ClientId.set -> void
+PubSoft.Edge.EdgeRpcRequest.Credential.get -> string!
+PubSoft.Edge.EdgeRpcRequest.Credential.set -> void
+PubSoft.Edge.EdgeRpcRequest.EdgeRpcRequest() -> void
+PubSoft.Edge.EdgeRpcRequest.Method.get -> string!
+PubSoft.Edge.EdgeRpcRequest.Method.set -> void
+PubSoft.Edge.EdgeRpcRequest.Nonce.get -> string!
+PubSoft.Edge.EdgeRpcRequest.Nonce.set -> void
+PubSoft.Edge.EdgeRpcRequest.Params.get -> System.Text.Json.JsonElement
+PubSoft.Edge.EdgeRpcRequest.Params.set -> void
+PubSoft.Edge.EdgeRpcRequest.RequestId.get -> string?
+PubSoft.Edge.EdgeRpcRequest.RequestId.set -> void
+PubSoft.Edge.EdgeRpcRequest.Scheme.get -> PubSoft.Edge.EdgeAuthScheme
+PubSoft.Edge.EdgeRpcRequest.Scheme.set -> void
+PubSoft.Edge.EdgeRpcRequest.Timestamp.get -> long
+PubSoft.Edge.EdgeRpcRequest.Timestamp.set -> void
+PubSoft.Edge.EdgeRpcRequest.Version.get -> string?
+PubSoft.Edge.EdgeRpcRequest.Version.set -> void
+PubSoft.Edge.EdgeRpcResponse
+PubSoft.Edge.EdgeRpcResponse.<Clone>$() -> PubSoft.Edge.EdgeRpcResponse!
+PubSoft.Edge.EdgeRpcResponse.Code.get -> string!
+PubSoft.Edge.EdgeRpcResponse.Code.init -> void
+PubSoft.Edge.EdgeRpcResponse.Data.get -> System.Text.Json.JsonElement?
+PubSoft.Edge.EdgeRpcResponse.Data.init -> void
+PubSoft.Edge.EdgeRpcResponse.EdgeRpcResponse() -> void
+PubSoft.Edge.EdgeRpcResponse.Equals(PubSoft.Edge.EdgeRpcResponse? other) -> bool
+PubSoft.Edge.EdgeRpcResponse.Message.get -> string!
+PubSoft.Edge.EdgeRpcResponse.Message.init -> void
+PubSoft.Edge.EdgeRpcResponse.Ok.get -> bool
+PubSoft.Edge.EdgeRpcResponse.Ok.init -> void
+PubSoft.Edge.EdgeRpcResponse.RequestId.get -> string?
+PubSoft.Edge.EdgeRpcResponse.RequestId.init -> void
+PubSoft.Edge.EdgeRpcResponse.TraceId.get -> string?
+PubSoft.Edge.EdgeRpcResponse.TraceId.init -> void
+PubSoft.Edge.EdgeRpcResponse.WithDiagnostics(PubSoft.Edge.EdgeRpcRequest! request) -> PubSoft.Edge.EdgeRpcResponse!
+PubSoft.Edge.EdgeSignResult
+PubSoft.Edge.EdgeSignResult.<Clone>$() -> PubSoft.Edge.EdgeSignResult!
+PubSoft.Edge.EdgeSignResult.Deconstruct(out bool Success, out string? ErrorMessage, out string? SignPayload) -> void
+PubSoft.Edge.EdgeSignResult.EdgeSignResult(bool Success, string? ErrorMessage, string? SignPayload) -> void
+PubSoft.Edge.EdgeSignResult.Equals(PubSoft.Edge.EdgeSignResult? other) -> bool
+PubSoft.Edge.EdgeSignResult.ErrorMessage.get -> string?
+PubSoft.Edge.EdgeSignResult.ErrorMessage.init -> void
+PubSoft.Edge.EdgeSignResult.SignPayload.get -> string?
+PubSoft.Edge.EdgeSignResult.SignPayload.init -> void
+PubSoft.Edge.EdgeSignResult.Success.get -> bool
+PubSoft.Edge.EdgeSignResult.Success.init -> void
+PubSoft.Edge.EdgeSigner
+const PubSoft.Edge.EdgeErrorCodes.AuthError = "10401" -> string!
+const PubSoft.Edge.EdgeErrorCodes.BadRequest = "10400" -> string!
+const PubSoft.Edge.EdgeErrorCodes.ClientIdRequired = "10400" -> string!
+const PubSoft.Edge.EdgeErrorCodes.ClientNotConfigured = "10401" -> string!
+const PubSoft.Edge.EdgeErrorCodes.Conflict = "10409" -> string!
+const PubSoft.Edge.EdgeErrorCodes.DuplicateRequest = "10409" -> string!
+const PubSoft.Edge.EdgeErrorCodes.FailureRateLimited = "10429" -> string!
+const PubSoft.Edge.EdgeErrorCodes.Forbidden = "10403" -> string!
+const PubSoft.Edge.EdgeErrorCodes.GatewayTimeout = "10504" -> string!
+const PubSoft.Edge.EdgeErrorCodes.InternalError = "10500" -> string!
+const PubSoft.Edge.EdgeErrorCodes.MethodNotFound = "10404" -> string!
+const PubSoft.Edge.EdgeErrorCodes.MethodRequired = "10400" -> string!
+const PubSoft.Edge.EdgeErrorCodes.NonceRequired = "10401" -> string!
+const PubSoft.Edge.EdgeErrorCodes.NotFound = "10404" -> string!
+const PubSoft.Edge.EdgeErrorCodes.ParamsInvalid = "10400" -> string!
+const PubSoft.Edge.EdgeErrorCodes.ParamsValidationFailed = "10400" -> string!
+const PubSoft.Edge.EdgeErrorCodes.RateLimited = "10429" -> string!
+const PubSoft.Edge.EdgeErrorCodes.RoleRequired = "10403" -> string!
+const PubSoft.Edge.EdgeErrorCodes.SchemeNotAccepted = "10401" -> string!
+const PubSoft.Edge.EdgeErrorCodes.ServiceUnavailable = "10503" -> string!
+const PubSoft.Edge.EdgeErrorCodes.SessionKeyExpired = "10401" -> string!
+const PubSoft.Edge.EdgeErrorCodes.SessionKeyInvalid = "10401" -> string!
+const PubSoft.Edge.EdgeErrorCodes.SessionKeyRequired = "10401" -> string!
+const PubSoft.Edge.EdgeErrorCodes.SessionServiceNotConfigured = "10500" -> string!
+const PubSoft.Edge.EdgeErrorCodes.SignServiceNotConfigured = "10500" -> string!
+const PubSoft.Edge.EdgeErrorCodes.SignatureInvalid = "10401" -> string!
+const PubSoft.Edge.EdgeErrorCodes.TenantMismatch = "10403" -> string!
+const PubSoft.Edge.EdgeErrorCodes.TimestampOutOfRange = "10400" -> string!
+const PubSoft.Edge.EdgeErrorCodes.Unauthorized = "10401" -> string!
+const PubSoft.Edge.EdgeErrorCodes.UnknownScheme = "10401" -> string!
+override PubSoft.Edge.EdgeRpcResponse.Equals(object? obj) -> bool
+override PubSoft.Edge.EdgeRpcResponse.GetHashCode() -> int
+override PubSoft.Edge.EdgeRpcResponse.ToString() -> string!
+override PubSoft.Edge.EdgeSignResult.Equals(object? obj) -> bool
+override PubSoft.Edge.EdgeSignResult.GetHashCode() -> int
+override PubSoft.Edge.EdgeSignResult.ToString() -> string!
+static PubSoft.Edge.EdgeError.BadRequest(string! message) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.Conflict(string! message) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.Forbidden(string! message) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.GatewayTimeout(string! message) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.InternalError(string! message) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.NotFound(string! message) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.RateLimited(string! message) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.ServiceUnavailable(string! message) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.Unauthorized(string! message) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeRpcResponse.Error(string! code, string! message) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeRpcResponse.Success(object? data) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeRpcResponse.operator !=(PubSoft.Edge.EdgeRpcResponse? left, PubSoft.Edge.EdgeRpcResponse? right) -> bool
+static PubSoft.Edge.EdgeRpcResponse.operator ==(PubSoft.Edge.EdgeRpcResponse? left, PubSoft.Edge.EdgeRpcResponse? right) -> bool
+static PubSoft.Edge.EdgeSignResult.operator !=(PubSoft.Edge.EdgeSignResult? left, PubSoft.Edge.EdgeSignResult? right) -> bool
+static PubSoft.Edge.EdgeSignResult.operator ==(PubSoft.Edge.EdgeSignResult? left, PubSoft.Edge.EdgeSignResult? right) -> bool
+static PubSoft.Edge.EdgeSigner.BuildSignPayload(string! method, long timestamp, string! nonce, string? requestId, object? parameters) -> string!
+static PubSoft.Edge.EdgeSigner.CanonicalizeJson(object? value) -> string!
+static PubSoft.Edge.EdgeSigner.SignHmac(string! method, long timestamp, string! nonce, string? requestId, object? parameters, string! secretKey) -> string!
+static PubSoft.Edge.EdgeSigner.SignMd5(string! method, long timestamp, string! nonce, string? requestId, object? parameters, string! secretKey) -> string!
+static PubSoft.Edge.EdgeSigner.Verify(PubSoft.Edge.EdgeRpcRequest! request, string! secretKey) -> PubSoft.Edge.EdgeSignResult!
+static PubSoft.Edge.EdgeSigner.VerifyHmac(string! method, long timestamp, string! nonce, string? requestId, object? parameters, string! secretKey, string! signature) -> bool
+static PubSoft.Edge.EdgeSigner.VerifyMd5(string! method, long timestamp, string! nonce, string? requestId, object? parameters, string! secretKey, string! signature) -> bool
+static readonly PubSoft.Edge.EdgeJsonOptions.Default -> System.Text.Json.JsonSerializerOptions!
