@@ -103,6 +103,8 @@ PubSoft.Edge.IEdgeHandler
 PubSoft.Edge.IEdgeHandler.ExecuteAsync(PubSoft.Edge.EdgeRpcRequest! request, PubSoft.Edge.EdgeContext! context, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<PubSoft.Edge.EdgeRpcResponse!>!
 PubSoft.Edge.IEdgeHandler.Method.get -> string!
 PubSoft.Edge.IEdgeHandler.Schemes.get -> PubSoft.Edge.EdgeAuthScheme[]!
+PubSoft.Edge.IEdgeSchemePolicy
+PubSoft.Edge.IEdgeSchemePolicy.GetAllowedScheme(string! clientId) -> PubSoft.Edge.EdgeAuthScheme?
 PubSoft.Edge.IEdgeSessionStore
 PubSoft.Edge.IEdgeSessionStore.GetAsync(string! sessionKey, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Edge.EdgeSession?>!
 PubSoft.Edge.IEdgeSessionStore.RemoveAsync(string! sessionKey, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!

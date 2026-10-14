@@ -10,6 +10,7 @@ PubSoft.Events.DomainEventDispatcher.Dispose() -> void
 PubSoft.Events.DomainEventDispatcher.DomainEventDispatcher(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory! scopeFactory, PubSoft.Events.DomainEventOptions? options = null, Microsoft.Extensions.Logging.ILogger<PubSoft.Events.DomainEventDispatcher!>? logger = null) -> void
 PubSoft.Events.DomainEventDispatcher.PublishAsync<TEvent>(TEvent event, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 PubSoft.Events.DomainEventDispatcher.RegisterHandler<TEvent>(System.Func<TEvent, System.Threading.CancellationToken, System.Threading.Tasks.Task!>! handler) -> void
+PubSoft.Events.DomainEventHandlerServiceCollectionExtensions
 PubSoft.Events.DomainEventOptions
 PubSoft.Events.DomainEventOptions.Capacity.get -> int
 PubSoft.Events.DomainEventOptions.Capacity.set -> void
@@ -23,4 +24,5 @@ PubSoft.Events.IDomainEventDispatcher.PublishAsync<TEvent>(TEvent event, System.
 PubSoft.Events.IDomainEventHandler<TEvent>
 PubSoft.Events.IDomainEventHandler<TEvent>.HandleAsync(TEvent event, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 override PubSoft.Events.DomainEventBackgroundService.StopAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+static PubSoft.Events.DomainEventHandlerServiceCollectionExtensions.AddPubSoftDomainEventHandler<TEvent, THandler>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Events.DomainEventServiceCollectionExtensions.AddPubSoftEvents(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Events.DomainEventOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
