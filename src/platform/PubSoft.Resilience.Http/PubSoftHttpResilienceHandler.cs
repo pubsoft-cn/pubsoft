@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
@@ -213,5 +214,27 @@ public static class HttpResilienceServiceCollectionExtensions
             circuitBreaker,
             provider.GetService<ILogger<PubSoftHttpResilienceHandler>>()));
         return builder;
+    }
+
+    /// <summary>
+    /// 从 <see cref="IConfigurationSection"/> 绑定 <see cref="HttpResilienceOptions"/> 并注册韧性 handler。
+    /// 兼容旧 <c>AddWireResilience(section)</c> 用法。
+    /// </summary>
+    public static IHttpClientBuilder AddPubSoftHttpResilience(
+        this IHttpClientBuilder builder,
+        IConfigurationSection section)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        ArgumentNullException.ThrowIfNull(section);
+        return builder.AddPubSoftHttpResilience(o =>
+        {
+            if (int.TryParse(section["Retry:MaxRetries"], out var mr)) { o.Retry ??= new(); o.Retry.MaxRetries = mr; }
+            if (int.TryParse(section["Retry:InitialDelayMs"], out var idl)) { o.Retry ??= new(); o.Retry.InitialDelay = TimeSpan.FromMilliseconds(idl); }
+            if (bool.TryParse(section["Retry:RetryOnTimeout"], out var rt)) { o.Retry ??= new(); o.Retry.RetryOnTimeout = rt; }
+            if (bool.TryParse(section["Retry:RetryOn5xx"], out var r5)) { o.Retry ??= new(); o.Retry.RetryOn5xx = r5; }
+            if (bool.TryParse(section["Retry:RetryOnConnectionFailure"], out var rcf)) { o.Retry ??= new(); o.Retry.RetryOnConnectionFailure = rcf; }
+            if (int.TryParse(section["CircuitBreaker:FailureThreshold"], out var ft)) { o.CircuitBreaker ??= new(); o.CircuitBreaker.FailureThreshold = ft; }
+            if (int.TryParse(section["CircuitBreaker:OpenTimeoutMs"], out var ot)) { o.CircuitBreaker ??= new(); o.CircuitBreaker.OpenTimeout = TimeSpan.FromMilliseconds(ot); }
+        });
     }
 }

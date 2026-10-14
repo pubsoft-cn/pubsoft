@@ -4,6 +4,7 @@
     <Description>Optional ASP.NET Core adapters for PubSoft security and auditing.</Description>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../core/PubSoft.DependencyInjection/PubSoft.DependencyInjection.csproj" />
     <ProjectReference Include="../../security/PubSoft.Authentication/PubSoft.Authentication.csproj" />
     <ProjectReference Include="../../security/PubSoft.Authorization/PubSoft.Authorization.csproj" />
     <ProjectReference Include="../../data/PubSoft.Auditing/PubSoft.Auditing.csproj" />
