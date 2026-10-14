@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="PubSoft.Messaging.Outbox" Version="0.1.0" />
+    <PackageReference Include="PubSoft.Messaging.Outbox" Version="0.1.0-*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
   </ItemGroup>
 </Project>

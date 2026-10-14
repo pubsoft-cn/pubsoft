@@ -7,6 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="PubSoft.Authentication.Jwt.AspNetCore" Version="0.1.0" />
+    <PackageReference Include="PubSoft.Authentication.Jwt.AspNetCore" Version="0.1.0-*" />
   </ItemGroup>
 </Project>
