@@ -4,6 +4,7 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="10.0.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
     <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.9" />
@@ -19,6 +20,9 @@
     <ProjectReference Include="../../src/security/PubSoft.Authentication/PubSoft.Authentication.csproj" />
     <ProjectReference Include="../../src/core/PubSoft.Identity/PubSoft.Identity.csproj" />
     <ProjectReference Include="../../src/security/PubSoft.Authentication.Jwt.AspNetCore/PubSoft.Authentication.Jwt.AspNetCore.csproj" />
+    <ProjectReference Include="../../src/host/PubSoft.Edge/PubSoft.Edge.csproj" />
+    <ProjectReference Include="../../src/host/PubSoft.Edge.Core/PubSoft.Edge.Core.csproj" />
+    <ProjectReference Include="../../src/host/PubSoft.Edge.Client/PubSoft.Edge.Client.csproj" />
     <ProjectReference Include="../../src/security/PubSoft.Authentication.Jwt/PubSoft.Authentication.Jwt.csproj" />
     <ProjectReference Include="../../src/security/PubSoft.Authentication.OAuthProviders/PubSoft.Authentication.OAuthProviders.csproj" />
     <ProjectReference Include="../../src/security/PubSoft.Authorization/PubSoft.Authorization.csproj" />

@@ -1,0 +1,148 @@
+#nullable enable
+PubSoft.Edge.EdgeContext
+PubSoft.Edge.EdgeContext.<Clone>$() -> PubSoft.Edge.EdgeContext!
+PubSoft.Edge.EdgeContext.ClientId.get -> string!
+PubSoft.Edge.EdgeContext.ClientId.init -> void
+PubSoft.Edge.EdgeContext.EdgeContext() -> void
+PubSoft.Edge.EdgeContext.Equals(PubSoft.Edge.EdgeContext? other) -> bool
+PubSoft.Edge.EdgeContext.HttpContext.get -> Microsoft.AspNetCore.Http.HttpContext?
+PubSoft.Edge.EdgeContext.HttpContext.init -> void
+PubSoft.Edge.EdgeContext.IsVerified.get -> bool
+PubSoft.Edge.EdgeContext.IsVerified.init -> void
+PubSoft.Edge.EdgeContext.MemberId.get -> string?
+PubSoft.Edge.EdgeContext.OpenId.get -> string?
+PubSoft.Edge.EdgeContext.RequestId.get -> string?
+PubSoft.Edge.EdgeContext.RequestId.init -> void
+PubSoft.Edge.EdgeContext.Roles.get -> string![]!
+PubSoft.Edge.EdgeContext.Scheme.get -> PubSoft.Edge.EdgeAuthScheme
+PubSoft.Edge.EdgeContext.Scheme.init -> void
+PubSoft.Edge.EdgeContext.Session.get -> PubSoft.Edge.EdgeSession?
+PubSoft.Edge.EdgeContext.Session.init -> void
+PubSoft.Edge.EdgeContext.TenantId.get -> string?
+PubSoft.Edge.EdgeContext.Token.get -> string?
+PubSoft.Edge.EdgeContext.UserId.get -> string?
+PubSoft.Edge.EdgeException
+PubSoft.Edge.EdgeException.Code.get -> string!
+PubSoft.Edge.EdgeException.EdgeException(string! code, string! message) -> void
+PubSoft.Edge.EdgeGatewayExtensions
+PubSoft.Edge.EdgeGatewayMiddleware
+PubSoft.Edge.EdgeGatewayMiddleware.EdgeGatewayMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, string! path, Microsoft.Extensions.Options.IOptions<PubSoft.Edge.EdgeGatewayOptions!>? options = null) -> void
+PubSoft.Edge.EdgeGatewayMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
+PubSoft.Edge.EdgeGatewayOptions
+PubSoft.Edge.EdgeGatewayOptions.EdgeGatewayOptions() -> void
+PubSoft.Edge.EdgeGatewayOptions.TimestampToleranceSeconds.get -> int
+PubSoft.Edge.EdgeGatewayOptions.TimestampToleranceSeconds.set -> void
+PubSoft.Edge.EdgeHandlerBase<TParams>
+PubSoft.Edge.EdgeHandlerBase<TParams>.EdgeHandlerBase() -> void
+PubSoft.Edge.EdgeHandlerBase<TParams>.ExecuteAsync(PubSoft.Edge.EdgeRpcRequest! request, PubSoft.Edge.EdgeContext! context, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<PubSoft.Edge.EdgeRpcResponse!>!
+PubSoft.Edge.EdgeHandlerRegistry
+PubSoft.Edge.EdgeHandlerRegistry.EdgeHandlerRegistry() -> void
+PubSoft.Edge.EdgeHandlerRegistry.TryGetHandler(string! method, out PubSoft.Edge.IEdgeHandler! handler) -> bool
+PubSoft.Edge.EdgeRateLimitExtensions
+PubSoft.Edge.EdgeRateLimitMiddleware
+PubSoft.Edge.EdgeRateLimitMiddleware.Dispose() -> void
+PubSoft.Edge.EdgeRateLimitMiddleware.EdgeRateLimitMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, string! path, Microsoft.Extensions.Options.IOptions<PubSoft.Edge.EdgeRateLimitOptions!>! options, Microsoft.Extensions.Logging.ILogger<PubSoft.Edge.EdgeRateLimitMiddleware!>! logger) -> void
+PubSoft.Edge.EdgeRateLimitMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
+PubSoft.Edge.EdgeRateLimitOptions
+PubSoft.Edge.EdgeRateLimitOptions.ClientPermitLimit.get -> int
+PubSoft.Edge.EdgeRateLimitOptions.ClientPermitLimit.set -> void
+PubSoft.Edge.EdgeRateLimitOptions.EdgeRateLimitOptions() -> void
+PubSoft.Edge.EdgeRateLimitOptions.Enabled.get -> bool
+PubSoft.Edge.EdgeRateLimitOptions.Enabled.set -> void
+PubSoft.Edge.EdgeRateLimitOptions.FailurePermitLimit.get -> int
+PubSoft.Edge.EdgeRateLimitOptions.FailurePermitLimit.set -> void
+PubSoft.Edge.EdgeRateLimitOptions.FailureRateLimitEnabled.get -> bool
+PubSoft.Edge.EdgeRateLimitOptions.FailureRateLimitEnabled.set -> void
+PubSoft.Edge.EdgeRateLimitOptions.FailureWindowSeconds.get -> int
+PubSoft.Edge.EdgeRateLimitOptions.FailureWindowSeconds.set -> void
+PubSoft.Edge.EdgeRateLimitOptions.HmacPermitLimit.get -> int
+PubSoft.Edge.EdgeRateLimitOptions.HmacPermitLimit.set -> void
+PubSoft.Edge.EdgeRateLimitOptions.Md5PermitLimit.get -> int
+PubSoft.Edge.EdgeRateLimitOptions.Md5PermitLimit.set -> void
+PubSoft.Edge.EdgeRateLimitOptions.NoneFailurePermitLimit.get -> int
+PubSoft.Edge.EdgeRateLimitOptions.NoneFailurePermitLimit.set -> void
+PubSoft.Edge.EdgeRateLimitOptions.NonePermitLimit.get -> int
+PubSoft.Edge.EdgeRateLimitOptions.NonePermitLimit.set -> void
+PubSoft.Edge.EdgeRateLimitOptions.QueueLimit.get -> int
+PubSoft.Edge.EdgeRateLimitOptions.QueueLimit.set -> void
+PubSoft.Edge.EdgeRateLimitOptions.SessionPermitLimit.get -> int
+PubSoft.Edge.EdgeRateLimitOptions.SessionPermitLimit.set -> void
+PubSoft.Edge.EdgeRateLimitOptions.WindowSeconds.get -> int
+PubSoft.Edge.EdgeRateLimitOptions.WindowSeconds.set -> void
+PubSoft.Edge.EdgeSchemeAttribute
+PubSoft.Edge.EdgeSchemeAttribute.EdgeSchemeAttribute(params PubSoft.Edge.EdgeAuthScheme[]! schemes) -> void
+PubSoft.Edge.EdgeSchemeAttribute.Schemes.get -> PubSoft.Edge.EdgeAuthScheme[]!
+PubSoft.Edge.EdgeSession
+PubSoft.Edge.EdgeSession.<Clone>$() -> PubSoft.Edge.EdgeSession!
+PubSoft.Edge.EdgeSession.EdgeSession() -> void
+PubSoft.Edge.EdgeSession.Equals(PubSoft.Edge.EdgeSession? other) -> bool
+PubSoft.Edge.EdgeSession.ExpiresAt.get -> long
+PubSoft.Edge.EdgeSession.ExpiresAt.init -> void
+PubSoft.Edge.EdgeSession.IsExpired.get -> bool
+PubSoft.Edge.EdgeSession.MemberId.get -> string?
+PubSoft.Edge.EdgeSession.MemberId.init -> void
+PubSoft.Edge.EdgeSession.OpenId.get -> string?
+PubSoft.Edge.EdgeSession.OpenId.init -> void
+PubSoft.Edge.EdgeSession.Roles.get -> string![]!
+PubSoft.Edge.EdgeSession.Roles.init -> void
+PubSoft.Edge.EdgeSession.SessionKey.get -> string!
+PubSoft.Edge.EdgeSession.SessionKey.init -> void
+PubSoft.Edge.EdgeSession.TenantId.get -> string?
+PubSoft.Edge.EdgeSession.TenantId.init -> void
+PubSoft.Edge.EdgeSession.Token.get -> string!
+PubSoft.Edge.EdgeSession.Token.init -> void
+PubSoft.Edge.EdgeSession.UserId.get -> string?
+PubSoft.Edge.EdgeSession.UserId.init -> void
+PubSoft.Edge.EdgeSessionExtensions
+PubSoft.Edge.EdgeSessionManager
+PubSoft.Edge.EdgeSessionManager.CreateAsync(string! clientId, string! appId, string! token, string? userId = null, string? memberId = null, string? openId = null, string![]? roles = null, string? tenantId = null, System.TimeSpan? expiry = null, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+PubSoft.Edge.EdgeSessionManager.EdgeSessionManager(PubSoft.Edge.IEdgeSessionStore! store, System.TimeSpan? defaultExpiry = null) -> void
+PubSoft.Edge.EdgeSessionManager.RevokeAsync(string! sessionKey, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Edge.EdgeSessionManager.ValidateAsync(string! sessionKey, bool autoRenew = true, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Edge.EdgeSession?>!
+PubSoft.Edge.IEdgeHandler
+PubSoft.Edge.IEdgeHandler.ExecuteAsync(PubSoft.Edge.EdgeRpcRequest! request, PubSoft.Edge.EdgeContext! context, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<PubSoft.Edge.EdgeRpcResponse!>!
+PubSoft.Edge.IEdgeHandler.Method.get -> string!
+PubSoft.Edge.IEdgeHandler.Schemes.get -> PubSoft.Edge.EdgeAuthScheme[]!
+PubSoft.Edge.IEdgeSessionStore
+PubSoft.Edge.IEdgeSessionStore.GetAsync(string! sessionKey, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Edge.EdgeSession?>!
+PubSoft.Edge.IEdgeSessionStore.RemoveAsync(string! sessionKey, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Edge.IEdgeSessionStore.RenewAsync(string! sessionKey, System.TimeSpan extendBy, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Edge.IEdgeSessionStore.SaveAsync(PubSoft.Edge.EdgeSession! session, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Edge.IEdgeSignKeyProvider
+PubSoft.Edge.IEdgeSignKeyProvider.GetSecretKey(string! clientId) -> string?
+PubSoft.Edge.IEdgeSignKeyProvider.ShowSignDebug.get -> bool
+PubSoft.Edge.InMemoryEdgeSessionStore
+PubSoft.Edge.InMemoryEdgeSessionStore.Dispose() -> void
+PubSoft.Edge.InMemoryEdgeSessionStore.GetAsync(string! sessionKey, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Edge.EdgeSession?>!
+PubSoft.Edge.InMemoryEdgeSessionStore.InMemoryEdgeSessionStore() -> void
+PubSoft.Edge.InMemoryEdgeSessionStore.RemoveAsync(string! sessionKey, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Edge.InMemoryEdgeSessionStore.RenewAsync(string! sessionKey, System.TimeSpan extendBy, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Edge.InMemoryEdgeSessionStore.SaveAsync(PubSoft.Edge.EdgeSession! session, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+abstract PubSoft.Edge.EdgeHandlerBase<TParams>.ExecuteAsync(TParams! parameters, PubSoft.Edge.EdgeContext! context, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<PubSoft.Edge.EdgeRpcResponse!>!
+abstract PubSoft.Edge.EdgeHandlerBase<TParams>.Method.get -> string!
+const PubSoft.Edge.EdgeGatewayOptions.SectionName = "Edge:Gateway" -> string!
+const PubSoft.Edge.EdgeRateLimitOptions.SectionName = "Edge:RateLimit" -> string!
+override PubSoft.Edge.EdgeContext.Equals(object? obj) -> bool
+override PubSoft.Edge.EdgeContext.GetHashCode() -> int
+override PubSoft.Edge.EdgeContext.ToString() -> string!
+override PubSoft.Edge.EdgeSession.Equals(object? obj) -> bool
+override PubSoft.Edge.EdgeSession.GetHashCode() -> int
+override PubSoft.Edge.EdgeSession.ToString() -> string!
+static PubSoft.Edge.EdgeContext.operator !=(PubSoft.Edge.EdgeContext? left, PubSoft.Edge.EdgeContext? right) -> bool
+static PubSoft.Edge.EdgeContext.operator ==(PubSoft.Edge.EdgeContext? left, PubSoft.Edge.EdgeContext? right) -> bool
+static PubSoft.Edge.EdgeGatewayExtensions.AddEdgeGateway(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Edge.EdgeGatewayExtensions.AddEdgeGateway(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! configuration) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Edge.EdgeGatewayExtensions.AddEdgeGateway(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Edge.EdgeGatewayOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Edge.EdgeGatewayExtensions.AddEdgeHandler<THandler>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Edge.EdgeGatewayExtensions.UseEdgeGateway(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, string! path) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+static PubSoft.Edge.EdgeHandlerBase<TParams>.Error(string! code, string! message) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeHandlerBase<TParams>.Success(object? data = null) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeRateLimitExtensions.AddEdgeRateLimiting(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! configuration) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Edge.EdgeRateLimitExtensions.AddEdgeRateLimiting(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Edge.EdgeRateLimitOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Edge.EdgeRateLimitExtensions.UseEdgeRateLimiting(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, string! path) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+static PubSoft.Edge.EdgeSession.operator !=(PubSoft.Edge.EdgeSession? left, PubSoft.Edge.EdgeSession? right) -> bool
+static PubSoft.Edge.EdgeSession.operator ==(PubSoft.Edge.EdgeSession? left, PubSoft.Edge.EdgeSession? right) -> bool
+static PubSoft.Edge.EdgeSessionExtensions.AddEdgeInMemorySession(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.TimeSpan? defaultExpiry = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Edge.EdgeSessionExtensions.AddEdgeSession<TStore>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.TimeSpan? defaultExpiry = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Edge.EdgeSessionManager.GenerateSessionKey(string! clientId, string! appId) -> string!
+virtual PubSoft.Edge.EdgeHandlerBase<TParams>.Schemes.get -> PubSoft.Edge.EdgeAuthScheme[]!

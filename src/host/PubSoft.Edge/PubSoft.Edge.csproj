@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>PubSoft.Edge</PackageId>
+    <Description>Edge RPC gateway — method-dispatch middleware, pluggable credential schemes, sessions, and rate limiting.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../PubSoft.Edge.Core/PubSoft.Edge.Core.csproj" />
+  </ItemGroup>
+</Project>
