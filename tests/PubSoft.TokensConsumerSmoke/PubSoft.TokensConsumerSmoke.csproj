@@ -6,6 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="PubSoft.Tokens" Version="0.1.0" />
+    <PackageReference Include="PubSoft.Tokens" Version="0.1.0-*" />
   </ItemGroup>
 </Project>

@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="PubSoft.Caching" Version="0.1.0" />
+    <PackageReference Include="PubSoft.Caching" Version="0.1.0-*" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
   </ItemGroup>
 </Project>

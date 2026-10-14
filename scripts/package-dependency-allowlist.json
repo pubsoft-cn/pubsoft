@@ -49,6 +49,14 @@
   "PubSoft.Core": [],
   "PubSoft.Cryptography": [],
   "PubSoft.Domain": [],
+  "PubSoft.Edge": [
+    "PubSoft.Edge.Core"
+  ],
+  "PubSoft.Edge.Client": [
+    "Microsoft.Extensions.Http",
+    "PubSoft.Edge.Core"
+  ],
+  "PubSoft.Edge.Core": [],
   "PubSoft.EntityFrameworkCore": [
     "Microsoft.EntityFrameworkCore",
     "Microsoft.EntityFrameworkCore.Relational",
