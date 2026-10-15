@@ -121,7 +121,7 @@ PubSoft.EntityFrameworkCore.EfCoreQueryExtensions
 PubSoft.EntityFrameworkCore.EfCoreRepository<TEntity, TKey, TDbContext>
 PubSoft.EntityFrameworkCore.EfCoreRepository<TEntity, TKey, TDbContext>.DeleteAsync(TEntity! entity, bool autoSave = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 PubSoft.EntityFrameworkCore.EfCoreRepository<TEntity, TKey, TDbContext>.DeleteAsync(TKey id, bool autoSave = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-PubSoft.EntityFrameworkCore.EfCoreRepository<TEntity, TKey, TDbContext>.EfCoreRepository(TDbContext! dbContext) -> void
+PubSoft.EntityFrameworkCore.EfCoreRepository<TEntity, TKey, TDbContext>.EfCoreRepository(TDbContext! dbContext, PubSoft.Domain.ISaveChangesBoundary? saveBoundary = null) -> void
 PubSoft.EntityFrameworkCore.EfCoreRepository<TEntity, TKey, TDbContext>.FindAsync(TKey id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TEntity?>!
 PubSoft.EntityFrameworkCore.EfCoreRepository<TEntity, TKey, TDbContext>.GetAsync(TKey id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TEntity!>!
 PubSoft.EntityFrameworkCore.EfCoreRepository<TEntity, TKey, TDbContext>.GetDbSetAsync() -> System.Threading.Tasks.Task<Microsoft.EntityFrameworkCore.DbSet<TEntity!>!>!

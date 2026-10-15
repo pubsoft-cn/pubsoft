@@ -284,11 +284,13 @@ public sealed class PubSoftDbContextTests
 
         await unitOfWork.DbContext.Database.EnsureCreatedAsync();
         await repository.InsertAsync(new ScopeRecord { Id = 1, MemberId = 10 });
-        Assert.Equal(1, await unitOfWork.SaveChangesAsync());
-        Assert.Equal(1, (await repository.FindAsync(1))?.Id);
+        // No activated save boundary in this scope — the insert persisted immediately,
+        // and the save hook already observed the Added entry at that save.
         Assert.Equal(EntityState.Added, scopedServices.GetRequiredService<ISaveChangesHook>() is RecordingSaveChangesHook hook
             ? hook.LastState
             : null);
+        Assert.Equal(0, await unitOfWork.SaveChangesAsync());
+        Assert.Equal(1, (await repository.FindAsync(1))?.Id);
     }
 
     [Fact]
@@ -336,6 +338,85 @@ public sealed class PubSoftDbContextTests
 
         await using var verify = CreateContext(options, 1, null, false);
         Assert.Empty(await verify.Records.ToListAsync());
+    }
+
+    [Fact]
+    public async Task InsertWithoutBoundaryPersistsImmediately()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<ScopeDbContext>().UseSqlite(connection).Options;
+
+        await using var context = CreateContext(options, tenantId: null, memberId: null, isMemberScoped: false);
+        await context.Database.EnsureCreatedAsync();
+        var repository = new EfCoreRepository<ScopeRecord, int, ScopeDbContext>(context);
+
+        await repository.InsertAsync(new ScopeRecord { Id = 1, Value = "no-boundary" });
+
+        await using var verify = CreateContext(options, tenantId: null, memberId: null, isMemberScoped: false);
+        Assert.Single(await verify.Records.Where(r => r.Value == "no-boundary").ToListAsync());
+    }
+
+    [Fact]
+    public async Task InsertWithActivatedBoundaryStagesUntilSaveAll()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<ScopeDbContext>().UseSqlite(connection).Options;
+
+        await using var context = CreateContext(options, tenantId: null, memberId: null, isMemberScoped: false);
+        await context.Database.EnsureCreatedAsync();
+        var boundary = new TestSaveChangesBoundary();
+        var repository = new EfCoreRepository<ScopeRecord, int, ScopeDbContext>(context, boundary);
+
+        boundary.Activate();
+        boundary.RegisterServiceParticipants(new[] { context });
+        await repository.InsertAsync(new ScopeRecord { Id = 2, Value = "staged" });
+
+        await using (var verify = CreateContext(options, tenantId: null, memberId: null, isMemberScoped: false))
+            Assert.Empty(await verify.Records.IgnoreQueryFilters().Where(r => r.Value == "staged").ToListAsync());
+
+        await boundary.SaveAllAsync();
+
+        await using var verifyAfter = CreateContext(options, tenantId: null, memberId: null, isMemberScoped: false);
+        Assert.Single(await verifyAfter.Records.Where(r => r.Value == "staged").ToListAsync());
+    }
+
+    [Fact]
+    public async Task InactiveBoundaryStillPersistsImmediately()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<ScopeDbContext>().UseSqlite(connection).Options;
+
+        await using var context = CreateContext(options, tenantId: null, memberId: null, isMemberScoped: false);
+        await context.Database.EnsureCreatedAsync();
+        // Boundary exists in DI but was never activated (middleware absent / worker scope).
+        var repository = new EfCoreRepository<ScopeRecord, int, ScopeDbContext>(context, new TestSaveChangesBoundary());
+
+        await repository.InsertAsync(new ScopeRecord { Id = 3, Value = "inactive-boundary" });
+
+        await using var verify = CreateContext(options, tenantId: null, memberId: null, isMemberScoped: false);
+        Assert.Single(await verify.Records.Where(r => r.Value == "inactive-boundary").ToListAsync());
+    }
+
+    private sealed class TestSaveChangesBoundary : ISaveChangesBoundary
+    {
+        private readonly List<Func<CancellationToken, Task>> _callbacks = new();
+        public bool IsActive { get; private set; }
+        public void Activate() => IsActive = true;
+        public void Register(Func<CancellationToken, Task> saveCallback) => _callbacks.Add(saveCallback);
+        public void RegisterServiceParticipants(IEnumerable<IPubSoftSaveParticipant> participants)
+        {
+            foreach (var participant in participants)
+                _callbacks.Add(participant.SaveChangesAsync);
+        }
+        public async Task SaveAllAsync(CancellationToken cancellationToken = default)
+        {
+            foreach (var callback in _callbacks)
+                await callback(cancellationToken);
+            _callbacks.Clear();
+        }
     }
 
     private static ScopeDbContext CreateContext(
