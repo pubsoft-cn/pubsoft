@@ -242,6 +242,68 @@ public sealed class CorePrimitiveTests
         Assert.Throws<InvalidOperationException>(() => generator.NextId());
     }
 
+    [Fact]
+    public void SnowflakeGenerator_BorrowsTheNextMillisecondOnSequenceOverflow()
+    {
+        var clock = new MutableTimeProvider(DateTimeOffset.FromUnixTimeMilliseconds(1_704_067_201_000));
+        var generator = new SnowflakeIdGenerator(1, clock);
+
+        for (var index = 0; index < 128; index++)
+            generator.NextId();
+        var borrowed = generator.NextId();
+
+        var timestamp = ((borrowed >> 12) + 1_704_067_200_000L);
+        Assert.Equal(1_704_067_201_001L, timestamp);
+        Assert.Equal(0, borrowed & 127);
+    }
+
+    [Fact]
+    public void SnowflakeGenerator_ToleratesClockRollbackWithinTheBorrowWindow()
+    {
+        var clock = new MutableTimeProvider(DateTimeOffset.FromUnixTimeMilliseconds(1_704_067_201_000));
+        var generator = new SnowflakeIdGenerator(1, clock);
+        var first = generator.NextId();
+
+        clock.UtcNow = clock.UtcNow.AddMilliseconds(-200);
+        var second = generator.NextId();
+
+        Assert.NotEqual(first, second);
+        Assert.True(second > first);
+    }
+
+    [Fact]
+    public void SnowflakeGenerator_RejectsClockRollbackBeyondTheBorrowWindow()
+    {
+        var clock = new MutableTimeProvider(DateTimeOffset.FromUnixTimeMilliseconds(1_704_067_201_000));
+        var generator = new SnowflakeIdGenerator(1, clock);
+        generator.NextId();
+
+        clock.UtcNow = clock.UtcNow.AddMilliseconds(-(SnowflakeIdGenerator.MaxBorrowMilliseconds + 100));
+
+        Assert.Throws<InvalidOperationException>(() => generator.NextId());
+    }
+
+    [Fact]
+    public void SnowflakeGenerator_BorrowedIdsStayUniqueAndOrdered()
+    {
+        var clock = new MutableTimeProvider(DateTimeOffset.FromUnixTimeMilliseconds(1_704_067_201_000));
+        var generator = new SnowflakeIdGenerator(2, clock);
+        var ids = new long[20_000];
+
+        for (var index = 0; index < ids.Length; index++)
+            ids[index] = generator.NextId();
+
+        Assert.Equal(ids.Length, ids.Distinct().Count());
+        for (var index = 1; index < ids.Length; index++)
+            Assert.True(ids[index] > ids[index - 1]);
+    }
+
+    private sealed class MutableTimeProvider(DateTimeOffset utcNow) : TimeProvider
+    {
+        public DateTimeOffset UtcNow { get; set; } = utcNow;
+        public override DateTimeOffset GetUtcNow() => UtcNow;
+    }
+
     private sealed class TestEntity : Entity<int>;
     private sealed class OtherTestEntity : Entity<int>;
     private sealed class TestStringEntity : Entity<string>;

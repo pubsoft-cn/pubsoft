@@ -2,8 +2,16 @@ namespace PubSoft.Core;
 
 /// <summary>
 /// Generates JavaScript-safe 53-bit Snowflake identifiers.
-/// Layout: 41-bit timestamp, 5-bit worker ID, 7-bit sequence.
+/// Layout: 41-bit timestamp | 5-bit worker ID | 7-bit sequence.
 /// </summary>
+/// <remarks>
+/// The generator may run the timestamp ahead of the wall clock by at most
+/// <see cref="MaxBorrowMilliseconds"/> ("borrowed time"): on sequence overflow it
+/// issues IDs stamped with the next millisecond instead of blocking, and it
+/// tolerates clock rollback within the same window. Beyond that bound it still
+/// fails closed (blocking wait for catch-up, or <see cref="InvalidOperationException"/>
+/// for rollback past the bound).
+/// </remarks>
 public sealed class SnowflakeIdGenerator
 {
     private const long Epoch = 1704067200000L;
@@ -14,6 +22,12 @@ public sealed class SnowflakeIdGenerator
     private const long MaxTimestamp = Epoch + (1L << 41) - 1;
     private const int WorkerIdShift = SequenceBits;
     private const int TimestampShift = SequenceBits + WorkerIdBits;
+
+    /// <summary>
+    /// Maximum milliseconds the generator may run ahead of the wall clock
+    /// (sequence-overflow borrowing and tolerated clock rollback).
+    /// </summary>
+    public const int MaxBorrowMilliseconds = 512;
 
     private readonly long _workerId;
     private readonly TimeProvider _timeProvider;
@@ -40,7 +54,11 @@ public sealed class SnowflakeIdGenerator
         {
             var timestamp = ReadTimestamp();
             if (timestamp < _lastTimestamp)
-                throw new InvalidOperationException($"Clock moved backwards by {_lastTimestamp - timestamp} milliseconds.");
+            {
+                if (_lastTimestamp - timestamp > MaxBorrowMilliseconds)
+                    throw new InvalidOperationException($"Clock moved backwards by {_lastTimestamp - timestamp} milliseconds.");
+                timestamp = _lastTimestamp; // tolerate skew: keep issuing on the last timestamp
+            }
 
             if (timestamp == _lastTimestamp)
             {
@@ -49,7 +67,8 @@ public sealed class SnowflakeIdGenerator
                 {
                     if (_lastTimestamp == MaxTimestamp)
                         throw new InvalidOperationException("The Snowflake timestamp range is exhausted.");
-                    timestamp = WaitNextMillis(_lastTimestamp);
+                    timestamp = _lastTimestamp + 1; // borrow the next millisecond instead of spinning
+                    WaitIfBorrowAhead(timestamp);
                 }
             }
             else
@@ -70,11 +89,12 @@ public sealed class SnowflakeIdGenerator
         return timestamp;
     }
 
-    private long WaitNextMillis(long lastTimestamp)
+    private void WaitIfBorrowAhead(long borrowedTimestamp)
     {
-        var timestamp = ReadTimestamp();
-        while (timestamp <= lastTimestamp)
-            timestamp = ReadTimestamp();
-        return timestamp;
+        var wallClock = ReadTimestamp();
+        if (borrowedTimestamp - wallClock <= MaxBorrowMilliseconds)
+            return;
+        while ((wallClock = ReadTimestamp()) <= borrowedTimestamp - MaxBorrowMilliseconds)
+            System.Threading.Thread.Yield(); // borrowed too far ahead — wait for the clock to catch up
     }
 }

@@ -63,6 +63,7 @@ PubSoft.Core.ResultError.Message.get -> string!
 PubSoft.Core.ResultError.ResultError() -> void
 PubSoft.Core.ResultError.ResultError(string! code, string! message) -> void
 PubSoft.Core.SnowflakeIdGenerator
+PubSoft.Core.SnowflakeIdGenerator.MaxBorrowMilliseconds -> int
 PubSoft.Core.SnowflakeIdGenerator.NextId() -> long
 PubSoft.Core.SnowflakeIdGenerator.SnowflakeIdGenerator(long workerId) -> void
 PubSoft.Core.SnowflakeIdGenerator.SnowflakeIdGenerator(long workerId, System.TimeProvider! timeProvider) -> void
