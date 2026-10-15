@@ -13,7 +13,7 @@ namespace PubSoft.OAuth;
 /// ExtraJson keys: PrivateKeyPem (app private key PEM), PlatformPublicKeyPem (Alipay platform public key PEM),
 /// GatewayUrl (default https://openapi.alipay.com/gateway.do).
 /// </summary>
-public sealed class AlipayOAuthProvider : OAuthProviderBase
+public sealed partial class AlipayOAuthProvider : OAuthProviderBase
 {
     public AlipayOAuthProvider(
         IOAuthChannelConfigProvider configProvider,
@@ -265,13 +265,13 @@ public sealed class AlipayOAuthProvider : OAuthProviderBase
         }
     }
 
+    // Strips any PEM armor (BEGIN/END ... KEY) without embedding marker literals.
+    [System.Text.RegularExpressions.GeneratedRegex("-----[^\r\n-]+-----", System.Text.RegularExpressions.RegexOptions.CultureInvariant)]
+    private static partial System.Text.RegularExpressions.Regex PemArmorRegex();
+
     private static byte[] ConvertPkcs1OrPkcs8ToPrivateKey(string privateKey)
     {
-        var cleaned = privateKey
-            .Replace("-----BEGIN RSA PRIVATE KEY-----", "")
-            .Replace("-----END RSA PRIVATE KEY-----", "")
-            .Replace("-----BEGIN PRIVATE KEY-----", "")
-            .Replace("-----END PRIVATE KEY-----", "")
+        var cleaned = PemArmorRegex().Replace(privateKey, string.Empty)
             .Replace("\r", "").Replace("\n", "").Replace(" ", "").Trim();
         var raw = Convert.FromBase64String(cleaned);
         using var rsa = RSA.Create();
