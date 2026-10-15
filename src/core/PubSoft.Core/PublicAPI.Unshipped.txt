@@ -63,7 +63,6 @@ PubSoft.Core.ResultError.Message.get -> string!
 PubSoft.Core.ResultError.ResultError() -> void
 PubSoft.Core.ResultError.ResultError(string! code, string! message) -> void
 PubSoft.Core.SnowflakeIdGenerator
-PubSoft.Core.SnowflakeIdGenerator.MaxBorrowMilliseconds -> int
 PubSoft.Core.SnowflakeIdGenerator.NextId() -> long
 PubSoft.Core.SnowflakeIdGenerator.SnowflakeIdGenerator(long workerId) -> void
 PubSoft.Core.SnowflakeIdGenerator.SnowflakeIdGenerator(long workerId, System.TimeProvider! timeProvider) -> void
@@ -85,6 +84,7 @@ PubSoft.Core.Specification<T>.Skip.get -> int
 PubSoft.Core.Specification<T>.Specification() -> void
 PubSoft.Core.Specification<T>.Specification(System.Linq.Expressions.Expression<System.Func<T!, bool>!>! criteria) -> void
 PubSoft.Core.Specification<T>.Take.get -> int
+const PubSoft.Core.SnowflakeIdGenerator.MaxBorrowMilliseconds = 512 -> int
 override PubSoft.Core.Money.Equals(object? obj) -> bool
 override PubSoft.Core.Money.GetHashCode() -> int
 override PubSoft.Core.Money.ToString() -> string!

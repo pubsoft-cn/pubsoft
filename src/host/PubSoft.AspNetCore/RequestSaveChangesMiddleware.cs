@@ -7,13 +7,20 @@ namespace PubSoft.AspNetCore;
 
 /// <summary>Collects persistence callbacks and executes them once for a successful request.</summary>
 /// <remarks>Callbacks run sequentially and are not an atomic transaction across multiple stores.</remarks>
-public sealed class PubSoftRequestSaveChanges
+public sealed class PubSoftRequestSaveChanges : ISaveChangesBoundary
 {
     private readonly object _sync = new();
     private readonly List<Func<CancellationToken, Task>> _callbacks = [];
     private bool _saveStarted;
     private bool _serviceParticipantsRegistered;
+    private bool _isActive;
     private Task? _saveTask;
+
+    /// <inheritdoc />
+    public bool IsActive => _isActive;
+
+    /// <inheritdoc />
+    public void Activate() => _isActive = true;
 
     public void Register(Func<CancellationToken, Task> saveCallback)
     {
@@ -98,6 +105,8 @@ public sealed class PubSoftRequestSaveChangesMiddleware(RequestDelegate next)
             return;
         }
 
+        saveChanges.Activate();
+
         context.Response.OnStarting(
             static async state =>
             {
@@ -128,6 +137,7 @@ public static class PubSoftRequestSaveChangesExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
         services.AddScoped<PubSoftRequestSaveChanges>();
+        services.AddScoped<ISaveChangesBoundary>(provider => provider.GetRequiredService<PubSoftRequestSaveChanges>());
         return services;
     }
 

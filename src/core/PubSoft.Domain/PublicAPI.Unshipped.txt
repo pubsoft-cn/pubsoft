@@ -130,6 +130,12 @@ PubSoft.Domain.IRepository<TEntity, TKey>.UpdateAsync(TEntity! entity, bool auto
 PubSoft.Domain.IRepository<TEntity, TKey>.UpdateManyAsync(System.Collections.Generic.IEnumerable<TEntity!>! entities, bool autoSave = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 PubSoft.Domain.IRoleDataScopeProvider
 PubSoft.Domain.IRoleDataScopeProvider.GetRoleScopesAsync(long subjectId, long? tenantId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<PubSoft.Domain.DataScopeDimension!>!>!
+PubSoft.Domain.ISaveChangesBoundary
+PubSoft.Domain.ISaveChangesBoundary.Activate() -> void
+PubSoft.Domain.ISaveChangesBoundary.IsActive.get -> bool
+PubSoft.Domain.ISaveChangesBoundary.Register(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task!>! saveCallback) -> void
+PubSoft.Domain.ISaveChangesBoundary.RegisterServiceParticipants(System.Collections.Generic.IEnumerable<PubSoft.Domain.IPubSoftSaveParticipant!>! participants) -> void
+PubSoft.Domain.ISaveChangesBoundary.SaveAllAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 PubSoft.Domain.ISoftDelete
 PubSoft.Domain.ISoftDelete.DeleterId.get -> long?
 PubSoft.Domain.ISoftDelete.DeleterId.set -> void

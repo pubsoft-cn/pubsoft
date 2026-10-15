@@ -122,6 +122,8 @@ PubSoft.AspNetCore.PubSoftRateLimitingMiddleware
 PubSoft.AspNetCore.PubSoftRateLimitingMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
 PubSoft.AspNetCore.PubSoftRateLimitingMiddleware.PubSoftRateLimitingMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, PubSoft.Security.RateLimiter! rateLimiter) -> void
 PubSoft.AspNetCore.PubSoftRequestSaveChanges
+PubSoft.AspNetCore.PubSoftRequestSaveChanges.Activate() -> void
+PubSoft.AspNetCore.PubSoftRequestSaveChanges.IsActive.get -> bool
 PubSoft.AspNetCore.PubSoftRequestSaveChanges.PubSoftRequestSaveChanges() -> void
 PubSoft.AspNetCore.PubSoftRequestSaveChanges.Register(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task!>! saveCallback) -> void
 PubSoft.AspNetCore.PubSoftRequestSaveChanges.RegisterServiceParticipants(System.Collections.Generic.IEnumerable<PubSoft.Domain.IPubSoftSaveParticipant!>! participants) -> void

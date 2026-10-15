@@ -10,12 +10,19 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
 {
     private readonly TDbContext _dbContext;
     private readonly DbSet<TEntity> _dbSet;
+    private readonly ISaveChangesBoundary? _saveBoundary;
 
-    public EfCoreRepository(TDbContext dbContext)
+    public EfCoreRepository(TDbContext dbContext, ISaveChangesBoundary? saveBoundary = null)
     {
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         _dbSet = dbContext.Set<TEntity>();
+        _saveBoundary = saveBoundary;
     }
+
+    // autoSave=false stages only when a host-level save point is armed in this scope
+    // (request-end middleware or an explicitly activated unit-of-work boundary).
+    // Without one there is no later flush — persist immediately or the write is lost.
+    private bool ShouldSaveNow(bool autoSave) => autoSave || _saveBoundary is not { IsActive: true };
 
     public Task<IQueryable<TEntity>> GetQueryableAsync()
         => Task.FromResult<IQueryable<TEntity>>(_dbSet);
@@ -50,7 +57,7 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
         ArgumentNullException.ThrowIfNull(entity);
         EnsureCurrentScope(entity, allowUnassignedTenant: true);
         await _dbSet.AddAsync(entity, cancellationToken).ConfigureAwait(false);
-        if (autoSave)
+        if (ShouldSaveNow(autoSave))
             await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return entity;
     }
@@ -63,7 +70,7 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
         var existing = await FindAsync(id, cancellationToken).ConfigureAwait(false)
             ?? throw new KeyNotFoundException($"{typeof(TEntity).Name} with id '{id}' not found in the current scope.");
         ApplyUpdate(existing, entity);
-        if (autoSave)
+        if (ShouldSaveNow(autoSave))
             await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return existing;
     }
@@ -75,7 +82,7 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
             return;
 
         _dbSet.Remove(entity);
-        if (autoSave)
+        if (ShouldSaveNow(autoSave))
             await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
@@ -88,7 +95,7 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
             return;
 
         _dbSet.Remove(existing);
-        if (autoSave)
+        if (ShouldSaveNow(autoSave))
             await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
@@ -120,7 +127,7 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
         foreach (var (existing, supplied) in updates)
             ApplyUpdate(existing, supplied);
 
-        if (autoSave)
+        if (ShouldSaveNow(autoSave))
             await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
@@ -135,7 +142,7 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
         }
 
         await _dbSet.AddRangeAsync(entityArray, cancellationToken).ConfigureAwait(false);
-        if (autoSave)
+        if (ShouldSaveNow(autoSave))
             await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
