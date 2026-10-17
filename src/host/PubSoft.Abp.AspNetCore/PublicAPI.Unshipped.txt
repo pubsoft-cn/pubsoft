@@ -2,5 +2,12 @@
 PubSoft.Abp.AspNetCore.PubSoftAbpAspNetCoreModule
 PubSoft.Abp.AspNetCore.PubSoftAbpAspNetCoreModule.PubSoftAbpAspNetCoreModule() -> void
 PubSoft.Abp.AspNetCore.PubSoftAbpAspNetCoreServiceCollectionExtensions
+PubSoft.Abp.AspNetCore.PubSoftApplicationBuilderExtensions
+PubSoft.Abp.AspNetCore.PubSoftApplicationInitializationContextExtensions
 override PubSoft.Abp.AspNetCore.PubSoftAbpAspNetCoreModule.ConfigureServices(Volo.Abp.Modularity.ServiceConfigurationContext! context) -> void
 static PubSoft.Abp.AspNetCore.PubSoftAbpAspNetCoreServiceCollectionExtensions.AddPubSoftAbpAspNetCore(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Abp.AspNetCore.PubSoftApplicationBuilderExtensions.AddPubSoftApplicationAsync<TStartupModule>(this Microsoft.AspNetCore.Builder.WebApplicationBuilder! builder, System.Action<Volo.Abp.AbpApplicationCreationOptions!>? optionsAction = null) -> System.Threading.Tasks.Task!
+static PubSoft.Abp.AspNetCore.PubSoftApplicationBuilderExtensions.InitializePubSoftApplicationAsync(this Microsoft.AspNetCore.Builder.WebApplication! app) -> System.Threading.Tasks.Task!
+static PubSoft.Abp.AspNetCore.PubSoftApplicationBuilderExtensions.ShutdownPubSoftApplicationAsync(this Microsoft.AspNetCore.Builder.WebApplication! app) -> System.Threading.Tasks.Task!
+static PubSoft.Abp.AspNetCore.PubSoftApplicationInitializationContextExtensions.GetAppBuilder(this Volo.Abp.ApplicationInitializationContext! context) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+static PubSoft.Abp.AspNetCore.PubSoftApplicationInitializationContextExtensions.GetEnv(this Volo.Abp.ApplicationInitializationContext! context) -> Microsoft.Extensions.Hosting.IHostEnvironment!
