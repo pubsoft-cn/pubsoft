@@ -8,6 +8,6 @@
     <ProjectReference Include="../../data/PubSoft.Auditing/PubSoft.Auditing.csproj" />
     <ProjectReference Include="../../data/PubSoft.EntityFrameworkCore/PubSoft.EntityFrameworkCore.csproj" />
     <ProjectReference Include="../../messaging/PubSoft.Messaging.Outbox/PubSoft.Messaging.Outbox.csproj" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.13" />
   </ItemGroup>
 </Project>
