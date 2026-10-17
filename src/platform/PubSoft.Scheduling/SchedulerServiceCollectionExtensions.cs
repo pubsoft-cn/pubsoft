@@ -8,9 +8,12 @@ namespace PubSoft.Scheduling;
 
 public static class SchedulerServiceCollectionExtensions
 {
+    public static IServiceCollection AddPubSoftScheduler(this IServiceCollection services)
+        => services.AddPubSoftScheduler(configure: null);
+
     public static IServiceCollection AddPubSoftScheduler(
         this IServiceCollection services,
-        Action<SchedulerOptions>? configure = null)
+        Action<SchedulerOptions>? configure)
     {
         ArgumentNullException.ThrowIfNull(services);
 
