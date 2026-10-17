@@ -2,7 +2,7 @@
 
 [English](README.md) | **简体中文**
 
-`PubSoft.Notifications` 提供不可变通知消息、通道契约、分发结果、有界进程内去重，以及三个内置 webhook/SMS 通道（`teams`、`dingtalk`、`sms`=阿里云）。不含持久投递或跨实例去重——宿主仍可自行实现 `INotificationChannel`。
+`PubSoft.Notifications` 提供不可变通知消息、通道契约、分发结果、有界进程内去重，以及两个内置 webhook 通道（`teams`、`dingtalk`）。不含持久投递或跨实例去重；厂商专有集成（短信/邮件/推送）有意留给宿主以自有 `INotificationChannel` 实现。
 
 ## 注册
 
@@ -12,18 +12,12 @@
 using Microsoft.Extensions.DependencyInjection;
 using PubSoft.Notifications;
 
-// 内置通道按配置节注册（子节 Teams / DingTalk / AliyunSms；子节不存在则不注册该通道）：
+// 内置通道按配置节注册（子节 Teams / DingTalk；子节不存在则不注册该通道）：
 services.AddPubSoftNotificationChannels(configuration.GetSection("Notifications"));
 
 // 或逐通道注册：
 services.AddTeamsNotificationChannel(configuration.GetSection("Notifications:Teams"));
 services.AddDingTalkNotificationChannel(options => { options.WebhookUrl = webhookUrl; });
-services.AddAliyunSmsNotificationChannel(options =>
-{
-    options.AccessKeyId = accessKeyId;
-    options.AccessKeySecret = accessKeySecret;
-    options.SignName = signName;
-});
 
 // 自定义通道：
 services.AddSingleton<INotificationChannel, EmailNotificationChannel>();
@@ -34,7 +28,7 @@ services.AddPubSoftNotifications(options =>
 });
 ```
 
-内置通道的 HTTP 调用走命名 `IHttpClientFactory` 客户端 + `PubSoft.Resilience.Http` 默认策略（总超时 10s、单次 5s、重试 1 次；SMS 客户端另带熔断）。阿里云 SMS 通道按 RPC 风格 API 规范签名（HMAC-SHA1，API 版本 `2017-05-25`）；`AliyunSmsOptions.Endpoint`/`RegionId` 可配。
+内置通道的 HTTP 调用走命名 `IHttpClientFactory` 客户端 + `PubSoft.Resilience.Http` 默认策略（总超时 10s、单次 5s、重试 1 次）。
 
 `AddPubSoftNotifications` 将 `NotificationDispatcher` 注册为单例——通道实例解析一次即长期持有，通道实现及其依赖必须可安全用于单例；HTTP 集成请用 `IHttpClientFactory`，勿向通道注入 scoped 服务。通道名必须非空且大小写不敏感唯一。
 
@@ -70,4 +64,4 @@ if (!result.Success) { /* 应用宿主运维策略；本包不重试 */ }
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
-- `PubSoft.Notifications`: `AliyunSmsChannel` `AliyunSmsOptions` `DingTalkWebhookChannel` `DingTalkWebhookOptions` `INotificationChannel` `NotificationChannelExtensions` `NotificationDispatchReport` `NotificationDispatcher` `NotificationMessage` `NotificationOptions` `NotificationResult` `NotificationServiceCollectionExtensions` `NotificationSeverity` `TeamsWebhookChannel` `TeamsWebhookOptions`
+- `PubSoft.Notifications`: `DingTalkWebhookChannel` `DingTalkWebhookOptions` `INotificationChannel` `NotificationChannelExtensions` `NotificationDispatchReport` `NotificationDispatcher` `NotificationMessage` `NotificationOptions` `NotificationResult` `NotificationServiceCollectionExtensions` `NotificationSeverity` `TeamsWebhookChannel` `TeamsWebhookOptions`

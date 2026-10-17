@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -196,6 +197,47 @@ public sealed class SchedulingTests
         using var provider = services.BuildServiceProvider();
 
         Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IOptions<SchedulerOptions>>().Value);
+    }
+
+    [Fact]
+    public void AddPubSoftSchedulerBindsJobsFromConfiguration()
+    {
+        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Jobs:0:Name"] = "probe",
+            ["Jobs:0:ExecutorType"] = "Http.Probe",
+            ["Jobs:0:Schedule:Seconds"] = "1152921504606846975",
+            ["Jobs:0:Schedule:Minutes"] = "1152921504606846975",
+            ["Jobs:0:Schedule:Hours"] = "16777215",
+            ["Jobs:0:Schedule:DaysOfMonth"] = "4294967294",
+            ["Jobs:0:Schedule:Months"] = "8190",
+            ["Jobs:0:Schedule:DaysOfWeek"] = "127",
+            ["Jobs:0:ExecutorConfig:Method"] = "POST",
+            ["Jobs:0:ExecutorConfig:Url"] = "https://service.test/probe",
+            ["Jobs:0:ExecutorConfig:ExpectStatusCodes:0"] = "200",
+            ["Jobs:0:ExecutorConfig:Timeout"] = "00:00:08",
+            ["Jobs:0:ResultProcessors:0"] = "AlertRules",
+            ["Jobs:0:ResultProcessors:1"] = "logging",
+            ["Jobs:0:ResultProcessorConfig:Rules:0:Name"] = "slow",
+            ["Jobs:0:ResultProcessorConfig:Rules:0:DelayThresholdMs"] = "2000",
+        }).Build();
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddPubSoftScheduler(config);
+        using var provider = services.BuildServiceProvider();
+
+        var job = Assert.Single(provider.GetRequiredService<IOptions<SchedulerOptions>>().Value.Jobs);
+        Assert.Equal("probe", job.Name);
+        Assert.True(job.Enabled);
+        Assert.Equal("Http.Probe", job.ExecutorType);
+        Assert.True(job.Schedule.IsValid);
+        Assert.Equal(["AlertRules", "logging"], job.ResultProcessors);
+        Assert.Equal(JsonValueKind.Object, job.ExecutorConfig.ValueKind);
+        Assert.Equal("https://service.test/probe", job.ExecutorConfig.GetProperty("Url").GetString());
+        Assert.Equal(200, job.ExecutorConfig.GetProperty("ExpectStatusCodes")[0].GetInt32());
+        Assert.Equal("00:00:08", job.ExecutorConfig.GetProperty("Timeout").GetString());
+        Assert.Equal("slow", job.ResultProcessorConfig.GetProperty("Rules")[0].GetProperty("Name").GetString());
     }
 
     private static SchedulerEngine CreateEngine(
