@@ -28,9 +28,9 @@ public static class IpNormalizer
             return string.Empty;
 
         var xff = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-        if (!StringValues.IsNullOrEmpty(xff))
+        if (!string.IsNullOrEmpty(xff))
         {
-            var normalized = Normalize(xff.ToString().Split(',')[0].Trim());
+            var normalized = Normalize(xff.Split(',')[0].Trim());
             if (!string.IsNullOrEmpty(normalized))
                 return normalized;
         }
