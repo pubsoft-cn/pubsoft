@@ -224,6 +224,23 @@ public sealed class EdgeGatewayTests
     }
 
     [Fact]
+    public async Task Gateway_None_Scheme_On_Session_Only_Method_Should_Return_10401()
+    {
+        // Fail-closed: an anonymous scheme must not bypass a handler's declared schemes.
+        using var host = await StartHostAsync();
+        var client = host.GetTestClient();
+        var resp = await PostAsync(client, new
+        {
+            clientId = "test-client",
+            method = "locked.method",
+            scheme = "none",
+            timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+            @params = new { },
+        });
+        Assert.Equal("10401", resp.GetProperty("code").GetString());
+    }
+
+    [Fact]
     public async Task Gateway_Missing_ClientId_Should_Return_10400()
     {
         using var host = await StartHostAsync();

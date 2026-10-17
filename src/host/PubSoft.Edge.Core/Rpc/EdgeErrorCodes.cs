@@ -92,13 +92,13 @@ public static class EdgeErrorCodes
 /// </summary>
 public static class EdgeError
 {
-    public static EdgeRpcResponse BadRequest(string message) => EdgeRpcResponse.Error(EdgeErrorCodes.BadRequest, message);
-    public static EdgeRpcResponse Unauthorized(string message) => EdgeRpcResponse.Error(EdgeErrorCodes.Unauthorized, message);
-    public static EdgeRpcResponse Forbidden(string message) => EdgeRpcResponse.Error(EdgeErrorCodes.Forbidden, message);
-    public static EdgeRpcResponse NotFound(string message) => EdgeRpcResponse.Error(EdgeErrorCodes.NotFound, message);
-    public static EdgeRpcResponse Conflict(string message) => EdgeRpcResponse.Error(EdgeErrorCodes.Conflict, message);
-    public static EdgeRpcResponse RateLimited(string message) => EdgeRpcResponse.Error(EdgeErrorCodes.RateLimited, message);
-    public static EdgeRpcResponse InternalError(string message) => EdgeRpcResponse.Error(EdgeErrorCodes.InternalError, message);
-    public static EdgeRpcResponse ServiceUnavailable(string message) => EdgeRpcResponse.Error(EdgeErrorCodes.ServiceUnavailable, message);
-    public static EdgeRpcResponse GatewayTimeout(string message) => EdgeRpcResponse.Error(EdgeErrorCodes.GatewayTimeout, message);
+    public static EdgeRpcResponse BadRequest(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.BadRequest, message) with { SubCode = subCode };
+    public static EdgeRpcResponse Unauthorized(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.Unauthorized, message) with { SubCode = subCode };
+    public static EdgeRpcResponse Forbidden(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.Forbidden, message) with { SubCode = subCode };
+    public static EdgeRpcResponse NotFound(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.NotFound, message) with { SubCode = subCode };
+    public static EdgeRpcResponse Conflict(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.Conflict, message) with { SubCode = subCode };
+    public static EdgeRpcResponse RateLimited(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.RateLimited, message) with { SubCode = subCode };
+    public static EdgeRpcResponse InternalError(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.InternalError, message) with { SubCode = subCode };
+    public static EdgeRpcResponse ServiceUnavailable(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.ServiceUnavailable, message) with { SubCode = subCode };
+    public static EdgeRpcResponse GatewayTimeout(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.GatewayTimeout, message) with { SubCode = subCode };
 }

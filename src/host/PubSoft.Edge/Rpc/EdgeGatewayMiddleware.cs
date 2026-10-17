@@ -20,6 +20,14 @@ public sealed class EdgeGatewayOptions
     /// Signature schemes (Hmac/Md5) are rejected when |now - timestamp| exceeds this window.
     /// </summary>
     public int TimestampToleranceSeconds { get; set; } = 300;
+
+    /// <summary>
+    /// Accept <c>POST {gatewayPath}/{method}</c> pseudo-paths — the path tail overrides
+    /// <c>envelope.method</c> before dispatch. Off by default (wire-protocol extension);
+    /// enable to let OpenAPI/Swagger Try-it-out and Postman call methods directly.
+    /// When enabled, <see cref="EdgeRateLimitMiddleware"/> matches pseudo-paths too.
+    /// </summary>
+    public bool EnablePseudoPaths { get; set; }
 }
 
 /// <summary>
@@ -49,9 +57,8 @@ public sealed class EdgeGatewayMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        var path = context.Request.Path.Value?.TrimEnd('/') ?? string.Empty;
-
-        if (!path.Equals(_path, StringComparison.OrdinalIgnoreCase) || !HttpMethods.IsPost(context.Request.Method))
+        if (!HttpMethods.IsPost(context.Request.Method)
+            || !EdgePathMatcher.TryMatch(context.Request.Path.Value, _path, _options.EnablePseudoPaths, out var pseudoMethod))
         {
             await _next(context);
             return;
@@ -73,6 +80,10 @@ public sealed class EdgeGatewayMiddleware
             await WriteResponseAsync(context, null, EdgeError.BadRequest($"Request parsing failed: {ex.Message}"));
             return;
         }
+
+        // Pseudo-path: the path tail is authoritative for dispatch (doc and wire agree).
+        if (request is not null && pseudoMethod is not null)
+            request.Method = pseudoMethod;
 
         if (request is null || string.IsNullOrWhiteSpace(request.Method))
         {
@@ -116,7 +127,7 @@ public sealed class EdgeGatewayMiddleware
         }
 
         var handlerSchemes = GetHandlerSchemes(handler);
-        if (!handlerSchemes.Contains(request.Scheme) && request.Scheme != EdgeAuthScheme.None)
+        if (!handlerSchemes.Contains(request.Scheme))
         {
             await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.SchemeNotAccepted,
                 $"method does not accept scheme={request.Scheme}"));
@@ -259,6 +270,32 @@ public sealed class EdgeGatewayMiddleware
         context.Response.ContentType = "application/json; charset=utf-8";
         context.Response.StatusCode = 200;
         await JsonSerializer.SerializeAsync(context.Response.Body, response, EdgeJsonOptions.Default, context.RequestAborted);
+    }
+}
+
+/// <summary>
+/// Shared gateway-path matcher — exact <c>{gatewayPath}</c> match, or the single-segment
+/// pseudo-path <c>{gatewayPath}/{method}</c> when pseudo paths are enabled.
+/// Used by both the gateway and the rate-limit middleware so pseudo-path traffic
+/// cannot slip past the limiter.
+/// </summary>
+internal static class EdgePathMatcher
+{
+    public static bool TryMatch(string? rawPath, string gatewayPath, bool allowPseudo, out string? pseudoMethod)
+    {
+        pseudoMethod = null;
+        var path = rawPath?.TrimEnd('/') ?? string.Empty;
+        if (path.Equals(gatewayPath, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (!allowPseudo)
+            return false;
+        if (!path.StartsWith(gatewayPath + "/", StringComparison.OrdinalIgnoreCase))
+            return false;
+        var tail = path[(gatewayPath.Length + 1)..];
+        if (tail.Length == 0 || tail.Contains('/'))
+            return false;
+        pseudoMethod = tail;
+        return true;
     }
 }
 

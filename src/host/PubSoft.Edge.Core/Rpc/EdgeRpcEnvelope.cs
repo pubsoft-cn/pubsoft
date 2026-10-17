@@ -86,6 +86,22 @@ public sealed record EdgeRpcResponse
     [JsonPropertyName("message")]
     public string Message { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Fine-grained business sub-code (alipay-style code/subCode layering) — optional.
+    /// <see cref="Code"/> is the stable gateway category (params/auth/ratelimit/server semantics);
+    /// <see cref="SubCode"/> is the open business vocabulary, conventionally
+    /// <c>{domain}.{detail}</c> — e.g. <c>identity.400</c> for an upstream pass-through or
+    /// <c>params.redirect_url</c> for a field-level rejection. Omitted when unset.
+    /// </summary>
+    [JsonPropertyName("subCode")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? SubCode { get; init; }
+
+    /// <summary>Supplementary human-readable detail for <see cref="SubCode"/> — optional, omitted when unset.</summary>
+    [JsonPropertyName("subMessage")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? SubMessage { get; init; }
+
     [JsonPropertyName("data")]
     public JsonElement? Data { get; init; }
 
@@ -109,6 +125,16 @@ public sealed record EdgeRpcResponse
         Ok = false,
         Code = code,
         Message = message,
+    };
+
+    /// <summary>Creates an error carrying a business <see cref="SubCode"/>/<see cref="SubMessage"/> pair.</summary>
+    public static EdgeRpcResponse ErrorWithSub(string code, string message, string? subCode = null, string? subMessage = null) => new()
+    {
+        Ok = false,
+        Code = code,
+        Message = message,
+        SubCode = subCode,
+        SubMessage = subMessage,
     };
 
     /// <summary>Returns a copy carrying the request correlation id and the current trace id.</summary>
