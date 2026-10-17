@@ -8,3 +8,5 @@ TestResults/
 artifacts/
 internal/
 feed/
+.env
+.env.*
