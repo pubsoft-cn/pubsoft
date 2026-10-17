@@ -9,8 +9,8 @@
     <ProjectReference Include="../../core/PubSoft.MultiTenancy/PubSoft.MultiTenancy.csproj" />
     <ProjectReference Include="../../security/PubSoft.Authorization/PubSoft.Authorization.csproj" />
     <ProjectReference Include="../../core/PubSoft.Identity/PubSoft.Identity.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.13" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.13" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.13" />
   </ItemGroup>
 </Project>
