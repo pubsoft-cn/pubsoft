@@ -38,7 +38,7 @@ public sealed class CachingTests
             ["userX1"] = "other",
         });
 
-        await cache.RemoveByPatternAsync("user.?" );
+        await cache.RemoveByPatternAsync("user.?");
 
         Assert.False(await cache.ExistsAsync("user.1"));
         Assert.True(await cache.ExistsAsync("user.12"));

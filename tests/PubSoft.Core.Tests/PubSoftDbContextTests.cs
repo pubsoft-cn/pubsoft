@@ -109,7 +109,7 @@ public sealed class PubSoftDbContextTests
                     new ScopeRecord { Id = 4, TenantId = 1, MemberId = 10 },
                     new ScopeRecord { Id = 5, TenantId = 2, MemberId = 10 }
                 }));
-            Assert.DoesNotContain(scoped.ChangeTracker.Entries<ScopeRecord>(), entry => entry.Entity.Id == 4);
+        Assert.DoesNotContain(scoped.ChangeTracker.Entries<ScopeRecord>(), entry => entry.Entity.Id == 4);
         await Assert.ThrowsAsync<InvalidOperationException>(
             () => repository.UpdateAsync(new ScopeRecord { Id = 4, TenantId = 2, MemberId = 10 }));
         await Assert.ThrowsAsync<InvalidOperationException>(

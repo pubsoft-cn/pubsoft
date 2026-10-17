@@ -253,7 +253,7 @@ public static class OutboxServiceCollectionExtensions
         services.TryAddSingleton(validatedOptions);
         services.TryAddScoped<IOutboxPublisher, EfCoreOutboxPublisher<TDbContext>>();
         services.TryAddScoped<IOutboxStore, EfCoreOutboxStore<TDbContext>>();
-            services.TryAddScoped<IInboxMessageProcessor, EfCoreInboxMessageProcessor<TDbContext>>();
+        services.TryAddScoped<IInboxMessageProcessor, EfCoreInboxMessageProcessor<TDbContext>>();
         services.TryAddScoped<OutboxProcessor>();
         return services;
     }

@@ -68,7 +68,11 @@ internal static class SchedulerConfigurationBinding
 
     /// <summary>Materializes a configuration subtree into a <see cref="JsonElement"/>.</summary>
     internal static JsonElement ToJsonElement(IConfiguration section)
-        => JsonSerializer.SerializeToElement(ToJsonNode(section));
+    {
+        // JsonDocument DOM parse keeps this trim/AOT-safe (no reflection-based serialization).
+        using var doc = JsonDocument.Parse(ToJsonNode(section)?.ToJsonString() ?? "null");
+        return doc.RootElement.Clone();
+    }
 
     private static JsonNode? ToJsonNode(IConfiguration config)
     {
