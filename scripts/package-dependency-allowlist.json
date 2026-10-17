@@ -8,10 +8,11 @@
     "Volo.Abp.Core"
   ],
   "PubSoft.AspNetCore": [
+    "PubSoft.Auditing",
     "PubSoft.Authentication",
     "PubSoft.Authorization",
-    "PubSoft.Auditing",
     "PubSoft.Core",
+    "PubSoft.DependencyInjection",
     "PubSoft.Domain",
     "PubSoft.Monitoring",
     "PubSoft.Security"
@@ -79,7 +80,9 @@
     "PubSoft.Domain"
   ],
   "PubSoft.Logging": [
+    "Microsoft.Extensions.Configuration.Abstractions",
     "Microsoft.Extensions.DependencyInjection.Abstractions",
+    "Microsoft.Extensions.Hosting.Abstractions",
     "Microsoft.Extensions.Logging.Abstractions"
   ],
   "PubSoft.Mapping": [],
@@ -108,8 +111,10 @@
   ],
   "PubSoft.Notifications": [
     "Microsoft.Extensions.DependencyInjection.Abstractions",
+    "Microsoft.Extensions.Http",
     "Microsoft.Extensions.Logging.Abstractions",
-    "Microsoft.Extensions.Options"
+    "Microsoft.Extensions.Options",
+    "PubSoft.Resilience.Http"
   ],
   "PubSoft.Outbound": [
     "Microsoft.Extensions.DependencyInjection.Abstractions",
