@@ -10,3 +10,4 @@ internal/
 feed/
 .env
 .env.*
+AGENTS.md
