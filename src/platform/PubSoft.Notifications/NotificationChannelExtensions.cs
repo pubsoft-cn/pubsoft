@@ -7,19 +7,21 @@ using PubSoft.Resilience.Http;
 namespace PubSoft.Notifications;
 
 /// <summary>
-/// Registration for the built-in notification channels (Teams / DingTalk / Aliyun SMS).
+/// Registration for the built-in notification channels (Teams / DingTalk webhooks).
 /// Channels whose configuration section is absent are not registered; a configured-but-empty
 /// credential set still registers the channel and fails closed at send time.
+/// Vendor-specific integrations (SMS providers, email, push) belong in the host's own
+/// <see cref="INotificationChannel"/> implementations, not in this package.
 /// </summary>
 public static class NotificationChannelExtensions
 {
     internal const string TeamsHttpClientName = "PubSoft.Notifications.Teams";
     internal const string DingTalkHttpClientName = "PubSoft.Notifications.DingTalk";
-    internal const string AliyunSmsHttpClientName = "PubSoft.Notifications.AliyunSms";
 
     /// <summary>
-    /// Registers every channel that has a configuration section under <paramref name="notificationsSection"/>
-    /// (expected subsections: <c>Teams</c>, <c>DingTalk</c>, <c>AliyunSms</c>) and the dispatcher.
+    /// Registers every built-in channel that has a configuration section under
+    /// <paramref name="notificationsSection"/> (expected subsections: <c>Teams</c>, <c>DingTalk</c>)
+    /// and the dispatcher.
     /// </summary>
     public static IServiceCollection AddPubSoftNotificationChannels(
         this IServiceCollection services,
@@ -32,8 +34,6 @@ public static class NotificationChannelExtensions
             services.AddTeamsNotificationChannel(notificationsSection.GetSection("Teams"));
         if (notificationsSection.GetSection("DingTalk").Exists())
             services.AddDingTalkNotificationChannel(notificationsSection.GetSection("DingTalk"));
-        if (notificationsSection.GetSection("AliyunSms").Exists())
-            services.AddAliyunSmsNotificationChannel(notificationsSection.GetSection("AliyunSms"));
 
         services.TryAddSingleton<NotificationDispatcher>();
         return services;
@@ -98,39 +98,6 @@ public static class NotificationChannelExtensions
         return AddDingTalkChannelCore(services);
     }
 
-    /// <summary>Registers the Aliyun SMS channel bound to a configuration section.</summary>
-    public static IServiceCollection AddAliyunSmsNotificationChannel(
-        this IServiceCollection services, IConfiguration section)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-        return services.AddAliyunSmsNotificationChannel(o =>
-        {
-            o.AccessKeyId = section["AccessKeyId"] ?? "";
-            o.AccessKeySecret = section["AccessKeySecret"] ?? "";
-            o.SignName = section["SignName"] ?? "";
-            if (section["Endpoint"] is { } endpoint) o.Endpoint = endpoint;
-            if (section["RegionId"] is { } regionId) o.RegionId = regionId;
-        });
-    }
-
-    private static IServiceCollection AddAliyunSmsChannelCore(IServiceCollection services)
-    {
-        AddAliyunSmsHttpClient(services);
-        services.TryAddSingleton<AliyunSmsChannel>();
-        services.AddSingleton<INotificationChannel>(sp => sp.GetRequiredService<AliyunSmsChannel>());
-        services.TryAddSingleton<NotificationDispatcher>();
-        return services;
-    }
-
-    /// <summary>Registers the Aliyun SMS channel with inline options.</summary>
-    public static IServiceCollection AddAliyunSmsNotificationChannel(
-        this IServiceCollection services, Action<AliyunSmsOptions> configure)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-        services.Configure(configure);
-        return AddAliyunSmsChannelCore(services);
-    }
-
     private static void AddTeamsHttpClient(IServiceCollection services)
         => services.AddHttpClient(TeamsHttpClientName)
             .AddPubSoftHttpResilience(opts =>
@@ -147,15 +114,5 @@ public static class NotificationChannelExtensions
                 opts.Timeout = TimeSpan.FromSeconds(10);
                 opts.PerAttemptTimeout = TimeSpan.FromSeconds(5);
                 opts.Retry = new RetryPolicy { MaxRetries = 1, InitialDelay = TimeSpan.FromSeconds(1) };
-            });
-
-    private static void AddAliyunSmsHttpClient(IServiceCollection services)
-        => services.AddHttpClient(AliyunSmsHttpClientName)
-            .AddPubSoftHttpResilience(opts =>
-            {
-                opts.Timeout = TimeSpan.FromSeconds(10);
-                opts.PerAttemptTimeout = TimeSpan.FromSeconds(5);
-                opts.Retry = new RetryPolicy { MaxRetries = 1, InitialDelay = TimeSpan.FromSeconds(1) };
-                opts.CircuitBreaker = new CircuitBreakerOptions { FailureThreshold = 10, OpenTimeout = TimeSpan.FromMinutes(1) };
             });
 }

@@ -3,7 +3,7 @@
 **English** | [简体中文](README.zh-CN.md)
 
 
-`PubSoft.Notifications` provides immutable notification messages, channel contracts, dispatch results, bounded in-process deduplication, and three built-in webhook/SMS channels (`teams`, `dingtalk`, `sms` for Aliyun). It does not include persistent delivery or cross-instance deduplication; hosts may still add their own `INotificationChannel` implementations.
+`PubSoft.Notifications` provides immutable notification messages, channel contracts, dispatch results, bounded in-process deduplication, and two built-in webhook channels (`teams`, `dingtalk`). It does not include persistent delivery or cross-instance deduplication. Vendor-specific integrations (SMS providers, email, push) intentionally live in the host application as its own `INotificationChannel` implementations.
 
 ## Registration
 
@@ -13,20 +13,13 @@ Register each channel and configure the dispatcher before resolving it:
 using Microsoft.Extensions.DependencyInjection;
 using PubSoft.Notifications;
 
-// Built-in channels bound to a configuration section (subsections Teams / DingTalk / AliyunSms;
+// Built-in channels bound to a configuration section (subsections Teams / DingTalk;
 // a channel is registered only when its section exists):
 services.AddPubSoftNotificationChannels(configuration.GetSection("Notifications"));
 
 // Or register channels and configure the dispatcher individually:
 services.AddTeamsNotificationChannel(configuration.GetSection("Notifications:Teams"));
 services.AddDingTalkNotificationChannel(options => { options.WebhookUrl = webhookUrl; });
-services.AddAliyunSmsNotificationChannel(options =>
-{
-    options.AccessKeyId = accessKeyId;
-    options.AccessKeySecret = accessKeySecret;
-    options.SignName = signName;
-});
-
 // Custom channel:
 services.AddSingleton<INotificationChannel, EmailNotificationChannel>();
 services.AddPubSoftNotifications(options =>
@@ -36,7 +29,7 @@ services.AddPubSoftNotifications(options =>
 });
 ```
 
-Built-in channel HTTP calls go through named `IHttpClientFactory` clients with `PubSoft.Resilience.Http` policy defaults (total timeout 10s, per-attempt 5s, one retry; the SMS client also gets a circuit breaker). The Aliyun SMS channel signs requests per the RPC-style API spec (HMAC-SHA1, API version `2017-05-25`); `AliyunSmsOptions.Endpoint`/`RegionId` are configurable.
+Built-in channel HTTP calls go through named `IHttpClientFactory` clients with `PubSoft.Resilience.Http` policy defaults (total timeout 10s, per-attempt 5s, one retry).
 
 `AddPubSoftNotifications` registers `NotificationDispatcher` as a singleton. Its channel instances are resolved once and retained, so channel implementations and their dependencies must be safe for singleton use. For HTTP integrations, prefer `IHttpClientFactory`; do not inject scoped services into a channel. Channel names must be unique (case-insensitively) and non-empty.
 
@@ -78,7 +71,7 @@ The default window is five minutes and the default capacity is 10,000 entries. E
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
-- `PubSoft.Notifications`: `AliyunSmsChannel` `AliyunSmsOptions` `DingTalkWebhookChannel` `DingTalkWebhookOptions` `INotificationChannel` `NotificationChannelExtensions` `NotificationDispatchReport` `NotificationDispatcher` `NotificationMessage` `NotificationOptions` `NotificationResult` `NotificationServiceCollectionExtensions` `NotificationSeverity` `TeamsWebhookChannel` `TeamsWebhookOptions`
+- `PubSoft.Notifications`: `DingTalkWebhookChannel` `DingTalkWebhookOptions` `INotificationChannel` `NotificationChannelExtensions` `NotificationDispatchReport` `NotificationDispatcher` `NotificationMessage` `NotificationOptions` `NotificationResult` `NotificationServiceCollectionExtensions` `NotificationSeverity` `TeamsWebhookChannel` `TeamsWebhookOptions`
 
 ## Verification
 

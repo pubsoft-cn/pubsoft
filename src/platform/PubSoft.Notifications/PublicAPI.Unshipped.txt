@@ -1,20 +1,4 @@
 #nullable enable
-PubSoft.Notifications.AliyunSmsChannel
-PubSoft.Notifications.AliyunSmsChannel.AliyunSmsChannel(System.Net.Http.IHttpClientFactory! httpClientFactory, Microsoft.Extensions.Options.IOptions<PubSoft.Notifications.AliyunSmsOptions!>! options, Microsoft.Extensions.Logging.ILogger<PubSoft.Notifications.AliyunSmsChannel!>? logger = null) -> void
-PubSoft.Notifications.AliyunSmsChannel.Name.get -> string!
-PubSoft.Notifications.AliyunSmsChannel.SendAsync(PubSoft.Notifications.NotificationMessage! message, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Notifications.NotificationResult!>!
-PubSoft.Notifications.AliyunSmsOptions
-PubSoft.Notifications.AliyunSmsOptions.AccessKeyId.get -> string!
-PubSoft.Notifications.AliyunSmsOptions.AccessKeyId.set -> void
-PubSoft.Notifications.AliyunSmsOptions.AccessKeySecret.get -> string!
-PubSoft.Notifications.AliyunSmsOptions.AccessKeySecret.set -> void
-PubSoft.Notifications.AliyunSmsOptions.AliyunSmsOptions() -> void
-PubSoft.Notifications.AliyunSmsOptions.Endpoint.get -> string!
-PubSoft.Notifications.AliyunSmsOptions.Endpoint.set -> void
-PubSoft.Notifications.AliyunSmsOptions.RegionId.get -> string!
-PubSoft.Notifications.AliyunSmsOptions.RegionId.set -> void
-PubSoft.Notifications.AliyunSmsOptions.SignName.get -> string!
-PubSoft.Notifications.AliyunSmsOptions.SignName.set -> void
 PubSoft.Notifications.DingTalkWebhookChannel
 PubSoft.Notifications.DingTalkWebhookChannel.DingTalkWebhookChannel(System.Net.Http.IHttpClientFactory! httpClientFactory, Microsoft.Extensions.Options.IOptions<PubSoft.Notifications.DingTalkWebhookOptions!>! options, Microsoft.Extensions.Logging.ILogger<PubSoft.Notifications.DingTalkWebhookChannel!>? logger = null) -> void
 PubSoft.Notifications.DingTalkWebhookChannel.Name.get -> string!
@@ -87,8 +71,6 @@ override PubSoft.Notifications.NotificationDispatchReport.ToString() -> string!
 override PubSoft.Notifications.NotificationResult.Equals(object? obj) -> bool
 override PubSoft.Notifications.NotificationResult.GetHashCode() -> int
 override PubSoft.Notifications.NotificationResult.ToString() -> string!
-static PubSoft.Notifications.NotificationChannelExtensions.AddAliyunSmsNotificationChannel(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! section) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
-static PubSoft.Notifications.NotificationChannelExtensions.AddAliyunSmsNotificationChannel(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Notifications.AliyunSmsOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Notifications.NotificationChannelExtensions.AddDingTalkNotificationChannel(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! section) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Notifications.NotificationChannelExtensions.AddDingTalkNotificationChannel(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Notifications.DingTalkWebhookOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Notifications.NotificationChannelExtensions.AddPubSoftNotificationChannels(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! notificationsSection) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

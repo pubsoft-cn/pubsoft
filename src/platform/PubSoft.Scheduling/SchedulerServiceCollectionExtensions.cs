@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -24,6 +25,27 @@ public static class SchedulerServiceCollectionExtensions
         services.TryAddSingleton<SchedulerEngine>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, SchedulerHostedService>());
         return services;
+    }
+
+    /// <summary>
+    /// Registers the scheduler bound to a configuration section (expected children:
+    /// <c>Jobs</c>, <c>LoopInterval</c>, <c>ErrorDelay</c>, <c>MaxConcurrentJobs</c>).
+    /// Bound without the reflection-based binder so executor/result-processor JSON
+    /// payloads and bitmask schedules round-trip correctly under AOT.
+    /// </summary>
+    public static IServiceCollection AddPubSoftScheduler(
+        this IServiceCollection services,
+        IConfiguration section)
+    {
+        ArgumentNullException.ThrowIfNull(section);
+        return services.AddPubSoftScheduler(o =>
+        {
+            var bound = SchedulerConfigurationBinding.Bind(section);
+            o.Jobs = bound.Jobs;
+            o.LoopInterval = bound.LoopInterval;
+            o.ErrorDelay = bound.ErrorDelay;
+            o.MaxConcurrentJobs = bound.MaxConcurrentJobs;
+        });
     }
 
     public static IServiceCollection AddExecutor<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TExecutor>(this IServiceCollection services)
