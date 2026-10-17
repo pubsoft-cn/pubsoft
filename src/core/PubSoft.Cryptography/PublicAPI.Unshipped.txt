@@ -1,4 +1,5 @@
 #nullable enable
+PubSoft.Cryptography.AesEncryptor
 PubSoft.Cryptography.AesGcmEncryptor
 PubSoft.Cryptography.AesGcmEncryptor.AesGcmEncryptor(PubSoft.Cryptography.IEncryptionKeyRing! keyRing) -> void
 PubSoft.Cryptography.AesGcmEncryptor.Decrypt(string! envelope, System.ReadOnlySpan<byte> additionalAuthenticatedData = default(System.ReadOnlySpan<byte>)) -> string!
@@ -22,12 +23,26 @@ PubSoft.Cryptography.DecryptedCredential.RequiresReEncryption.init -> void
 PubSoft.Cryptography.IEncryptionKeyRing
 PubSoft.Cryptography.IEncryptionKeyRing.ActiveKeyId.get -> string!
 PubSoft.Cryptography.IEncryptionKeyRing.TryGetKey(string! keyId, out System.ReadOnlyMemory<byte> key) -> bool
+PubSoft.Cryptography.Sm3
+PubSoft.Cryptography.Sm4
+const PubSoft.Cryptography.Sm3.DigestSize = 32 -> int
+const PubSoft.Cryptography.Sm4.BlockSize = 16 -> int
+const PubSoft.Cryptography.Sm4.KeySize = 16 -> int
 override PubSoft.Cryptography.DecryptedCredential.Equals(object? obj) -> bool
 override PubSoft.Cryptography.DecryptedCredential.GetHashCode() -> int
 override PubSoft.Cryptography.DecryptedCredential.ToString() -> string!
-static PubSoft.Cryptography.DecryptedCredential.operator !=(PubSoft.Cryptography.DecryptedCredential? left, PubSoft.Cryptography.DecryptedCredential? right) -> bool
-static PubSoft.Cryptography.DecryptedCredential.operator ==(PubSoft.Cryptography.DecryptedCredential? left, PubSoft.Cryptography.DecryptedCredential? right) -> bool
-PubSoft.Cryptography.AesEncryptor
 static PubSoft.Cryptography.AesEncryptor.Decrypt(string! encrypted, string! masterKey) -> string!
 static PubSoft.Cryptography.AesEncryptor.Encrypt(string! plaintext, string! masterKey) -> string!
 static PubSoft.Cryptography.AesEncryptor.GenerateSecretKey() -> string!
+static PubSoft.Cryptography.DecryptedCredential.operator !=(PubSoft.Cryptography.DecryptedCredential? left, PubSoft.Cryptography.DecryptedCredential? right) -> bool
+static PubSoft.Cryptography.DecryptedCredential.operator ==(PubSoft.Cryptography.DecryptedCredential? left, PubSoft.Cryptography.DecryptedCredential? right) -> bool
+static PubSoft.Cryptography.Sm3.Hash(System.ReadOnlySpan<byte> data) -> byte[]!
+static PubSoft.Cryptography.Sm3.HashHex(string! data) -> string!
+static PubSoft.Cryptography.Sm3.Hmac(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> data) -> byte[]!
+static PubSoft.Cryptography.Sm3.HmacBase64(string! key, string! data) -> string!
+static PubSoft.Cryptography.Sm3.HmacHex(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> data) -> string!
+static PubSoft.Cryptography.Sm4.DecryptEcb(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> ciphertext) -> byte[]!
+static PubSoft.Cryptography.Sm4.DecryptEcbHex(string! hexKey, string! cipherHex) -> string!
+static PubSoft.Cryptography.Sm4.EncryptEcb(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> plaintext) -> byte[]!
+static PubSoft.Cryptography.Sm4.EncryptEcbBase64Key(string! base64Key, string! plaintext) -> string!
+static PubSoft.Cryptography.Sm4.EncryptEcbHex(string! hexKey, string! plaintext) -> string!
