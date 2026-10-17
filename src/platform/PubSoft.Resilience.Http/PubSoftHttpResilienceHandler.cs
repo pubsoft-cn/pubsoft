@@ -175,9 +175,12 @@ public sealed class PubSoftHttpResilienceHandler : DelegatingHandler
 
 public static class HttpResilienceServiceCollectionExtensions
 {
+    public static IHttpClientBuilder AddPubSoftHttpResilience(this IHttpClientBuilder builder)
+        => builder.AddPubSoftHttpResilience(configure: null);
+
     public static IHttpClientBuilder AddPubSoftHttpResilience(
         this IHttpClientBuilder builder,
-        Action<HttpResilienceOptions>? configure = null)
+        Action<HttpResilienceOptions>? configure)
     {
         ArgumentNullException.ThrowIfNull(builder);
 
