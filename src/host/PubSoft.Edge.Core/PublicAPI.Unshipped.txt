@@ -41,6 +41,10 @@ PubSoft.Edge.EdgeRpcResponse.Ok.get -> bool
 PubSoft.Edge.EdgeRpcResponse.Ok.init -> void
 PubSoft.Edge.EdgeRpcResponse.RequestId.get -> string?
 PubSoft.Edge.EdgeRpcResponse.RequestId.init -> void
+PubSoft.Edge.EdgeRpcResponse.SubCode.get -> string?
+PubSoft.Edge.EdgeRpcResponse.SubCode.init -> void
+PubSoft.Edge.EdgeRpcResponse.SubMessage.get -> string?
+PubSoft.Edge.EdgeRpcResponse.SubMessage.init -> void
 PubSoft.Edge.EdgeRpcResponse.TraceId.get -> string?
 PubSoft.Edge.EdgeRpcResponse.TraceId.init -> void
 PubSoft.Edge.EdgeRpcResponse.WithDiagnostics(PubSoft.Edge.EdgeRpcRequest! request) -> PubSoft.Edge.EdgeRpcResponse!
@@ -92,16 +96,17 @@ override PubSoft.Edge.EdgeRpcResponse.ToString() -> string!
 override PubSoft.Edge.EdgeSignResult.Equals(object? obj) -> bool
 override PubSoft.Edge.EdgeSignResult.GetHashCode() -> int
 override PubSoft.Edge.EdgeSignResult.ToString() -> string!
-static PubSoft.Edge.EdgeError.BadRequest(string! message) -> PubSoft.Edge.EdgeRpcResponse!
-static PubSoft.Edge.EdgeError.Conflict(string! message) -> PubSoft.Edge.EdgeRpcResponse!
-static PubSoft.Edge.EdgeError.Forbidden(string! message) -> PubSoft.Edge.EdgeRpcResponse!
-static PubSoft.Edge.EdgeError.GatewayTimeout(string! message) -> PubSoft.Edge.EdgeRpcResponse!
-static PubSoft.Edge.EdgeError.InternalError(string! message) -> PubSoft.Edge.EdgeRpcResponse!
-static PubSoft.Edge.EdgeError.NotFound(string! message) -> PubSoft.Edge.EdgeRpcResponse!
-static PubSoft.Edge.EdgeError.RateLimited(string! message) -> PubSoft.Edge.EdgeRpcResponse!
-static PubSoft.Edge.EdgeError.ServiceUnavailable(string! message) -> PubSoft.Edge.EdgeRpcResponse!
-static PubSoft.Edge.EdgeError.Unauthorized(string! message) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.BadRequest(string! message, string? subCode = null) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.Conflict(string! message, string? subCode = null) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.Forbidden(string! message, string? subCode = null) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.GatewayTimeout(string! message, string? subCode = null) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.InternalError(string! message, string? subCode = null) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.NotFound(string! message, string? subCode = null) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.RateLimited(string! message, string? subCode = null) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.ServiceUnavailable(string! message, string? subCode = null) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeError.Unauthorized(string! message, string? subCode = null) -> PubSoft.Edge.EdgeRpcResponse!
 static PubSoft.Edge.EdgeRpcResponse.Error(string! code, string! message) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeRpcResponse.ErrorWithSub(string! code, string! message, string? subCode = null, string? subMessage = null) -> PubSoft.Edge.EdgeRpcResponse!
 static PubSoft.Edge.EdgeRpcResponse.Success(object? data) -> PubSoft.Edge.EdgeRpcResponse!
 static PubSoft.Edge.EdgeRpcResponse.operator !=(PubSoft.Edge.EdgeRpcResponse? left, PubSoft.Edge.EdgeRpcResponse? right) -> bool
 static PubSoft.Edge.EdgeRpcResponse.operator ==(PubSoft.Edge.EdgeRpcResponse? left, PubSoft.Edge.EdgeRpcResponse? right) -> bool

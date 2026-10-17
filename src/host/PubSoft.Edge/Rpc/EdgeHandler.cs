@@ -111,11 +111,22 @@ public abstract class EdgeHandlerBase<TParams> : IEdgeHandler
         }
         catch (EdgeException ex)
         {
-            return EdgeRpcResponse.Error(ex.Code, ex.Message);
+            return EdgeRpcResponse.ErrorWithSub(ex.Code, ex.Message, ex.SubCode, ex.SubMessage);
         }
         catch (ArgumentException ex)
         {
             return EdgeRpcResponse.Error(EdgeErrorCodes.ParamsValidationFailed, ex.Message);
+        }
+        catch (HttpRequestException ex)
+        {
+            // Unhandled downstream HTTP failure — honest 10503, not a generic 10500.
+            // Raw transport detail goes to subMessage so the top-level message stays clean.
+            return EdgeError.ServiceUnavailable("Upstream service unavailable") with { SubMessage = ex.Message };
+        }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+        {
+            // Timeout inside the handler (the request itself was not aborted).
+            return EdgeError.GatewayTimeout("Upstream call timed out");
         }
         catch (Exception)
         {
@@ -132,8 +143,17 @@ public abstract class EdgeHandlerBase<TParams> : IEdgeHandler
 
 /// <summary>
 /// Edge business exception — thrown inside handlers, mapped to <see cref="EdgeRpcResponse"/> by the base class.
+/// <paramref name="subCode"/> carries the optional machine-readable business detail
+/// (convention: <c>{domain}.{detail}</c>, e.g. <c>params.plate_invalid</c>);
+/// <paramref name="subMessage"/> carries the optional human-readable detail for it.
 /// </summary>
-public class EdgeException(string code, string message) : Exception(message)
+public class EdgeException(string code, string message, string? subCode = null, string? subMessage = null) : Exception(message)
 {
     public string Code { get; } = code;
+
+    /// <summary>Business sub-code surfaced as <see cref="EdgeRpcResponse.SubCode"/>.</summary>
+    public string? SubCode { get; } = subCode;
+
+    /// <summary>Business detail surfaced as <see cref="EdgeRpcResponse.SubMessage"/>.</summary>
+    public string? SubMessage { get; } = subMessage;
 }

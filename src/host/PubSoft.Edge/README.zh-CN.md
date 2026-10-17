@@ -47,7 +47,26 @@ public class PingHandler : EdgeHandlerBase<PingParams>
 
 `EdgeSessionManager` 签发 `{clientId}:{appId}:{guid}`；`IEdgeSessionStore` 可插拔（默认内存——多实例请接分布式存储）。
 
+## OpenAPI（opt-in）
+
+单端点 method 分发对 Swashbuckle 不可见，网关因此自产文档——由已注册的 `IEdgeHandler` 集合 + handler/params 的 XML 注释反射生成：
+
+```csharp
+builder.Services.AddEdgeGateway(o => o.EnablePseudoPaths = true);
+builder.Services.AddEdgeOpenApi(builder.Configuration); // Edge:OpenApi
+app.MapEdgeOpenApi("/rpc");
+```
+
+- `GET /openapi.json`——OpenAPI 3.0.3：真实 envelope 端点 + 每方法一条伪路径 + `x-edge-methods` 目录
+- `GET /docs`——Swagger UI（CDN 资源，可用 `Edge:OpenApi:UiEnabled=false` 关闭）
+- `EnablePseudoPaths`（默认关）——接受 `POST /rpc/{method}`，路径尾段覆盖 `envelope.method`；限流同样覆盖伪路径，文档只在开启时列出伪路径。`hmac`/`md5` 请求的签名串必须按**路径中的 method** 计算（网关在验签前覆盖 `envelope.method`）
+- 文档暴露完整方法目录——生产环境请按环境/网络管控
+- `/docs` 从 CDN 加载 Swagger UI（`SwaggerUiCssUrl`/`SwaggerUiBundleUrl`）——离线或高加固部署请自托管资源或 `UiEnabled=false`
+- `subMessage` 携带原始上游/传输层细节（如 `HttpRequestException.Message`，可能包含内部主机名）——定位为集成方诊断字段，不是 C 端文案；响应直达终端用户时请在 handler/宿主层抑制
+
 ## 配置
 
 - `Edge:Gateway:TimestampToleranceSeconds`——签名时间窗（默认 300 秒，0 关闭）
+- `Edge:Gateway:EnablePseudoPaths`——接受 `POST /rpc/{method}` 伪路径（默认 false）
 - `Edge:RateLimit:*`——按 clientId/方案/IP 的限流 + 失败限流
+- `Edge:OpenApi:*`——文档/UI 路径、标题、clientId 示例

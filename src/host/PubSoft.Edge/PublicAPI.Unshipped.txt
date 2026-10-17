@@ -23,13 +23,17 @@ PubSoft.Edge.EdgeContext.Token.get -> string?
 PubSoft.Edge.EdgeContext.UserId.get -> string?
 PubSoft.Edge.EdgeException
 PubSoft.Edge.EdgeException.Code.get -> string!
-PubSoft.Edge.EdgeException.EdgeException(string! code, string! message) -> void
+PubSoft.Edge.EdgeException.EdgeException(string! code, string! message, string? subCode = null, string? subMessage = null) -> void
+PubSoft.Edge.EdgeException.SubCode.get -> string?
+PubSoft.Edge.EdgeException.SubMessage.get -> string?
 PubSoft.Edge.EdgeGatewayExtensions
 PubSoft.Edge.EdgeGatewayMiddleware
 PubSoft.Edge.EdgeGatewayMiddleware.EdgeGatewayMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, string! path, Microsoft.Extensions.Options.IOptions<PubSoft.Edge.EdgeGatewayOptions!>? options = null) -> void
 PubSoft.Edge.EdgeGatewayMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
 PubSoft.Edge.EdgeGatewayOptions
 PubSoft.Edge.EdgeGatewayOptions.EdgeGatewayOptions() -> void
+PubSoft.Edge.EdgeGatewayOptions.EnablePseudoPaths.get -> bool
+PubSoft.Edge.EdgeGatewayOptions.EnablePseudoPaths.set -> void
 PubSoft.Edge.EdgeGatewayOptions.TimestampToleranceSeconds.get -> int
 PubSoft.Edge.EdgeGatewayOptions.TimestampToleranceSeconds.set -> void
 PubSoft.Edge.EdgeHandlerBase<TParams>
@@ -38,10 +42,32 @@ PubSoft.Edge.EdgeHandlerBase<TParams>.ExecuteAsync(PubSoft.Edge.EdgeRpcRequest! 
 PubSoft.Edge.EdgeHandlerRegistry
 PubSoft.Edge.EdgeHandlerRegistry.EdgeHandlerRegistry() -> void
 PubSoft.Edge.EdgeHandlerRegistry.TryGetHandler(string! method, out PubSoft.Edge.IEdgeHandler! handler) -> bool
+PubSoft.Edge.EdgeOpenApiDocument
+PubSoft.Edge.EdgeOpenApiExtensions
+PubSoft.Edge.EdgeOpenApiOptions
+PubSoft.Edge.EdgeOpenApiOptions.ClientIdExample.get -> string?
+PubSoft.Edge.EdgeOpenApiOptions.ClientIdExample.set -> void
+PubSoft.Edge.EdgeOpenApiOptions.Description.get -> string?
+PubSoft.Edge.EdgeOpenApiOptions.Description.set -> void
+PubSoft.Edge.EdgeOpenApiOptions.DocumentPath.get -> string!
+PubSoft.Edge.EdgeOpenApiOptions.DocumentPath.set -> void
+PubSoft.Edge.EdgeOpenApiOptions.EdgeOpenApiOptions() -> void
+PubSoft.Edge.EdgeOpenApiOptions.SwaggerUiBundleUrl.get -> string!
+PubSoft.Edge.EdgeOpenApiOptions.SwaggerUiBundleUrl.set -> void
+PubSoft.Edge.EdgeOpenApiOptions.SwaggerUiCssUrl.get -> string!
+PubSoft.Edge.EdgeOpenApiOptions.SwaggerUiCssUrl.set -> void
+PubSoft.Edge.EdgeOpenApiOptions.Title.get -> string!
+PubSoft.Edge.EdgeOpenApiOptions.Title.set -> void
+PubSoft.Edge.EdgeOpenApiOptions.UiEnabled.get -> bool
+PubSoft.Edge.EdgeOpenApiOptions.UiEnabled.set -> void
+PubSoft.Edge.EdgeOpenApiOptions.UiPath.get -> string!
+PubSoft.Edge.EdgeOpenApiOptions.UiPath.set -> void
+PubSoft.Edge.EdgeOpenApiOptions.Version.get -> string!
+PubSoft.Edge.EdgeOpenApiOptions.Version.set -> void
 PubSoft.Edge.EdgeRateLimitExtensions
 PubSoft.Edge.EdgeRateLimitMiddleware
 PubSoft.Edge.EdgeRateLimitMiddleware.Dispose() -> void
-PubSoft.Edge.EdgeRateLimitMiddleware.EdgeRateLimitMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, string! path, Microsoft.Extensions.Options.IOptions<PubSoft.Edge.EdgeRateLimitOptions!>! options, Microsoft.Extensions.Logging.ILogger<PubSoft.Edge.EdgeRateLimitMiddleware!>! logger) -> void
+PubSoft.Edge.EdgeRateLimitMiddleware.EdgeRateLimitMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, string! path, Microsoft.Extensions.Options.IOptions<PubSoft.Edge.EdgeRateLimitOptions!>! options, Microsoft.Extensions.Logging.ILogger<PubSoft.Edge.EdgeRateLimitMiddleware!>! logger, Microsoft.Extensions.Options.IOptions<PubSoft.Edge.EdgeGatewayOptions!>? gatewayOptions = null) -> void
 PubSoft.Edge.EdgeRateLimitMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
 PubSoft.Edge.EdgeRateLimitOptions
 PubSoft.Edge.EdgeRateLimitOptions.ClientPermitLimit.get -> int
@@ -123,6 +149,7 @@ PubSoft.Edge.InMemoryEdgeSessionStore.SaveAsync(PubSoft.Edge.EdgeSession! sessio
 abstract PubSoft.Edge.EdgeHandlerBase<TParams>.ExecuteAsync(TParams! parameters, PubSoft.Edge.EdgeContext! context, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<PubSoft.Edge.EdgeRpcResponse!>!
 abstract PubSoft.Edge.EdgeHandlerBase<TParams>.Method.get -> string!
 const PubSoft.Edge.EdgeGatewayOptions.SectionName = "Edge:Gateway" -> string!
+const PubSoft.Edge.EdgeOpenApiOptions.SectionName = "Edge:OpenApi" -> string!
 const PubSoft.Edge.EdgeRateLimitOptions.SectionName = "Edge:RateLimit" -> string!
 override PubSoft.Edge.EdgeContext.Equals(object? obj) -> bool
 override PubSoft.Edge.EdgeContext.GetHashCode() -> int
@@ -139,6 +166,10 @@ static PubSoft.Edge.EdgeGatewayExtensions.AddEdgeHandler<THandler>(this Microsof
 static PubSoft.Edge.EdgeGatewayExtensions.UseEdgeGateway(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, string! path) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
 static PubSoft.Edge.EdgeHandlerBase<TParams>.Error(string! code, string! message) -> PubSoft.Edge.EdgeRpcResponse!
 static PubSoft.Edge.EdgeHandlerBase<TParams>.Success(object? data = null) -> PubSoft.Edge.EdgeRpcResponse!
+static PubSoft.Edge.EdgeOpenApiDocument.Build(System.Collections.Generic.IEnumerable<PubSoft.Edge.IEdgeHandler!>! handlers, string! gatewayPath, PubSoft.Edge.EdgeOpenApiOptions? options = null, PubSoft.Edge.EdgeGatewayOptions? gatewayOptions = null) -> System.Text.Json.Nodes.JsonObject!
+static PubSoft.Edge.EdgeOpenApiExtensions.AddEdgeOpenApi(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! configuration) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Edge.EdgeOpenApiExtensions.AddEdgeOpenApi(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Edge.EdgeOpenApiOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Edge.EdgeOpenApiExtensions.MapEdgeOpenApi(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder! endpoints, string! gatewayPath = "/rpc") -> Microsoft.AspNetCore.Routing.IEndpointRouteBuilder!
 static PubSoft.Edge.EdgeRateLimitExtensions.AddEdgeRateLimiting(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! configuration) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Edge.EdgeRateLimitExtensions.AddEdgeRateLimiting(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Edge.EdgeRateLimitOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Edge.EdgeRateLimitExtensions.UseEdgeRateLimiting(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, string! path) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!

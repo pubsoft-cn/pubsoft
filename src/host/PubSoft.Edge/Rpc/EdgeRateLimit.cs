@@ -91,6 +91,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
     private readonly RequestDelegate _next;
     private readonly string _path;
     private readonly EdgeRateLimitOptions _options;
+    private readonly bool _pseudoPathsEnabled;
     private readonly ConcurrentDictionary<string, EdgeRateCounter> _totalCounters = new();
     private readonly ConcurrentDictionary<string, EdgeRateCounter> _failureCounters = new();
     private readonly ILogger<EdgeRateLimitMiddleware> _logger;
@@ -100,20 +101,21 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
         RequestDelegate next,
         string path,
         IOptions<EdgeRateLimitOptions> options,
-        ILogger<EdgeRateLimitMiddleware> logger)
+        ILogger<EdgeRateLimitMiddleware> logger,
+        IOptions<EdgeGatewayOptions>? gatewayOptions = null)
     {
         _next = next;
         _path = path.TrimEnd('/');
         _options = options.Value;
+        _pseudoPathsEnabled = gatewayOptions?.Value.EnablePseudoPaths ?? false;
         _logger = logger;
         _cleanupTimer = new Timer(CleanupExpired, null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
-        var path = context.Request.Path.Value?.TrimEnd('/') ?? string.Empty;
-
-        if (!path.Equals(_path, StringComparison.OrdinalIgnoreCase) || !HttpMethods.IsPost(context.Request.Method))
+        if (!HttpMethods.IsPost(context.Request.Method)
+            || !EdgePathMatcher.TryMatch(context.Request.Path.Value, _path, _pseudoPathsEnabled, out var pseudoMethod))
         {
             await _next(context);
             return;
@@ -163,7 +165,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
         }
 
         // ── 2. total-limit pre-check ──
-        var totalKey = BuildTotalKey(clientId, scheme, request?.Method, ip);
+        var totalKey = BuildTotalKey(clientId, scheme, pseudoMethod ?? request?.Method, ip);
         var permitLimit = GetPermitLimit(scheme, _options);
         var window = TimeSpan.FromSeconds(Math.Max(1, _options.WindowSeconds));
 
