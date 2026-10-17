@@ -54,9 +54,12 @@ public sealed class RedisCache : ICache
         var json = JsonSerializer.Serialize(value, _serializerOptions);
         if (Encoding.UTF8.GetByteCount(json) > _maxValueBytes)
             throw new ArgumentOutOfRangeException(nameof(value), $"Serialized cache value exceeds {_maxValueBytes} bytes.");
-        await Database.StringSetAsync(PhysicalKey(key), json, expiry)
+        await Database.StringSetAsync(PhysicalKey(key), json, ToExpiration(expiry))
             .WaitAsync(cancellationToken).ConfigureAwait(false);
     }
+
+    private static Expiration ToExpiration(TimeSpan? expiry)
+        => expiry.HasValue ? new Expiration(expiry.Value) : Expiration.Default;
 
     public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)
     {
@@ -143,7 +146,7 @@ public sealed class RedisCache : ICache
             for (var index = 0; index < count; index++)
             {
                 var item = serializedItems[offset + index];
-                writes[index] = Database.StringSetAsync(item.Key, item.Json, expiry);
+                writes[index] = Database.StringSetAsync(item.Key, item.Json, ToExpiration(expiry));
             }
             await Task.WhenAll(writes).WaitAsync(cancellationToken).ConfigureAwait(false);
         }
