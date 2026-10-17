@@ -5,6 +5,10 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    # Only direct PackageReferences. Transitive pins would appear as
+    # undeclared nuspec deps and fail scripts/verify-package-dependencies.py.
+    allow:
+      - dependency-type: direct
     groups:
       microsoft-extensions:
         patterns:
