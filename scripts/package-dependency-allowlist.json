@@ -1,10 +1,14 @@
 {
   "PubSoft.Abp.AspNetCore": [
     "PubSoft.AspNetCore",
+    "Microsoft.Extensions.DependencyInjection.Abstractions",
+    "Microsoft.Extensions.Hosting.Abstractions",
     "Volo.Abp.Core"
   ],
   "PubSoft.Abp.Core": [
     "PubSoft.Core",
+    "Microsoft.Extensions.DependencyInjection.Abstractions",
+    "Microsoft.Extensions.Options",
     "Volo.Abp.Core"
   ],
   "PubSoft.AspNetCore": [
@@ -124,6 +128,7 @@
     "Microsoft.Extensions.Logging.Abstractions"
   ],
   "PubSoft.Resilience.Http": [
+    "Microsoft.Extensions.DependencyInjection.Abstractions",
     "Microsoft.Extensions.Http",
     "Microsoft.Extensions.Logging.Abstractions",
     "PubSoft.Resilience"
