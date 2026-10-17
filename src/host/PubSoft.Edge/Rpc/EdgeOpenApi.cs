@@ -153,12 +153,16 @@ public static class EdgeOpenApiDocument
                     {
                         ["edgeSession"] = new JsonObject
                         {
-                            ["type"] = "apiKey", ["in"] = "body", ["name"] = "credential",
+                            ["type"] = "apiKey",
+                            ["in"] = "body",
+                            ["name"] = "credential",
                             ["description"] = "scheme=session — credential carries the sessionKey issued by a login method",
                         },
                         ["edgeSignature"] = new JsonObject
                         {
-                            ["type"] = "apiKey", ["in"] = "body", ["name"] = "credential",
+                            ["type"] = "apiKey",
+                            ["in"] = "body",
+                            ["name"] = "credential",
                             ["description"] = "scheme=hmac/md5 — credential carries the canonical-string signature over method/timestamp/nonce/params",
                         },
                     },

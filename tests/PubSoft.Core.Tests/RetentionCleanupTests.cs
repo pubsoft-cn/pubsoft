@@ -143,8 +143,11 @@ public sealed class AuditArchiveTests
         var expired = new AuditLogRecord { StartedAt = epoch, Success = true };
         expired.EntityChanges.Add(new AuditEntityChangeRecord
         {
-            EntityType = "User", EntityId = "7", Kind = AuditChangeKind.Created,
-            ChangedAt = epoch, PropertiesJson = "{}",
+            EntityType = "User",
+            EntityId = "7",
+            Kind = AuditChangeKind.Created,
+            ChangedAt = epoch,
+            PropertiesJson = "{}",
         });
         context.Set<AuditLogRecord>().AddRange(
             expired,

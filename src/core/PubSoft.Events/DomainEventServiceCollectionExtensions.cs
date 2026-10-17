@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -27,7 +28,7 @@ public static class DomainEventServiceCollectionExtensions
 public static class DomainEventHandlerServiceCollectionExtensions
 {
     /// <summary>Registers a scoped domain event handler for <typeparamref name="TEvent"/>.</summary>
-    public static IServiceCollection AddPubSoftDomainEventHandler<TEvent, THandler>(this IServiceCollection services)
+    public static IServiceCollection AddPubSoftDomainEventHandler<TEvent, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] THandler>(this IServiceCollection services)
         where TEvent : IDomainEvent
         where THandler : class, IDomainEventHandler<TEvent>
     {
