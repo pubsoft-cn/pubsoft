@@ -12,6 +12,6 @@ if (sp.GetService<UnmarkedService>() is not null)
 
 Console.WriteLine("Isolated PubSoft.DependencyInjection consumer smoke check passed.");
 
-file interface ISmokeService { }
-file sealed class SmokeService : ISmokeService, ITransientDependency { }
-file sealed class UnmarkedService { }
+public interface ISmokeService { }
+public sealed class SmokeService : ISmokeService, ITransientDependency { }
+public sealed class UnmarkedService { }
