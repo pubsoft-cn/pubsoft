@@ -106,7 +106,14 @@ public sealed class PubSoftHttpResilienceHandler : DelegatingHandler
                 if (!CanRetry(request)
                     || _options.Retry?.ShouldRetry(null, attempt, (int)response.StatusCode) != true)
                 {
-                    RecordFailure(circuitKey);
+                    // 熔断只统计服务端故障（5xx/408/429/超时/连接失败）。
+                    // 其余 4xx 是业务拒绝（参数错误/凭证失效/资源不存在）——远端仍在正常响应，
+                    // 重置连续失败计数，避免客户端错误烧穿熔断器连坐其它请求。
+                    var status = (int)response.StatusCode;
+                    if (status >= 500 || status == 408 || status == 429)
+                        RecordFailure(circuitKey);
+                    else
+                        _circuitBreaker?.RecordSuccess(circuitKey);
                     completed = true;
                     return response;
                 }
