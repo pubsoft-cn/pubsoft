@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace PubSoft.Edge;
@@ -18,7 +19,8 @@ namespace PubSoft.Edge;
 /// the registered <see cref="IEdgeHandler"/> set instead.
 ///
 /// The document endpoint exposes the full method catalog and parameter schemas —
-/// treat it as a protected/dev surface (gate by environment or network), it is opt-in.
+/// mapped only in Development unless <see cref="DevelopmentOnly"/> is explicitly
+/// disabled (then gate by network or auth policy yourself).
 /// </summary>
 public sealed class EdgeOpenApiOptions
 {
@@ -50,6 +52,14 @@ public sealed class EdgeOpenApiOptions
 
     /// <summary>Swagger UI bundle URL.</summary>
     public string SwaggerUiBundleUrl { get; set; } = "https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js";
+
+    /// <summary>
+    /// When true (default), <see cref="EdgeOpenApiExtensions.MapEdgeOpenApi"/> maps nothing
+    /// outside the Development environment — the method catalog and parameter schemas are
+    /// an attack map, so production exposure must be an explicit opt-in (set false and gate
+    /// by network or auth policy yourself).
+    /// </summary>
+    public bool DevelopmentOnly { get; set; } = true;
 }
 
 /// <summary>
@@ -596,6 +606,8 @@ public static class EdgeOpenApiExtensions
     /// Maps the OpenAPI document (<see cref="EdgeOpenApiOptions.DocumentPath"/>) and, when
     /// <see cref="EdgeOpenApiOptions.UiEnabled"/>, the Swagger UI page (<see cref="EdgeOpenApiOptions.UiPath"/>).
     /// The document reflects the handlers registered in DI at first request.
+    /// Outside Development, nothing is mapped unless <see cref="EdgeOpenApiOptions.DevelopmentOnly"/>
+    /// is explicitly disabled.
     /// <code>
     /// app.MapEdgeOpenApi("/rpc");
     /// </code>
@@ -607,6 +619,10 @@ public static class EdgeOpenApiExtensions
         var gwOpts = endpoints.ServiceProvider.GetService<IOptions<EdgeGatewayOptions>>()?.Value
             ?? new EdgeGatewayOptions();
         var path = gatewayPath.TrimEnd('/');
+
+        if (opts.DevelopmentOnly
+            && endpoints.ServiceProvider.GetService<IHostEnvironment>()?.IsDevelopment() != true)
+            return endpoints;
 
         var document = new Lazy<string>(() => EdgeOpenApiDocument
             .Build(endpoints.ServiceProvider.GetServices<IEdgeHandler>(), path, opts, gwOpts)

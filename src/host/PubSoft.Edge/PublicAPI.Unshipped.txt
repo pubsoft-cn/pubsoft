@@ -49,6 +49,8 @@ PubSoft.Edge.EdgeOpenApiOptions.ClientIdExample.get -> string?
 PubSoft.Edge.EdgeOpenApiOptions.ClientIdExample.set -> void
 PubSoft.Edge.EdgeOpenApiOptions.Description.get -> string?
 PubSoft.Edge.EdgeOpenApiOptions.Description.set -> void
+PubSoft.Edge.EdgeOpenApiOptions.DevelopmentOnly.get -> bool
+PubSoft.Edge.EdgeOpenApiOptions.DevelopmentOnly.set -> void
 PubSoft.Edge.EdgeOpenApiOptions.DocumentPath.get -> string!
 PubSoft.Edge.EdgeOpenApiOptions.DocumentPath.set -> void
 PubSoft.Edge.EdgeOpenApiOptions.EdgeOpenApiOptions() -> void

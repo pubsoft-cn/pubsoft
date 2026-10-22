@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>PubSoft.AspNetCore.Docs</RootNamespace>
+    <PackageId>PubSoft.AspNetCore.Docs</PackageId>
+    <Version>$(PubSoftVersion)</Version>
+    <Description>Self-hosted API doc catalog generated from EndpointDataSource + XML comments, with a semantic overlay and an embedded docs page. Not an OpenAPI/codegen replacement.</Description>
+    <PackageTags>api;docs;catalog;openapi-alternative</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <EmbeddedResource Include="Assets\docs.html" />
+  </ItemGroup>
+</Project>

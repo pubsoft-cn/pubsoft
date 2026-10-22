@@ -60,7 +60,7 @@ app.MapEdgeOpenApi("/rpc");
 - `GET /openapi.json` — OpenAPI 3.0.3: real envelope endpoint + one pseudo-path per method + `x-edge-methods` catalog
 - `GET /docs` — Swagger UI (CDN assets, disable via `Edge:OpenApi:UiEnabled=false`)
 - `EnablePseudoPaths` (default off) — accepts `POST /rpc/{method}` where the path tail overrides `envelope.method`; rate limiting covers pseudo-paths, and the document only lists them when enabled. For `hmac`/`md5` requests the signature must be computed over the *path* method (the gateway overrides `envelope.method` before verifying).
-- The document exposes the full method catalog — gate it by environment/network in production
+- The document exposes the full method catalog — mapped **only in Development** by default (`DevelopmentOnly`); set it false for non-dev exposure and gate by network/auth yourself
 - `/docs` loads Swagger UI from a CDN (`SwaggerUiCssUrl`/`SwaggerUiBundleUrl`) — self-host the assets or set `UiEnabled=false` for air-gapped or hardened deployments
 - `subMessage` carries raw upstream/transport detail (e.g. `HttpRequestException.Message`, which may include internal hostnames) — treat it as integrator-facing diagnostics, not C-end copy; suppress it at the handler/host layer if the response reaches end users
 

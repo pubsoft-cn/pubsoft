@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>{{TITLE}}</title>
+<style>
+  :root{color-scheme:dark}
+  body{margin:0;background:#040c1c;color:#dfe9f5;font-family:'Segoe UI',system-ui,sans-serif;font-size:14px}
+  .ad-head{display:flex;align-items:center;gap:16px;padding:14px 24px;border-bottom:1px solid #1d2d44}
+  .ad-head h1{font-size:18px;margin:0;color:#5cf}
+  .hint{color:#9db4d0;text-decoration:none;font-size:12px}
+  .mono{font-family:monospace}
+  .docs-wrap{display:flex;gap:20px;max-width:1200px;margin:0 auto;padding:20px}
+  .docs-nav{min-width:200px;position:sticky;top:16px;align-self:flex-start}
+  .docs-nav a{display:block;padding:8px 12px;color:#9db4d0;text-decoration:none;border-left:3px solid transparent;font-size:13px}
+  .docs-nav a:hover,.docs-nav a.on{color:#5cf;border-left-color:#5cf;background:rgba(60,140,255,.08)}
+  .section-box{background:#0a1628;border:1px solid #1d2d44;border-radius:6px;padding:14px 16px}
+  .ep{margin-bottom:16px}
+  .ep-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .method{font-weight:700;padding:2px 8px;border-radius:3px;font-size:12px;min-width:44px;text-align:center}
+  .method.GET{background:#0b3d2e;color:#3fd69c}
+  .method.POST{background:#123a63;color:#6cb4ff}
+  .method.DELETE{background:#4d1f1f;color:#ff8a8a}
+  .method.WS{background:#3d2e0b;color:#ffd166}
+  .ep-path{font-family:monospace;font-size:14px;color:#dfe9f5}
+  .tag{padding:1px 8px;border-radius:3px;font-size:11px}
+  .tag.open{background:#0b3d2e;color:#3fd69c}
+  .tag.jwt{background:#4d3a0b;color:#ffd166}
+  .param-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+  .param-tbl td,.param-tbl th{padding:5px 8px;border-bottom:1px solid #1d2d44;color:#9db4d0;text-align:left}
+  .param-tbl th{color:#5cf;font-weight:600}
+  .ep-note{color:#9db4d0;font-size:12px;margin-top:6px;line-height:1.6}
+  .ep-example{background:#040c1c;border:1px solid #1d2d44;border-radius:4px;padding:10px;margin-top:8px;font-family:monospace;font-size:12px;color:#8fd3ff;white-space:pre-wrap;word-break:break-all;max-height:220px;overflow:auto}
+  .grp-title{color:#5cf;margin:24px 0 10px;font-size:15px;border-bottom:1px solid #1d2d44;padding-bottom:6px}
+  .ep-returns{font-size:12px;color:#9db4d0;margin-top:6px}
+  .ep-returns b{color:#3fd69c;font-family:monospace}
+</style>
+</head>
+<body>
+<header class="ad-head">
+  <h1>{{TITLE}}</h1>
+  <a class="hint" id="expMd" href="#" style="margin-left:auto">⬇ 导出 Markdown</a>
+  <a class="hint" id="expJson" href="#">⬇ 导出 JSON</a>
+  <span class="hint mono" id="genAt"></span>
+</header>
+<div class="docs-wrap">
+  <nav class="docs-nav section-box" id="nav"></nav>
+  <main id="main" style="flex:1"></main>
+</div>
+<script>
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// 一键导出：全部数据来自已加载的 catalog JSON，客户端本地生成，不新增服务端面
+const download = (name, text, mime) => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type: mime }));
+  a.download = name;
+  document.body.appendChild(a);   // 部分浏览器要求元素在 DOM 中才触发下载
+  a.click();
+  a.remove();
+  // 延迟回收：立即 revoke 会中断下载（Chrome 留 .crdownload 残件）
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+const safeName = s => String(s || 'api').replace(/[^\w\u4e00-\u9fa5.-]+/g, '_');
+
+const toMd = d => {
+  let md = `# ${d.title || 'API Docs'}\n\n> 生成于 ${d.generatedAt}\n\n`;
+  for (const g of d.groups) {
+    md += `## ${g.name}\n\n`;
+    for (const e of g.endpoints) {
+      md += `### \`${e.method} ${e.path}\`\n\n`;
+      if (e.summary) md += `${e.summary}\n\n`;
+      if (e.note) md += `> ${e.note}\n\n`;
+      md += `- 鉴权：**${e.auth === 'open' ? '开放' : e.auth.toUpperCase()}**\n`;
+      if (e.returns) md += `- 返回：\`${e.returns}\`\n`;
+      const ps = (e.parameters || []).filter(p => p.name && !p.name.startsWith('cancellation'));
+      if (ps.length) {
+        md += `\n| 参数 | 位置 | 类型 | 必填 | 说明 |\n|---|---|---|---|---|\n`;
+        for (const p of ps)
+          md += `| ${p.name} | ${p.at} | \`${p.type}\` | ${p.required ? '是' : ''} | ${String(p.doc || '').replace(/\|/g, '\\|')} |\n`;
+      }
+      if (e.example) md += `\n\`\`\`json\n${JSON.stringify(e.example, null, 2)}\n\`\`\`\n`;
+      md += '\n';
+    }
+  }
+  return md;
+};
+
+let catalogData = null;
+document.getElementById('expMd').onclick = ev => {
+  ev.preventDefault();
+  if (catalogData) download(safeName(catalogData.title) + '-api.md', toMd(catalogData), 'text/markdown;charset=utf-8');
+};
+document.getElementById('expJson').onclick = ev => {
+  ev.preventDefault();
+  if (catalogData) download(safeName(catalogData.title) + '-api.json', JSON.stringify(catalogData, null, 2), 'application/json');
+};
+
+fetch('{{CATALOG}}').then(r => r.json()).then(d => {
+  catalogData = d;
+  document.getElementById('genAt').textContent = '生成于 ' + new Date(d.generatedAt).toLocaleString();
+  const nav = document.getElementById('nav'), main = document.getElementById('main');
+  d.groups.forEach((g, gi) => {
+    const aid = 'grp-' + gi;
+    nav.innerHTML += `<a href="#${aid}">${esc(g.name)}（${g.endpoints.length}）</a>`;
+    let h = `<div class="grp-title" id="${aid}">${esc(g.name)}</div>`;
+    g.endpoints.forEach(e => {
+      const params = (e.parameters || []).filter(p => p.name && !p.name.startsWith('cancellation'));
+      h += `<div class="ep section-box">
+        <div class="ep-head">
+          <span class="method ${esc(e.method)}">${esc(e.method)}</span>
+          <span class="ep-path">${esc(e.path)}</span>
+          <span class="tag ${e.auth === 'open' ? 'open' : 'jwt'}">${e.auth === 'open' ? '开放' : esc(e.auth.toUpperCase())}</span>
+        </div>
+        ${e.summary ? `<div class="ep-note"><b style="color:#dfe9f5">${esc(e.summary)}</b></div>` : ''}
+        ${e.note ? `<div class="ep-note">${esc(e.note)}</div>` : ''}
+        ${e.returns ? `<div class="ep-returns">返回 <b>${esc(e.returns)}</b></div>` : ''}
+        ${params.length ? `<table class="param-tbl"><tr><th>参数</th><th>位置</th><th>类型</th><th>必填</th><th>说明</th></tr>` +
+          params.map(p => `<tr><td class="mono">${esc(p.name)}</td><td>${esc(p.at)}</td><td class="mono">${esc(p.type)}</td><td>${p.required ? '是' : ''}</td><td>${esc(p.doc || '')}</td></tr>`).join('') + '</table>' : ''}
+        ${e.example ? `<div class="ep-example">${esc(JSON.stringify(e.example, null, 2))}</div>` : ''}
+      </div>`;
+    });
+    main.innerHTML += h;
+  });
+  nav.querySelectorAll('a').forEach(a => a.onclick = () => {
+    nav.querySelectorAll('a').forEach(x => x.classList.remove('on'));
+    a.classList.add('on');
+  });
+}).catch(e => {
+  document.getElementById('main').innerHTML = '<div class="section-box">文档目录加载失败：' + e + '</div>';
+});
+</script>
+</body>
+</html>

@@ -52,12 +52,14 @@ public sealed class EdgeOpenApiTests
     private static IEdgeHandler[] Handlers => [new EchoHandler(), new AnonHandler()];
 
     private static async Task<IHost> StartHostAsync(
-        bool pseudoPaths, int nonePermitLimit = 1000, bool mapOpenApi = true)
+        bool pseudoPaths, int nonePermitLimit = 1000, bool mapOpenApi = true,
+        string environment = "Development")
     {
         return await new HostBuilder()
             .ConfigureWebHost(web =>
             {
                 web.UseTestServer();
+                web.UseEnvironment(environment);
                 web.ConfigureServices(services =>
                 {
                     if (pseudoPaths)
@@ -180,6 +182,16 @@ public sealed class EdgeOpenApiTests
         var ui = await client.GetAsync("/docs");
         Assert.Equal(HttpStatusCode.OK, ui.StatusCode);
         Assert.Contains("SwaggerUIBundle", await ui.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task Document_And_Ui_Endpoints_Should_Not_Map_Outside_Development()
+    {
+        using var host = await StartHostAsync(pseudoPaths: true, environment: "Production");
+        var client = host.GetTestClient();
+
+        Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync("/openapi.json")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync("/docs")).StatusCode);
     }
 
     [Fact]

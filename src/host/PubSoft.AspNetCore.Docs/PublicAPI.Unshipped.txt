@@ -1,0 +1,45 @@
+#nullable enable
+PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint
+PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint.ApiDocExtraEndpoint() -> void
+PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint.Auth.get -> string!
+PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint.Auth.set -> void
+PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint.Example.get -> System.Text.Json.JsonElement?
+PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint.Example.set -> void
+PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint.Group.get -> string?
+PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint.Group.set -> void
+PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint.Method.get -> string!
+PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint.Method.set -> void
+PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint.Note.get -> string?
+PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint.Note.set -> void
+PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint.Path.get -> string!
+PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint.Path.set -> void
+PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint.Summary.get -> string?
+PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint.Summary.set -> void
+PubSoft.AspNetCore.Docs.ApiDocsCatalogService
+PubSoft.AspNetCore.Docs.ApiDocsCatalogService.ApiDocsCatalogService(Microsoft.AspNetCore.Routing.EndpointDataSource! endpoints, Microsoft.Extensions.Hosting.IHostEnvironment! env, Microsoft.Extensions.Options.IOptions<PubSoft.AspNetCore.Docs.ApiDocsOptions!>! options) -> void
+PubSoft.AspNetCore.Docs.ApiDocsCatalogService.GetCatalog() -> object!
+PubSoft.AspNetCore.Docs.ApiDocsCatalogService.Invalidate() -> void
+PubSoft.AspNetCore.Docs.ApiDocsExtensions
+PubSoft.AspNetCore.Docs.ApiDocsOptions
+PubSoft.AspNetCore.Docs.ApiDocsOptions.ApiDocsOptions() -> void
+PubSoft.AspNetCore.Docs.ApiDocsOptions.CatalogPath.get -> string!
+PubSoft.AspNetCore.Docs.ApiDocsOptions.CatalogPath.set -> void
+PubSoft.AspNetCore.Docs.ApiDocsOptions.DetectAuthMetadata.get -> bool
+PubSoft.AspNetCore.Docs.ApiDocsOptions.DetectAuthMetadata.set -> void
+PubSoft.AspNetCore.Docs.ApiDocsOptions.DevelopmentOnly.get -> bool
+PubSoft.AspNetCore.Docs.ApiDocsOptions.DevelopmentOnly.set -> void
+PubSoft.AspNetCore.Docs.ApiDocsOptions.ExtraEndpoints.get -> System.Collections.Generic.List<PubSoft.AspNetCore.Docs.ApiDocExtraEndpoint!>!
+PubSoft.AspNetCore.Docs.ApiDocsOptions.GroupBy.get -> System.Func<string!, string!, string!>?
+PubSoft.AspNetCore.Docs.ApiDocsOptions.GroupBy.set -> void
+PubSoft.AspNetCore.Docs.ApiDocsOptions.OverlayPath.get -> string?
+PubSoft.AspNetCore.Docs.ApiDocsOptions.OverlayPath.set -> void
+PubSoft.AspNetCore.Docs.ApiDocsOptions.PagePath.get -> string?
+PubSoft.AspNetCore.Docs.ApiDocsOptions.PagePath.set -> void
+PubSoft.AspNetCore.Docs.ApiDocsOptions.RequireAuthorization.get -> bool
+PubSoft.AspNetCore.Docs.ApiDocsOptions.RequireAuthorization.set -> void
+PubSoft.AspNetCore.Docs.ApiDocsOptions.Title.get -> string!
+PubSoft.AspNetCore.Docs.ApiDocsOptions.Title.set -> void
+static PubSoft.AspNetCore.Docs.ApiDocsExtensions.AddPubSoftApiDocs(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.AspNetCore.Docs.ApiDocsOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.AspNetCore.Docs.ApiDocsExtensions.MapPubSoftApiDocs(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder! app) -> Microsoft.AspNetCore.Routing.IEndpointRouteBuilder!
+PubSoft.AspNetCore.Docs.ApiDocsOptions.IncludeNonActionEndpoints.get -> bool
+PubSoft.AspNetCore.Docs.ApiDocsOptions.IncludeNonActionEndpoints.set -> void
