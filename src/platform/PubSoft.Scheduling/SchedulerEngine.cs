@@ -10,6 +10,7 @@ public sealed class SchedulerEngine
     private readonly IResultProcessorRegistry _processors;
     private readonly IStateStore _state;
     private readonly ILogger<SchedulerEngine>? _logger;
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, SemaphoreSlim> _jobLocks = new();
 
     public SchedulerEngine(
         IExecutorRegistry executors,
@@ -59,20 +60,30 @@ public sealed class SchedulerEngine
             return;
         }
 
+        SemaphoreSlim? overlapGuard = null;
+        if (job.PreventOverlap)
+        {
+            overlapGuard = _jobLocks.GetOrAdd(job.Name, _ => new SemaphoreSlim(1, 1));
+            if (!overlapGuard.Wait(0))
+            {
+                _logger?.LogWarning("Job {Name} skipped: previous run still executing", job.Name);
+                return;
+            }
+        }
+
         var stopwatch = Stopwatch.StartNew();
         JobResult result;
         try
         {
-            result = await executor.ExecuteAsync(job, cancellationToken).ConfigureAwait(false);
+            result = await ExecuteWithRetryAsync(job, executor, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             throw;
         }
-        catch (Exception exception)
+        finally
         {
-            result = new JobResult { Success = false, ErrorMessage = "Job execution failed." };
-            _logger?.LogError(exception, "Job {Name} threw an exception", job.Name);
+            overlapGuard?.Release();
         }
         stopwatch.Stop();
         _logger?.LogDebug("Job {Name} completed in {ElapsedMs}ms success={Success}",
@@ -113,6 +124,63 @@ public sealed class SchedulerEngine
         catch (Exception exception)
         {
             _logger?.LogError(exception, "Failed to update state for job {Name}", job.Name);
+        }
+    }
+
+    /// <summary>
+    /// Runs one execution attempt with the job timeout, retrying retryable failures
+    /// and thrown exceptions per <see cref="ScheduledJob.Retry"/>.
+    /// </summary>
+    private async Task<JobResult> ExecuteWithRetryAsync(
+        ScheduledJob job, IJobExecutor executor, CancellationToken cancellationToken)
+    {
+        var retry = job.Retry;
+        var maxAttempts = Math.Max(1, retry?.MaxAttempts ?? 1);
+
+        for (var attempt = 1; ; attempt++)
+        {
+            JobResult? result = null;
+            var canRetry = false;
+            try
+            {
+                var jobTimeout = job.Timeout;
+                using var timeout = jobTimeout.HasValue
+                    ? CancellationTokenSource.CreateLinkedTokenSource(cancellationToken)
+                    : null;
+                if (timeout is not null) timeout.CancelAfter(jobTimeout.GetValueOrDefault());
+                result = await executor.ExecuteAsync(job, timeout?.Token ?? cancellationToken).ConfigureAwait(false);
+                canRetry = !result.Success && result.Retryable;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                // Job-level timeout fired while the host is still running.
+                result = new JobResult { Success = false, StatusCode = 408, ErrorMessage = "Job timed out.", Retryable = true };
+                canRetry = true;
+                _logger?.LogWarning("Job {Name} timed out after {Timeout}", job.Name, job.Timeout);
+            }
+            catch (Exception exception)
+            {
+                result = new JobResult { Success = false, ErrorMessage = "Job execution failed." };
+                canRetry = true;
+                _logger?.LogError(exception, "Job {Name} threw an exception", job.Name);
+            }
+
+            if (!canRetry || attempt >= maxAttempts)
+                return result!;
+
+            var delay = retry is null
+                ? TimeSpan.Zero
+                : TimeSpan.FromMilliseconds(Math.Min(
+                    retry.InitialDelay.TotalMilliseconds * Math.Pow(retry.BackoffFactor, attempt - 1),
+                    retry.MaxDelay.TotalMilliseconds));
+            _logger?.LogWarning("Job {Name} attempt {Attempt}/{Max} failed, retrying in {DelayMs}ms",
+                job.Name, attempt, maxAttempts, delay.TotalMilliseconds);
+            if (delay > TimeSpan.Zero)
+                await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
         }
     }
 }

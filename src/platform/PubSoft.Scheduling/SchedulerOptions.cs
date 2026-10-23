@@ -40,6 +40,18 @@ public sealed class SchedulerOptions
                 error = $"Job name '{job.Name}' is duplicated.";
                 return false;
             }
+            if (job.Timeout is { } timeout && timeout <= TimeSpan.Zero)
+            {
+                error = $"Job '{job.Name}' Timeout must be greater than zero.";
+                return false;
+            }
+            if (job.Retry is { } retry
+                && (retry.MaxAttempts < 1 || retry.InitialDelay < TimeSpan.Zero
+                    || retry.BackoffFactor < 1.0 || retry.MaxDelay < TimeSpan.Zero))
+            {
+                error = $"Job '{job.Name}' has an invalid Retry policy.";
+                return false;
+            }
         }
 
         error = string.Empty;

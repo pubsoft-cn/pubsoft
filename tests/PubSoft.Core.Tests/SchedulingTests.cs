@@ -151,6 +151,116 @@ public sealed class SchedulingTests
     }
 
     [Fact]
+    public async Task EngineRetriesRetryableFailureUntilSuccess()
+    {
+        var attempts = 0;
+        var executor = new TestExecutor("flaky", _ =>
+        {
+            attempts++;
+            return Task.FromResult(attempts < 3
+                ? new JobResult { Success = false, ErrorMessage = "transient", Retryable = true }
+                : new JobResult { Success = true });
+        });
+        var state = new MemoryStateStore();
+        var engine = CreateEngine([executor], [], state);
+        var options = new SchedulerOptions
+        {
+            Jobs =
+            [
+                new ScheduledJob
+                {
+                    Name = "job", ExecutorType = "flaky", Schedule = ScheduleMask.EverySecond,
+                    Retry = new JobRetryPolicy { MaxAttempts = 3, InitialDelay = TimeSpan.FromMilliseconds(1) }
+                }
+            ]
+        };
+
+        await engine.RunDueJobsAsync(options, DateTimeOffset.UtcNow);
+
+        Assert.Equal(3, executor.ExecutionCount);
+        Assert.True((await state.GetLastResultAsync("job", default))!.Success);
+    }
+
+    [Fact]
+    public async Task EngineDoesNotRetryNonRetryableFailure()
+    {
+        var executor = new TestExecutor("hard", _ =>
+            Task.FromResult(new JobResult { Success = false, ErrorMessage = "permanent" }));
+        var state = new MemoryStateStore();
+        var engine = CreateEngine([executor], [], state);
+        var options = new SchedulerOptions
+        {
+            Jobs =
+            [
+                new ScheduledJob
+                {
+                    Name = "job", ExecutorType = "hard", Schedule = ScheduleMask.EverySecond,
+                    Retry = new JobRetryPolicy { MaxAttempts = 5, InitialDelay = TimeSpan.FromMilliseconds(1) }
+                }
+            ]
+        };
+
+        await engine.RunDueJobsAsync(options, DateTimeOffset.UtcNow);
+
+        Assert.Equal(1, executor.ExecutionCount);
+        Assert.False((await state.GetLastResultAsync("job", default))!.Success);
+    }
+
+    [Fact]
+    public async Task EngineSkipsDueRunWhilePreviousRunIsExecuting()
+    {
+        var gate = new TaskCompletionSource();
+        var executor = new TestExecutor("slow", async token =>
+        {
+            await gate.Task;
+            return new JobResult { Success = true };
+        });
+        var engine = CreateEngine([executor], [], new MemoryStateStore());
+        var options = new SchedulerOptions
+        {
+            Jobs = [new ScheduledJob { Name = "job", ExecutorType = "slow", Schedule = ScheduleMask.EverySecond }]
+        };
+        var now = DateTimeOffset.UtcNow;
+
+        var first = engine.RunDueJobsAsync(options, now);
+        await Task.Delay(30); // let the first run acquire the job lock
+        await engine.RunDueJobsAsync(options, now.AddSeconds(1)); // skipped: overlap
+        Assert.Equal(1, executor.ExecutionCount);
+
+        gate.SetResult();
+        await first;
+    }
+
+    [Fact]
+    public async Task EngineConvertsJobTimeoutToFailedResult()
+    {
+        var executor = new TestExecutor("hang", async token =>
+        {
+            await Task.Delay(Timeout.InfiniteTimeSpan, token);
+            return new JobResult { Success = true };
+        });
+        var state = new MemoryStateStore();
+        var engine = CreateEngine([executor], [], state);
+        var options = new SchedulerOptions
+        {
+            Jobs =
+            [
+                new ScheduledJob
+                {
+                    Name = "job", ExecutorType = "hang", Schedule = ScheduleMask.EverySecond,
+                    Timeout = TimeSpan.FromMilliseconds(30)
+                }
+            ]
+        };
+
+        await engine.RunDueJobsAsync(options, DateTimeOffset.UtcNow);
+
+        var result = await state.GetLastResultAsync("job", default);
+        Assert.False(result!.Success);
+        Assert.Equal(408, result.StatusCode);
+    }
+
+    [Fact]
     public async Task MemoryStateStoreExpiresCustomEntriesUsingTimeProvider()
     {
         var clock = new MutableTimeProvider(DateTimeOffset.Parse("2026-09-30T00:00:00Z"));
@@ -238,6 +348,75 @@ public sealed class SchedulingTests
         Assert.Equal(200, job.ExecutorConfig.GetProperty("ExpectStatusCodes")[0].GetInt32());
         Assert.Equal("00:00:08", job.ExecutorConfig.GetProperty("Timeout").GetString());
         Assert.Equal("slow", job.ResultProcessorConfig.GetProperty("Rules")[0].GetProperty("Name").GetString());
+    }
+
+    // ── strict scalar binding ──
+
+    private static IConfiguration JobConfig(Dictionary<string, string?> values)
+    {
+        var data = new Dictionary<string, string?>
+        {
+            ["Jobs:0:Name"] = "job",
+            ["Jobs:0:Schedule:Seconds"] = "1152921504606846975",
+            ["Jobs:0:Schedule:Minutes"] = "1152921504606846975",
+            ["Jobs:0:Schedule:Hours"] = "16777215",
+            ["Jobs:0:Schedule:DaysOfMonth"] = "4294967294",
+            ["Jobs:0:Schedule:Months"] = "8190",
+            ["Jobs:0:Schedule:DaysOfWeek"] = "127",
+        };
+        foreach (var (k, v) in values) data[k] = v;
+        return new ConfigurationBuilder().AddInMemoryCollection(data).Build();
+    }
+
+    [Theory]
+    [InlineData("5m", 300)]
+    [InlineData("30s", 30)]
+    [InlineData("1h", 3600)]
+    [InlineData("500ms", 0.5)]
+    [InlineData("2d", 172800)]
+    [InlineData("00:00:30", 30)]
+    public void BindingParsesDurationSuffixesForJobTimeout(string raw, double seconds)
+    {
+        var job = SchedulerConfigurationBinding.Bind(
+            JobConfig(new() { ["Jobs:0:Timeout"] = raw })).Jobs.Single();
+        Assert.Equal(TimeSpan.FromSeconds(seconds), job.Timeout);
+    }
+
+    [Fact]
+    public void BindingRejectsUnparsableTimeoutInsteadOfSilentUnbounded()
+    {
+        var exception = Assert.Throws<FormatException>(() => SchedulerConfigurationBinding.Bind(
+            JobConfig(new() { ["Jobs:0:Timeout"] = "soon" })));
+        Assert.Contains("job", exception.Message);
+        Assert.Contains("Timeout", exception.Message);
+    }
+
+    [Fact]
+    public void BindingParsesPreventOverlapAndRetrySection()
+    {
+        var job = SchedulerConfigurationBinding.Bind(JobConfig(new()
+        {
+            ["Jobs:0:PreventOverlap"] = "false",
+            ["Jobs:0:Retry:MaxAttempts"] = "3",
+            ["Jobs:0:Retry:InitialDelay"] = "2s",
+            ["Jobs:0:Retry:BackoffFactor"] = "1.5",
+            ["Jobs:0:Retry:MaxDelay"] = "30s",
+        })).Jobs.Single();
+
+        Assert.False(job.PreventOverlap);
+        Assert.Equal(3, job.Retry!.MaxAttempts);
+        Assert.Equal(TimeSpan.FromSeconds(2), job.Retry.InitialDelay);
+        Assert.Equal(1.5, job.Retry.BackoffFactor);
+        Assert.Equal(TimeSpan.FromSeconds(30), job.Retry.MaxDelay);
+    }
+
+    [Fact]
+    public void BindingRejectsUnparsableRetryFieldWithJobContext()
+    {
+        var exception = Assert.Throws<FormatException>(() => SchedulerConfigurationBinding.Bind(
+            JobConfig(new() { ["Jobs:0:Retry:InitialDelay"] = "fast" })));
+        Assert.Contains("'job'", exception.Message);
+        Assert.Contains("Retry:InitialDelay", exception.Message);
     }
 
     private static SchedulerEngine CreateEngine(

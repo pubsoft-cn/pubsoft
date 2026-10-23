@@ -17,12 +17,12 @@ internal static class SchedulerConfigurationBinding
     {
         var options = new SchedulerOptions();
 
-        if (section["LoopInterval"] is { } loop && TimeSpan.TryParse(loop, out var loopInterval))
-            options.LoopInterval = loopInterval;
-        if (section["ErrorDelay"] is { } delay && TimeSpan.TryParse(delay, out var errorDelay))
-            options.ErrorDelay = errorDelay;
-        if (section["MaxConcurrentJobs"] is { } max && int.TryParse(max, out var maxConcurrent))
-            options.MaxConcurrentJobs = maxConcurrent;
+        if (section["LoopInterval"] is { } loop)
+            options.LoopInterval = ParseDuration(section, loop, "LoopInterval");
+        if (section["ErrorDelay"] is { } delay)
+            options.ErrorDelay = ParseDuration(section, delay, "ErrorDelay");
+        if (section["MaxConcurrentJobs"] is { } max)
+            options.MaxConcurrentJobs = ParseInt(section, max, "MaxConcurrentJobs");
 
         foreach (var jobSection in section.GetSection("Jobs").GetChildren())
             options.Jobs.Add(BindJob(jobSection));
@@ -39,6 +39,21 @@ internal static class SchedulerConfigurationBinding
         };
         if (section["Enabled"] is { } enabled)
             job.Enabled = !string.Equals(enabled, "false", StringComparison.OrdinalIgnoreCase);
+        if (section["PreventOverlap"] is { } overlap)
+            job.PreventOverlap = !string.Equals(overlap, "false", StringComparison.OrdinalIgnoreCase);
+        if (section["Timeout"] is { } timeout)
+            job.Timeout = ParseDuration(section, timeout, "Timeout");
+
+        var retry = section.GetSection("Retry");
+        if (retry.Exists())
+        {
+            var policy = new JobRetryPolicy();
+            if (retry["MaxAttempts"] is { } maxAttempts) policy.MaxAttempts = ParseInt(section, maxAttempts, "Retry:MaxAttempts");
+            if (retry["InitialDelay"] is { } initial) policy.InitialDelay = ParseDuration(section, initial, "Retry:InitialDelay");
+            if (retry["BackoffFactor"] is { } factor) policy.BackoffFactor = ParseDouble(section, factor, "BackoffFactor");
+            if (retry["MaxDelay"] is { } maxDelay) policy.MaxDelay = ParseDuration(section, maxDelay, "Retry:MaxDelay");
+            job.Retry = policy;
+        }
 
         var schedule = section.GetSection("Schedule");
         if (schedule.Exists())
@@ -109,4 +124,58 @@ internal static class SchedulerConfigurationBinding
         => ushort.TryParse(s[key], out var v) ? v : (ushort)0;
     private static byte ReadByte(IConfiguration s, string key)
         => byte.TryParse(s[key], out var v) ? v : (byte)0;
+
+    // ── strict scalar parsing ──
+    // Present-but-unparsable values throw instead of silently falling back to
+    // defaults — for knobs like Timeout a silent fallback inverts the intent
+    // (a misspelled "5m" would leave the job unbounded).
+
+    private static TimeSpan ParseDuration(IConfiguration section, string raw, string key)
+    {
+        if (TimeSpan.TryParse(raw, out var parsed))
+            return parsed;
+        if (TryParseDurationSuffix(raw, out var suffixed))
+            return suffixed;
+        throw Invalid(section, key, raw);
+    }
+
+    /// <summary>Accepts a number plus unit suffix: 500ms, 30s, 5m, 1h, 2d.</summary>
+    private static bool TryParseDurationSuffix(string raw, out TimeSpan duration)
+    {
+        duration = default;
+        var span = raw.AsSpan().Trim();
+        var cut = span.Length;
+        while (cut > 0 && char.IsAsciiLetter(span[cut - 1])) cut--;
+        var suffix = span[cut..];
+        if (suffix.Length == 0
+            || !double.TryParse(span[..cut], System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out var value))
+            return false;
+
+        var scaled = suffix.ToString().ToLowerInvariant() switch
+        {
+            "ms" => TimeSpan.FromMilliseconds(value),
+            "s" => TimeSpan.FromSeconds(value),
+            "m" => TimeSpan.FromMinutes(value),
+            "h" => TimeSpan.FromHours(value),
+            "d" => TimeSpan.FromDays(value),
+            _ => (TimeSpan?)null,
+        };
+        if (scaled is not { } result)
+            return false;
+        duration = result;
+        return true;
+    }
+
+    private static int ParseInt(IConfiguration section, string raw, string key)
+        => int.TryParse(raw, out var v) ? v : throw Invalid(section, key, raw);
+
+    private static double ParseDouble(IConfiguration section, string raw, string key)
+        => double.TryParse(raw, System.Globalization.NumberStyles.Float,
+            System.Globalization.CultureInfo.InvariantCulture, out var v) ? v : throw Invalid(section, key, raw);
+
+    private static FormatException Invalid(IConfiguration section, string key, string raw)
+        => new($"Invalid scheduler configuration '{key}' = '{raw}'"
+            + (section["Name"] is { } name ? $" (job '{name}')." : ".")
+            + " Durations accept TimeSpan text ('00:00:30') or a unit suffix ('500ms', '30s', '5m', '1h', '2d').");
 }

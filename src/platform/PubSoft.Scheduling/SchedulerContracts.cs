@@ -11,6 +11,28 @@ public sealed class ScheduledJob
     public List<string> ResultProcessors { get; set; } = [];
     public JsonElement ResultProcessorConfig { get; set; }
     public bool Enabled { get; set; } = true;
+
+    /// <summary>
+    /// Skips a due run while a previous run of the same job is still executing.
+    /// Defaults to true: overlapping runs of one job are almost never intended.
+    /// </summary>
+    public bool PreventOverlap { get; set; } = true;
+
+    /// <summary>Per-attempt timeout; null means the job runs until completion or host shutdown.</summary>
+    public TimeSpan? Timeout { get; set; }
+
+    /// <summary>Retry policy applied to retryable failures and thrown exceptions; null disables retries.</summary>
+    public JobRetryPolicy? Retry { get; set; }
+}
+
+/// <summary>Bounded exponential-backoff retry for a <see cref="ScheduledJob"/>.</summary>
+public sealed class JobRetryPolicy
+{
+    /// <summary>Total attempts including the first execution (1 = no retry).</summary>
+    public int MaxAttempts { get; set; } = 1;
+    public TimeSpan InitialDelay { get; set; } = TimeSpan.FromSeconds(1);
+    public double BackoffFactor { get; set; } = 2.0;
+    public TimeSpan MaxDelay { get; set; } = TimeSpan.FromMinutes(1);
 }
 
 public sealed class JobResult
@@ -19,6 +41,14 @@ public sealed class JobResult
     public int StatusCode { get; init; }
     public int DelayMs { get; init; }
     public string? ErrorMessage { get; init; }
+
+    /// <summary>
+    /// Signals that a failed result is transient and may be retried when the job
+    /// has a <see cref="ScheduledJob.Retry"/> policy. Defaults to false: executors
+    /// opt in per failure instead of masking persistent errors behind retries.
+    /// </summary>
+    public bool Retryable { get; init; }
+
     public Dictionary<string, object?> Metadata { get; init; } = [];
     public DateTimeOffset ExecutedAt { get; init; } = DateTimeOffset.UtcNow;
 }

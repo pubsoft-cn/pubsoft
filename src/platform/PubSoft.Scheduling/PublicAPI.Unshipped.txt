@@ -31,10 +31,22 @@ PubSoft.Scheduling.JobResult.ExecutedAt.init -> void
 PubSoft.Scheduling.JobResult.JobResult() -> void
 PubSoft.Scheduling.JobResult.Metadata.get -> System.Collections.Generic.Dictionary<string!, object?>!
 PubSoft.Scheduling.JobResult.Metadata.init -> void
+PubSoft.Scheduling.JobResult.Retryable.get -> bool
+PubSoft.Scheduling.JobResult.Retryable.init -> void
 PubSoft.Scheduling.JobResult.StatusCode.get -> int
 PubSoft.Scheduling.JobResult.StatusCode.init -> void
 PubSoft.Scheduling.JobResult.Success.get -> bool
 PubSoft.Scheduling.JobResult.Success.init -> void
+PubSoft.Scheduling.JobRetryPolicy
+PubSoft.Scheduling.JobRetryPolicy.BackoffFactor.get -> double
+PubSoft.Scheduling.JobRetryPolicy.BackoffFactor.set -> void
+PubSoft.Scheduling.JobRetryPolicy.InitialDelay.get -> System.TimeSpan
+PubSoft.Scheduling.JobRetryPolicy.InitialDelay.set -> void
+PubSoft.Scheduling.JobRetryPolicy.JobRetryPolicy() -> void
+PubSoft.Scheduling.JobRetryPolicy.MaxAttempts.get -> int
+PubSoft.Scheduling.JobRetryPolicy.MaxAttempts.set -> void
+PubSoft.Scheduling.JobRetryPolicy.MaxDelay.get -> System.TimeSpan
+PubSoft.Scheduling.JobRetryPolicy.MaxDelay.set -> void
 PubSoft.Scheduling.LoggingResultProcessor
 PubSoft.Scheduling.LoggingResultProcessor.LoggingResultProcessor(Microsoft.Extensions.Logging.ILogger<PubSoft.Scheduling.LoggingResultProcessor!>? logger = null) -> void
 PubSoft.Scheduling.LoggingResultProcessor.Name.get -> string!
@@ -72,13 +84,19 @@ PubSoft.Scheduling.ScheduledJob.ExecutorType.get -> string!
 PubSoft.Scheduling.ScheduledJob.ExecutorType.set -> void
 PubSoft.Scheduling.ScheduledJob.Name.get -> string!
 PubSoft.Scheduling.ScheduledJob.Name.set -> void
+PubSoft.Scheduling.ScheduledJob.PreventOverlap.get -> bool
+PubSoft.Scheduling.ScheduledJob.PreventOverlap.set -> void
 PubSoft.Scheduling.ScheduledJob.ResultProcessorConfig.get -> System.Text.Json.JsonElement
 PubSoft.Scheduling.ScheduledJob.ResultProcessorConfig.set -> void
 PubSoft.Scheduling.ScheduledJob.ResultProcessors.get -> System.Collections.Generic.List<string!>!
 PubSoft.Scheduling.ScheduledJob.ResultProcessors.set -> void
+PubSoft.Scheduling.ScheduledJob.Retry.get -> PubSoft.Scheduling.JobRetryPolicy?
+PubSoft.Scheduling.ScheduledJob.Retry.set -> void
 PubSoft.Scheduling.ScheduledJob.Schedule.get -> PubSoft.Scheduling.ScheduleMask
 PubSoft.Scheduling.ScheduledJob.Schedule.set -> void
 PubSoft.Scheduling.ScheduledJob.ScheduledJob() -> void
+PubSoft.Scheduling.ScheduledJob.Timeout.get -> System.TimeSpan?
+PubSoft.Scheduling.ScheduledJob.Timeout.set -> void
 PubSoft.Scheduling.SchedulerEngine
 PubSoft.Scheduling.SchedulerEngine.RunDueJobsAsync(PubSoft.Scheduling.SchedulerOptions! options, System.DateTimeOffset timestamp, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 PubSoft.Scheduling.SchedulerEngine.SchedulerEngine(PubSoft.Scheduling.IExecutorRegistry! executors, PubSoft.Scheduling.IResultProcessorRegistry! processors, PubSoft.Scheduling.IStateStore! state, Microsoft.Extensions.Logging.ILogger<PubSoft.Scheduling.SchedulerEngine!>? logger = null) -> void
