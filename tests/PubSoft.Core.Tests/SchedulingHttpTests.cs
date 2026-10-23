@@ -294,9 +294,130 @@ public sealed class SchedulingHttpTests
     [InlineData("fd00::1", true)]
     [InlineData("ff02::1", true)]
     [InlineData("::ffff:10.0.0.1", true)]
+    [InlineData("100::1", true)]           // discard-only
+    [InlineData("64:ff9b:1::1", true)]     // v4v6 doc range
+    [InlineData("2001:2::1", true)]        // benchmarking
+    [InlineData("2001:4:112::1", true)]    // AS112
+    [InlineData("2001:10::1", true)]       // ORCHID
+    [InlineData("2001:20::1", true)]       // ORCHIDv2
+    [InlineData("2001:30::1", true)]       // DRIP
+    [InlineData("2001:db8::1", true)]      // documentation
+    [InlineData("3fff::1", true)]          // documentation
+    [InlineData("5f00::1", true)]          // SRv6 SIDs
+    [InlineData("2001:4860:4860::8888", false)] // Google public DNS
     [InlineData("2606:4700:4700::1111", false)]
     public void BlockedAddressClassification(string address, bool blocked)
         => Assert.Equal(blocked, HttpEgressGuard.IsBlockedAddress(IPAddress.Parse(address)));
+
+    // ── manual redirect following ──
+
+    private static HttpResponseMessage RedirectTo(string location)
+        => new(HttpStatusCode.Found) { Headers = { Location = new Uri(location, UriKind.RelativeOrAbsolute) } };
+
+    [Fact]
+    public async Task RedirectToNonAllowlistedHostIsBlocked()
+    {
+        var handler = new RecordingHandler(request => request.RequestUri!.Host == "api.example.com"
+            ? RedirectTo("https://evil.test/cb")
+            : new HttpResponseMessage(HttpStatusCode.OK));
+        var executor = CreateProbe(handler, options: new HttpExecutorOptions
+        {
+            AllowedHosts = { "api.example.com" },
+            FollowRedirects = true,
+        });
+
+        var result = await executor.ExecuteAsync(
+            CreateJob(new HttpExecutorConfig { Url = "https://api.example.com/start" }), default);
+
+        Assert.False(result.Success);
+        Assert.Equal("redirect target blocked", result.ErrorMessage);
+        Assert.Single(handler.RequestedHosts); // evil.test never contacted
+    }
+
+    [Fact]
+    public async Task RedirectToLiteralPrivateAddressIsBlocked()
+    {
+        var handler = new RecordingHandler(request => request.RequestUri!.PathAndQuery == "/start"
+            ? RedirectTo("http://169.254.169.254/latest")
+            : new HttpResponseMessage(HttpStatusCode.OK));
+        var executor = CreateProbe(handler, options: new HttpExecutorOptions { FollowRedirects = true });
+
+        var result = await executor.ExecuteAsync(
+            CreateJob(new HttpExecutorConfig { Url = "https://public.test/start" }), default);
+
+        Assert.False(result.Success);
+        Assert.Equal("redirect target blocked", result.ErrorMessage);
+        Assert.Single(handler.RequestedHosts);
+    }
+
+    [Fact]
+    public async Task CrossHostRedirectStripsTokenHeader()
+    {
+        var handler = new RecordingHandler(request => request.RequestUri!.Host == "a.example.com"
+            ? RedirectTo("https://b.example.com/land")
+            : new HttpResponseMessage(HttpStatusCode.OK));
+        var tokens = new RecordingTokenProvider("secret-token");
+        var executor = CreateProbe(handler, tokens, new HttpExecutorOptions
+        {
+            AllowedHosts = { ".example.com" },
+            FollowRedirects = true,
+        });
+
+        var result = await executor.ExecuteAsync(CreateJob(new HttpExecutorConfig
+        {
+            Url = "https://a.example.com/start",
+            Token = new TokenRef { CredentialKey = "svc", HeaderName = "X-Service-Token" },
+        }), default);
+
+        Assert.True(result.Success);
+        Assert.Equal(2, handler.RequestCount);
+        Assert.Equal("Bearer secret-token", handler.TokenHeaders.ElementAt(0));
+        Assert.Null(handler.TokenHeaders.ElementAt(1)); // credential not leaked cross-host
+    }
+
+    [Fact]
+    public async Task SameHostRedirectKeepsTokenAndDowngradesPost()
+    {
+        var handler = new RecordingHandler(request => request.RequestUri!.PathAndQuery == "/start"
+            ? RedirectTo("https://a.example.com/land")
+            : new HttpResponseMessage(HttpStatusCode.OK));
+        var tokens = new RecordingTokenProvider("secret-token");
+        var executor = CreateProbe(handler, tokens, new HttpExecutorOptions { FollowRedirects = true });
+
+        var result = await executor.ExecuteAsync(CreateJob(new HttpExecutorConfig
+        {
+            Method = "POST",
+            Url = "https://a.example.com/start",
+            Body = "{}",
+            Token = new TokenRef { CredentialKey = "svc", HeaderName = "X-Service-Token" },
+        }), default);
+
+        Assert.True(result.Success);
+        Assert.Equal("Bearer secret-token", handler.TokenHeaders.ElementAt(1)); // same host keeps credential
+        Assert.Equal("GET", handler.Methods.ElementAt(1)); // 302 downgrades POST to GET
+    }
+
+    [Fact]
+    public async Task RedirectLoopFailsAfterBudget()
+    {
+        var handler = new RecordingHandler(_ => RedirectTo("https://a.example.com/loop"));
+        var executor = CreateProbe(handler, options: new HttpExecutorOptions { FollowRedirects = true });
+
+        var result = await executor.ExecuteAsync(
+            CreateJob(new HttpExecutorConfig { Url = "https://a.example.com/loop" }), default);
+
+        Assert.False(result.Success);
+        Assert.Equal("redirect limit exceeded", result.ErrorMessage);
+        Assert.True(handler.RequestCount <= 10);
+    }
+
+    [Fact]
+    public void ProxyPlusPrivateBlockingIsRejectedAtValidation()
+        => Assert.False(new HttpExecutorOptions
+        {
+            UseSystemProxy = true,
+            BlockPrivateNetworks = true,
+        }.IsValid());
 
     [Fact]
     public async Task ConnectBlockingRefusesPrivateLiteralAtSocketLevel()
@@ -368,12 +489,12 @@ public sealed class SchedulingHttpTests
 
     private sealed class RecordingHandler : HttpMessageHandler
     {
-        private readonly Func<CancellationToken, Task<HttpResponseMessage>> _responseFactory;
+        private readonly Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> _responseFactory;
         private int _requestCount;
 
         public RecordingHandler(params object[] responses)
         {
-            _responseFactory = cancellationToken =>
+            _responseFactory = (_, cancellationToken) =>
             {
                 var response = responses[Math.Min(RequestCount - 1, responses.Length - 1)];
                 return response switch
@@ -386,12 +507,16 @@ public sealed class SchedulingHttpTests
         }
 
         public RecordingHandler(Func<CancellationToken, Task<HttpResponseMessage>> responseFactory)
-            => _responseFactory = responseFactory;
+            => _responseFactory = (_, ct) => responseFactory(ct);
+
+        public RecordingHandler(Func<HttpRequestMessage, HttpResponseMessage> responseFactory)
+            => _responseFactory = (request, _) => Task.FromResult(responseFactory(request));
 
         public int RequestCount => Volatile.Read(ref _requestCount);
         public ConcurrentQueue<string> Methods { get; } = new();
         public ConcurrentQueue<string?> Bodies { get; } = new();
         public ConcurrentQueue<string?> TokenHeaders { get; } = new();
+        public ConcurrentQueue<string> RequestedHosts { get; } = new();
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
@@ -399,7 +524,8 @@ public sealed class SchedulingHttpTests
             Methods.Enqueue(request.Method.Method);
             Bodies.Enqueue(request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken));
             TokenHeaders.Enqueue(request.Headers.TryGetValues("X-Service-Token", out var values) ? values.Single() : null);
-            return await _responseFactory(cancellationToken);
+            RequestedHosts.Enqueue(request.RequestUri!.Host);
+            return await _responseFactory(request, cancellationToken);
         }
     }
 }

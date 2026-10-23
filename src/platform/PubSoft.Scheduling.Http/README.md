@@ -33,10 +33,14 @@ internal or cloud-metadata endpoints:
 - `HttpExecutorOptions.AllowedHosts` (default empty = no allowlist) — exact hosts
   (`api.example.com`) or suffix wildcards (`.example.com` / `*.example.com`).
   Configure it for strict egress isolation.
-- `HttpExecutorOptions.FollowRedirects` (default **false**) — a 3xx is returned
-  as the job result rather than followed to an unchecked target.
+- `HttpExecutorOptions.FollowRedirects` (default **false**) — when enabled,
+  redirects are followed manually (max 8): every hop is re-validated against the
+  same scheme/allowlist/private-address rules, and the `TokenRef` credential
+  header is stripped when a hop crosses to a different host. `POST` downgrades
+  to `GET` on 301/302/303 (HttpClient parity).
 - `HttpExecutorOptions.UseSystemProxy` (default **false**) — env/system proxies
-  would bypass the connect-time check, so direct egress is the default.
+  would bypass the connect-time check, so direct egress is the default; options
+  validation **rejects** `UseSystemProxy` + `BlockPrivateNetworks` together.
 
 Set `BlockPrivateNetworks = false` only when jobs legitimately probe inside the
 host's own network (e.g. intranet health checks).

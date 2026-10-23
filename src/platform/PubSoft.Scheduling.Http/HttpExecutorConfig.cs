@@ -60,7 +60,10 @@ public sealed class HttpExecutorOptions
         => DefaultTimeout > TimeSpan.Zero
             && CircuitFailureThreshold > 0
             && CircuitOpenTimeout > TimeSpan.Zero
-            && AllowedHosts.All(entry => IsValidHostEntry(entry));
+            && AllowedHosts.All(entry => IsValidHostEntry(entry))
+            // Under a proxy the connect-time check sees the proxy, not the target —
+            // the combination silently weakens egress control, so it fails fast.
+            && !(UseSystemProxy && BlockPrivateNetworks);
 
     private static bool IsValidHostEntry(string entry)
     {

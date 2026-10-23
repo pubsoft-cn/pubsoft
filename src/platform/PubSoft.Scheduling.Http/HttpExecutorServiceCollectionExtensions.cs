@@ -25,7 +25,9 @@ public static class HttpExecutorServiceCollectionExtensions
                 var options = provider.GetRequiredService<IOptions<HttpExecutorOptions>>().Value;
                 var handler = new SocketsHttpHandler
                 {
-                    AllowAutoRedirect = options.FollowRedirects,
+                    // Redirects are followed manually in SendAsync so every hop is
+                    // re-validated — handler-level auto-redirect would bypass it.
+                    AllowAutoRedirect = false,
                     UseProxy = options.UseSystemProxy,
                 };
                 if (options.BlockPrivateNetworks)

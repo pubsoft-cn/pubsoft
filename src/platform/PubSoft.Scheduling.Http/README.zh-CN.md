@@ -31,10 +31,12 @@ services.AddPubSoftHttpExecutors();
 - `HttpExecutorOptions.AllowedHosts`（默认空 = 不设白名单）——精确主机
   （`api.example.com`）或后缀通配（`.example.com` / `*.example.com`）。
   需要严格出口隔离时配置。
-- `HttpExecutorOptions.FollowRedirects`（默认 **false**）——3xx 直接作为任务结果
-  返回，不跟随到未校验的目标。
+- `HttpExecutorOptions.FollowRedirects`（默认 **false**）——开启后由执行器手工
+  跟随跳转（上限 8 跳）：每跳重新走 scheme/白名单/私网校验，跨主机时剥除
+  `TokenRef` 凭据头；301/302/303 时 `POST` 降级为 `GET`（与 HttpClient 一致）。
 - `HttpExecutorOptions.UseSystemProxy`（默认 **false**）——环境/系统代理会绕过
-  连接时检查，默认直连。
+  连接时检查，默认直连；options 校验**拒绝** `UseSystemProxy` 与
+  `BlockPrivateNetworks` 同开的组合。
 
 仅当任务确需探测宿主自身内网（如内网健康检查）时才将 `BlockPrivateNetworks` 置 false。
 

@@ -79,18 +79,44 @@ internal static class HttpEgressGuard
             var b = address.GetAddressBytes();
             if (b.All(x => x == 0))                            // :: unspecified
                 return true;
-            return b[0] switch
-            {
-                0xff => true,                                  // ff00::/8 multicast
-                0xfc or 0xfd => true,                          // fc00::/7 unique-local
-                0xfe => (b[1] & 0xc0) == 0x80,                 // fe80::/10 link-local
-                0x20 => b[1] == 0x02                           // 2002::/16 6to4
-                        || b[1] == 0x01 && (b[2], b[3]) is (0, 0) or (0x0d, 0xb8), // Teredo / doc
-                _ => false,
-            };
+            foreach (var (prefix, bits) in BlockedV6Prefixes)
+                if (IsInPrefix(b, prefix, bits))
+                    return true;
+            return false;
         }
 
         return true;
+    }
+
+    /// <summary>IANA IPv6 special-purpose ranges that are not globally routable.</summary>
+    private static readonly (byte[] Prefix, int Bits)[] BlockedV6Prefixes =
+    [
+        ([0xfc], 7),                                          // fc00::/7 unique-local
+        ([0xfe, 0x80], 10),                                   // fe80::/10 link-local
+        ([0xff], 8),                                          // ff00::/8 multicast
+        ([0x01, 0, 0, 0, 0, 0, 0, 0], 64),                    // 100::/64 discard-only
+        ([0, 0x64, 0xff, 0x9b, 0, 1], 48),                    // 64:ff9b:1::/48 v4v6 doc
+        ([0x20, 0x01, 0, 0], 32),                             // 2001::/32 Teredo
+        ([0x20, 0x01, 0, 0x02, 0, 0], 48),                    // 2001:2::/48 benchmarking
+        ([0x20, 0x01, 0, 0x04, 0x01, 0x12], 48),              // 2001:4:112::/48 AS112
+        ([0x20, 0x01, 0, 0x10], 28),                          // 2001:10::/28 ORCHID
+        ([0x20, 0x01, 0, 0x20], 28),                          // 2001:20::/28 ORCHIDv2
+        ([0x20, 0x01, 0, 0x30], 28),                          // 2001:30::/28 DRIP
+        ([0x20, 0x01, 0x0d, 0xb8], 32),                       // 2001:db8::/32 documentation
+        ([0x20, 0x02], 16),                                   // 2002::/16 6to4
+        ([0x3f, 0xff, 0], 20),                                // 3fff::/20 documentation
+        ([0x5f, 0x00], 16),                                   // 5f00::/16 SRv6 SIDs
+    ];
+
+    private static bool IsInPrefix(byte[] address, byte[] prefix, int bits)
+    {
+        var whole = bits / 8;
+        for (var i = 0; i < whole; i++)
+            if (address[i] != prefix[i])
+                return false;
+        var remainder = bits % 8;
+        return remainder == 0
+            || (address[whole] & (0xff << (8 - remainder))) == (prefix[whole] & (0xff << (8 - remainder)));
     }
 
     /// <summary>
