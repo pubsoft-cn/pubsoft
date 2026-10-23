@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Net;
+using System.Net.Http;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -208,6 +209,103 @@ public sealed class SchedulingHttpTests
         Assert.Equal(0, handler.RequestCount);
     }
 
+    // ── SSRF egress guard ──
+
+    [Theory]
+    [InlineData("http://169.254.169.254/latest/meta-data")]   // cloud metadata
+    [InlineData("http://127.0.0.1:8080/admin")]
+    [InlineData("http://10.1.2.3/internal")]
+    [InlineData("http://192.168.1.1/")]
+    [InlineData("http://[::1]/")]
+    [InlineData("http://[fe80::1]/")]
+    [InlineData("http://[::ffff:127.0.0.1]/")]
+    public async Task PrivateLiteralTargetsAreRejectedWithoutSending(string url)
+    {
+        var handler = new RecordingHandler(HttpStatusCode.OK);
+        var executor = CreateProbe(handler);
+        var job = CreateJob(new HttpExecutorConfig { Url = url });
+
+        var result = await executor.ExecuteAsync(job, default);
+
+        Assert.False(result.Success);
+        Assert.Equal("Invalid HttpExecutorConfig", result.ErrorMessage);
+        Assert.Equal(0, handler.RequestCount);
+    }
+
+    [Fact]
+    public async Task NonAllowlistedHostIsRejectedWithoutSending()
+    {
+        var handler = new RecordingHandler(HttpStatusCode.OK);
+        var executor = CreateProbe(handler, options: new HttpExecutorOptions
+        {
+            AllowedHosts = { "api.example.com", ".corp.internal" }
+        });
+        var job = CreateJob(new HttpExecutorConfig { Url = "https://evil.test/x" });
+
+        var result = await executor.ExecuteAsync(job, default);
+
+        Assert.False(result.Success);
+        Assert.Equal("Invalid HttpExecutorConfig", result.ErrorMessage);
+        Assert.Equal(0, handler.RequestCount);
+    }
+
+    [Fact]
+    public async Task AllowlistedExactAndSuffixHostsAreAccepted()
+    {
+        var handler = new RecordingHandler(HttpStatusCode.OK);
+        var executor = CreateProbe(handler, options: new HttpExecutorOptions
+        {
+            AllowedHosts = { "api.example.com", ".corp.internal" }
+        });
+
+        foreach (var url in new[]
+        {
+            "https://api.example.com/a",
+            "https://node1.corp.internal/b",
+            "https://corp.internal/c", // suffix wildcard covers the bare domain
+        })
+        {
+            var result = await executor.ExecuteAsync(
+                CreateJob(new HttpExecutorConfig { Url = url }), default);
+            Assert.True(result.Success, url);
+        }
+        Assert.Equal(3, handler.RequestCount);
+    }
+
+    [Theory]
+    [InlineData("0.0.0.0", true)]
+    [InlineData("10.9.9.9", true)]
+    [InlineData("100.64.0.1", true)]   // CGNAT
+    [InlineData("100.63.255.255", false)]
+    [InlineData("127.0.0.1", true)]
+    [InlineData("169.254.169.254", true)]
+    [InlineData("172.16.0.1", true)]
+    [InlineData("172.32.0.1", false)]
+    [InlineData("192.168.0.1", true)]
+    [InlineData("192.0.2.1", true)]    // TEST-NET-1
+    [InlineData("198.51.100.1", true)] // TEST-NET-2
+    [InlineData("198.51.99.1", false)]
+    [InlineData("203.0.113.1", true)]  // TEST-NET-3
+    [InlineData("224.0.0.1", true)]
+    [InlineData("255.255.255.255", true)]
+    [InlineData("8.8.8.8", false)]
+    [InlineData("::1", true)]
+    [InlineData("fe80::1", true)]
+    [InlineData("fd00::1", true)]
+    [InlineData("ff02::1", true)]
+    [InlineData("::ffff:10.0.0.1", true)]
+    [InlineData("2606:4700:4700::1111", false)]
+    public void BlockedAddressClassification(string address, bool blocked)
+        => Assert.Equal(blocked, HttpEgressGuard.IsBlockedAddress(IPAddress.Parse(address)));
+
+    [Fact]
+    public async Task ConnectBlockingRefusesPrivateLiteralAtSocketLevel()
+    {
+        var exception = await Assert.ThrowsAsync<HttpRequestException>(
+            () => HttpEgressGuard.ConnectBlockingAsync("169.254.169.254", 80, CancellationToken.None).AsTask());
+        Assert.Contains("non-public", exception.Message);
+    }
+
     [Fact]
     public void RegistrationAddsBothExecutorsAndValidatesOptions()
     {
@@ -221,8 +319,11 @@ public sealed class SchedulingHttpTests
         Assert.Equal(TimeSpan.FromSeconds(3), provider.GetRequiredService<IOptions<HttpExecutorOptions>>().Value.DefaultTimeout);
     }
 
-    private static ProbeExecutor CreateProbe(HttpMessageHandler handler, ITokenProvider? tokenProvider = null)
-        => new(new TestHttpClientFactory(handler), Options.Create(new HttpExecutorOptions()), tokenProvider);
+    private static ProbeExecutor CreateProbe(
+        HttpMessageHandler handler,
+        ITokenProvider? tokenProvider = null,
+        HttpExecutorOptions? options = null)
+        => new(new TestHttpClientFactory(handler), Options.Create(options ?? new HttpExecutorOptions()), tokenProvider);
 
     private static ResilientExecutor CreateResilient(
         HttpMessageHandler handler,

@@ -20,6 +20,24 @@ services.AddPubSoftHttpExecutors();
 
 `Http.Resilient` 默认只重试无 body 的 `GET`/`HEAD`/`OPTIONS`/`TRACE`；其他方法或带 content 请求须宿主显式 `AllowUnsafeRetries = true`，前提是已确认端点幂等。token、URL、凭据不进日志；错误面已脱敏。
 
+## 出口管控（SSRF）
+
+任务 URL 受约束，低信任的任务写入方无法把调度器引向内网或云元数据端点：
+
+- `HttpExecutorOptions.BlockPrivateNetworks`（默认 **true**）——拒绝解析到非公网
+  地址的目标（RFC1918、loopback、link-local 含云元数据 `169.254.x.x`、CGNAT、组播、
+  保留/过渡段）。检查在**连接时**执行：`ConnectCallback` 自行解析并固定地址，
+  关闭了"校验到连接之间换 DNS 答案"的 rebinding 窗口。
+- `HttpExecutorOptions.AllowedHosts`（默认空 = 不设白名单）——精确主机
+  （`api.example.com`）或后缀通配（`.example.com` / `*.example.com`）。
+  需要严格出口隔离时配置。
+- `HttpExecutorOptions.FollowRedirects`（默认 **false**）——3xx 直接作为任务结果
+  返回，不跟随到未校验的目标。
+- `HttpExecutorOptions.UseSystemProxy`（默认 **false**）——环境/系统代理会绕过
+  连接时检查，默认直连。
+
+仅当任务确需探测宿主自身内网（如内网健康检查）时才将 `BlockPrivateNetworks` 置 false。
+
 ## 边界
 
 job 注册、bitmask 排程、引擎上限与 state store 在 [PubSoft.Scheduling](../../platform/PubSoft.Scheduling/README.zh-CN.md)。本包只加执行器。

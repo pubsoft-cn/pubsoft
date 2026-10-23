@@ -57,6 +57,8 @@ internal sealed class HttpExecutionSupport
         if (config is null || !Uri.TryCreate(config.Url, UriKind.Absolute, out uri!)
             || uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps
             || !string.IsNullOrEmpty(uri.UserInfo)
+            || !HttpEgressGuard.IsHostAllowed(uri.IdnHost, _options.AllowedHosts)
+            || _options.BlockPrivateNetworks && HttpEgressGuard.IsBlockedHostLiteral(uri)
             || !TryCreateMethod(config.Method, out method)
             || (config.Timeout ?? _options.DefaultTimeout) <= TimeSpan.Zero
             || config.Headers is null

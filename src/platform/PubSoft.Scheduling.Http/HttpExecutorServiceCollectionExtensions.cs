@@ -19,7 +19,19 @@ public static class HttpExecutorServiceCollectionExtensions
             .Validate(options => options.IsValid(), "HTTP executor options are invalid.")
             .ValidateOnStart();
         services.AddHttpClient(HttpExecutionSupport.HttpClientName)
-            .ConfigureHttpClient(client => client.Timeout = Timeout.InfiniteTimeSpan);
+            .ConfigureHttpClient(client => client.Timeout = Timeout.InfiniteTimeSpan)
+            .ConfigurePrimaryHttpMessageHandler(provider =>
+            {
+                var options = provider.GetRequiredService<IOptions<HttpExecutorOptions>>().Value;
+                var handler = new SocketsHttpHandler
+                {
+                    AllowAutoRedirect = options.FollowRedirects,
+                    UseProxy = options.UseSystemProxy,
+                };
+                if (options.BlockPrivateNetworks)
+                    handler.ConnectCallback = HttpEgressGuard.ConnectBlockingAsync;
+                return handler;
+            });
         services.TryAddSingleton(provider =>
         {
             var options = provider.GetRequiredService<IOptions<HttpExecutorOptions>>().Value;

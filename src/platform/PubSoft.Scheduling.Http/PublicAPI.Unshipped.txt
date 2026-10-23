@@ -20,13 +20,20 @@ PubSoft.Scheduling.Http.HttpExecutorConfig.Token.set -> void
 PubSoft.Scheduling.Http.HttpExecutorConfig.Url.get -> string!
 PubSoft.Scheduling.Http.HttpExecutorConfig.Url.set -> void
 PubSoft.Scheduling.Http.HttpExecutorOptions
+PubSoft.Scheduling.Http.HttpExecutorOptions.AllowedHosts.get -> System.Collections.Generic.IList<string!>!
+PubSoft.Scheduling.Http.HttpExecutorOptions.BlockPrivateNetworks.get -> bool
+PubSoft.Scheduling.Http.HttpExecutorOptions.BlockPrivateNetworks.set -> void
 PubSoft.Scheduling.Http.HttpExecutorOptions.CircuitFailureThreshold.get -> int
 PubSoft.Scheduling.Http.HttpExecutorOptions.CircuitFailureThreshold.set -> void
 PubSoft.Scheduling.Http.HttpExecutorOptions.CircuitOpenTimeout.get -> System.TimeSpan
 PubSoft.Scheduling.Http.HttpExecutorOptions.CircuitOpenTimeout.set -> void
 PubSoft.Scheduling.Http.HttpExecutorOptions.DefaultTimeout.get -> System.TimeSpan
 PubSoft.Scheduling.Http.HttpExecutorOptions.DefaultTimeout.set -> void
+PubSoft.Scheduling.Http.HttpExecutorOptions.FollowRedirects.get -> bool
+PubSoft.Scheduling.Http.HttpExecutorOptions.FollowRedirects.set -> void
 PubSoft.Scheduling.Http.HttpExecutorOptions.HttpExecutorOptions() -> void
+PubSoft.Scheduling.Http.HttpExecutorOptions.UseSystemProxy.get -> bool
+PubSoft.Scheduling.Http.HttpExecutorOptions.UseSystemProxy.set -> void
 PubSoft.Scheduling.Http.HttpExecutorServiceCollectionExtensions
 PubSoft.Scheduling.Http.ProbeExecutor
 PubSoft.Scheduling.Http.ProbeExecutor.ExecuteAsync(PubSoft.Scheduling.ScheduledJob! job, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<PubSoft.Scheduling.JobResult!>!

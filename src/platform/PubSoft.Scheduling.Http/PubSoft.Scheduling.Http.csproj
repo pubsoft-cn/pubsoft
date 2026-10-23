@@ -9,6 +9,9 @@
     <PackageTags>scheduler;http;probe;retry;circuit-breaker</PackageTags>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="PubSoft.Core.Tests" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../../platform/PubSoft.Scheduling/PubSoft.Scheduling.csproj" />
     <ProjectReference Include="../../core/PubSoft.Resilience/PubSoft.Resilience.csproj" />
     <ProjectReference Include="../../platform/PubSoft.Tokens/PubSoft.Tokens.csproj" />
