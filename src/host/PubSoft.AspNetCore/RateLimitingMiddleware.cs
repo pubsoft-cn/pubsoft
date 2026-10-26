@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using PubSoft.Security;
 using System.Globalization;
 
@@ -11,6 +12,7 @@ public sealed class PubSoftRateLimitingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly RateLimiter _rateLimiter;
+    private int _proxyWarningEmitted;
 
     public PubSoftRateLimitingMiddleware(RequestDelegate next, RateLimiter rateLimiter)
     {
@@ -20,6 +22,7 @@ public sealed class PubSoftRateLimitingMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        WarnOnUnprocessedForwardedHeaders(context);
         var ipAddress = IpNormalizer.Normalize(context.Connection.RemoteIpAddress?.ToString());
         var result = _rateLimiter.CheckByIpAddress(ipAddress);
         if (result.RemainingRequests != int.MaxValue)
@@ -33,6 +36,12 @@ public sealed class PubSoftRateLimitingMiddleware
             context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
             context.Response.Headers.RetryAfter = Math.Max(1, GetSecondsUntilReset(result.ResetTime))
                 .ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var rejection = context.RequestServices?.GetService<PubSoftRateLimitRejection>();
+            if (rejection?.BodyWriter is { } writer)
+            {
+                await writer(context).ConfigureAwait(false);
+                return;
+            }
             await context.Response.WriteAsJsonAsync(
                 new { error = "rate_limit_exceeded" },
                 context.RequestAborted).ConfigureAwait(false);
@@ -40,6 +49,21 @@ public sealed class PubSoftRateLimitingMiddleware
         }
 
         await _next(context).ConfigureAwait(false);
+    }
+
+    private void WarnOnUnprocessedForwardedHeaders(HttpContext context)
+    {
+        if (Volatile.Read(ref _proxyWarningEmitted) != 0
+            || !ProxyDeploymentDiagnostics.HasUnprocessedForwardedHeaders(context))
+            return;
+        if (Interlocked.CompareExchange(ref _proxyWarningEmitted, 1, 0) != 0)
+            return;
+        context.RequestServices?.GetService<ILogger<PubSoftRateLimitingMiddleware>>()?
+            .LogWarning(
+                "Request carries X-Forwarded-For/X-Real-IP but RemoteIpAddress is the proxy address ({RemoteIp}) — forwarded headers were never processed. " +
+                "All clients share one rate-limit bucket. Insert app.UsePubSoftForwardedHeaders() early in the pipeline " +
+                "(X-Real-IP-only proxies also need options.RealIp = true).",
+                context.Connection.RemoteIpAddress);
     }
 
     private static int GetSecondsUntilReset(DateTime resetTime)
@@ -81,14 +105,14 @@ public sealed class PubSoftRateLimitPolicyOptions
     public Func<HttpContext, bool> AppliesTo { get; set; } = static _ => true;
     public Func<HttpContext, string?> IdentifierSelector { get; set; } = static context =>
         IpNormalizer.Normalize(context.Connection.RemoteIpAddress?.ToString());
-    public Func<int, bool> IsFailureResponse { get; set; } = static statusCode => statusCode >= 400;
+    public Func<HttpContext, int, bool> IsFailureResponse { get; set; } = static (_, statusCode) => statusCode >= 400;
 }
 
 public sealed class PubSoftRateLimitPolicy
 {
     private readonly Func<HttpContext, bool> _appliesTo;
     private readonly Func<HttpContext, string?> _identifierSelector;
-    private readonly Func<int, bool> _isFailureResponse;
+    private readonly Func<HttpContext, int, bool> _isFailureResponse;
     private readonly RateLimiter _limiter;
 
     public PubSoftRateLimitPolicy(PubSoftRateLimitPolicyOptions options)
@@ -115,7 +139,7 @@ public sealed class PubSoftRateLimitPolicy
     public bool CountFailuresOnly { get; }
     internal bool Applies(HttpContext context) => _appliesTo(context);
     internal string? GetIdentifier(HttpContext context) => _identifierSelector(context);
-    internal bool IsFailure(int statusCode) => _isFailureResponse(statusCode);
+    internal bool IsFailure(HttpContext context, int statusCode) => _isFailureResponse(context, statusCode);
     internal RateLimitResult Check(string? identifier, bool countRequest) => _limiter.CheckRateLimit(identifier, countRequest);
 }
 
@@ -123,6 +147,7 @@ public sealed class PubSoftRateLimitPolicyMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly IReadOnlyList<PubSoftRateLimitPolicy> _policies;
+    private int _proxyWarningEmitted;
 
     public PubSoftRateLimitPolicyMiddleware(
         RequestDelegate next,
@@ -136,6 +161,7 @@ public sealed class PubSoftRateLimitPolicyMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+        WarnOnUnprocessedForwardedHeaders(context);
         var remaining = int.MaxValue;
         DateTime? resetTime = null;
         var failureCounters = new List<(PubSoftRateLimitPolicy Policy, string? Identifier)>();
@@ -175,20 +201,36 @@ public sealed class PubSoftRateLimitPolicyMiddleware
         }
         catch
         {
-            RecordFailures(failureCounters);
+            RecordFailures(context, failureCounters);
             throw;
         }
 
-        RecordFailures(failureCounters, context.Response.StatusCode);
+        RecordFailures(context, failureCounters, context.Response.StatusCode);
+    }
+
+    private void WarnOnUnprocessedForwardedHeaders(HttpContext context)
+    {
+        if (Volatile.Read(ref _proxyWarningEmitted) != 0
+            || !ProxyDeploymentDiagnostics.HasUnprocessedForwardedHeaders(context))
+            return;
+        if (Interlocked.CompareExchange(ref _proxyWarningEmitted, 1, 0) != 0)
+            return;
+        context.RequestServices?.GetService<ILogger<PubSoftRateLimitPolicyMiddleware>>()?
+            .LogWarning(
+                "Request carries X-Forwarded-For/X-Real-IP but RemoteIpAddress is the proxy address ({RemoteIp}) — forwarded headers were never processed. " +
+                "All clients share one rate-limit bucket. Insert app.UsePubSoftForwardedHeaders() early in the pipeline " +
+                "(X-Real-IP-only proxies also need options.RealIp = true).",
+                context.Connection.RemoteIpAddress);
     }
 
     private static void RecordFailures(
+        HttpContext context,
         IEnumerable<(PubSoftRateLimitPolicy Policy, string? Identifier)> failureCounters,
         int? statusCode = null)
     {
         foreach (var (policy, identifier) in failureCounters)
         {
-            if (statusCode is null || policy.IsFailure(statusCode.Value))
+            if (statusCode is null || policy.IsFailure(context, statusCode.Value))
                 _ = policy.Check(identifier, countRequest: true);
         }
     }
@@ -198,6 +240,12 @@ public sealed class PubSoftRateLimitPolicyMiddleware
         var retryAfter = Math.Max(1, GetSecondsUntilReset(resetTime));
         context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
         context.Response.Headers.RetryAfter = retryAfter.ToString(CultureInfo.InvariantCulture);
+        var rejection = context.RequestServices?.GetService<PubSoftRateLimitRejection>();
+        if (rejection?.BodyWriter is { } writer)
+        {
+            await writer(context).ConfigureAwait(false);
+            return;
+        }
         await context.Response.WriteAsJsonAsync(
             new { error = "rate_limit_exceeded" },
             context.RequestAborted).ConfigureAwait(false);
@@ -233,5 +281,38 @@ public static class PubSoftRateLimitPolicyExtensions
     {
         ArgumentNullException.ThrowIfNull(app);
         return app.UseMiddleware<PubSoftRateLimitPolicyMiddleware>();
+    }
+}
+
+/// <summary>
+/// Customizes the 429 rejection body written by the rate-limiting middlewares.
+/// Status code and Retry-After are already set by the middleware; the writer owns the body only.
+/// Register once via <see cref="PubSoftRateLimitRejectionExtensions.AddPubSoftRateLimitRejection"/>;
+/// default body is <c>{"error":"rate_limit_exceeded"}</c>.
+/// </summary>
+public sealed class PubSoftRateLimitRejection
+{
+    public PubSoftRateLimitRejection(Func<HttpContext, Task> bodyWriter)
+    {
+        BodyWriter = bodyWriter ?? throw new ArgumentNullException(nameof(bodyWriter));
+    }
+
+    /// <summary>Writes the rejection response body (status 429 + Retry-After already set).</summary>
+    public Func<HttpContext, Task> BodyWriter { get; }
+}
+
+public static class PubSoftRateLimitRejectionExtensions
+{
+    /// <summary>
+    /// Registers a host-specific 429 body writer — e.g. an API error envelope
+    /// (<c>{"code":429,"message":"..."}</c>) matching the host's response conventions.
+    /// </summary>
+    public static IServiceCollection AddPubSoftRateLimitRejection(
+        this IServiceCollection services,
+        Func<HttpContext, Task> bodyWriter)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        services.TryAddSingleton(new PubSoftRateLimitRejection(bodyWriter));
+        return services;
     }
 }

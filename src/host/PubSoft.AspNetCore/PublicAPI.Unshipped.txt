@@ -81,6 +81,7 @@ PubSoft.AspNetCore.HmacValidationServiceCollectionExtensions
 PubSoft.AspNetCore.IAppSecretResolver
 PubSoft.AspNetCore.IAppSecretResolver.ResolveSecretAsync(string! appId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<string?>
 PubSoft.AspNetCore.IpNormalizer
+PubSoft.AspNetCore.ProxyDeploymentDiagnostics
 PubSoft.AspNetCore.PubSoftApplicationService
 PubSoft.AspNetCore.PubSoftApplicationService.Logger.get -> Microsoft.Extensions.Logging.ILogger!
 PubSoft.AspNetCore.PubSoftApplicationService.PubSoftApplicationService() -> void
@@ -91,6 +92,21 @@ PubSoft.AspNetCore.PubSoftController.SubjectAccessor.get -> PubSoft.Authenticati
 PubSoft.AspNetCore.PubSoftControllerBase
 PubSoft.AspNetCore.PubSoftControllerBase.Logger.get -> Microsoft.Extensions.Logging.ILogger!
 PubSoft.AspNetCore.PubSoftControllerBase.PubSoftControllerBase() -> void
+PubSoft.AspNetCore.PubSoftForwardedHeadersExtensions
+PubSoft.AspNetCore.PubSoftForwardedHeadersOptions
+PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.ForwardLimit.get -> int?
+PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.ForwardLimit.set -> void
+PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.ForwardedFor.get -> bool
+PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.ForwardedFor.set -> void
+PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.ForwardedProto.get -> bool
+PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.ForwardedProto.set -> void
+PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.KnownNetworks.get -> System.Collections.Generic.IList<string!>!
+PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.KnownProxies.get -> System.Collections.Generic.IList<string!>!
+PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.PubSoftForwardedHeadersOptions() -> void
+PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.RealIp.get -> bool
+PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.RealIp.set -> void
+PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.TrustAnyProxy.get -> bool
+PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.TrustAnyProxy.set -> void
 PubSoft.AspNetCore.PubSoftRateLimitPolicy
 PubSoft.AspNetCore.PubSoftRateLimitPolicy.CountFailuresOnly.get -> bool
 PubSoft.AspNetCore.PubSoftRateLimitPolicy.Name.get -> string!
@@ -106,7 +122,7 @@ PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.CountFailuresOnly.get -> bool
 PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.CountFailuresOnly.set -> void
 PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.IdentifierSelector.get -> System.Func<Microsoft.AspNetCore.Http.HttpContext!, string?>!
 PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.IdentifierSelector.set -> void
-PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.IsFailureResponse.get -> System.Func<int, bool>!
+PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.IsFailureResponse.get -> System.Func<Microsoft.AspNetCore.Http.HttpContext!, int, bool>!
 PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.IsFailureResponse.set -> void
 PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.MaxIdentifiers.get -> int
 PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.MaxIdentifiers.set -> void
@@ -117,6 +133,10 @@ PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.RequestsPerWindow.get -> int
 PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.RequestsPerWindow.set -> void
 PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.WindowSize.get -> System.TimeSpan
 PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.WindowSize.set -> void
+PubSoft.AspNetCore.PubSoftRateLimitRejection
+PubSoft.AspNetCore.PubSoftRateLimitRejection.BodyWriter.get -> System.Func<Microsoft.AspNetCore.Http.HttpContext!, System.Threading.Tasks.Task!>!
+PubSoft.AspNetCore.PubSoftRateLimitRejection.PubSoftRateLimitRejection(System.Func<Microsoft.AspNetCore.Http.HttpContext!, System.Threading.Tasks.Task!>! bodyWriter) -> void
+PubSoft.AspNetCore.PubSoftRateLimitRejectionExtensions
 PubSoft.AspNetCore.PubSoftRateLimitingExtensions
 PubSoft.AspNetCore.PubSoftRateLimitingMiddleware
 PubSoft.AspNetCore.PubSoftRateLimitingMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
@@ -174,8 +194,12 @@ static PubSoft.AspNetCore.HmacValidationServiceCollectionExtensions.AddPubSoftHm
 static PubSoft.AspNetCore.HmacValidationServiceCollectionExtensions.UsePubSoftHmacValidation(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
 static PubSoft.AspNetCore.IpNormalizer.GetRemoteIp(Microsoft.AspNetCore.Http.HttpContext? context) -> string!
 static PubSoft.AspNetCore.IpNormalizer.Normalize(string? ip) -> string!
+static PubSoft.AspNetCore.ProxyDeploymentDiagnostics.HasUnprocessedForwardedHeaders(Microsoft.AspNetCore.Http.HttpContext! context) -> bool
+static PubSoft.AspNetCore.PubSoftForwardedHeadersExtensions.AddPubSoftForwardedHeaders(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.AspNetCore.PubSoftForwardedHeadersOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.AspNetCore.PubSoftForwardedHeadersExtensions.UsePubSoftForwardedHeaders(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, System.Action<PubSoft.AspNetCore.PubSoftForwardedHeadersOptions!>? configure = null) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
 static PubSoft.AspNetCore.PubSoftRateLimitPolicyExtensions.AddPubSoftRateLimitPolicy(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.PubSoftRateLimitPolicyExtensions.UsePubSoftRateLimitPolicies(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+static PubSoft.AspNetCore.PubSoftRateLimitRejectionExtensions.AddPubSoftRateLimitRejection(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Func<Microsoft.AspNetCore.Http.HttpContext!, System.Threading.Tasks.Task!>! bodyWriter) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.PubSoftRateLimitingExtensions.AddPubSoftRateLimiting(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Security.RateLimiterOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.PubSoftRateLimitingExtensions.UsePubSoftRateLimiting(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
 static PubSoft.AspNetCore.PubSoftRequestSaveChangesExtensions.AddPubSoftRequestSaveChanges(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

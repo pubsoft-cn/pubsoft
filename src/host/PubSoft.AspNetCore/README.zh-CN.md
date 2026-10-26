@@ -67,6 +67,27 @@ app.UsePubSoftHmacValidation();
 
 `AddPubSoftHmacValidation` 默认 `MemoryNonceStore`——只防单进程内重放；多实例生产部署需要经评审的原子共享 `INonceStore`；secret 解析须用批准的 secret manager。排除路径绕过签名验证——列表保持窄而显式。secret 解析不可用时中间件返回 503，不暴露密钥。
 
+## Forwarded Headers
+
+`RemoteIpAddress` 是全栈唯一的客户端 IP 权威来源，任何组件不得自行读原始 `X-Forwarded-For`。反代部署下，在所有 IP 消费方之前插一次 forwarded-header 处理：
+
+```csharp
+app.UsePubSoftForwardedHeaders(options =>
+{
+    // 默认：仅信平台默认（loopback peer）。
+    // 后端直连可达时钉死代理 peer 集合：
+    // options.KnownProxies.Add("10.0.0.1");
+    // options.KnownNetworks.Add("172.16.0.0/12");
+    // 只发 X-Real-IP 的代理（无 X-Forwarded-For）：
+    // options.RealIp = true;
+    // 仅当 socket 只能被代理触达（回环端口 / 私网段）：
+    // options.TrustAnyProxy = true;
+});
+app.UsePubSoftRateLimiting();
+```
+
+直连可达的后端开 `TrustAnyProxy` = 任意客户端可伪造源 IP（限流绕过 + 审计投毒）。`RealIp = true` 在没有 `X-Forwarded-For` 且 socket peer 可信时采纳 `X-Real-IP`——默认关闭，且 `AddPubSoftForwardedHeaders` 会直接拒绝（平台 `ForwardedHeadersOptions` 表达不了）。`KnownProxies`/`KnownNetworks` 里格式非法的条目在启动期抛错而非静默丢弃。`AddPubSoftForwardedHeaders` 是服务侧等价件（注册 `ForwardedHeadersOptions`，供自行 `UseForwardedHeaders()` 的宿主用）。`ProxyDeploymentDiagnostics.HasUnprocessedForwardedHeaders` 运行时检测该错配（私网 socket peer + 公网宣告客户端）：两个限流中间件都会输出一次性告警并点名缺失的调用。
+
 ## IP 限流与健康端点
 
 限流适配器是有界、进程内固定窗口限流器，只按规范化 `HttpContext.Connection.RemoteIpAddress` 分键：
@@ -102,7 +123,14 @@ services.AddPubSoftRateLimitPolicy(options =>
 app.UsePubSoftRateLimitPolicies();
 ```
 
-多策略命中同一请求时叠加生效。默认标识符为规范化 transport remote IP；自定义 selector 是宿主代码，必须用可信身份或经代理处理的值——绝不用未校验的 forwarded/client header。仅计失败策略在端点前检查已有计数、在下游管线返回或抛出时记录响应——同时并发在飞的失败可能在计数提交前全部通过，这是滥用节流而非严格并发限制。两种中间件变体均为进程内；集群级强制用经评审的分布式配额 provider。路由类别与哪些 4xx/5xx、404 或认证失败计数由宿主定义。
+多策略命中同一请求时叠加生效。默认标识符为规范化 transport remote IP；自定义 selector 是宿主代码，必须用可信身份或经代理处理的值——绝不用未校验的 forwarded/client header。仅计失败策略在端点前检查已有计数、在下游管线返回或抛出时记录响应——同时并发在飞的失败可能在计数提交前全部通过，这是滥用节流而非严格并发限制。两种中间件变体均为进程内；集群级强制用经评审的分布式配额 provider。路由类别与哪些 4xx/5xx、404 或认证失败计数由宿主定义——`IsFailureResponse` 接收 `(HttpContext, statusCode)`，谓词可排除例如"已带凭证请求的 401"。
+
+429 拒绝体默认 `{"error":"rate_limit_exceeded"}`；有 API 错误信封约定的宿主可为两个中间件统一覆写：
+
+```csharp
+services.AddPubSoftRateLimitRejection(context =>
+    context.Response.WriteAsJsonAsync(new { code = 429, message = "rate limit exceeded" }));
+```
 
 聚合健康检查：注册 `PubSoft.Monitoring` 检查与聚合器，再显式 `app.MapPubSoftHealthEndpoint()`——只返回总体状态（`Unhealthy` 503；`Healthy`/`Degraded` 200）。按需加端点授权与限流。
 

@@ -68,6 +68,28 @@ The request uses one each of `X-Fend-App-Id`, `X-Fend-Signature`, `X-Fend-Timest
 
 `AddPubSoftHmacValidation` defaults to `MemoryNonceStore`, which only prevents replay within one process. Multi-instance production deployments need a reviewed atomic shared `INonceStore`; secret resolution must use an approved secret manager. Excluded paths bypass signature validation, so keep the list narrow and explicit. The middleware returns 503 when secret resolution is unavailable and does not expose the secret.
 
+## Forwarded Headers
+
+`RemoteIpAddress` is the canonical client-IP source across the stack; components must not read raw `X-Forwarded-For` themselves. Behind a reverse proxy, insert forwarded-header processing once, before any IP consumer:
+
+```csharp
+app.UsePubSoftForwardedHeaders(options =>
+{
+    // Default: trust the platform defaults (loopback peers) only.
+    // Pin the proxy peer set when the backend is directly reachable:
+    // options.KnownProxies.Add("10.0.0.1");
+    // options.KnownNetworks.Add("172.16.0.0/12");
+    // X-Real-IP-only proxies (no X-Forwarded-For):
+    // options.RealIp = true;
+    // Only when the socket is exclusively reachable from the proxy
+    // (loopback-bound port / private network):
+    // options.TrustAnyProxy = true;
+});
+app.UsePubSoftRateLimiting();
+```
+
+`TrustAnyProxy` on a directly reachable backend lets any client spoof its source IP — rate-limit evasion and audit poisoning. `RealIp = true` applies `X-Real-IP` when no `X-Forwarded-For` is present and the socket peer is trusted; it is off by default and rejected by `AddPubSoftForwardedHeaders` because the platform `ForwardedHeadersOptions` cannot express it. Malformed `KnownProxies`/`KnownNetworks` entries fail startup instead of being silently dropped. `AddPubSoftForwardedHeaders` is the service-side counterpart registering `ForwardedHeadersOptions` for hosts that call `UseForwardedHeaders()` themselves. `ProxyDeploymentDiagnostics.HasUnprocessedForwardedHeaders` detects the misconfiguration at runtime (private socket peer + public advertised client): both rate-limiting middlewares emit a one-time warning naming the missing call.
+
 ## IP Rate Limiting and Health Endpoint
 
 The rate-limiting adapter is a bounded, process-local fixed-window limiter keyed only by normalized `HttpContext.Connection.RemoteIpAddress`:
@@ -103,7 +125,14 @@ services.AddPubSoftRateLimitPolicy(options =>
 app.UsePubSoftRateLimitPolicies();
 ```
 
-Policies stack when more than one matches a request. The default identifier is the normalized transport remote IP; custom selectors are host code and must use a trusted identity or proxy-processed value, never an unvalidated forwarded/client header. Failure-only policies check the existing count before the endpoint and record the response when the downstream pipeline returns or throws. Simultaneous in-flight failures may all pass before their counts are committed, so this is abuse throttling rather than a strict concurrency limit. Both middleware variants are process-local; use a reviewed distributed quota provider for cluster-wide enforcement. Hosts must define route categories and decide whether 4xx/5xx, 404, or particular authentication failures count.
+Policies stack when more than one matches a request. The default identifier is the normalized transport remote IP; custom selectors are host code and must use a trusted identity or proxy-processed value, never an unvalidated forwarded/client header. Failure-only policies check the existing count before the endpoint and record the response when the downstream pipeline returns or throws. Simultaneous in-flight failures may all pass before their counts are committed, so this is abuse throttling rather than a strict concurrency limit. Both middleware variants are process-local; use a reviewed distributed quota provider for cluster-wide enforcement. Hosts must define route categories and decide whether 4xx/5xx, 404, or particular authentication failures count — `IsFailureResponse` receives `(HttpContext, statusCode)` so predicates can exclude e.g. 401s on requests that already carried credentials.
+
+The 429 rejection body defaults to `{"error":"rate_limit_exceeded"}`; hosts with an API error envelope can override it once for both middlewares:
+
+```csharp
+services.AddPubSoftRateLimitRejection(context =>
+    context.Response.WriteAsJsonAsync(new { code = 429, message = "rate limit exceeded" }));
+```
 
 For aggregate health, register `PubSoft.Monitoring` checks and its aggregator, then explicitly map `app.MapPubSoftHealthEndpoint()`. It returns only the overall status (`Unhealthy` is 503; `Healthy`/`Degraded` is 200). Apply endpoint authorization and rate limiting as required by the host.
 
