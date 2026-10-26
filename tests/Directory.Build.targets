@@ -8,7 +8,9 @@
       <_ExpectedId>$([System.String]::Copy('$(MSBuildProjectName)').Replace('ConsumerSmoke', ''))</_ExpectedId>
     </PropertyGroup>
     <ItemGroup>
-      <_OwnRefs Include="@(PackageReference)" />
+      <!-- only PubSoft.* refs count — toolchain/framework refs are legitimate extras -->
+      <_OwnRefs Include="@(PackageReference)"
+                Condition="$([System.String]::Copy('%(Identity)').StartsWith('PubSoft.'))" />
     </ItemGroup>
     <Error Condition="'@(_OwnRefs)' != '$(_ExpectedId)'"
            Text="$(MSBuildProjectName) must directly reference only $(_ExpectedId); found '@(_OwnRefs)'" />

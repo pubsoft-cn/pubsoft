@@ -17,6 +17,7 @@ trap 'rm -rf "$feed" "$packages" "$nuget_config"' EXIT
 
 dotnet restore "$repo_root/PubSoft.sln"
 dotnet pack "$repo_root/PubSoft.sln" -c Release -o "$feed" --no-restore
+python3 "$repo_root/scripts/sync-package-deps.py" --check
 python3 "$repo_root/scripts/verify-package-dependencies.py" "$feed"
 cat > "$nuget_config" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
