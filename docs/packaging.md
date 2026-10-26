@@ -33,7 +33,7 @@ restore → Release build (warnings treated strictly) → full test suite → de
 
 ## Environment-Gated Tests
 
-`[RedisFact]`/`[MySql84Fact]` tests skip automatically when `PUBSOFT_REDIS`/`PUBSOFT_MYSQL` are unset. Current baseline: 443 passed / 19 environment-skipped. Coverage guarantees apply only to the tested Redis/MySQL scenarios.
+`[RedisFact]`/`[MySql84Fact]` tests skip automatically when `PUBSOFT_REDIS`/`PUBSOFT_MYSQL` are unset. Coverage guarantees apply only to the tested Redis/MySQL scenarios.
 
 ## Release Stages
 

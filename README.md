@@ -53,7 +53,7 @@ dotnet test PubSoft.sln -c Release && dotnet pack PubSoft.sln -c Release
 bash scripts/verify-package-consumer.sh && bash scripts/verify-aot-consumer.sh
 ```
 
-443 tests pass / 19 environment-skipped (`PUBSOFT_REDIS`/`PUBSOFT_MYSQL` unset); 37 isolated consumers + dependency allowlist + native AOT smoke all green. Release engineering details: [docs/packaging.md](docs/packaging.md).
+Set `PUBSOFT_REDIS`/`PUBSOFT_MYSQL` so integration cases actually run (they skip otherwise); the verify scripts exercise isolated consumers, the dependency allowlist, and the native AOT smoke. Release engineering details: [docs/packaging.md](docs/packaging.md).
 
 ## License & contact
 

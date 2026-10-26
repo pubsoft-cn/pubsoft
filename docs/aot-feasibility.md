@@ -2,7 +2,7 @@
 
 **English** | [简体中文](aot-feasibility.zh-CN.md)
 
-**Verdict:** full-repo Native AOT across all 37 packages is not feasible (EF Core / ASP.NET Core MVC / Volo.Abp upstreams do not support it, affecting ~10 packages). **27 leaf packages are marked `IsAotCompatible` and verified for real**: `tests/PubSoft.AotSmoke` (a `PublishAot=true` console referencing 16 leaf packages) publishes with `dotnet publish -r linux-x64` with **zero IL2xxx/IL3xxx warnings** and the native binary runs successfully. Entry point: `scripts/verify-aot-consumer.sh` (in CI; skips gracefully without a native toolchain).
+**Verdict:** full-repo Native AOT is not feasible (EF Core / ASP.NET Core MVC / Volo.Abp upstreams do not support it). **The pure-managed leaf packages are marked `IsAotCompatible` and verified for real**: `tests/PubSoft.AotSmoke` (a `PublishAot=true` console referencing the leaf packages) publishes with `dotnet publish -r linux-x64` with **zero IL2xxx/IL3xxx warnings** and the native binary runs successfully. Entry point: `scripts/verify-aot-consumer.sh` (in CI; skips gracefully without a native toolchain).
 
 ## Hard Dependency Constraints (non-negotiable)
 
@@ -44,7 +44,7 @@
 
 ## Landed 2026-10-12
 
-**Marked `IsAotCompatible` (27 packages):** `Core`, `Domain`, `Contracts`, `Caching`, `Security`, `Cryptography`, `Logging`, `Notifications`, `MultiTenancy`, `Scheduling`, `Scheduling.Http`, `Events`, `Tokens`, `Testing`, `Monitoring`, `Monitoring.Scheduling`, `Resilience`, `Resilience.Http`, `Authentication`, `Authentication.Jwt`, `Authentication.OAuthProviders`, `Identity`, `Messaging`, `Authorization`, `Mapping`, `Outbound`, `Auditing`.
+**Marked `IsAotCompatible`:** `Core`, `Domain`, `Contracts`, `Caching`, `Security`, `Cryptography`, `Logging`, `Notifications`, `MultiTenancy`, `Scheduling`, `Scheduling.Http`, `Events`, `Tokens`, `Testing`, `Monitoring`, `Monitoring.Scheduling`, `Resilience`, `Resilience.Http`, `Authentication`, `Authentication.Jwt`, `Authentication.OAuthProviders`, `Identity`, `Messaging`, `Authorization`, `Mapping`, `Outbound`, `Auditing`.
 
 **Fix patterns applied:**
 - Host-supplied `JsonSerializerOptions` STJ sites → `UnconditionalSuppressMessage` + contract documentation (`Messaging` envelope/dispatcher)

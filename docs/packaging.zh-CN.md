@@ -32,7 +32,7 @@ restore → Release 构建（警告即失败倾向）→ 全量测试 → 包依
 
 ## 环境门控测试
 
-`PUBSOFT_REDIS` / `PUBSOFT_MYSQL` 未设置时对应集成测试（`[RedisFact]`/`[MySql84Fact]`）自动跳过；当前基线 443 通过 / 19 环境跳过。覆盖 provider 只保证测过的 Redis/MySQL 场景。
+`PUBSOFT_REDIS` / `PUBSOFT_MYSQL` 未设置时对应集成测试（`[RedisFact]`/`[MySql84Fact]`）自动跳过；覆盖 provider 只保证测过的 Redis/MySQL 场景。
 
 ## 发布阶段
 

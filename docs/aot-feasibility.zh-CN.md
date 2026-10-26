@@ -2,7 +2,7 @@
 
 [English](aot-feasibility.md) | **简体中文**
 
-**结论：** 全量 37 包 Native AOT 不可行（EF Core / ASP.NET Core MVC / Volo.Abp 上游不支持，波及 10 包）。**27 个叶子包已标注 `IsAotCompatible` 并通过真实验证**：`tests/PubSoft.AotSmoke`（`PublishAot=true` console，引用 16 个叶子包）`dotnet publish -r linux-x64` **零 IL2xxx/IL3xxx 警告**，原生二进制运行通过。入口：`scripts/verify-aot-consumer.sh`（已进 CI；无原生工具链时优雅跳过）。
+**结论：** 全仓库 Native AOT 不可行（EF Core / ASP.NET Core MVC / Volo.Abp 上游不支持）。**纯托管叶子包已标注 `IsAotCompatible` 并通过真实验证**：`tests/PubSoft.AotSmoke`（`PublishAot=true` console，引用各叶子包）`dotnet publish -r linux-x64` **零 IL2xxx/IL3xxx 警告**，原生二进制运行通过。入口：`scripts/verify-aot-consumer.sh`（已进 CI；无原生工具链时优雅跳过）。
 
 ## 依赖侧硬约束（不可绕行）
 
@@ -44,7 +44,7 @@
 
 ## 2026-10-12 落地情况
 
-**已标注 `IsAotCompatible`（27 包）**：`Core`、`Domain`、`Contracts`、`Caching`、`Security`、`Cryptography`、`Logging`、`Notifications`、`MultiTenancy`、`Scheduling`、`Scheduling.Http`、`Events`、`Tokens`、`Testing`、`Monitoring`、`Monitoring.Scheduling`、`Resilience`、`Resilience.Http`、`Authentication`、`Authentication.Jwt`、`Authentication.OAuthProviders`、`Identity`、`Messaging`、`Authorization`、`Mapping`、`Outbound`、`Auditing`。
+**已标注 `IsAotCompatible`：**`Core`、`Domain`、`Contracts`、`Caching`、`Security`、`Cryptography`、`Logging`、`Notifications`、`MultiTenancy`、`Scheduling`、`Scheduling.Http`、`Events`、`Tokens`、`Testing`、`Monitoring`、`Monitoring.Scheduling`、`Resilience`、`Resilience.Http`、`Authentication`、`Authentication.Jwt`、`Authentication.OAuthProviders`、`Identity`、`Messaging`、`Authorization`、`Mapping`、`Outbound`、`Auditing`。
 
 **采取的修复模式**：
 - 宿主传 `JsonSerializerOptions` 的 STJ 调用点 → `UnconditionalSuppressMessage` + 契约文档（`Messaging` envelope/dispatcher）
