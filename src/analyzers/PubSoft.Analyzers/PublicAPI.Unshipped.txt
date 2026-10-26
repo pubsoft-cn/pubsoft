@@ -1,6 +1,11 @@
 #nullable enable
 PubSoft.Analyzers.DocNumbersAnalyzer
 PubSoft.Analyzers.DocNumbersAnalyzer.DocNumbersAnalyzer() -> void
+PubSoft.Analyzers.ForbiddenPatternsAnalyzer
+PubSoft.Analyzers.ForbiddenPatternsAnalyzer.ForbiddenPatternsAnalyzer() -> void
 const PubSoft.Analyzers.DocNumbersAnalyzer.DiagnosticId = "PUBSOFT001" -> string!
+const PubSoft.Analyzers.ForbiddenPatternsAnalyzer.DiagnosticId = "PUBSOFT002" -> string!
 override PubSoft.Analyzers.DocNumbersAnalyzer.Initialize(Microsoft.CodeAnalysis.Diagnostics.AnalysisContext! context) -> void
 override PubSoft.Analyzers.DocNumbersAnalyzer.SupportedDiagnostics.get -> System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.DiagnosticDescriptor!>
+override PubSoft.Analyzers.ForbiddenPatternsAnalyzer.Initialize(Microsoft.CodeAnalysis.Diagnostics.AnalysisContext! context) -> void
+override PubSoft.Analyzers.ForbiddenPatternsAnalyzer.SupportedDiagnostics.get -> System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.DiagnosticDescriptor!>

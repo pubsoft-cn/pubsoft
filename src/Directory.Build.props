@@ -7,11 +7,15 @@
   <ItemGroup>
     <!-- API drift guard: every public symbol must be declared in PublicAPI.*.txt. -->
     <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
-    <ProjectReference Condition="'$(MSBuildProjectName)' == 'PubSoft.Core'"
+    <!-- Repo analyzers on every source project (each scans its own syntax trees);
+         markdown files feed the sentinel project only so doc rules report once. -->
+    <ProjectReference Condition="'$(MSBuildProjectName)' != 'PubSoft.Analyzers'"
         Include="$(MSBuildThisFileDirectory)analyzers/PubSoft.Analyzers/PubSoft.Analyzers.csproj"
         OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
     <AdditionalFiles Condition="'$(MSBuildProjectName)' == 'PubSoft.Core'"
         Include="$(MSBuildThisFileDirectory)../docs/**/*.md;$(MSBuildThisFileDirectory)../README*.md;$(MSBuildThisFileDirectory)**/README*.md" />
+    <CompilerVisibleProperty Include="PUBSOFT_FORBIDDEN_PATTERNS" />
+    <CompilerVisibleProperty Include="PUBSOFT_FORBIDDEN_PATTERNS_EXCLUDING_TESTS" />
     <!-- Ship the per-package README inside the nupkg (NuGet.org renders it on the package page). -->
     <None Include="README.md" Pack="true" PackagePath="\" Condition="Exists('README.md')" />
   </ItemGroup>
