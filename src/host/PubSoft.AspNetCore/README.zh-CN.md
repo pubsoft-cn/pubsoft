@@ -19,7 +19,7 @@ app.UsePubSoftSecurityHeaders(new SecurityHeadersOptions
 });
 ```
 
-异常中间件把 `DomainException` 与参数错误映射 400、授权异常映射 401、意外错误在生产映射为通用 500。不改写调用方取消或响应头已发出后的异常。开发环境响应可含异常细节/堆栈——勿对外暴露开发模式。安全头值拒绝 CR/LF。HSTS 默认仅对 HTTPS 请求输出；TLS 在可信代理终止时须在这些中间件之前配置 forwarded headers，开发环境勿盲开 HSTS。
+异常中间件把 `DomainException` 与参数错误映射 400（`DomainException.StatusCode` 可声明其他 4xx，如冲突用 409——非 4xx 回退 400）、授权异常映射 401、意外错误在生产映射为通用 500。不改写调用方取消或响应头已发出后的异常。开发环境响应可含异常细节/堆栈——勿对外暴露开发模式。安全头值拒绝 CR/LF。HSTS 默认仅对 HTTPS 请求输出；TLS 在可信代理终止时须在这些中间件之前配置 forwarded headers，开发环境勿盲开 HSTS。
 
 ## 请求收尾与审计
 

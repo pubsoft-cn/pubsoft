@@ -52,7 +52,9 @@ public sealed class ExceptionHandlingMiddleware
         var (statusCode, errorCode, message) = exception switch
         {
             DomainException domainException =>
-                (HttpStatusCode.BadRequest, "domain_error", domainException.Message),
+                (domainException.StatusCode is >= 400 and <= 499
+                    ? (HttpStatusCode)domainException.StatusCode
+                    : HttpStatusCode.BadRequest, "domain_error", domainException.Message),
             ArgumentException =>
                 (HttpStatusCode.BadRequest, "invalid_argument", "Invalid request."),
             UnauthorizedAccessException =>

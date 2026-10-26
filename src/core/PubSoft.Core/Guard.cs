@@ -65,4 +65,11 @@ public sealed class DomainException : Exception
 {
     public DomainException(string message) : base(message) { }
     public DomainException(string message, Exception innerException) : base(message, innerException) { }
+
+    /// <summary>
+    /// HTTP status the exception middleware surfaces for this domain violation.
+    /// Default 400; use 409 for conflicts (e.g. "already registered"). Values
+    /// outside the 4xx range are clamped to 400 — domain errors never map to 5xx.
+    /// </summary>
+    public int StatusCode { get; init; } = 400;
 }

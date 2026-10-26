@@ -29,6 +29,24 @@ public sealed class ExceptionHandlingMiddlewareTests
     }
 
     [Theory]
+    [InlineData(409, StatusCodes.Status409Conflict)]  // 冲突类领域错误可显式声明
+    [InlineData(500, StatusCodes.Status400BadRequest)] // 4xx 区间外回退 400——领域错误永不映射 5xx
+    public async Task DomainExceptionHonoursDeclared4xxStatusCode(int declared, int expected)
+    {
+        var context = CreateContext();
+        var middleware = CreateMiddleware(
+            _ => throw new DomainException("Already registered.") { StatusCode = declared },
+            Environments.Production);
+
+        await middleware.InvokeAsync(context);
+
+        using var document = await ReadResponseAsync(context);
+        Assert.Equal(expected, context.Response.StatusCode);
+        Assert.Equal("domain_error", document.RootElement.GetProperty("error").GetString());
+        Assert.Equal("Already registered.", document.RootElement.GetProperty("message").GetString());
+    }
+
+    [Theory]
     [InlineData(true, StatusCodes.Status400BadRequest, "invalid_argument", "Invalid request.")]
     [InlineData(false, StatusCodes.Status401Unauthorized, "unauthorized", "Authentication required.")]
     public async Task ClientExceptionsMapToSafeResponses(

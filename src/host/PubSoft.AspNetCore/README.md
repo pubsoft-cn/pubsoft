@@ -20,7 +20,7 @@ app.UsePubSoftSecurityHeaders(new SecurityHeadersOptions
 });
 ```
 
-The exception middleware maps `DomainException` and argument errors to 400, authorization exceptions to 401, and unexpected errors to a generic 500 in production. It does not rewrite caller cancellation or exceptions after response headers have started. Development responses may include exception detail/stack trace; do not expose development mode publicly. Security header values reject CR/LF. HSTS is emitted only for HTTPS requests by default; configure forwarded headers before these middleware when TLS terminates at a trusted proxy, and do not enable HSTS blindly for development.
+The exception middleware maps `DomainException` and argument errors to 400 (`DomainException.StatusCode` may declare another 4xx, e.g. 409 for conflicts — non-4xx values fall back to 400), authorization exceptions to 401, and unexpected errors to a generic 500 in production. It does not rewrite caller cancellation or exceptions after response headers have started. Development responses may include exception detail/stack trace; do not expose development mode publicly. Security header values reject CR/LF. HSTS is emitted only for HTTPS requests by default; configure forwarded headers before these middleware when TLS terminates at a trusted proxy, and do not enable HSTS blindly for development.
 
 ## Request Finalization and Audit
 

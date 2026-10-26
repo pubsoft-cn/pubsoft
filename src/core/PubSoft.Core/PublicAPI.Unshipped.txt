@@ -14,6 +14,8 @@ PubSoft.Core.ApiResponse<T>.TraceId.set -> void
 PubSoft.Core.DomainException
 PubSoft.Core.DomainException.DomainException(string! message) -> void
 PubSoft.Core.DomainException.DomainException(string! message, System.Exception! innerException) -> void
+PubSoft.Core.DomainException.StatusCode.get -> int
+PubSoft.Core.DomainException.StatusCode.init -> void
 PubSoft.Core.Gender
 PubSoft.Core.Gender.Female = 2 -> PubSoft.Core.Gender
 PubSoft.Core.Gender.Male = 1 -> PubSoft.Core.Gender
