@@ -10,7 +10,7 @@
 
 - 这是**内部交接文档**，不是 OpenAPI 实现——喂不了标准 OpenAPI 工具链
   （Swagger UI 导入、REST 插件、OpenAPI codegen）。替代 Swagger codegen 请用
-  `scripts/apigen.mjs` 对 catalog 端点生成 TS client。
+  `scripts/apigen.mjs` 对 catalog 端点生成 TS/C# client（`--lang cs` 产出 HttpClient 客户端 + source-gen JsonSerializerContext，AOT 干净）。需要 Node >= 18；catalog 默认仅 Development 映射，按 dev 宿主生成或用 `--header` 带凭证。
 - catalog 暴露服务**全量路由表**——opt-in 且**默认仅 Development 环境映射**
   （`DevelopmentOnly`）；非 dev 需显式置 false 并配合 `RequireAuthorization`/网络门控。
 - catalog 每进程构建一次并缓存；动态改路由后调 `Invalidate()` 重建。

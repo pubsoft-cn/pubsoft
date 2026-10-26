@@ -5,7 +5,7 @@
 Self-hosted API documentation for ASP.NET Core services — a Swashbuckle-free
 catalog generated from `EndpointDataSource` + XML doc comments, merged with an
 optional semantic overlay JSON, plus an embedded docs page and a companion
-TypeScript client generator (`scripts/apigen.mjs`).
+TypeScript/C# client generator (`scripts/apigen.mjs`).
 
 ## Honest boundaries
 
@@ -78,15 +78,19 @@ app.MapPubSoftApiDocs();
 Keys are `"METHOD /path"`. `example` payloads drive both the rendered docs page and
 **example-driven type inference** in the TS client generator.
 
-## TypeScript client generation
+## Client generation
 
 ```bash
-node scripts/apigen.mjs http://localhost:5090/docs/catalog -o src/api/api-client.ts
+node scripts/apigen.mjs http://localhost:5090/docs/catalog -o src/api/api-client.ts          # TypeScript
+node scripts/apigen.mjs http://localhost:5090/docs/catalog --lang cs --name Acme -o AcmeClient.cs  # C#
 ```
 
-Emits `api.getXxx(...)`, `api.postXxx(...)`, typed via `example` inference; query
-params come from controller signatures. Endpoints without an example return
-`Promise<unknown>`.
+TS emits `api.getXxx(...)` typed via `example` inference (no example → `Promise<unknown>`).
+C# emits a `HttpClient`-based `<Name>Client` plus a source-gen `<Name>JsonContext`
+(AOT-clean; example payloads become `record` types, no example → `JsonElement?`).
+Requires Node >= 18; accepts a catalog URL or a saved `catalog.json`. Since the
+catalog is DevelopmentOnly by default, generate against a dev host or pass
+`--header 'Authorization: …'` when the endpoint is gated.
 
 ## Public API surface
 
