@@ -15,7 +15,7 @@
 | 认证授权 | [Authentication](src/security/PubSoft.Authentication/README.md) · [Authentication.Jwt](src/security/PubSoft.Authentication.Jwt/README.md) · [Jwt.AspNetCore](src/security/PubSoft.Authentication.Jwt.AspNetCore/README.md) · [OAuthProviders](src/security/PubSoft.Authentication.OAuthProviders/README.md) · [Authorization](src/security/PubSoft.Authorization/README.md) |
 | 消息与审计 | [Messaging](src/messaging/PubSoft.Messaging/README.md) · [Messaging.Outbox](src/messaging/PubSoft.Messaging.Outbox/README.md) · [Auditing](src/data/PubSoft.Auditing/README.md) · [Auditing.Outbox](src/data/PubSoft.Auditing.Outbox/README.md) · [Events](src/core/PubSoft.Events/README.md) |
 | 缓存与安全 | [Caching](src/platform/PubSoft.Caching/README.md) · [Caching.Redis](src/platform/PubSoft.Caching.Redis/README.md) · [Security](src/security/PubSoft.Security/README.md) · [Security.Redis](src/security/PubSoft.Security.Redis/README.md) · [Cryptography](src/core/PubSoft.Cryptography/README.md) |
-| 运行时 | [AspNetCore](src/host/PubSoft.AspNetCore/README.md) · [Resilience](src/core/PubSoft.Resilience/README.md) · [Resilience.Http](src/platform/PubSoft.Resilience.Http/README.md) · [Scheduling](src/platform/PubSoft.Scheduling/README.md) · [Scheduling.EF](src/platform/PubSoft.Scheduling.EntityFrameworkCore/README.md) · [Scheduling.Http](src/platform/PubSoft.Scheduling.Http/README.md) · [Monitoring](src/platform/PubSoft.Monitoring/README.md) · [Monitoring.Scheduling](src/platform/PubSoft.Monitoring.Scheduling/README.md) · [Logging](src/core/PubSoft.Logging/README.md) · [Notifications](src/platform/PubSoft.Notifications/README.md) · [Tokens](src/platform/PubSoft.Tokens/README.md) · [Outbound](src/platform/PubSoft.Outbound/README.md) |
+| 运行时 | [AspNetCore](src/host/PubSoft.AspNetCore/README.md) · [AspNetCore.Docs](src/host/PubSoft.AspNetCore.Docs/README.md) · [Resilience](src/core/PubSoft.Resilience/README.md) · [Resilience.Http](src/platform/PubSoft.Resilience.Http/README.md) · [Scheduling](src/platform/PubSoft.Scheduling/README.md) · [Scheduling.EF](src/platform/PubSoft.Scheduling.EntityFrameworkCore/README.md) · [Scheduling.Http](src/platform/PubSoft.Scheduling.Http/README.md) · [Monitoring](src/platform/PubSoft.Monitoring/README.md) · [Monitoring.Scheduling](src/platform/PubSoft.Monitoring.Scheduling/README.md) · [Logging](src/core/PubSoft.Logging/README.md) · [Notifications](src/platform/PubSoft.Notifications/README.md) · [Tokens](src/platform/PubSoft.Tokens/README.md) · [Outbound](src/platform/PubSoft.Outbound/README.md) |
 | 客户端入口 | [Edge](src/host/PubSoft.Edge/README.zh-CN.md) · [Edge.Core](src/host/PubSoft.Edge.Core/README.zh-CN.md) · [Edge.Client](src/host/PubSoft.Edge.Client/README.zh-CN.md) |
 | ABP 适配 | [Abp.Core](src/host/PubSoft.Abp.Core/README.md) · [Abp.AspNetCore](src/host/PubSoft.Abp.AspNetCore/README.md) |
 
@@ -53,7 +53,7 @@ dotnet test PubSoft.sln -c Release && dotnet pack PubSoft.sln -c Release
 bash scripts/verify-package-consumer.sh && bash scripts/verify-aot-consumer.sh
 ```
 
-配置 `PUBSOFT_REDIS`/`PUBSOFT_MYSQL` 后集成用例才会真正执行（未配置则跳过）；verify 脚本负责隔离 consumer、依赖 allowlist 与原生 AOT smoke。发布工程细节：[docs/packaging.zh-CN.md](docs/packaging.zh-CN.md)。
+配置 `PUBSOFT_REDIS`/`PUBSOFT_MYSQL` 后集成用例才会真正执行（未配置则跳过）；verify 脚本负责隔离 consumer、pack 期 nuspec 自检与原生 AOT smoke。发布工程细节：[docs/packaging.zh-CN.md](docs/packaging.zh-CN.md)。
 
 ## 许可证与联系
 
