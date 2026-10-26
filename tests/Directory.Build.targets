@@ -1,0 +1,41 @@
+<Project>
+  <!-- Per-isolated-consumer invariant: a *ConsumerSmoke project must reference
+       exactly its own PubSoft package (project name = PackageId + "ConsumerSmoke").
+       Runs on every build/restore-time evaluation of that project. -->
+  <Target Name="AssertIsolatedConsumer" BeforeTargets="Build"
+          Condition="$([System.String]::Copy('$(MSBuildProjectName)').EndsWith('ConsumerSmoke')) and '$(MSBuildProjectName)' != 'PubSoft.PackageConsumerSmoke'">
+    <PropertyGroup>
+      <_ExpectedId>$([System.String]::Copy('$(MSBuildProjectName)').Replace('ConsumerSmoke', ''))</_ExpectedId>
+    </PropertyGroup>
+    <ItemGroup>
+      <_OwnRefs Include="@(PackageReference)" />
+    </ItemGroup>
+    <Error Condition="'@(_OwnRefs)' != '$(_ExpectedId)'"
+           Text="$(MSBuildProjectName) must directly reference only $(_ExpectedId); found '@(_OwnRefs)'" />
+  </Target>
+
+  <!-- Parity invariant on the aggregate project: shipped packages (nested MSBuild
+       probe over src/) must equal the set of isolated *ConsumerSmoke projects. -->
+  <Target Name="AssertConsumerParity" BeforeTargets="Build"
+          Condition="'$(MSBuildProjectName)' == 'PubSoft.PackageConsumerSmoke'">
+    <ItemGroup>
+      <_SrcProjects Include="$(MSBuildThisFileDirectory)..\src\*\*\*.csproj" />
+      <_SmokeProjects Include="$(MSBuildThisFileDirectory)*ConsumerSmoke\*.csproj"
+                      Exclude="$(MSBuildThisFileDirectory)PubSoft.PackageConsumerSmoke\*.csproj" />
+      <_SmokeIds Include="@(_SmokeProjects->'%(FileName)')" />
+    </ItemGroup>
+    <MSBuild Projects="%(_SrcProjects.Identity)" Targets="GetShippedPackageId" BuildInParallel="false">
+      <Output TaskParameter="TargetOutputs" ItemName="_ShippedIds" />
+    </MSBuild>
+    <ItemGroup>
+      <!-- compare in filename space: shipped id + "ConsumerSmoke" == smoke csproj basename -->
+      <_ExpectedSmokeIds Include="@(_ShippedIds->'%(Identity)ConsumerSmoke')" />
+      <_MissingSmoke Include="@(_ExpectedSmokeIds)" Exclude="@(_SmokeIds)" />
+      <_OrphanSmoke Include="@(_SmokeIds)" Exclude="@(_ExpectedSmokeIds)" />
+    </ItemGroup>
+    <Error Condition="'@(_MissingSmoke)' != ''"
+           Text="Shipped package(s) missing an isolated consumer smoke: @(_MissingSmoke)" />
+    <Error Condition="'@(_OrphanSmoke)' != ''"
+           Text="Isolated consumer smoke(s) without a shipped package: @(_OrphanSmoke)" />
+  </Target>
+</Project>

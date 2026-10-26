@@ -4,7 +4,6 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 consumer_project="$repo_root/tests/PubSoft.PackageConsumerSmoke/PubSoft.PackageConsumerSmoke.csproj"
 allowlist_path="$repo_root/scripts/package-dependency-allowlist.json"
-python3 "$repo_root/scripts/verify-package-consumers.py"
 mapfile -t package_ids < <(python3 -c 'import json, sys; print("\n".join(sorted(json.load(open(sys.argv[1], encoding="utf-8")))))' "$allowlist_path")
 consumer_projects=()
 for package_id in "${package_ids[@]}"; do

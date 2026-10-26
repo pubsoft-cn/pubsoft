@@ -6,4 +6,11 @@
       <_AotMarkedOut Include="$(PackageId)" Condition="'$(IsAotCompatible)' == 'true'" />
     </ItemGroup>
   </Target>
+  <!-- Returns PackageId for every packable src project — the shipped set for the
+       consumer-parity check in tests/Directory.Build.targets. -->
+  <Target Name="GetShippedPackageId" Returns="@(_ShippedOut)">
+    <ItemGroup>
+      <_ShippedOut Include="$(PackageId)" Condition="'$(IsPackable)' != 'false'" />
+    </ItemGroup>
+  </Target>
 </Project>
