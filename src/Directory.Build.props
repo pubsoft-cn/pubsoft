@@ -6,7 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- API drift guard: every public symbol must be declared in PublicAPI.*.txt. -->
-    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
     <!-- Ship the per-package README inside the nupkg (NuGet.org renders it on the package page). -->
     <None Include="README.md" Pack="true" PackagePath="\" Condition="Exists('README.md')" />
   </ItemGroup>

@@ -7,7 +7,7 @@
     <ProjectReference Include="../../platform/PubSoft.Scheduling/PubSoft.Scheduling.csproj" />
     <ProjectReference Include="../../data/PubSoft.EntityFrameworkCore/PubSoft.EntityFrameworkCore.csproj" />
     <ProjectReference Include="../../core/PubSoft.Domain/PubSoft.Domain.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.13" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.13" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
   </ItemGroup>
 </Project>

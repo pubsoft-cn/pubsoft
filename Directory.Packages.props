@@ -1,0 +1,77 @@
+<Project>
+  <PropertyGroup>
+    <!-- Central package management: every PackageReference is versionless in the
+         csproj; all versions live here. Dependabot updates this file directly. -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Third-party dependencies -->
+    <PackageVersion Include="BouncyCastle.Cryptography" Version="2.7.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.23.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageVersion Include="MySql.EntityFrameworkCore" Version="10.0.12" />
+    <PackageVersion Include="StackExchange.Redis" Version="3.4.20" />
+    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
+    <PackageVersion Include="Volo.Abp.Core" Version="10.7.0" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
+    <!-- PubSoft packages are referenced only by the consumer smoke projects;
+         central pin tracks the packing version, each smoke overrides with
+         0.1.0-* so restore follows whatever the local feed produced. -->
+    <PackageVersion Include="PubSoft.Abp.AspNetCore" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Abp.Core" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.AspNetCore" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Auditing.Outbox" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Auditing" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Authentication.Jwt.AspNetCore" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Authentication.Jwt" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Authentication.OAuthProviders" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Authentication" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Authorization" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Caching.Redis" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Caching" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Contracts" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Core" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Cryptography" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.DependencyInjection" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Domain" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Edge.Client" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Edge.Core" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Edge" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.EntityFrameworkCore" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Events" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Identity" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Logging" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Mapping" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Messaging.Outbox" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Messaging" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Monitoring.Scheduling" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Monitoring" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.MultiTenancy" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Notifications" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Outbound" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Resilience.Http" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Resilience" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Scheduling.EntityFrameworkCore" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Scheduling.Http" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Scheduling" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Security.Redis" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Security" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Testing" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Tokens" Version="$(PubSoftVersion)" />
+  </ItemGroup>
+</Project>

@@ -10,22 +10,22 @@
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="PubSoft.Auditing" Version="0.1.0-*" />
-    <PackageReference Include="PubSoft.Authentication.OAuthProviders" Version="0.1.0-*" />
-    <PackageReference Include="PubSoft.Caching" Version="0.1.0-*" />
-    <PackageReference Include="PubSoft.Contracts" Version="0.1.0-*" />
-    <PackageReference Include="PubSoft.Core" Version="0.1.0-*" />
-    <PackageReference Include="PubSoft.Cryptography" Version="0.1.0-*" />
-    <PackageReference Include="PubSoft.Domain" Version="0.1.0-*" />
-    <PackageReference Include="PubSoft.Events" Version="0.1.0-*" />
-    <PackageReference Include="PubSoft.Logging" Version="0.1.0-*" />
-    <PackageReference Include="PubSoft.Mapping" Version="0.1.0-*" />
-    <PackageReference Include="PubSoft.Messaging" Version="0.1.0-*" />
-    <PackageReference Include="PubSoft.MultiTenancy" Version="0.1.0-*" />
-    <PackageReference Include="PubSoft.Notifications" Version="0.1.0-*" />
-    <PackageReference Include="PubSoft.Resilience" Version="0.1.0-*" />
-    <PackageReference Include="PubSoft.Scheduling" Version="0.1.0-*" />
-    <PackageReference Include="PubSoft.Testing" Version="0.1.0-*" />
-    <PackageReference Include="PubSoft.Tokens" Version="0.1.0-*" />
+    <PackageReference Include="PubSoft.Auditing" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Authentication.OAuthProviders" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Caching" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Contracts" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Core" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Cryptography" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Domain" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Events" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Logging" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Mapping" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Messaging" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.MultiTenancy" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Notifications" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Resilience" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Scheduling" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Testing" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Tokens" VersionOverride="0.1.0-*" />
   </ItemGroup>
 </Project>

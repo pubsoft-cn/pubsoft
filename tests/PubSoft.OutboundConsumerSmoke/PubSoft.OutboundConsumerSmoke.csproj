@@ -6,6 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="PubSoft.Outbound" Version="0.1.0-*" />
+    <PackageReference Include="PubSoft.Outbound" VersionOverride="0.1.0-*" />
   </ItemGroup>
 </Project>

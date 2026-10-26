@@ -6,6 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="PubSoft.Abp.AspNetCore" Version="0.1.0-*" />
+    <PackageReference Include="PubSoft.Abp.AspNetCore" VersionOverride="0.1.0-*" />
   </ItemGroup>
 </Project>
