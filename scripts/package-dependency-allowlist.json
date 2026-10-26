@@ -170,5 +170,6 @@
     "Microsoft.Extensions.Logging.Abstractions",
     "Microsoft.Extensions.Options",
     "PubSoft.Caching"
-  ]
+  ],
+  "PubSoft.AspNetCore.Docs": []
 }

@@ -90,7 +90,9 @@ public sealed class ApiDocsCatalogService
 
             items.Add(new
             {
-                method, path, summary,
+                method,
+                path,
+                summary,
                 group = ov?.Group ?? _options.GroupBy?.Invoke(method, path) ?? DefaultGroup(path),
                 note = ov?.Note,
                 auth,
@@ -104,10 +106,16 @@ public sealed class ApiDocsCatalogService
         foreach (var e in _options.ExtraEndpoints.Concat(extra))
             items.Add(new
             {
-                method = e.Method, path = e.Path, summary = e.Summary,
-                group = e.Group ?? "misc", note = e.Note, auth = e.Auth,
-                returns = (string?)null, parameters = Array.Empty<object>(),
-                example = e.Example, controller = (string?)null
+                method = e.Method,
+                path = e.Path,
+                summary = e.Summary,
+                group = e.Group ?? "misc",
+                note = e.Note,
+                auth = e.Auth,
+                returns = (string?)null,
+                parameters = Array.Empty<object>(),
+                example = e.Example,
+                controller = (string?)null
             });
 
         var groups = items
@@ -214,7 +222,7 @@ public sealed class ApiDocsCatalogService
                     map.TryAdd(name[2..], new XmlMember(m.Element("summary")?.Value.Trim(), ps));
                 }
             }
-            catch { }
+            catch { /* malformed xml doc file never blocks catalog generation */ }
         }
         return map;
     }
