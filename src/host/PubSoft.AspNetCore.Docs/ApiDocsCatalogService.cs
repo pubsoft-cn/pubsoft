@@ -71,22 +71,23 @@ public sealed class ApiDocsCatalogService
                     summary = member.Summary;
                     paramDocs = member.Params;
                 }
-                returns = UnwrapTask(cad.MethodInfo.ReturnType).Name;
+                returns = FriendlyName(UnwrapTask(cad.MethodInfo.ReturnType));
                 ps = cad.Parameters.Select(p => new
                 {
                     name = p.Name,
                     at = p.BindingInfo?.BindingSource?.Id ?? "query",
                     type = FriendlyName(p.ParameterType),
-                    required = p is ControllerParameterDescriptor cpd && !cpd.ParameterInfo.HasDefaultValue
-                        && Nullable.GetUnderlyingType(p.ParameterType) == null && p.ParameterType != typeof(string),
+                    required = p is ControllerParameterDescriptor cpd && IsRequired(cpd),
                     doc = paramDocs.TryGetValue(p.Name, out var pd) ? pd : null
                 }).Cast<object>().ToList();
             }
 
             overlay.TryGetValue($"{method} {path}", out var ov);
+            // honest labeling: only overlay or detected authorization metadata decide;
+            // undetected auth must not be guessed — unauthenticated POSTs are not "jwt"
             var auth = ov?.Auth
                 ?? (_options.DetectAuthMetadata && ep.Metadata.GetMetadata<IAuthorizeData>() != null
-                    ? "jwt" : method != "GET" ? "jwt" : "open");
+                    ? "jwt" : "unknown");
 
             items.Add(new
             {
@@ -123,12 +124,25 @@ public sealed class ApiDocsCatalogService
             .OrderBy(g => g.Key)
             .Select(g => new { name = g.Key, endpoints = g.OrderBy(e => ((dynamic)e).path).Cast<object>().ToList() })
             .ToList();
-        return new { title = _options.Title, generatedAt = DateTime.Now, groups };
+        return new { title = _options.Title, generatedAt = DateTimeOffset.UtcNow, groups };
     }
 
     private bool IsOwnEndpoint(string raw)
-        => ("/" + raw.TrimStart('/')) is var p
-            && (p == _options.CatalogPath || p == _options.PagePath);
+    {
+        var p = "/" + raw.TrimStart('/');
+        // hosts may configure paths without a leading slash — normalize both sides
+        return p == "/" + _options.CatalogPath.TrimStart('/')
+            || (_options.PagePath is { } pp && p == "/" + pp.TrimStart('/'));
+    }
+
+    private static readonly NullabilityInfoContext Nullability = new();
+
+    // path params are always required; otherwise consult NRT metadata + default value
+    private static bool IsRequired(ControllerParameterDescriptor p)
+        => p.BindingInfo?.BindingSource?.Id == "Path"
+           || (!p.ParameterInfo.HasDefaultValue
+               && Nullable.GetUnderlyingType(p.ParameterType) is null
+               && Nullability.Create(p.ParameterInfo).ReadState != NullabilityState.Nullable);
 
     private static string DefaultGroup(string path)
     {

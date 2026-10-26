@@ -31,6 +31,8 @@ public static class ApiDocsExtensions
     public static IEndpointRouteBuilder MapPubSoftApiDocs(this IEndpointRouteBuilder app)
     {
         var options = app.ServiceProvider.GetRequiredService<IOptions<ApiDocsOptions>>().Value;
+        // fail fast at startup rather than per-request 500 when AddPubSoftApiDocs was skipped
+        _ = app.ServiceProvider.GetRequiredService<ApiDocsCatalogService>();
 
         if (options.DevelopmentOnly
             && app.ServiceProvider.GetService<IHostEnvironment>()?.IsDevelopment() != true)

@@ -45,9 +45,13 @@ public sealed class ApiDocsCatalogTests
 
         Assert.Equal("GET", widget.GetProperty("method").GetString());
         Assert.Equal("api/widgets", widget.GetProperty("group").GetString());
-        Assert.Equal("open", widget.GetProperty("auth").GetString());
+        Assert.Equal("unknown", widget.GetProperty("auth").GetString());
         Assert.Equal("Gets a widget.", widget.GetProperty("summary").GetString());
-        Assert.Equal("id", widget.GetProperty("parameters")[0].GetProperty("name").GetString());
+        var ps = widget.GetProperty("parameters");
+        Assert.Equal("id", ps[0].GetProperty("name").GetString());
+        Assert.True(ps[0].GetProperty("required").GetBoolean());      // path params always required
+        Assert.Equal("verbose", ps[1].GetProperty("name").GetString());
+        Assert.False(ps[1].GetProperty("required").GetBoolean());     // default value → optional
         Assert.Equal("WidgetDocs", widget.GetProperty("controller").GetString());
 
         // 目录自身端点与 catch-all 永远不入目录
@@ -101,6 +105,29 @@ public sealed class ApiDocsCatalogTests
         return app;
     }
 
+    [Fact]
+    public async Task Catalog_NonGetWithoutAuthMetadata_IsUnknownNotGuessedJwt()
+    {
+        await using var app = await BuildApp(o => o.DevelopmentOnly = false);
+
+        var entries = CatalogEntries(app);
+        var rename = Assert.Single(entries, e => e.GetProperty("path").GetString() == "/api/widgets/{id}/rename");
+        Assert.Equal("POST", rename.GetProperty("method").GetString());
+        Assert.Equal("unknown", rename.GetProperty("auth").GetString());  // honest: no claim
+        var label = rename.GetProperty("parameters").EnumerateArray()
+            .Single(p => p.GetProperty("name").GetString() == "label");
+        Assert.True(label.GetProperty("required").GetBoolean());          // non-nullable string via NRT
+    }
+
+    [Fact]
+    public async Task MapPubSoftApiDocs_WithoutAdd_ThrowsAtMapTime()
+    {
+        var builder = WebApplication.CreateSlimBuilder(new WebApplicationOptions { EnvironmentName = "Production" });
+        builder.WebHost.UseTestServer();
+        await using var app = builder.Build();
+        Assert.Throws<InvalidOperationException>(() => app.MapPubSoftApiDocs());
+    }
+
     private static List<string> RoutePaths(WebApplication app)
         => app.Services.GetRequiredService<EndpointDataSource>().Endpoints
             .OfType<RouteEndpoint>()
@@ -122,6 +149,11 @@ public sealed class WidgetDocsController : ControllerBase
 {
     /// <summary>Gets a widget.</summary>
     /// <param name="id">Widget id.</param>
+    /// <param name="verbose">Verbose output.</param>
     [HttpGet("api/widgets/{id}")]
-    public string GetWidget(long id) => "widget";
+    public string GetWidget(long id, bool verbose = false) => "widget";
+
+    /// <summary>Renames a widget.</summary>
+    [HttpPost("api/widgets/{id}/rename")]
+    public string Rename(long id, string label) => "ok";
 }
