@@ -21,7 +21,44 @@ jobs:
           docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest \
             git --no-banner --redact /repo
       - name: Internal identifier scan
-        run: bash scripts/check-internal-identifiers.sh
+        env:
+          # Org-private token lists live in repository secrets or variables —
+          # never in the repo, where they would leak the identifiers they guard
+          # against. STRICT applies to every tracked file; EXCLUDING_TESTS skips
+          # tests/ (unit tests legitimately embed RFC1918 fixtures).
+          STRICT: ${{ secrets.PUBSOFT_FORBIDDEN_PATTERNS || vars.PUBSOFT_FORBIDDEN_PATTERNS }}
+          EXCLUDING_TESTS: ${{ secrets.PUBSOFT_FORBIDDEN_PATTERNS_EXCLUDING_TESTS || vars.PUBSOFT_FORBIDDEN_PATTERNS_EXCLUDING_TESTS }}
+        run: |
+          if [ -z "$STRICT" ] && [ -z "$EXCLUDING_TESTS" ]; then
+            echo "::warning::identifier patterns not configured in repository variables — scan skipped"
+            exit 0
+          fi
+          report_hits() {
+            local patterns="$1"; shift
+            local hits
+            hits=$(grep -lE "$patterns" "$@" 2>/dev/null || true)
+            if [ -n "$hits" ]; then
+              echo "Forbidden internal identifiers found in tracked files:"
+              echo "$hits" | while IFS= read -r f; do
+                echo "  $f"
+                grep -nE "$patterns" -- "$f" | head -3 | sed 's/^/    /'
+              done
+              return 1
+            fi
+          }
+          mapfile -d '' files < <(git ls-files -z)
+          failed=0
+          if [ -n "$STRICT" ]; then
+            report_hits "$STRICT" "${files[@]}" || failed=1
+          fi
+          if [ -n "$EXCLUDING_TESTS" ]; then
+            non_test=()
+            for f in "${files[@]}"; do [[ "$f" == tests/* ]] || non_test+=("$f"); done
+            if ((${#non_test[@]})); then
+              report_hits "$EXCLUDING_TESTS" "${non_test[@]}" || failed=1
+            fi
+          fi
+          exit $failed
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
