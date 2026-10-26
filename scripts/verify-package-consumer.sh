@@ -3,13 +3,10 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 consumer_project="$repo_root/tests/PubSoft.PackageConsumerSmoke/PubSoft.PackageConsumerSmoke.csproj"
-allowlist_path="$repo_root/scripts/package-dependency-allowlist.json"
-mapfile -t package_ids < <(python3 -c 'import json, sys; print("\n".join(sorted(json.load(open(sys.argv[1], encoding="utf-8")))))' "$allowlist_path")
-consumer_projects=()
-for package_id in "${package_ids[@]}"; do
-  project="$repo_root/tests/${package_id}ConsumerSmoke/${package_id}ConsumerSmoke.csproj"
-  consumer_projects+=("$project")
-done
+# Shipped set == smoke set is enforced by AssertConsumerParity in
+# tests/Directory.Build.targets, so the loop can glob the smoke projects directly.
+mapfile -t consumer_projects < <(find "$repo_root/tests" -mindepth 2 -maxdepth 2 \
+  -name "*ConsumerSmoke.csproj" ! -name "PubSoft.PackageConsumerSmoke.csproj" | sort)
 feed="$(mktemp -d)"
 packages="$(mktemp -d)"
 nuget_config="$(mktemp)"
@@ -17,8 +14,6 @@ trap 'rm -rf "$feed" "$packages" "$nuget_config"' EXIT
 
 dotnet restore "$repo_root/PubSoft.sln"
 dotnet pack "$repo_root/PubSoft.sln" -c Release -o "$feed" --no-restore
-python3 "$repo_root/scripts/sync-package-deps.py" --check
-python3 "$repo_root/scripts/verify-package-dependencies.py" "$feed"
 cat > "$nuget_config" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>

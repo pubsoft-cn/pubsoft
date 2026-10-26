@@ -1,4 +1,11 @@
 <Project>
+  <!-- Evaluation-time snapshot of declared references — during pack, MSBuild
+       expands @ProjectReference into the transitive closure, but the nuspec only
+       lists direct deps, so the comparison set must be the literal declarations. -->
+  <ItemGroup>
+    <_DeclaredPkgReferences Include="@(PackageReference)" />
+    <_DeclaredProjReferences Include="@(ProjectReference)" />
+  </ItemGroup>
   <!-- Called by tests/PubSoft.AotSmoke via nested MSBuild: returns this project's
        PackageId when it declares IsAotCompatible — the authoritative AOT package set. -->
   <Target Name="GetAotMarkedPackageId" Returns="@(_AotMarkedOut)">
@@ -12,5 +19,38 @@
     <ItemGroup>
       <_ShippedOut Include="$(PackageId)" Condition="'$(IsPackable)' != 'false'" />
     </ItemGroup>
+  </Target>
+  <!-- Nested-eval probe: caller resolves a ProjectReference to its PackageId. -->
+  <Target Name="GetPackageId" Returns="$(PackageId)" />
+
+  <!-- Pack-time nuspec self-check: dependency ids in the generated nuspec must
+       equal the declared set (PackageReference minus PrivateAssets=all, plus
+       ProjectReference PackageIds minus PrivateAssets/ReferenceOutputAssembly).
+       Catches SDK-injected deps and PrivateAssets leaks without any allowlist file. -->
+  <Target Name="VerifyNuspecDependencies" AfterTargets="GenerateNuspec"
+          Condition="'$(IsPackable)' != 'false' and '$(IsPackable)' != ''">
+    <ItemGroup>
+      <_DeclPkgRefs Include="@(_DeclaredPkgReferences)"
+                    Condition="'%(_DeclaredPkgReferences.PrivateAssets)' != 'all' and '%(_DeclaredPkgReferences.PrivateAssets)' != 'All'" />
+      <_DeclProjRefs Include="@(_DeclaredProjReferences)"
+                     Condition="'%(_DeclaredProjReferences.PrivateAssets)' != 'all' and '%(_DeclaredProjReferences.ReferenceOutputAssembly)' != 'false'" />
+    </ItemGroup>
+    <!-- ProjectReference filename == PackageId is a repo convention (also relied on
+         by consumer-smoke naming and the parity check), so %(FileName) is exact. -->
+    <ItemGroup>
+      <_DeclProjIds Include="@(_DeclProjRefs->'%(FileName)')" />
+    </ItemGroup>
+    <XmlPeek XmlInputPath="$(MSBuildProjectDirectory)\obj\$(Configuration)\$(PackageId).$(PackageVersion).nuspec"
+             Query="//*[local-name()='dependency']/@id">
+      <Output TaskParameter="Result" ItemName="_NuspecDeps" />
+    </XmlPeek>
+    <ItemGroup>
+      <_Undeclared Include="@(_NuspecDeps)" Exclude="@(_DeclPkgRefs);@(_DeclProjIds)" />
+      <_Dropped Include="@(_DeclPkgRefs);@(_DeclProjIds)" Exclude="@(_NuspecDeps)" />
+    </ItemGroup>
+    <Error Condition="'@(_Undeclared)' != ''"
+           Text="$(PackageId) nuspec contains undeclared dependencies: @(_Undeclared)" />
+    <Error Condition="'@(_Dropped)' != ''"
+           Text="$(PackageId) declares dependencies absent from the nuspec: @(_Dropped)" />
   </Target>
 </Project>
