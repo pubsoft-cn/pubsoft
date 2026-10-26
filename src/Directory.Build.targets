@@ -1,0 +1,9 @@
+<Project>
+  <!-- Called by tests/PubSoft.AotSmoke via nested MSBuild: returns this project's
+       PackageId when it declares IsAotCompatible — the authoritative AOT package set. -->
+  <Target Name="GetAotMarkedPackageId" Returns="@(_AotMarkedOut)">
+    <ItemGroup>
+      <_AotMarkedOut Include="$(PackageId)" Condition="'$(IsAotCompatible)' == 'true'" />
+    </ItemGroup>
+  </Target>
+</Project>
