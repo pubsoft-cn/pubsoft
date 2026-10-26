@@ -20,7 +20,7 @@ var envelope = MessageEnvelope.Create(
     target: "billing");
 ```
 
-envelope 存储不透明消息 ID、显式消息类型键、克隆的 `JsonElement` payload、发生时间与可选 source/target 标签。ID 上限 128 个非控制字符；键与标签上限 256。payload JSON 不用于推断运行时类型。发布方与消费方须独立于包 transport 约定键、payload schema 与 `JsonSerializerOptions`。
+envelope 存储不透明消息 ID、显式消息类型键、克隆的 `JsonElement` payload、发生时间与可选 source/target 标签。ID 上限 128 非控制字符；键与标签上限 256。payload JSON 不用于推断运行时类型。发布方与消费方须独立于包 transport 约定键、payload schema 与 `JsonSerializerOptions`。
 
 ## Handler 注册与分发
 

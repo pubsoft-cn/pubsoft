@@ -7,6 +7,11 @@
   <ItemGroup>
     <!-- API drift guard: every public symbol must be declared in PublicAPI.*.txt. -->
     <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
+    <ProjectReference Condition="'$(MSBuildProjectName)' == 'PubSoft.Core'"
+        Include="$(MSBuildThisFileDirectory)analyzers/PubSoft.Analyzers/PubSoft.Analyzers.csproj"
+        OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
+    <AdditionalFiles Condition="'$(MSBuildProjectName)' == 'PubSoft.Core'"
+        Include="$(MSBuildThisFileDirectory)../docs/**/*.md;$(MSBuildThisFileDirectory)../README*.md;$(MSBuildThisFileDirectory)**/README*.md" />
     <!-- Ship the per-package README inside the nupkg (NuGet.org renders it on the package page). -->
     <None Include="README.md" Pack="true" PackagePath="\" Condition="Exists('README.md')" />
   </ItemGroup>

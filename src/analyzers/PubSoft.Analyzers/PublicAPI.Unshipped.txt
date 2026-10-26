@@ -1,0 +1,6 @@
+#nullable enable
+PubSoft.Analyzers.DocNumbersAnalyzer
+PubSoft.Analyzers.DocNumbersAnalyzer.DocNumbersAnalyzer() -> void
+const PubSoft.Analyzers.DocNumbersAnalyzer.DiagnosticId = "PUBSOFT001" -> string!
+override PubSoft.Analyzers.DocNumbersAnalyzer.Initialize(Microsoft.CodeAnalysis.Diagnostics.AnalysisContext! context) -> void
+override PubSoft.Analyzers.DocNumbersAnalyzer.SupportedDiagnostics.get -> System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.DiagnosticDescriptor!>

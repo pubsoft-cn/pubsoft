@@ -15,7 +15,7 @@ using PubSoft.Logging;
 services.AddPubSoftLogging(minLevel: AppLogLevel.Info, enableJsonSink: true);
 ```
 
-扩展注册 `AppLogger` 与 `AppLoggerProvider`，宿主使用已注册 logging provider 后参与常规 `ILogger<T>` 解析。logger 默认 8,192 条队列、每批至多 128 条。自定义 sink 或队列容量可显式构造：
+扩展注册 `AppLogger` 与 `AppLoggerProvider`，宿主使用已注册 logging provider 后参与常规 `ILogger<T>` 解析。logger 默认队列容量 8192、每批至多 128。自定义 sink 或队列容量可显式构造：
 
 ```csharp
 var logger = new AppLogger(

@@ -2,7 +2,7 @@
 
 [English](README.md) | **简体中文**
 
-OAuth 渠道 provider 适配器（命名空间 `PubSoft.OAuth`）——19 个厂商登录流程的统一契约。
+OAuth 渠道 provider 适配器（命名空间 `PubSoft.OAuth`）——各厂商登录流程的统一契约。
 
 ## Provider 一览
 

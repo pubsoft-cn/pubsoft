@@ -58,7 +58,7 @@ if (!result.Success) { /* 应用宿主运维策略；本包不重试 */ }
 
 去重仅在消息带 `CorrelationId` 且 `DeduplicationWindow` > 0 时生效。键为注册通道名 + correlation ID；通道查找大小写不敏感——请求大小写不产生第二个去重身份。首次发送进行中时并发重复被抑制；发送成功后窗口自完成时刻起算。失败/异常/取消会释放占用，宿主可重试。被抑制的发送返回成功且 `ProviderMessageId = "suppressed"`。
 
-默认窗口 5 分钟、容量 10,000 条。过期项在后续符合条件的分发中回收；容量满时新的带 correlation 分发 fail closed（不改为无去重发送）。状态属单进程单例 dispatcher——不跨实例共享、不跨重启持久。持久或分布式保证请用 provider/应用幂等。
+默认窗口 5 分钟、容量上限 10,000。过期项在后续符合条件的分发中回收；容量满时新的带 correlation 分发 fail closed（不改为无去重发送）。状态属单进程单例 dispatcher——不跨实例共享、不跨重启持久。持久或分布式保证请用 provider/应用幂等。
 
 ## Public API surface
 

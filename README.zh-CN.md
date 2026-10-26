@@ -53,7 +53,7 @@ dotnet test PubSoft.sln -c Release && dotnet pack PubSoft.sln -c Release
 bash scripts/verify-package-consumer.sh && bash scripts/verify-aot-consumer.sh
 ```
 
-443 通过 / 19 项环境跳过（`PUBSOFT_REDIS`/`PUBSOFT_MYSQL` 未配置）；37 个隔离 consumer + 依赖 allowlist + 原生 AOT smoke 全绿。发布工程细节：[docs/packaging.zh-CN.md](docs/packaging.zh-CN.md)。
+配置 `PUBSOFT_REDIS`/`PUBSOFT_MYSQL` 后集成用例才会真正执行（未配置则跳过）；verify 脚本负责隔离 consumer、依赖 allowlist 与原生 AOT smoke。发布工程细节：[docs/packaging.zh-CN.md](docs/packaging.zh-CN.md)。
 
 ## 许可证与联系
 
