@@ -187,6 +187,7 @@ static PubSoft.AspNetCore.Authentication.PrincipalSnapshotServiceCollectionExten
 static PubSoft.AspNetCore.Authorization.PermissionEndpointFilterExtensions.AddPubSoftPermissionAuthorization(this Microsoft.AspNetCore.Builder.RouteHandlerBuilder! endpoint) -> Microsoft.AspNetCore.Builder.RouteHandlerBuilder!
 static PubSoft.AspNetCore.Authorization.PermissionEndpointFilterExtensions.AddPubSoftPermissionAuthorization(this Microsoft.AspNetCore.Routing.RouteGroupBuilder! group) -> Microsoft.AspNetCore.Routing.RouteGroupBuilder!
 static PubSoft.AspNetCore.Authorization.PermissionMvcAuthorizationExtensions.AddPubSoftPermissionAuthorization(this Microsoft.Extensions.DependencyInjection.IMvcBuilder! mvcBuilder) -> Microsoft.Extensions.DependencyInjection.IMvcBuilder!
+static PubSoft.AspNetCore.CorrelationAmbient.Current.get -> (string! TraceId, string! SpanId)?
 static PubSoft.AspNetCore.DevelopmentOnlyControllerConventionExtensions.AddPubSoftDevelopmentOnlyControllerConvention(this Microsoft.Extensions.DependencyInjection.IMvcBuilder! builder, Microsoft.Extensions.Hosting.IHostEnvironment! environment) -> Microsoft.Extensions.DependencyInjection.IMvcBuilder!
 static PubSoft.AspNetCore.ExceptionHandlingMiddlewareExtensions.UsePubSoftExceptionHandling(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
 static PubSoft.AspNetCore.HealthEndpointRouteBuilderExtensions.MapPubSoftHealthEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder! endpoints, string! pattern = "/health") -> Microsoft.AspNetCore.Builder.IEndpointConventionBuilder!
@@ -206,3 +207,25 @@ static PubSoft.AspNetCore.PubSoftRequestSaveChangesExtensions.AddPubSoftRequestS
 static PubSoft.AspNetCore.PubSoftRequestSaveChangesExtensions.UsePubSoftRequestSaveChanges(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
 static PubSoft.AspNetCore.PubSoftSecurityExtensions.AddPubSoftSecurity(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration? configuration = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.SecurityHeadersMiddlewareExtensions.UsePubSoftSecurityHeaders(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, PubSoft.AspNetCore.SecurityHeadersOptions? options = null) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+PubSoft.AspNetCore.CorrelationIdMiddleware
+PubSoft.AspNetCore.CorrelationIdMiddleware.CorrelationIdMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, PubSoft.AspNetCore.CorrelationIdOptions? options = null) -> void
+PubSoft.AspNetCore.CorrelationIdMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
+PubSoft.AspNetCore.CorrelationIdMiddlewareExtensions
+PubSoft.AspNetCore.CorrelationIdOptions
+PubSoft.AspNetCore.CorrelationIdOptions.CorrelationIdOptions() -> void
+PubSoft.AspNetCore.CorrelationIdOptions.EchoResponseHeader.get -> bool
+PubSoft.AspNetCore.CorrelationIdOptions.EchoResponseHeader.set -> void
+PubSoft.AspNetCore.CorrelationIdOptions.Enabled.get -> bool
+PubSoft.AspNetCore.CorrelationIdOptions.Enabled.set -> void
+PubSoft.AspNetCore.CorrelationIdOptions.InboundHeaderNames.get -> string![]!
+PubSoft.AspNetCore.CorrelationIdOptions.InboundHeaderNames.set -> void
+PubSoft.AspNetCore.CorrelationIdOptions.ResponseHeaderName.get -> string!
+PubSoft.AspNetCore.CorrelationIdOptions.ResponseHeaderName.set -> void
+static PubSoft.AspNetCore.CorrelationIdMiddleware.CurrentId(Microsoft.AspNetCore.Http.HttpContext! context) -> string!
+static PubSoft.AspNetCore.CorrelationIdMiddlewareExtensions.UsePubSoftCorrelationId(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, PubSoft.AspNetCore.CorrelationIdOptions? options = null) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+PubSoft.AspNetCore.CorrelationAmbient
+PubSoft.AspNetCore.CorrelationPropagationHandler
+PubSoft.AspNetCore.CorrelationPropagationHandler.CorrelationPropagationHandler() -> void
+PubSoft.AspNetCore.CorrelationPropagationHandler.CorrelationHeaderName.get -> string?
+PubSoft.AspNetCore.CorrelationPropagationHandler.CorrelationHeaderName.set -> void
+static PubSoft.AspNetCore.CorrelationAmbient.NewSpanId() -> string!
