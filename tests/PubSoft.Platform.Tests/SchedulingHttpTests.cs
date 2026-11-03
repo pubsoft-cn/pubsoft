@@ -487,6 +487,86 @@ public sealed class SchedulingHttpTests
             => Task.CompletedTask;
     }
 
+    [Fact]
+    public async Task CrossHostRedirectDropsConfiguredHeaders()
+    {
+        var handler = new RecordingHandler(request => request.RequestUri!.Host == "a.example.com"
+            ? RedirectTo("https://b.example.com/land")
+            : new HttpResponseMessage(HttpStatusCode.OK));
+        var executor = CreateProbe(handler, options: new HttpExecutorOptions
+        {
+            AllowedHosts = { ".example.com" },
+            FollowRedirects = true,
+        });
+
+        var result = await executor.ExecuteAsync(CreateJob(new HttpExecutorConfig
+        {
+            Url = "https://a.example.com/start",
+            Headers = { ["X-Custom-Key"] = "secret-value" },
+        }), default);
+
+        Assert.True(result.Success);
+        Assert.Equal("secret-value", handler.CustomHeaders.ElementAt(0));
+        Assert.Null(handler.CustomHeaders.ElementAt(1));
+    }
+
+    [Fact]
+    public async Task SchemeDowngradeRedirectDropsConfiguredHeaders()
+    {
+        var handler = new RecordingHandler(request => request.RequestUri!.Scheme == "https"
+            ? RedirectTo("http://a.example.com/land")
+            : new HttpResponseMessage(HttpStatusCode.OK));
+        var executor = CreateProbe(handler, options: new HttpExecutorOptions { FollowRedirects = true });
+
+        var result = await executor.ExecuteAsync(CreateJob(new HttpExecutorConfig
+        {
+            Url = "https://a.example.com/start",
+            Headers = { ["X-Custom-Key"] = "secret-value" },
+        }), default);
+
+        Assert.True(result.Success);
+        Assert.Equal("secret-value", handler.CustomHeaders.ElementAt(0));
+        Assert.Null(handler.CustomHeaders.ElementAt(1));
+    }
+
+    [Fact]
+    public async Task SameHostDifferentPortRedirectDropsConfiguredHeaders()
+    {
+        var handler = new RecordingHandler(request => request.RequestUri!.Port == 443
+            ? RedirectTo("https://a.example.com:8443/land")
+            : new HttpResponseMessage(HttpStatusCode.OK));
+        var executor = CreateProbe(handler, options: new HttpExecutorOptions { FollowRedirects = true });
+
+        var result = await executor.ExecuteAsync(CreateJob(new HttpExecutorConfig
+        {
+            Url = "https://a.example.com/start",
+            Headers = { ["X-Custom-Key"] = "secret-value" },
+        }), default);
+
+        Assert.True(result.Success);
+        Assert.Equal("secret-value", handler.CustomHeaders.ElementAt(0));
+        Assert.Null(handler.CustomHeaders.ElementAt(1));
+    }
+
+    [Fact]
+    public async Task SameOriginRedirectKeepsConfiguredHeaders()
+    {
+        var handler = new RecordingHandler(request => request.RequestUri!.PathAndQuery == "/start"
+            ? RedirectTo("https://a.example.com/land")
+            : new HttpResponseMessage(HttpStatusCode.OK));
+        var executor = CreateProbe(handler, options: new HttpExecutorOptions { FollowRedirects = true });
+
+        var result = await executor.ExecuteAsync(CreateJob(new HttpExecutorConfig
+        {
+            Url = "https://a.example.com/start",
+            Headers = { ["X-Custom-Key"] = "secret-value" },
+        }), default);
+
+        Assert.True(result.Success);
+        Assert.Equal("secret-value", handler.CustomHeaders.ElementAt(0));
+        Assert.Equal("secret-value", handler.CustomHeaders.ElementAt(1));
+    }
+
     private sealed class RecordingHandler : HttpMessageHandler
     {
         private readonly Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> _responseFactory;
@@ -516,6 +596,7 @@ public sealed class SchedulingHttpTests
         public ConcurrentQueue<string> Methods { get; } = new();
         public ConcurrentQueue<string?> Bodies { get; } = new();
         public ConcurrentQueue<string?> TokenHeaders { get; } = new();
+        public ConcurrentQueue<string?> CustomHeaders { get; } = new();
         public ConcurrentQueue<string> RequestedHosts { get; } = new();
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -524,6 +605,7 @@ public sealed class SchedulingHttpTests
             Methods.Enqueue(request.Method.Method);
             Bodies.Enqueue(request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken));
             TokenHeaders.Enqueue(request.Headers.TryGetValues("X-Service-Token", out var values) ? values.Single() : null);
+            CustomHeaders.Enqueue(request.Headers.TryGetValues("X-Custom-Key", out var cvals) ? cvals.Single() : null);
             RequestedHosts.Enqueue(request.RequestUri!.Host);
             return await _responseFactory(request, cancellationToken);
         }

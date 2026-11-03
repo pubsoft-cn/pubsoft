@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="BouncyCastle.Cryptography" />
+    <PackageReference Include="coverlet.collector">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../../src/host/PubSoft.AspNetCore/PubSoft.AspNetCore.csproj" />
+    <ProjectReference Include="../../src/host/PubSoft.AspNetCore.Docs/PubSoft.AspNetCore.Docs.csproj" />
+    <ProjectReference Include="../../src/host/PubSoft.Edge/PubSoft.Edge.csproj" />
+    <ProjectReference Include="../../src/host/PubSoft.Edge.Core/PubSoft.Edge.Core.csproj" />
+    <ProjectReference Include="../../src/host/PubSoft.Edge.Client/PubSoft.Edge.Client.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Core/PubSoft.Core.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Domain/PubSoft.Domain.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Cryptography/PubSoft.Cryptography.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.MultiTenancy/PubSoft.MultiTenancy.csproj" />
+    <ProjectReference Include="../../src/security/PubSoft.Authorization/PubSoft.Authorization.csproj" />
+    <ProjectReference Include="../../src/security/PubSoft.Authentication.Jwt.AspNetCore/PubSoft.Authentication.Jwt.AspNetCore.csproj" />
+    <ProjectReference Include="../../src/security/PubSoft.Authentication.Jwt/PubSoft.Authentication.Jwt.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Monitoring/PubSoft.Monitoring.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Resilience.Http/PubSoft.Resilience.Http.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Caching/PubSoft.Caching.csproj" />
+    <ProjectReference Include="../../src/data/PubSoft.EntityFrameworkCore/PubSoft.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="../../src/testing/PubSoft.Testing/PubSoft.Testing.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Tokens/PubSoft.Tokens.csproj" />
+  </ItemGroup>
+</Project>

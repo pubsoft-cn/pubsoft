@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="PubSoft.Core.Tests" />
+    <InternalsVisibleTo Include="PubSoft.Platform.Tests" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../platform/PubSoft.Scheduling/PubSoft.Scheduling.csproj" />

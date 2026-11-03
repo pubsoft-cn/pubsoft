@@ -154,6 +154,46 @@ public sealed class OAuthProvidersTests
     }
 
     [Fact]
+    public async Task AuthorizeUrlsPercentEncodeReservedCharacters()
+    {
+        var providers = new IOAuthProvider[]
+        {
+            new AlipayOAuthProvider(new FakeConfigProvider(null), new HttpClient(new StubHandler(Json("{}")))),
+            new DingTalkOAuthProvider(new FakeConfigProvider(null), new HttpClient(new StubHandler(Json("{}")))),
+            new GitHubOAuthProvider(new FakeConfigProvider(null), new HttpClient(new StubHandler(Json("{}")))),
+            new WeChatOAuthProvider(new FakeConfigProvider(null), new FakeAccessTokenProvider(), new HttpClient(new StubHandler(Json("{}")))),
+            new WeComOAuthProvider(new FakeConfigProvider(null), new HttpClient(new StubHandler(Json("{}")))),
+            new TwitterOAuthProvider(new FakeConfigProvider(null), new HttpClient(new StubHandler(Json("{}")))),
+        };
+
+        foreach (var provider in providers)
+        {
+            var result = await provider.GetAuthorizeUrlAsync(new OAuthAuthorizeUrlRequest
+            {
+                AppId = "app&id#1",
+                RedirectUri = "https://app.test/cb",
+                State = "st&ate#x",
+                Scope = "openid profile",
+                CodeChallenge = "abc123",
+            });
+            Assert.True(result.Success, provider.GetType().Name);
+            var queryIndex = result.AuthorizeUrl.IndexOf('?');
+            var fragmentIndex = result.AuthorizeUrl.IndexOf('#');
+            var query = fragmentIndex > queryIndex && fragmentIndex > 0
+                ? result.AuthorizeUrl[(queryIndex + 1)..fragmentIndex]
+                : result.AuthorizeUrl[(queryIndex + 1)..];
+            Assert.DoesNotContain("&id#1", query);
+            Assert.DoesNotContain("st&ate", query);
+            var parsed = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(query);
+            var appId = parsed.TryGetValue("app_id", out var v1) ? v1.ToString()
+                : parsed.TryGetValue("appid", out var v2) ? v2.ToString()
+                : parsed.TryGetValue("client_id", out var v3) ? v3.ToString() : "";
+            Assert.Equal("app&id#1", appId);
+            Assert.Equal("st&ate#x", parsed["state"].ToString());
+        }
+    }
+
+    [Fact]
     public async Task AlipayExchangeSignsRequestAndVerifiesResponseSignature()
     {
         using var appKey = RSA.Create(2048);

@@ -1,4 +1,5 @@
 #nullable enable
+const PubSoft.Core.SnowflakeIdGenerator.MaxWorkerId = 31 -> long
 PubSoft.Core.ApiResponse
 PubSoft.Core.ApiResponse.ApiResponse() -> void
 PubSoft.Core.ApiResponse<T>

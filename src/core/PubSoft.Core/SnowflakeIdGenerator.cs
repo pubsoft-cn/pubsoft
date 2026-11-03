@@ -17,7 +17,7 @@ public sealed class SnowflakeIdGenerator
     private const long Epoch = 1704067200000L;
     private const int WorkerIdBits = 5;
     private const int SequenceBits = 7;
-    private const long MaxWorkerId = (1L << WorkerIdBits) - 1;
+    public const long MaxWorkerId = (1L << WorkerIdBits) - 1;
     private const long MaxSequence = (1L << SequenceBits) - 1;
     private const long MaxTimestamp = Epoch + (1L << 41) - 1;
     private const int WorkerIdShift = SequenceBits;

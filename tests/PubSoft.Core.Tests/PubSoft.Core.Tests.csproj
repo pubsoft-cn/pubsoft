@@ -11,6 +11,10 @@
     <PackageReference Include="StackExchange.Redis" />
     <!-- test-only: cross-validates the managed SM3/SM4 implementations -->
     <PackageReference Include="BouncyCastle.Cryptography" />
+    <PackageReference Include="coverlet.collector">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>

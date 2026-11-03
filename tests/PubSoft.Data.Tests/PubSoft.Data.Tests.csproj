@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="MySql.EntityFrameworkCore" />
+    <PackageReference Include="coverlet.collector">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../../src/data/PubSoft.Auditing/PubSoft.Auditing.csproj" />
+    <ProjectReference Include="../../src/data/PubSoft.Auditing.Outbox/PubSoft.Auditing.Outbox.csproj" />
+    <ProjectReference Include="../../src/data/PubSoft.EntityFrameworkCore/PubSoft.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="../../src/messaging/PubSoft.Messaging.Outbox/PubSoft.Messaging.Outbox.csproj" />
+    <ProjectReference Include="../../src/messaging/PubSoft.Messaging/PubSoft.Messaging.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Monitoring/PubSoft.Monitoring.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Scheduling/PubSoft.Scheduling.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Scheduling.EntityFrameworkCore/PubSoft.Scheduling.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Tokens/PubSoft.Tokens.csproj" />
+    <ProjectReference Include="../../src/security/PubSoft.Authorization/PubSoft.Authorization.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Core/PubSoft.Core.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Domain/PubSoft.Domain.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Cryptography/PubSoft.Cryptography.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.MultiTenancy/PubSoft.MultiTenancy.csproj" />
+    <ProjectReference Include="../../src/testing/PubSoft.Testing/PubSoft.Testing.csproj" />
+    <ProjectReference Include="../../src/host/PubSoft.AspNetCore/PubSoft.AspNetCore.csproj" />
+  </ItemGroup>
+</Project>

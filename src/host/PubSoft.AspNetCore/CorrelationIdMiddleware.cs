@@ -129,7 +129,7 @@ public static class CorrelationAmbient
     /// <summary>Shared g53 snowflake generator — worker id derived from machine name hash,
     /// collision-free across processes on one host.</summary>
     private static readonly PubSoft.Core.SnowflakeIdGenerator _gen = new(
-        (Math.Abs(Environment.MachineName.GetHashCode()) % 1024));
+        Math.Abs(Environment.MachineName.GetHashCode()) % (PubSoft.Core.SnowflakeIdGenerator.MaxWorkerId + 1));
 
     /// <summary>New span id — g53 snowflake → 16-hex (W3C spanId slot).</summary>
     public static string NewSpanId() => _gen.NextId().ToString("x16");

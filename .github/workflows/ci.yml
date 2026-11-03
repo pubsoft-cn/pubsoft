@@ -46,8 +46,36 @@ jobs:
         run: dotnet restore PubSoft.sln
       - name: Format check
         run: dotnet format PubSoft.sln --verify-no-changes --no-restore
-      - name: Test
-        run: dotnet test PubSoft.sln --no-restore --configuration Release
+      - name: Test (with coverage)
+        run: dotnet test PubSoft.sln --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory coverage-results
+      - name: Coverage gate (>=70% union line coverage)
+        run: |
+          python3 - <<'PY'
+          import glob, sys, xml.etree.ElementTree as ET
+          lines={}
+          for f in glob.glob('coverage-results/*/coverage.cobertura.xml'):
+              for cls in ET.parse(f).getroot().iter('class'):
+                  fn=cls.get('filename','')
+                  if 'PubSoft.' not in fn or fn.startswith('tests'): continue
+                  for line in cls.iter('line'):
+                      k=(fn,line.get('number'))
+                      lines[k]=max(lines.get(k,0),int(line.get('hits',0)))
+          cov=sum(1 for v in lines.values() if v>0)
+          pct=cov*100/max(len(lines),1)
+          print(f"UNION line coverage: {cov}/{len(lines)} = {pct:.1f}%")
+          sys.exit(0 if pct >= 70 else 1)
+          PY
+      - name: Coverage report (ReportGenerator)
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          reportgenerator "-reports:coverage-results/*/coverage.cobertura.xml" "-targetdir:coverage-report" "-reporttypes:HtmlInline;MarkdownSummary"
+          cat coverage-report/Summary.md >> "$GITHUB_STEP_SUMMARY" || true
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f4360fa925 # v4.6.2
+        with:
+          name: coverage-report
+          path: coverage-report
+          retention-days: 14
       - name: Pack
         run: dotnet pack PubSoft.sln --no-restore --configuration Release
       - name: Verify packed package consumer
