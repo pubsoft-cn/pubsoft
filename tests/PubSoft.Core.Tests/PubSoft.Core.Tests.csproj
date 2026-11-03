@@ -40,6 +40,7 @@
     <ProjectReference Include="../../src/core/PubSoft.Cryptography/PubSoft.Cryptography.csproj" />
     <ProjectReference Include="../../src/host/PubSoft.AspNetCore/PubSoft.AspNetCore.csproj" />
     <ProjectReference Include="../../src/host/PubSoft.AspNetCore.Docs/PubSoft.AspNetCore.Docs.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Modularity/PubSoft.Modularity.csproj" />
     <ProjectReference Include="../../src/data/PubSoft.Auditing/PubSoft.Auditing.csproj" />
     <ProjectReference Include="../../src/data/PubSoft.Auditing.Outbox/PubSoft.Auditing.Outbox.csproj" />
     <ProjectReference Include="../../src/data/PubSoft.EntityFrameworkCore/PubSoft.EntityFrameworkCore.csproj" />

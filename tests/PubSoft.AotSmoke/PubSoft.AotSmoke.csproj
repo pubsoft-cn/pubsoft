@@ -56,6 +56,7 @@
     <PackageReference Include="PubSoft.Logging" VersionOverride="0.1.0-*" />
     <PackageReference Include="PubSoft.Mapping" VersionOverride="0.1.0-*" />
     <PackageReference Include="PubSoft.Messaging" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Modularity" VersionOverride="0.1.0-*" />
     <PackageReference Include="PubSoft.Monitoring" VersionOverride="0.1.0-*" />
     <PackageReference Include="PubSoft.Monitoring.Scheduling" VersionOverride="0.1.0-*" />
     <PackageReference Include="PubSoft.MultiTenancy" VersionOverride="0.1.0-*" />

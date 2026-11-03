@@ -57,6 +57,7 @@
     <PackageVersion Include="PubSoft.Mapping" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.Messaging.Outbox" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.Messaging" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Modularity" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.Monitoring.Scheduling" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.Monitoring" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.MultiTenancy" Version="$(PubSoftVersion)" />
