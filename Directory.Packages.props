@@ -27,14 +27,11 @@
     <PackageVersion Include="MySql.EntityFrameworkCore" Version="10.0.12" />
     <PackageVersion Include="StackExchange.Redis" Version="3.4.20" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
-    <PackageVersion Include="Volo.Abp.Core" Version="10.7.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
     <!-- PubSoft packages are referenced only by the consumer smoke projects;
          central pin tracks the packing version, each smoke overrides with
          0.1.0-* so restore follows whatever the local feed produced. -->
-    <PackageVersion Include="PubSoft.Abp.AspNetCore" Version="$(PubSoftVersion)" />
-    <PackageVersion Include="PubSoft.Abp.Core" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.AspNetCore" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.Auditing.Outbox" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.Auditing" Version="$(PubSoftVersion)" />

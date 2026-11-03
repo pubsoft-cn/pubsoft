@@ -2,7 +2,7 @@
 
 **English** | [简体中文](README.zh-CN.md)
 
-Open-source infrastructure building blocks for .NET 10 microservices — tenancy, permissions, auditing, messaging, caching, security, scheduling, and resilience, packaged as independent `PubSoft.*` libraries that each do one thing honestly. Optional `PubSoft.Abp.*` adapters integrate the ABP module lifecycle; the generic core never depends on ABP.
+Open-source infrastructure building blocks for .NET 10 microservices — tenancy, permissions, auditing, messaging, caching, security, scheduling, and resilience, packaged as independent `PubSoft.*` libraries that each do one thing honestly.
 
 ## Packages
 
@@ -17,7 +17,6 @@ Per-package hosting guides ship inside every nupkg and live at `src/*/PubSoft.*/
 | Caching & security | [Caching](src/platform/PubSoft.Caching/README.md) · [Caching.Redis](src/platform/PubSoft.Caching.Redis/README.md) · [Security](src/security/PubSoft.Security/README.md) · [Security.Redis](src/security/PubSoft.Security.Redis/README.md) · [Cryptography](src/core/PubSoft.Cryptography/README.md) |
 | Runtime | [AspNetCore](src/host/PubSoft.AspNetCore/README.md) · [AspNetCore.Docs](src/host/PubSoft.AspNetCore.Docs/README.md) · [Resilience](src/core/PubSoft.Resilience/README.md) · [Resilience.Http](src/platform/PubSoft.Resilience.Http/README.md) · [Scheduling](src/platform/PubSoft.Scheduling/README.md) · [Scheduling.EF](src/platform/PubSoft.Scheduling.EntityFrameworkCore/README.md) · [Scheduling.Http](src/platform/PubSoft.Scheduling.Http/README.md) · [Monitoring](src/platform/PubSoft.Monitoring/README.md) · [Monitoring.Scheduling](src/platform/PubSoft.Monitoring.Scheduling/README.md) · [Logging](src/core/PubSoft.Logging/README.md) · [Notifications](src/platform/PubSoft.Notifications/README.md) · [Tokens](src/platform/PubSoft.Tokens/README.md) · [Outbound](src/platform/PubSoft.Outbound/README.md) |
 | Client entry | [Edge](src/host/PubSoft.Edge/README.md) · [Edge.Core](src/host/PubSoft.Edge.Core/README.md) · [Edge.Client](src/host/PubSoft.Edge.Client/README.md) |
-| ABP adapters | [Abp.Core](src/host/PubSoft.Abp.Core/README.md) · [Abp.AspNetCore](src/host/PubSoft.Abp.AspNetCore/README.md) |
 
 ## Why PubSoft
 

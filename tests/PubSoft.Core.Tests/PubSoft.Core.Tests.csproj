@@ -28,8 +28,6 @@
     <ProjectReference Include="../../src/security/PubSoft.Authentication.Jwt/PubSoft.Authentication.Jwt.csproj" />
     <ProjectReference Include="../../src/security/PubSoft.Authentication.OAuthProviders/PubSoft.Authentication.OAuthProviders.csproj" />
     <ProjectReference Include="../../src/security/PubSoft.Authorization/PubSoft.Authorization.csproj" />
-    <ProjectReference Include="../../src/host/PubSoft.Abp.Core/PubSoft.Abp.Core.csproj" />
-    <ProjectReference Include="../../src/host/PubSoft.Abp.AspNetCore/PubSoft.Abp.AspNetCore.csproj" />
     <ProjectReference Include="../../src/core/PubSoft.Core/PubSoft.Core.csproj" />
     <ProjectReference Include="../../src/core/PubSoft.Domain/PubSoft.Domain.csproj" />
     <ProjectReference Include="../../src/testing/PubSoft.Testing/PubSoft.Testing.csproj" />

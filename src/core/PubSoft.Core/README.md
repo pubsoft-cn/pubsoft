@@ -43,6 +43,8 @@ Derive `Specification<T>` to collect criteria, includes, ordering, grouping, and
 
 `SnowflakeIdGenerator` generates JavaScript-safe 53-bit IDs using a 2024-01-01 UTC epoch, a 5-bit worker ID (0–31), and a 7-bit per-millisecond sequence. Inject a `TimeProvider` for deterministic tests. The clock must not move backwards, and the timestamp must remain within the generator's supported window. Assign worker IDs uniquely to concurrently active generators sharing an ID space; the generator's lock only coordinates calls on that one instance. Exhausting all 128 sequence values in the final supported millisecond throws instead of wrapping.
 
+DI registration is a one-liner in the host — validate the configured worker ID (0–31, unique per concurrent generator) before constructing: `services.AddSingleton(new SnowflakeIdGenerator(workerId))`. Hosts that want options-binding + startup validation can wrap it in `services.AddOptions<WorkerIdOptions>().Validate(o => o.WorkerId is >= 0 and <= 31)`.
+
 `ApiResponse<T>` and `ApiResponse` are mutable response-shape DTOs: code `0` represents success, and `Fail` rejects code `0`. They do not set HTTP status codes, define a global error-code registry, or enforce serialization conventions. `PagedResultDto<T>` carries a mutable item list and total count without imposing paging semantics.
 
 ## Public API surface

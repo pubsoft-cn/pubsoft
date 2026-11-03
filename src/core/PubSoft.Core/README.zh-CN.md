@@ -42,6 +42,8 @@ decimal yuan = amount.ToYuan();
 
 `SnowflakeIdGenerator` 生成 JS 安全 53-bit ID：2024-01-01 UTC epoch + 5-bit worker ID（0–31）+ 7-bit 每毫秒序列。注入 `TimeProvider` 可做确定性测试。时钟不得回拨，时间戳不得超出支持窗口。共享同一 ID 空间的并发生成器须分配不同 worker ID——实例内锁只协调单实例调用。最后一个支持毫秒耗尽序列号空间（每毫秒 128）时抛异常而非回绕。
 
+DI 注册是宿主侧一行：`services.AddSingleton(new SnowflakeIdGenerator(workerId))`——构造前校验 worker ID（0–31，并发生成器间唯一）；需要 options 绑定 + 启动校验的宿主可自行包 `AddOptions<T>().Validate(...)`。
+
 `ApiResponse<T>`/`ApiResponse` 是可变响应 DTO：code `0` 表示成功，`Fail` 拒绝 code `0`。不设置 HTTP 状态码、不定义全局错误码注册表、不强制序列化约定。`PagedResultDto<T>` 携带可变列表与总数，不规定分页语义。
 
 ## Public API surface

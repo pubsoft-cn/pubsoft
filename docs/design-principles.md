@@ -68,5 +68,4 @@ The library never touches credential stores, permission stores, user databases, 
 
 - `PubSoft.{Area}` — framework-neutral core contracts and implementations.
 - `PubSoft.{Area}.{Tech}` — technology adapters (`.AspNetCore`, `.Redis`, `.EntityFrameworkCore`, `.Http`, `.Outbox`).
-- `PubSoft.Abp.*` — optional ABP wiring only; never part of the generic core.
 - Inter-package dependencies are governed by the `scripts/verify-package-dependencies.py` allowlist.

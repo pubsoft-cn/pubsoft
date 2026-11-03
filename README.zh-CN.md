@@ -2,7 +2,7 @@
 
 [English](README.md) | **简体中文**
 
-面向 .NET 10 微服务的开源基础设施构件库——租户、权限、审计、消息、缓存、安全、调度、韧性，以独立的 `PubSoft.*` 包提供，每个包只诚实地做一件事。可选 `PubSoft.Abp.*` 适配层集成 ABP 模块生命周期；通用核心不依赖 ABP。
+面向 .NET 10 微服务的开源基础设施构件库——租户、权限、审计、消息、缓存、安全、调度、韧性，以独立的 `PubSoft.*` 包提供，每个包只诚实地做一件事。
 
 ## 包清单
 
@@ -17,7 +17,6 @@
 | 缓存与安全 | [Caching](src/platform/PubSoft.Caching/README.md) · [Caching.Redis](src/platform/PubSoft.Caching.Redis/README.md) · [Security](src/security/PubSoft.Security/README.md) · [Security.Redis](src/security/PubSoft.Security.Redis/README.md) · [Cryptography](src/core/PubSoft.Cryptography/README.md) |
 | 运行时 | [AspNetCore](src/host/PubSoft.AspNetCore/README.md) · [AspNetCore.Docs](src/host/PubSoft.AspNetCore.Docs/README.md) · [Resilience](src/core/PubSoft.Resilience/README.md) · [Resilience.Http](src/platform/PubSoft.Resilience.Http/README.md) · [Scheduling](src/platform/PubSoft.Scheduling/README.md) · [Scheduling.EF](src/platform/PubSoft.Scheduling.EntityFrameworkCore/README.md) · [Scheduling.Http](src/platform/PubSoft.Scheduling.Http/README.md) · [Monitoring](src/platform/PubSoft.Monitoring/README.md) · [Monitoring.Scheduling](src/platform/PubSoft.Monitoring.Scheduling/README.md) · [Logging](src/core/PubSoft.Logging/README.md) · [Notifications](src/platform/PubSoft.Notifications/README.md) · [Tokens](src/platform/PubSoft.Tokens/README.md) · [Outbound](src/platform/PubSoft.Outbound/README.md) |
 | 客户端入口 | [Edge](src/host/PubSoft.Edge/README.zh-CN.md) · [Edge.Core](src/host/PubSoft.Edge.Core/README.zh-CN.md) · [Edge.Client](src/host/PubSoft.Edge.Client/README.zh-CN.md) |
-| ABP 适配 | [Abp.Core](src/host/PubSoft.Abp.Core/README.md) · [Abp.AspNetCore](src/host/PubSoft.Abp.AspNetCore/README.md) |
 
 ## 为什么选 PubSoft
 

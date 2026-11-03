@@ -68,5 +68,4 @@ PubSoft 全部包共享以下规范。新包/新 API 不偏离这些原则，除
 
 - `PubSoft.{Area}`：零框架依赖的核心契约与实现
 - `PubSoft.{Area}.{Tech}`：技术适配（`.AspNetCore`、`.Redis`、`.EntityFrameworkCore`、`.Http`、`.Outbox`）
-- `PubSoft.Abp.*`：仅可选 ABP 接线，不进通用核心
 - 包间依赖由 `scripts/verify-package-dependencies.py` allowlist 把关

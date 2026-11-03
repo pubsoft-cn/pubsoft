@@ -2,7 +2,7 @@
 
 **English** | [简体中文](aot-feasibility.zh-CN.md)
 
-**Verdict:** full-repo Native AOT is not feasible (EF Core / ASP.NET Core MVC / Volo.Abp upstreams do not support it). **The pure-managed leaf packages are marked `IsAotCompatible` and verified for real**: `tests/PubSoft.AotSmoke` (a `PublishAot=true` console referencing the leaf packages) publishes with `dotnet publish -r linux-x64` with **zero IL2xxx/IL3xxx warnings** and the native binary runs successfully. Entry point: `scripts/verify-aot-consumer.sh` (in CI; skips gracefully without a native toolchain).
+**Verdict:** full-repo Native AOT is not feasible (EF Core / ASP.NET Core MVC upstreams do not support it). **The pure-managed leaf packages are marked `IsAotCompatible` and verified for real**: `tests/PubSoft.AotSmoke` (a `PublishAot=true` console referencing the leaf packages) publishes with `dotnet publish -r linux-x64` with **zero IL2xxx/IL3xxx warnings** and the native binary runs successfully. Entry point: `scripts/verify-aot-consumer.sh` (in CI; skips gracefully without a native toolchain).
 
 ## Hard Dependency Constraints (non-negotiable)
 
@@ -10,7 +10,6 @@
 |---|---|---|
 | EF Core 10 | **No Native AOT** (runtime model building is reflection-heavy; compiled models speed startup but don't change this) | `EntityFrameworkCore`, `Messaging.Outbox`, `Scheduling.EntityFrameworkCore`, all EF persistence paths |
 | ASP.NET Core MVC | No (controller model binding/filters are reflection-driven); Minimal API partially | `AspNetCore` (contains MVC filters) |
-| Volo.Abp | No (module system is reflection-driven) | `Abp.Core`, `Abp.AspNetCore` |
 | StackExchange.Redis | No AOT commitment; verify per version | `Caching.Redis`, `Security.Redis` |
 
 ## Package Tier Matrix
@@ -34,7 +33,7 @@
 
 ### Tier C: unsupported (by dependency)
 
-`EntityFrameworkCore`, `Scheduling.EntityFrameworkCore`, `Abp.Core`, `Abp.AspNetCore`, `Messaging.Outbox`, `Auditing.Outbox` (EF sink chain).
+`EntityFrameworkCore`, `Scheduling.EntityFrameworkCore`, `Messaging.Outbox`, `Auditing.Outbox` (EF sink chain).
 
 ## Already AOT-Friendly Design (keep it)
 

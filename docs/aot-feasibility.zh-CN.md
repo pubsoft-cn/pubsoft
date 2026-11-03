@@ -2,7 +2,7 @@
 
 [English](aot-feasibility.md) | **简体中文**
 
-**结论：** 全仓库 Native AOT 不可行（EF Core / ASP.NET Core MVC / Volo.Abp 上游不支持）。**纯托管叶子包已标注 `IsAotCompatible` 并通过真实验证**：`tests/PubSoft.AotSmoke`（`PublishAot=true` console，引用各叶子包）`dotnet publish -r linux-x64` **零 IL2xxx/IL3xxx 警告**，原生二进制运行通过。入口：`scripts/verify-aot-consumer.sh`（已进 CI；无原生工具链时优雅跳过）。
+**结论：** 全仓库 Native AOT 不可行（EF Core / ASP.NET Core MVC 上游不支持）。**纯托管叶子包已标注 `IsAotCompatible` 并通过真实验证**：`tests/PubSoft.AotSmoke`（`PublishAot=true` console，引用各叶子包）`dotnet publish -r linux-x64` **零 IL2xxx/IL3xxx 警告**，原生二进制运行通过。入口：`scripts/verify-aot-consumer.sh`（已进 CI；无原生工具链时优雅跳过）。
 
 ## 依赖侧硬约束（不可绕行）
 
@@ -10,7 +10,6 @@
 |---|---|---|
 | EF Core 10 | **不支持 Native AOT**（运行时模型构建重度依赖反射；compiled model 只加速启动不改本质） | `EntityFrameworkCore`、`Messaging.Outbox`、`Scheduling.EntityFrameworkCore`、所有 EF 持久化路径 |
 | ASP.NET Core MVC | 不支持（controller 模型绑定/筛选器是反射驱动）；Minimal API 部分支持 | `AspNetCore`（含 MVC filter） |
-| Volo.Abp | 不支持（模块系统是反射驱动） | `Abp.Core`、`Abp.AspNetCore` |
 | StackExchange.Redis | 未承诺 AOT；需逐版本验证 | `Caching.Redis`、`Security.Redis` |
 
 ## 包分级矩阵
@@ -34,7 +33,7 @@
 
 ### C 级：不支持（依赖决定）
 
-`EntityFrameworkCore`、`Scheduling.EntityFrameworkCore`、`Abp.Core`、`Abp.AspNetCore`、`Messaging.Outbox`、`Auditing.Outbox`（EF sink 链路）。
+`EntityFrameworkCore`、`Scheduling.EntityFrameworkCore`、`Messaging.Outbox`、`Auditing.Outbox`（EF sink 链路）。
 
 ## 当前已具备的 AOT 友好设计（保持）
 

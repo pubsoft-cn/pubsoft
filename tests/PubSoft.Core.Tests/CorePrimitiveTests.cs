@@ -1,10 +1,7 @@
 using PubSoft.Core;
 using PubSoft.Domain;
-using PubSoft.Abp.Core;
-using PubSoft.Abp.AspNetCore;
 using PubSoft.Authentication;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace PubSoft.Core.Tests;
@@ -162,60 +159,6 @@ public sealed class CorePrimitiveTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => new SnowflakeIdGenerator(32));
         Assert.Throws<ArgumentOutOfRangeException>(() => new SnowflakeIdGenerator(-1));
-    }
-
-    [Fact]
-    public void AbpCoreRegistration_UsesTheConfiguredWorkerIdAndSingletonLifetime()
-    {
-        var services = new ServiceCollection();
-        services.AddPubSoftCore();
-        services.Configure<PubSoftSnowflakeOptions>(options => options.WorkerId = 17);
-        using var provider = services.BuildServiceProvider();
-
-        var generator = provider.GetRequiredService<SnowflakeIdGenerator>();
-
-        Assert.Same(generator, provider.GetRequiredService<SnowflakeIdGenerator>());
-        Assert.Equal(17, (generator.NextId() >> 7) & 31);
-    }
-
-    [Fact]
-    public void AbpCoreRegistration_RejectsMissingWorkerId()
-    {
-        var services = new ServiceCollection();
-        services.AddPubSoftCore();
-        using var provider = services.BuildServiceProvider();
-
-        Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<SnowflakeIdGenerator>());
-    }
-
-    [Theory]
-    [InlineData(-1)]
-    [InlineData(32)]
-    public void AbpCoreRegistration_RejectsWorkerIdsOutsideGeneratorRange(long workerId)
-    {
-        var services = new ServiceCollection();
-        services.AddPubSoftCore();
-        services.Configure<PubSoftSnowflakeOptions>(options => options.WorkerId = workerId);
-        using var provider = services.BuildServiceProvider();
-
-        Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<SnowflakeIdGenerator>());
-    }
-
-    [Fact]
-    public void AbpAspNetCoreRegistration_UsesScopedPrincipalSnapshotAccessor()
-    {
-        var services = new ServiceCollection();
-        services.AddPubSoftAbpAspNetCore();
-        using var provider = services.BuildServiceProvider();
-        using var firstScope = provider.CreateScope();
-        using var secondScope = provider.CreateScope();
-
-        var first = firstScope.ServiceProvider.GetRequiredService<IPrincipalSnapshotAccessor>();
-        var second = secondScope.ServiceProvider.GetRequiredService<IPrincipalSnapshotAccessor>();
-
-        Assert.NotSame(first, second);
-        Assert.Null(first.GetCurrent());
-        Assert.Null(second.GetCurrent());
     }
 
     [Fact]
