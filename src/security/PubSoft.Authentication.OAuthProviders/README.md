@@ -39,3 +39,5 @@ services.AddPubSoftOAuthProviders<MyChannelConfigProvider>();
 ## Boundaries
 
 Providers return raw vendor identity data — user creation, account binding, session/JWT issuance, relay-state machines, and login endpoints are host orchestration. Secrets never enter logs or exception messages. Native-AOT compatible.
+Authorization URLs encode all query values (`app_id`, `state`, `scope`, `redirect_uri`) per parameter. Provider response bodies are capped at 1 MiB of actual bytes — multi-byte UTF-8 payloads cannot bypass the limit.
+

@@ -38,3 +38,17 @@ Sm4.DecryptEcbHex(hexKey, cipherHex);
 ```
 
 SM4-ECB 仅用于**存量互通**（银联/政务类协议）——ECB 会泄露明文分组模式，自行设计的加密场景一律用 `AesEncryptor`/AES-GCM。`DecryptEcb` 全量校验填充，非法输入抛 `CryptographicException`。
+
+## ClientSigner — HMAC-SHA256 请求签名
+
+签名串格式 `{method}\n{path}\n{timestamp}\n{nonce}\n{bodyHash}`，签名 = `Base64(HMAC-SHA256(secret, 签名串))`。
+
+- `Sign`/`Verify` — 签名计算与常量时间比较
+- `ComputeBodyHash` — 请求体 SHA-256 hex（无 body 为空串）
+- `IsTimestampValid` — 校验时间戳在 ±5 分钟内；**timestamp 为 Unix 毫秒**
+- `TimestampTolerance`/`NonceTtl` — 共享常量（5 分钟 / 10 分钟）
+
+防重放**故意不含**：`ClientSigner` 不存 nonce。宿主须自行记录已用 nonce（如共享缓存以 nonce
+为键、TTL=`NonceTtl`）并拒绝重复——`NonceTtl` 覆盖时间窗，过期签名无法重放。
+
+约定 header：`X-Client-Id`、`X-Timestamp`、`X-Nonce`、`X-Signature`。

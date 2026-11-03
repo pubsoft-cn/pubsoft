@@ -87,18 +87,15 @@ public abstract class OAuthProviderBase : IOAuthProvider
             if (response.Content.Headers.ContentLength > MaxResponseBytes)
                 throw new InvalidDataException($"OAuth provider response exceeded {MaxResponseBytes} bytes");
             await using var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-            using var reader = new StreamReader(stream);
-            var buffer = new char[8192];
-            var builder = new System.Text.StringBuilder();
-            int total = 0, read;
-            while ((read = await reader.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
-            {
+            var bytes = new byte[MaxResponseBytes + 1];
+            var total = 0;
+            int read;
+            while (total <= MaxResponseBytes
+                   && (read = await stream.ReadAsync(bytes.AsMemory(total, Math.Min(8192, bytes.Length - total)), ct).ConfigureAwait(false)) > 0)
                 total += read;
-                if (total > MaxResponseBytes)
-                    throw new InvalidDataException($"OAuth provider response exceeded {MaxResponseBytes} bytes");
-                builder.Append(buffer, 0, read);
-            }
-            return builder.ToString();
+            if (total > MaxResponseBytes)
+                throw new InvalidDataException($"OAuth provider response exceeded {MaxResponseBytes} bytes");
+            return System.Text.Encoding.UTF8.GetString(bytes, 0, total);
         }
     }
 

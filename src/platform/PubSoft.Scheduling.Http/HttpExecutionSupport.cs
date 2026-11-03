@@ -93,16 +93,16 @@ internal sealed class HttpExecutionSupport
         var target = uri;
         var sendMethod = method;
         var sendBody = method != HttpMethod.Get;
-        var dropTokenHeader = false;
+        var dropRequestHeaders = false;
         var redirectsLeft = _options.FollowRedirects ? MaxRedirects : 0;
 
         // Redirects are followed manually so every hop re-runs target validation
-        // (allowlist + literal private-IP) and the credential header is stripped
-        // when the redirect crosses to a different host.
+        // (allowlist + literal private-IP); custom headers and the credential
+        // header are only forwarded while the request stays on the same origin.
         while (true)
         {
             var (result, location) = await SendOnceAsync(
-                config, target, sendMethod, sendBody, dropTokenHeader, stopwatch, cancellationToken)
+                config, target, sendMethod, sendBody, dropRequestHeaders, stopwatch, cancellationToken)
                 .ConfigureAwait(false);
             if (location is null || !_options.FollowRedirects)
                 return result;
@@ -115,8 +115,10 @@ internal sealed class HttpExecutionSupport
             if (!IsValidTarget(next))
                 return HttpAttemptResult.Failure(0, stopwatch.Elapsed, "redirect target blocked");
 
-            if (!string.Equals(target.IdnHost, next.IdnHost, StringComparison.OrdinalIgnoreCase))
-                dropTokenHeader = true;
+            if (!string.Equals(target.IdnHost, next.IdnHost, StringComparison.OrdinalIgnoreCase)
+                || !string.Equals(target.Scheme, next.Scheme, StringComparison.OrdinalIgnoreCase)
+                || target.Port != next.Port)
+                dropRequestHeaders = true;
 
             // RFC 7231: 303 downgrades to GET; 301/302 do the same for POST (HttpClient parity).
             if ((int)result.StatusCode == 303 && sendMethod != HttpMethod.Head
@@ -135,7 +137,7 @@ internal sealed class HttpExecutionSupport
         Uri uri,
         HttpMethod method,
         bool sendBody,
-        bool dropTokenHeader,
+        bool dropRequestHeaders,
         Stopwatch stopwatch,
         CancellationToken cancellationToken)
     {
@@ -145,14 +147,17 @@ internal sealed class HttpExecutionSupport
             if (sendBody && !string.IsNullOrEmpty(config.Body))
                 request.Content = new StringContent(config.Body, Encoding.UTF8, "application/json");
 
-            foreach (var (name, value) in config.Headers)
+            if (!dropRequestHeaders)
             {
-                if (!request.Headers.TryAddWithoutValidation(name, value)
-                    && (request.Content is null || !request.Content.Headers.TryAddWithoutValidation(name, value)))
-                    return (HttpAttemptResult.Failure(0, stopwatch.Elapsed, "invalid request header"), null);
+                foreach (var (name, value) in config.Headers)
+                {
+                    if (!request.Headers.TryAddWithoutValidation(name, value)
+                        && (request.Content is null || !request.Content.Headers.TryAddWithoutValidation(name, value)))
+                        return (HttpAttemptResult.Failure(0, stopwatch.Elapsed, "invalid request header"), null);
+                }
             }
 
-            if (config.Token is { } tokenRef && !dropTokenHeader)
+            if (config.Token is { } tokenRef && !dropRequestHeaders)
             {
                 if (_tokenProvider is null)
                     return (HttpAttemptResult.Failure(0, stopwatch.Elapsed, "token provider is not registered"), null);

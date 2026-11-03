@@ -54,3 +54,5 @@ Job registration, bitmask schedules, engine limits, and state stores live in [Pu
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Scheduling.Http`: `HttpExecutorOptions` `HttpProbeExecutor` `HttpResilientExecutor` `ScheduledHttpRequest` `ScheduledHttpResult` `SchedulingHttpServiceCollectionExtensions`
+Redirects are followed manually with per-hop target re-validation. When a redirect changes origin (scheme, host, or port), job-configured headers and the token header are no longer forwarded — credentials never cross origins.
+

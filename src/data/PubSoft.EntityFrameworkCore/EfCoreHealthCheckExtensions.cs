@@ -21,6 +21,7 @@ public static class EfCoreServiceDefaultsExtensions
         this IServiceCollection services, string healthCheckName = "db")
         where TDbContext : DbContext
     {
+        services.AddPubSoftHealthChecks();
         services.AddPubSoftEfCoreHealthCheck<TDbContext>(healthCheckName);
         services.AddPubSoftDbQueryDiagnostics();
         return services;

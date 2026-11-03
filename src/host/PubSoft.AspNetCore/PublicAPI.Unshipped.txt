@@ -166,6 +166,8 @@ PubSoft.AspNetCore.HttpContextTenantOptions.ClaimNames.set -> void
 PubSoft.AspNetCore.HttpContextTenantOptions.HeaderName.get -> string!
 PubSoft.AspNetCore.HttpContextTenantOptions.HeaderName.set -> void
 PubSoft.AspNetCore.HttpContextTenantOptions.HttpContextTenantOptions() -> void
+PubSoft.AspNetCore.HttpContextTenantOptions.ReadHeader.get -> bool
+PubSoft.AspNetCore.HttpContextTenantOptions.ReadHeader.set -> void
 PubSoft.AspNetCore.IAppSecretResolver
 PubSoft.AspNetCore.IAppSecretResolver.ResolveSecretAsync(string! appId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<string?>
 PubSoft.AspNetCore.IpNormalizer

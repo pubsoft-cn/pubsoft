@@ -22,7 +22,7 @@ public sealed class JwksKeyProvider
     private readonly IMemoryCache _cache;
     private readonly ILogger<JwksKeyProvider> _logger;
     private readonly HttpClient _httpClient;
-    private static readonly ConcurrentDictionary<string, SecurityKey> _keyCache = new();
+    private readonly ConcurrentDictionary<string, SecurityKey> _keyCache = new();
 
     public JwksKeyProvider(IOptions<JwksOptions> options, IMemoryCache cache,
         ILogger<JwksKeyProvider> logger, HttpClient httpClient)

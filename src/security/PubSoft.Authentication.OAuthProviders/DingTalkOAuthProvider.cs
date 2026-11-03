@@ -29,7 +29,7 @@ public sealed class DingTalkOAuthProvider : OAuthProviderBase
     {
         var state = request.State ?? Guid.NewGuid().ToString("N");
         var redirectUri = Uri.EscapeDataString(request.RedirectUri ?? "");
-        var url = $"https://login.dingtalk.com/oauth2/auth?redirect_uri={redirectUri}&response_type=code&client_id={request.AppId}&scope=openid&state={state}&prompt=consent";
+        var url = $"https://login.dingtalk.com/oauth2/auth?redirect_uri={redirectUri}&response_type=code&client_id={Uri.EscapeDataString(request.AppId)}&scope=openid&state={Uri.EscapeDataString(state)}&prompt=consent";
 
         return Task.FromResult(new OAuthAuthorizeUrlResult
         {

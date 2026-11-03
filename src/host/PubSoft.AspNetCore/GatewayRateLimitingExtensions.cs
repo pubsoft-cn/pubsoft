@@ -44,17 +44,19 @@ public static class GatewayRateLimitingExtensions
     public static IServiceCollection AddPubSoftGatewayRateLimiting(
         this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<ForwardedHeadersOptions>(options =>
-        {
-            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-            options.KnownIPNetworks.Clear();
-            options.KnownProxies.Clear();
-            options.ForwardLimit = null;
-        });
-
         var options = configuration.GetSection(GatewayRateLimitOptions.SectionName).Get<GatewayRateLimitOptions>()
                       ?? new GatewayRateLimitOptions();
         if (!options.Enabled) return services;
+
+        // 仅在启用时限流时重写转发头信任面——否则限流关闭也会信任任意 X-Forwarded-For。
+        // 适用前提：宿主部署在可信网关之后（网关剥离外部 X-Forwarded-For）。
+        services.Configure<ForwardedHeadersOptions>(o =>
+        {
+            o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            o.KnownIPNetworks.Clear();
+            o.KnownProxies.Clear();
+            o.ForwardLimit = null;
+        });
 
         services.Configure<GatewayRateLimitOptions>(o =>
         {

@@ -9,7 +9,7 @@
 `PubSoftDbContext` 为 `IMultiTenant`/`IMemberScoped`/`ISoftDelete` 实体注册命名过滤器。过滤表达式读取 context 实例属性——缓存的 EF model 不会固化首个创建它的 context 的 scope。
 
 - 租户过滤将 `TenantId` 匹配 `ITenantContext.TenantId`；当前租户为 null 时只看到 TenantId 为 null 的行
-- 成员过滤仅在 `IMemberScopeContext.IsMemberScoped` 为 true 且当前 member ID 非空时生效，否则不按成员限制
+- 成员过滤为 fail-closed：`IMemberScopeContext.IsMemberScoped` 为 true 但当前 member ID 为空时，查询匹配空结果集而非静默放宽；`IsMemberScoped` 为 false 时才不按成员限制
 - `IgnoreScopeFilters()` 只关闭租户+成员过滤，软删过滤保持
 - `IgnoreQueryFilters()` 关闭全部命名过滤器——会暴露已删行，仅限明确的审计/恢复路径
 

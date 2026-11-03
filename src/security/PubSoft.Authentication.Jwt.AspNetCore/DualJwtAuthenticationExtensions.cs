@@ -34,11 +34,19 @@ public static class DualJwtAuthenticationExtensions
         if (hasAuthServer)
         {
             services.Configure<JwksOptions>(authServerSection);
-            services.AddHttpClient<JwksKeyProvider>();
+            services.AddHttpClient(nameof(JwksKeyProvider));
+            services.AddSingleton(sp => new JwksKeyProvider(
+                sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<JwksOptions>>(),
+                sp.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>(),
+                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<JwksKeyProvider>>(),
+                sp.GetRequiredService<System.Net.Http.IHttpClientFactory>().CreateClient(nameof(JwksKeyProvider))));
             jwksOptions = authServerSection.Get<JwksOptions>() ?? new JwksOptions();
             if (string.IsNullOrWhiteSpace(jwksOptions.JwksUri) && !string.IsNullOrWhiteSpace(jwksOptions.Issuer))
                 jwksOptions.JwksUri = $"{jwksOptions.Issuer.TrimEnd('/')}/.well-known/jwks.json";
         }
+
+        var _keyProvider = new Lazy<JwksKeyProvider>(
+            () => services.BuildServiceProvider().GetRequiredService<JwksKeyProvider>());
 
         var authBuilder = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
 
@@ -97,7 +105,7 @@ public static class DualJwtAuthenticationExtensions
                     ClockSkew = TimeSpan.FromMinutes(1),
                     IssuerSigningKeyResolver = (_, _, kid, _) =>
                     {
-                        var provider = services.BuildServiceProvider().GetRequiredService<JwksKeyProvider>();
+                        var provider = _keyProvider.Value;
                         var key = provider.ResolveSigningKeyAsync(kid ?? "").GetAwaiter().GetResult();
                         return key is null ? Array.Empty<SecurityKey>() : new[] { key };
                     },

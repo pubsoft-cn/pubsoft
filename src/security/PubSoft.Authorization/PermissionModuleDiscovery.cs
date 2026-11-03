@@ -31,6 +31,7 @@ public sealed class PermissionModuleDiscoveryOptions
     public Func<ControllerActionDescriptor, string?>? PinDisplayNameResolver { get; set; }
     public Func<ControllerActionDescriptor, string?>? PinDescriptionResolver { get; set; }
     public Func<ControllerActionDescriptor, int?>? PinSortOrderResolver { get; set; }
+    public Func<ControllerActionDescriptor, byte?>? PinAvailableFlagsResolver { get; set; }
     public Func<ControllerActionDescriptor, IEnumerable<string>>? CustomPermissionsExtractor { get; set; }
     public Dictionary<string, string> RouteModuleMap { get; } = new(StringComparer.OrdinalIgnoreCase);
 }
@@ -81,7 +82,7 @@ public sealed class PermissionModuleDiscovery
                 ModuleKey = key,
                 DisplayName = acc.PinDisplayName ?? provider?.GetDisplayName(key) ?? key,
                 Description = acc.PinDescription ?? provider?.GetDescription(key),
-                AvailableFlags = 63,
+                AvailableFlags = acc.PinAvailableFlags ?? provider?.GetAvailableFlags(key) ?? 63,
                 CustomPermissions = acc.CustomPermissions.OrderBy(x => x).ToList(),
                 SortOrder = acc.PinSortOrder > 0 ? acc.PinSortOrder.Value
                     : provider?.GetSortOrder(key) ?? (providerOrder.TryGetValue(key, out var i) ? i * 10 : 9999),
@@ -115,12 +116,14 @@ public sealed class PermissionModuleDiscovery
         public string? PinDisplayName;
         public string? PinDescription;
         public int? PinSortOrder;
+        public byte? PinAvailableFlags;
 
         public void Merge(ControllerActionDescriptor action, PermissionModuleDiscoveryOptions options)
         {
             PinDisplayName ??= options.PinDisplayNameResolver?.Invoke(action);
             PinDescription ??= options.PinDescriptionResolver?.Invoke(action);
             PinSortOrder ??= options.PinSortOrderResolver?.Invoke(action);
+            PinAvailableFlags ??= options.PinAvailableFlagsResolver?.Invoke(action);
             if (options.CustomPermissionsExtractor is { } extractor)
                 CustomPermissions.AddRange(extractor(action));
             var methods = action.EndpointMetadata.OfType<HttpMethodActionConstraint>()

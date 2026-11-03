@@ -15,6 +15,8 @@ public sealed class ScheduledJob
     /// <summary>
     /// Skips a due run while a previous run of the same job is still executing.
     /// Defaults to true: overlapping runs of one job are almost never intended.
+    /// <para>Process-local only: multiple scheduler instances sharing state can run
+    /// the same job concurrently — distributed mutual exclusion is not provided.</para>
     /// </summary>
     public bool PreventOverlap { get; set; } = true;
 

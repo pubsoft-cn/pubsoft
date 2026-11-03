@@ -9,7 +9,7 @@ API_KEY="${NUGET_API_KEY:?set NUGET_API_KEY}"
 PACK_DIR="${1:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/feed}"
 
 ok=0; fail=0
-for f in "$PACK_DIR"/*.nupkg; do
+for f in "$PACK_DIR"/PubSoft.*.nupkg; do
   code=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
     -H "X-NuGet-ApiKey: ${API_KEY}" \
     -H "Content-Type: application/octet-stream" \

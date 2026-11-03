@@ -40,7 +40,7 @@ public sealed partial class AlipayOAuthProvider : OAuthProviderBase
     {
         var state = request.State ?? Guid.NewGuid().ToString("N");
         var redirectUri = Uri.EscapeDataString(request.RedirectUri ?? "");
-        var url = $"https://openauth.alipay.com/oauth2/publicAppAuthorize.htm?app_id={request.AppId}&scope=auth_user&redirect_uri={redirectUri}&state={state}";
+        var url = $"https://openauth.alipay.com/oauth2/publicAppAuthorize.htm?app_id={Uri.EscapeDataString(request.AppId)}&scope=auth_user&redirect_uri={redirectUri}&state={Uri.EscapeDataString(state)}";
 
         return Task.FromResult(new OAuthAuthorizeUrlResult
         {

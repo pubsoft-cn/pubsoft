@@ -40,7 +40,7 @@ public sealed class WeChatOAuthProvider : OAuthProviderBase
 
         var state = request.State ?? Guid.NewGuid().ToString("N");
         var redirectUri = Uri.EscapeDataString(request.RedirectUri ?? "");
-        var url = $"{baseUrl}?appid={request.AppId}&redirect_uri={redirectUri}&response_type=code&scope={scope}&state={state}#wechat_redirect";
+        var url = $"{baseUrl}?appid={Uri.EscapeDataString(request.AppId)}&redirect_uri={redirectUri}&response_type=code&scope={scope}&state={Uri.EscapeDataString(state)}#wechat_redirect";
 
         return Task.FromResult(new OAuthAuthorizeUrlResult
         {

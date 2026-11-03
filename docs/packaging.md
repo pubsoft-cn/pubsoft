@@ -4,7 +4,7 @@
 
 ## Versioning & License
 
-- `Directory.Build.props` owns `PubSoftVersion` (currently `0.1.0`); individual csproj files do not set `<Version>`.
+- `Directory.Build.props` owns `PubSoftVersion` (currently `0.1.0-alpha.10`); individual csproj files do not set `<Version>`.
 - License: MIT (root `LICENSE` + `PackageLicenseExpression`); security contact: pubsoft@gmail.com (`SECURITY.md`).
 - Each `src/*/PubSoft.*/README.md` ships inside its nupkg (`PackageReadmeFile`); keep the module-level hosting guide next to the code.
 
@@ -18,8 +18,8 @@
 
 ## Dependency Governance
 
-- Third-party dependency allowlist: `scripts/verify-package-dependencies.py` parses every nupkg's nuspec and compares it against the allowlist; new dependencies require approval first.
-- Every package has an isolated consumer (`tests/consumers/PubSoft.{X}.Only`) that references only that package plus host-declared dependencies, and is verified end-to-end by `verify-package-consumers.py`.
+- Package-dependency consistency: `src/Directory.Build.targets` parses each nupkg's nuspec during pack and verifies declared dependencies match the project/package references; `scripts/sync-package-deps.py` regenerates nuspec metadata. It is a consistency check, not an approval allowlist.
+- Every package has an isolated consumer (`tests/PubSoft.{X}ConsumerSmoke`, outside the solution) that references only that package plus host-declared dependencies, verified end-to-end by `scripts/verify-package-consumer.sh` against a freshly packed local feed.
 - Local delivery: `dotnet pack` to a local feed. No floating versions (`latest`/`*`); prefer dependency versions published at least 7 days ago.
 
 ## AOT Verification
@@ -29,7 +29,7 @@
 
 ## CI (`.github/workflows/ci.yml`)
 
-restore → Release build (warnings treated strictly) → full test suite → dependency allowlist → isolated consumers → AOT smoke → gitleaks secret scan (`fetch-depth: 0`). CI contains no publish step — releases require a separately authorized pipeline.
+restore → Release build → full test suite (Redis + MySQL integration when services are up) → format check → pack → isolated consumers → AOT smoke → gitleaks secret scan (`fetch-depth: 0`) → vulnerability listing. High/critical NuGet advisories fail at restore via `NU1903`/`NU1904` warnings-as-errors. CI contains no publish step — releases require a separately authorized pipeline.
 
 ## Environment-Gated Tests
 

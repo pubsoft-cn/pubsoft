@@ -6,6 +6,8 @@ namespace PubSoft.AspNetCore;
 
 public sealed class HttpContextTenantOptions
 {
+    /// <summary>是否接受请求头租户覆盖。默认 false——header 可被客户端伪造，仅可信网关剥离外部头后开启。</summary>
+    public bool ReadHeader { get; set; }
     public string HeaderName { get; set; } = "X-Tenant-Id";
     public string[] ClaimNames { get; set; } = { "tid", "tenant_id" };
 }
@@ -32,8 +34,11 @@ public sealed class HttpContextTenantContext : ITenantContext
             if (ambient.HasValue) return ambient;
             var httpContext = _httpContextAccessor.HttpContext;
             if (httpContext is null) return null;
-            var headerValue = httpContext.Request.Headers[_options.HeaderName].FirstOrDefault();
-            if (long.TryParse(headerValue, out var headerId)) return headerId;
+            if (_options.ReadHeader)
+            {
+                var headerValue = httpContext.Request.Headers[_options.HeaderName].FirstOrDefault();
+                if (long.TryParse(headerValue, out var headerId)) return headerId;
+            }
             foreach (var claimName in _options.ClaimNames)
             {
                 var claim = httpContext.User?.FindFirst(claimName);

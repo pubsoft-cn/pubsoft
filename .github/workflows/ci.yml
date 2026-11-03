@@ -12,23 +12,36 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PUBSOFT_REDIS: localhost:7000,abortConnect=false
+      PUBSOFT_MYSQL: Server=localhost;User=root;Password=pubsoft-it;AllowUserVariables=True
       # Org-private token lists reach the PUBSOFT002 analyzer via env → MSBuild
       # property → CompilerVisibleProperty — never committed to the repo.
       PUBSOFT_FORBIDDEN_PATTERNS: ${{ secrets.PUBSOFT_FORBIDDEN_PATTERNS || vars.PUBSOFT_FORBIDDEN_PATTERNS }}
       PUBSOFT_FORBIDDEN_PATTERNS_EXCLUDING_TESTS: ${{ secrets.PUBSOFT_FORBIDDEN_PATTERNS_EXCLUDING_TESTS || vars.PUBSOFT_FORBIDDEN_PATTERNS_EXCLUDING_TESTS }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
       - name: Secret scan
+        # gitleaks pinned by digest — do not float to :latest.
         run: |
-          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest \
+          docker run --rm -v "$PWD:/repo" \
+            zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f \
             git --no-banner --redact /repo
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6
         with:
           dotnet-version: 10.0.x
       - name: Start Redis Cluster
         run: bash scripts/start-redis-cluster.sh
+      - name: Start MySQL
+        run: |
+          docker run -d --name pubsoft-test-mysql -p 3306:3306 \
+            -e MYSQL_ROOT_PASSWORD=pubsoft-it mysql:8.4
+          for i in $(seq 1 90); do
+            if docker exec pubsoft-test-mysql mysqladmin --user=root --password=pubsoft-it ping --silent 2>/dev/null; then exit 0; fi
+            sleep 2
+          done
+          docker logs pubsoft-test-mysql | tail -20
+          exit 1
       - name: Restore
         run: dotnet restore PubSoft.sln
       - name: Format check
@@ -41,8 +54,10 @@ jobs:
         run: bash scripts/verify-package-consumer.sh
       - name: Verify Native AOT consumer
         run: bash scripts/verify-aot-consumer.sh
+      # Hard gate lives in Directory.Build.props: NU1903/NU1904 are errors at
+      # restore time. This step stays informational for low/moderate advisories.
       - name: Check vulnerable dependencies
         run: dotnet list PubSoft.sln package --vulnerable --include-transitive
       - name: Stop Redis Cluster
         if: always()
-        run: docker stop pubsoft-test-redis-cluster || true
+        run: docker stop pubsoft-test-redis-cluster pubsoft-test-mysql || true

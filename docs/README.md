@@ -7,7 +7,7 @@
 ## Framework-level docs
 
 - [Design Principles](design-principles.md) — fail-closed defaults, explicit opt-in, boundedness, inversion-of-control contracts, ambient scope rules, AOT policy, package layering
-- [Packaging & Release Engineering](packaging.md) — versioning, Public API baselines, dependency allowlists, isolated-consumer verification, AOT smoke, release gates
+- [Packaging & Release Engineering](packaging.md) — versioning, Public API baselines, dependency consistency checks, isolated-consumer verification, AOT smoke, release gates
 - [Native AOT Feasibility](aot-feasibility.md) — upstream support surface, annotated packages, verified publish results
 - [Security Model](security-cryptography.md) — Security/Cryptography/AspNetCore package boundaries, AEAD envelope format, nonce/HMAC semantics
 - [Permission Client Scope](permission-client-scope.md) — `ClientCode` authorization namespace semantics across Authorization/EF/ASP.NET

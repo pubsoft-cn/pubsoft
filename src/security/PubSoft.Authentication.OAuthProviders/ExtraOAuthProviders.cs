@@ -206,7 +206,7 @@ public sealed class TwitterOAuthProvider : GenericOAuthProvider
         var state = request.State ?? Guid.NewGuid().ToString("N");
         var redirectUri = Uri.EscapeDataString(request.RedirectUri ?? "");
         var scope = Uri.EscapeDataString(request.Scope ?? DefaultScope);
-        var url = $"{AuthorizeEndpoint}?response_type=code&client_id={request.AppId}&redirect_uri={redirectUri}&scope={scope}&state={state}&code_challenge={Uri.EscapeDataString(request.CodeChallenge)}&code_challenge_method=S256";
+        var url = $"{AuthorizeEndpoint}?response_type=code&client_id={Uri.EscapeDataString(request.AppId)}&redirect_uri={redirectUri}&scope={scope}&state={Uri.EscapeDataString(state)}&code_challenge={Uri.EscapeDataString(request.CodeChallenge)}&code_challenge_method=S256";
 
         return Task.FromResult(new OAuthAuthorizeUrlResult
         {

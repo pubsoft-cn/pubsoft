@@ -16,5 +16,9 @@
     <Authors>PubSoft Contributors</Authors>
     <Company>PubSoft</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+      <!-- NuGet audit hard gate: high/critical advisories fail restore. -->
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <WarningsAsErrors>$(WarningsAsErrors);NU1903;NU1904</WarningsAsErrors>
   </PropertyGroup>
 </Project>

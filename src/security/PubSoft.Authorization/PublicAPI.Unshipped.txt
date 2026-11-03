@@ -32,6 +32,7 @@ PubSoft.Authorization.IPermissionGrantProvider.GetGrantsAsync(long subjectId, lo
 PubSoft.Authorization.IPermissionGrantProvider.GetGrantsAsync(long subjectId, long? tenantId, string! clientCode, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<PubSoft.Authorization.PermissionGrant!>!>!
 PubSoft.Authorization.IPermissionModuleProvider
 PubSoft.Authorization.IPermissionModuleProvider.All.get -> System.Collections.Generic.IReadOnlyCollection<string!>!
+PubSoft.Authorization.IPermissionModuleProvider.GetAvailableFlags(string! moduleKey) -> byte?
 PubSoft.Authorization.IPermissionModuleProvider.GetDescription(string! moduleKey) -> string?
 PubSoft.Authorization.IPermissionModuleProvider.GetDisplayName(string! moduleKey) -> string!
 PubSoft.Authorization.IPermissionModuleProvider.GetSortOrder(string! moduleKey) -> int?
@@ -117,6 +118,8 @@ PubSoft.Authorization.PermissionModuleDiscoveryOptions.CustomPermissionsExtracto
 PubSoft.Authorization.PermissionModuleDiscoveryOptions.ModuleKeyResolver.get -> System.Func<Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor!, string?>?
 PubSoft.Authorization.PermissionModuleDiscoveryOptions.ModuleKeyResolver.set -> void
 PubSoft.Authorization.PermissionModuleDiscoveryOptions.PermissionModuleDiscoveryOptions() -> void
+PubSoft.Authorization.PermissionModuleDiscoveryOptions.PinAvailableFlagsResolver.get -> System.Func<Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor!, byte?>?
+PubSoft.Authorization.PermissionModuleDiscoveryOptions.PinAvailableFlagsResolver.set -> void
 PubSoft.Authorization.PermissionModuleDiscoveryOptions.PinDescriptionResolver.get -> System.Func<Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor!, string?>?
 PubSoft.Authorization.PermissionModuleDiscoveryOptions.PinDescriptionResolver.set -> void
 PubSoft.Authorization.PermissionModuleDiscoveryOptions.PinDisplayNameResolver.get -> System.Func<Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor!, string?>?

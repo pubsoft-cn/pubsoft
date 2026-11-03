@@ -28,7 +28,7 @@ public abstract class GenericOAuthProvider : OAuthProviderBase
         var state = request.State ?? Guid.NewGuid().ToString("N");
         var redirectUri = Uri.EscapeDataString(request.RedirectUri ?? "");
         var scope = request.Scope ?? DefaultScope;
-        var url = $"{AuthorizeEndpoint}?client_id={request.AppId}&redirect_uri={redirectUri}&response_type=code&scope={Uri.EscapeDataString(scope)}&state={state}";
+        var url = $"{AuthorizeEndpoint}?client_id={Uri.EscapeDataString(request.AppId)}&redirect_uri={redirectUri}&response_type=code&scope={Uri.EscapeDataString(scope)}&state={Uri.EscapeDataString(state)}";
 
         return Task.FromResult(new OAuthAuthorizeUrlResult
         {

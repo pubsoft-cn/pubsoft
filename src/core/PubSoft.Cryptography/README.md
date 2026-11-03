@@ -38,3 +38,18 @@ Sm4.DecryptEcbHex(hexKey, cipherHex);
 ```
 
 SM4-ECB is provided for **interop only** (legacy CUP/government-style integrations) — ECB leaks plaintext block patterns; use `AesEncryptor`/AES-GCM for anything you design yourself. `DecryptEcb` validates the full padding and throws `CryptographicException` on malformed input.
+
+## ClientSigner — HMAC-SHA256 request signing
+
+Signs requests as `Base64(HMAC-SHA256(secret, "{method}\n{path}\n{timestamp}\n{nonce}\n{bodyHash}"))`.
+
+- `Sign`/`Verify` — signature computation and constant-time comparison
+- `ComputeBodyHash` — SHA-256 hex of the request body (empty string for no body)
+- `IsTimestampValid` — checks the timestamp is within ±5 minutes; **timestamps are Unix milliseconds**
+- `TimestampTolerance`/`NonceTtl` — shared constants (5 min / 10 min)
+
+Replay protection is intentionally NOT included: `ClientSigner` does not store nonces. The host must
+record used nonces (e.g. in a shared cache keyed by nonce, TTL = `NonceTtl`) and reject repeats —
+`NonceTtl` covers the timestamp window so an old signature cannot be replayed after expiry.
+
+Headers used by convention: `X-Client-Id`, `X-Timestamp`, `X-Nonce`, `X-Signature`.

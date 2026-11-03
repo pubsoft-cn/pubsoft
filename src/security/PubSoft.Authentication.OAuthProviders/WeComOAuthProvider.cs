@@ -29,7 +29,7 @@ public sealed class WeComOAuthProvider : OAuthProviderBase
     {
         var state = request.State ?? Guid.NewGuid().ToString("N");
         var redirectUri = Uri.EscapeDataString(request.RedirectUri ?? "");
-        var url = $"https://open.weixin.qq.com/connect/oauth2/authorize?appid={request.AppId}&redirect_uri={redirectUri}&response_type=code&scope=snsapi_base&state={state}#wechat_redirect";
+        var url = $"https://open.weixin.qq.com/connect/oauth2/authorize?appid={Uri.EscapeDataString(request.AppId)}&redirect_uri={redirectUri}&response_type=code&scope=snsapi_base&state={Uri.EscapeDataString(state)}#wechat_redirect";
 
         return Task.FromResult(new OAuthAuthorizeUrlResult
         {

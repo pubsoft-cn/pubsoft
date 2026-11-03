@@ -11,7 +11,7 @@
 `PubSoftDbContext` registers named filters for `IMultiTenant`, `IMemberScoped`, and `ISoftDelete` entities. Filter expressions read context instance properties so a cached EF model does not capture the scope from the first context that created it.
 
 - Tenant filtering matches `TenantId` to `ITenantContext.TenantId`; a null current tenant sees only rows whose tenant ID is null.
-- Member filtering applies only when `IMemberScopeContext.IsMemberScoped` is true and the current member ID is non-null. Otherwise it does not restrict rows by member.
+- Member filtering is fail-closed: when `IMemberScopeContext.IsMemberScoped` is true but the current member ID is null, queries match an empty result set instead of silently widening. When `IsMemberScoped` is false, rows are not restricted by member.
 - `IgnoreScopeFilters()` disables only tenant and member filtering. The soft-delete filter remains active.
 - `IgnoreQueryFilters()` disables every named filter and can expose deleted rows; reserve it for explicit audit or recovery paths.
 

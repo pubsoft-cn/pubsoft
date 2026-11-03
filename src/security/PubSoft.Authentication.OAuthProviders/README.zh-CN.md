@@ -39,3 +39,5 @@ services.AddPubSoftOAuthProviders<MyChannelConfigProvider>();
 ## 边界
 
 provider 只返回原始厂商身份数据——用户创建、账号绑定、会话/JWT 签发、relay state 机与登录端点均为宿主编排。密钥不进日志与异常消息。兼容 Native AOT。
+授权 URL 对所有查询值（`app_id`/`state`/`scope`/`redirect_uri`）逐项编码。Provider 响应体按实际字节数限制 1 MiB——多字节 UTF-8 载荷无法绕过限制。
+

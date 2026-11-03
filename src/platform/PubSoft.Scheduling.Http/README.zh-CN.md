@@ -49,3 +49,5 @@ job 注册、bitmask 排程、引擎上限与 state store 在 [PubSoft.Schedulin
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
 - `PubSoft.Scheduling.Http`: `HttpExecutorOptions` `HttpProbeExecutor` `HttpResilientExecutor` `ScheduledHttpRequest` `ScheduledHttpResult` `SchedulingHttpServiceCollectionExtensions`
+重定向逐跳手工跟随并重复目标校验。当跳转改变 origin（scheme/host/port）时，任务配置请求头与 token 头不再转发——凭证绝不跨源发送。
+

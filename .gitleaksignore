@@ -1,2 +1,3 @@
 # False positive: source strips PEM armor markers as literals (not a real key).
 10c103c89ef0db9c9b488ce4c29b89197277a059:src/security/PubSoft.Authentication.OAuthProviders/AlipayOAuthProvider.cs:private-key:267
+92897085a2b0fc9ec4ef3bf4dfdc53bb0477a4af:tests/PubSoft.Core.Tests/MachineTokenAndEfHealthTests.cs:generic-api-key:76
