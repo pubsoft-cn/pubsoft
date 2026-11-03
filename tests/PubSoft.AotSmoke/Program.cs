@@ -28,6 +28,23 @@ using (tenant.Change(7))
         return Fail("ambient tenant scope");
 }
 
+var moduleCalls = new List<string>();
+var orchestrator = new PubSoft.Modularity.ModuleOrchestrator(
+    new[]
+    {
+        new PubSoft.Modularity.ModuleDescriptor("smoke-core", typeof(SmokeCoreModule)),
+        PubSoft.Modularity.ModuleDescriptor.FromType(typeof(SmokeDepModule), optional: true),
+    },
+    t => t == typeof(SmokeCoreModule)
+        ? (PubSoft.Modularity.IPubSoftModule)new SmokeCoreModule()
+        : new SmokeDepModule(moduleCalls));
+var moduleCtx = new PubSoft.Modularity.ModuleContext { Services = services, ServiceProvider = provider };
+orchestrator.ConfigureServicesAll(moduleCtx);
+orchestrator.OnInitializationAll(moduleCtx);
+orchestrator.OnShutdownAll(moduleCtx);
+if (string.Join(',', moduleCalls) != "dep.init,dep.sd")
+    return Fail("module lifecycle");
+
 await using (await provider.GetRequiredService<IDistributedLock>()
     .AcquireAsync("smoke", TimeSpan.FromMinutes(1)) ?? throw new InvalidOperationException("lock"))
 {
@@ -70,6 +87,19 @@ public sealed class DestDto
 }
 
 public sealed record Ping(string Text);
+
+public sealed class SmokeCoreModule : PubSoft.Modularity.IPubSoftModule
+{
+    public void ConfigureServices(PubSoft.Modularity.ModuleContext context) { }
+}
+
+[PubSoft.Modularity.DependsOn(typeof(SmokeCoreModule))]
+public sealed class SmokeDepModule(List<string> calls) : PubSoft.Modularity.IPubSoftModule
+{
+    public void ConfigureServices(PubSoft.Modularity.ModuleContext context) { }
+    public void OnInitialization(PubSoft.Modularity.ModuleContext context) => calls.Add("dep.init");
+    public void OnShutdown(PubSoft.Modularity.ModuleContext context) => calls.Add("dep.sd");
+}
 
 public sealed class PingHandler(Action onHandled) : IMessageHandler<Ping>
 {

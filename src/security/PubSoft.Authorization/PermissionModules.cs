@@ -7,6 +7,7 @@ public interface IPermissionModuleProvider
     IReadOnlyCollection<string> All { get; }
     string GetDisplayName(string moduleKey);
     string? GetDescription(string moduleKey) => null;
+    int? GetSortOrder(string moduleKey) => null;
 }
 
 public sealed class PermissionModuleRegistry

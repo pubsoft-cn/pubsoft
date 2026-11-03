@@ -99,3 +99,9 @@ _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 - `PubSoft.EntityFrameworkCore`: `AuditChangeCaptureHook` `DbQueryDiagnostics` `DbQueryDiagnosticsOptions` `DbQueryDiagnosticsServiceCollectionExtensions` `DiagnosticSnapshot` `EfCorePermissionGrantManager<TDbContext>` `EfCorePermissionGrantProvider<TDbContext>` `EfCoreQueryExtensions` `EfCoreRepository<TEntity, TKey, TDbContext>` `EfCoreRoleDataScopeProvider<TDbContext>` `EfCoreServiceCollectionExtensions` `IEfCoreRepository<TEntity, TKey>` `IPubSoftUnitOfWork<TDbContext>` `ISaveChangesHook` `IdentityModelBuilderExtensions` `PermissionGrantModelBuilderExtensions` `PubSoftDbContext` `PubSoftUnitOfWork<TDbContext>` `QuerySnapshot` `RoleDataScopeModelBuilderExtensions` `TenantModelBuilderExtensions`
 - `PubSoft.EntityFrameworkCore.Auditing`: `AuditEntityChangeRecord` `AuditLogRecord` `AuditPersistenceModelBuilderExtensions` `AuditPersistenceServiceCollectionExtensions` `AuditRetentionCleanup<TDbContext>` `EfCoreAuditSnapshotSink<TDbContext>`
 - `PubSoft.EntityFrameworkCore.Migrations`: `DatabaseMigrationService` `DatabaseMigrationServiceCollectionExtensions` `EfCoreDatabaseSchemaMigrator<TDbContext>` `IDataSeeder` `IDatabaseMigrationService` `IDatabaseSchemaMigrator`
+
+## Database health and Snowflake conventions
+
+`AddPubSoftEfCoreHealthCheck<TDbContext>(name = "db", probeSql = "SELECT 1")` registers an `IAppHealthCheck` that opens a scope, verifies `CanConnectAsync`, and runs the probe statement — drop-in for the usual per-host `MySqlHealthCheck` boilerplate.
+
+`builder.ApplySnowflakeIdConventions()` in `OnModelCreating` marks every `long` primary key `ValueGenerated.Never` — replaces the copy-pasted entity loop that pairs with `SnowflakeIdGenerator` (client assigns ids, the store never generates).

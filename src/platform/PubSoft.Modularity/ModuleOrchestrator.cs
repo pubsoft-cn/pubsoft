@@ -20,6 +20,9 @@ public sealed class ModuleOrchestrator
     {
         ArgumentNullException.ThrowIfNull(modules);
         ArgumentNullException.ThrowIfNull(moduleFactory);
+        var duplicateName = modules.GroupBy(m => m.Name, StringComparer.Ordinal).FirstOrDefault(g => g.Count() > 1);
+        if (duplicateName is not null)
+            throw new ArgumentException($"duplicate module name: {duplicateName.Key}", nameof(modules));
         _modules = modules;
         _byType = modules.ToDictionary(m => m.ModuleType);
         _moduleFactory = moduleFactory;
@@ -64,7 +67,10 @@ public sealed class ModuleOrchestrator
         {
             if (_failedTypes.Contains(moduleType)) continue;
             if (_instances.TryGetValue(moduleType, out var module))
-                module.OnShutdown(ctx);
+            {
+                try { module.OnShutdown(ctx); }
+                catch (Exception ex) when (IsOptional(moduleType)) { MarkFailed(moduleType, ex, nameof(OnShutdownAll), ctx); }
+            }
         }
     }
 

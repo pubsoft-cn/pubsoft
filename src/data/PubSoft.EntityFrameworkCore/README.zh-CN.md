@@ -91,3 +91,9 @@ _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行�
 - `PubSoft.EntityFrameworkCore`: `AuditChangeCaptureHook` `DbQueryDiagnostics` `DbQueryDiagnosticsOptions` `DbQueryDiagnosticsServiceCollectionExtensions` `DiagnosticSnapshot` `EfCorePermissionGrantManager<TDbContext>` `EfCorePermissionGrantProvider<TDbContext>` `EfCoreQueryExtensions` `EfCoreRepository<TEntity, TKey, TDbContext>` `EfCoreRoleDataScopeProvider<TDbContext>` `EfCoreServiceCollectionExtensions` `IEfCoreRepository<TEntity, TKey>` `IPubSoftUnitOfWork<TDbContext>` `ISaveChangesHook` `IdentityModelBuilderExtensions` `PermissionGrantModelBuilderExtensions` `PubSoftDbContext` `PubSoftUnitOfWork<TDbContext>` `QuerySnapshot` `RoleDataScopeModelBuilderExtensions` `TenantModelBuilderExtensions`
 - `PubSoft.EntityFrameworkCore.Auditing`: `AuditEntityChangeRecord` `AuditLogRecord` `AuditPersistenceModelBuilderExtensions` `AuditPersistenceServiceCollectionExtensions` `AuditRetentionCleanup<TDbContext>` `EfCoreAuditSnapshotSink<TDbContext>`
 - `PubSoft.EntityFrameworkCore.Migrations`: `DatabaseMigrationService` `DatabaseMigrationServiceCollectionExtensions` `EfCoreDatabaseSchemaMigrator<TDbContext>` `IDataSeeder` `IDatabaseMigrationService` `IDatabaseSchemaMigrator`
+
+## 数据库健康检查与 Snowflake 约定
+
+`AddPubSoftEfCoreHealthCheck<TDbContext>(name = "db", probeSql = "SELECT 1")` 注册 `IAppHealthCheck`：开 scope、验 `CanConnectAsync`、执行探测语句——替代每个宿主复制的 `MySqlHealthCheck` 样板。
+
+`builder.ApplySnowflakeIdConventions()`（`OnModelCreating` 中调用）把所有 `long` 主键标为 `ValueGenerated.Never`——替代配合 `SnowflakeIdGenerator` 的逐实体循环（ID 由客户端生成，存储不生成）。

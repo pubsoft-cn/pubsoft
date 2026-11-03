@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../platform/PubSoft.Caching/PubSoft.Caching.csproj" />
+    <ProjectReference Include="../../security/PubSoft.Authentication.Jwt/PubSoft.Authentication.Jwt.csproj" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />

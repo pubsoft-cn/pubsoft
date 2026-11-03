@@ -80,3 +80,17 @@ bash scripts/verify-package-consumer.sh
 ```
 
 Tests cover token caching, dynamic expiry, concurrent refresh within one process, endpoint timeout/cancellation, fail-closed missing tokens, endpoint exception log redaction, and the request-level 401 opt-in. They do not validate a production secret manager, shared cache isolation, distributed refresh coordination, or endpoint idempotency.
+
+## Self-signed machine tokens
+
+`MachineTokenProvider` issues HS256 access tokens locally (via `PubSoft.Authentication.Jwt`) and caches them per credential key until `Lifetime - RefreshBefore` — the standard machine-to-machine credential when no external STS is involved. Compose with `TokenDelegatingHandler` for outbound `HttpClient` Bearer injection.
+
+```csharp
+services.Configure<MachineTokenOptions>(o =>
+{
+    o.Issuer = "orders"; o.Audience = "inventory";
+    o.SigningKey = configuration["Jwt:SecretKey"]!;
+    o.Credentials["inventory"] = new MachineTokenCredential { Claims = { ["caller_type"] = "Machine" } };
+});
+services.AddSingleton<ITokenProvider, MachineTokenProvider>();
+```

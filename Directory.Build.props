@@ -9,7 +9,7 @@
     <!-- Internal-validation releases carry a prerelease suffix so they never
          collide with the eventual stable public version. Bump the counter per
          validation drop; drop the suffix entirely for the public stable release. -->
-    <PubSoftVersion>0.1.0-alpha.9</PubSoftVersion>
+    <PubSoftVersion>0.1.0-alpha.10</PubSoftVersion>
     <Version>$(PubSoftVersion)</Version>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/pubsoft-cn/pubsoft</RepositoryUrl>

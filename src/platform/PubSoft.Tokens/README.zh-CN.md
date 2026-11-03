@@ -79,3 +79,17 @@ bash scripts/verify-package-consumer.sh
 ```
 
 测试覆盖 token 缓存、动态过期、单进程并发刷新、端点超时/取消、缺 token fail-closed、端点异常日志脱敏与请求级 401 opt-in。不验证生产 secret manager、共享缓存隔离、分布式刷新协调或端点幂等。
+
+## 自签机器令牌
+
+`MachineTokenProvider` 本地签发 HS256 access token（走 `PubSoft.Authentication.Jwt`），按 credential key 缓存到 `Lifetime - RefreshBefore`——无外部 STS 场景的标准机到机凭证。配合 `TokenDelegatingHandler` 为出站 `HttpClient` 注入 Bearer。
+
+```csharp
+services.Configure<MachineTokenOptions>(o =>
+{
+    o.Issuer = "orders"; o.Audience = "inventory";
+    o.SigningKey = configuration["Jwt:SecretKey"]!;
+    o.Credentials["inventory"] = new MachineTokenCredential { Claims = { ["caller_type"] = "Machine" } };
+});
+services.AddSingleton<ITokenProvider, MachineTokenProvider>();
+```

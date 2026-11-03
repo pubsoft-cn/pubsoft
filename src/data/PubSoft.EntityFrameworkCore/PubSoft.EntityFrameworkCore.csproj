@@ -9,6 +9,7 @@
     <ProjectReference Include="../../core/PubSoft.MultiTenancy/PubSoft.MultiTenancy.csproj" />
     <ProjectReference Include="../../security/PubSoft.Authorization/PubSoft.Authorization.csproj" />
     <ProjectReference Include="../../core/PubSoft.Identity/PubSoft.Identity.csproj" />
+    <ProjectReference Include="../../platform/PubSoft.Monitoring/PubSoft.Monitoring.csproj" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />

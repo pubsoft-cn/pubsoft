@@ -1,0 +1,49 @@
+#nullable enable
+override PubSoft.Modularity.ModuleDescriptor.Equals(object? obj) -> bool
+override PubSoft.Modularity.ModuleDescriptor.GetHashCode() -> int
+override PubSoft.Modularity.ModuleDescriptor.ToString() -> string!
+PubSoft.Modularity.DependsOnAttribute
+PubSoft.Modularity.DependsOnAttribute.DependsOnAttribute(params System.Type![]! moduleTypes) -> void
+PubSoft.Modularity.DependsOnAttribute.ModuleTypes.get -> System.Type![]!
+PubSoft.Modularity.IPubSoftModule
+PubSoft.Modularity.IPubSoftModule.ConfigureServices(PubSoft.Modularity.ModuleContext! context) -> void
+PubSoft.Modularity.IPubSoftModule.OnInitialization(PubSoft.Modularity.ModuleContext! context) -> void
+PubSoft.Modularity.IPubSoftModule.OnShutdown(PubSoft.Modularity.ModuleContext! context) -> void
+PubSoft.Modularity.ModuleContext
+PubSoft.Modularity.ModuleContext.Logger.get -> Microsoft.Extensions.Logging.ILogger?
+PubSoft.Modularity.ModuleContext.Logger.init -> void
+PubSoft.Modularity.ModuleContext.ModuleContext() -> void
+PubSoft.Modularity.ModuleContext.ServiceProvider.get -> System.IServiceProvider?
+PubSoft.Modularity.ModuleContext.ServiceProvider.init -> void
+PubSoft.Modularity.ModuleContext.Services.get -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+PubSoft.Modularity.ModuleContext.Services.init -> void
+PubSoft.Modularity.ModuleContext.ShutdownToken.get -> System.Threading.CancellationToken
+PubSoft.Modularity.ModuleContext.ShutdownToken.init -> void
+PubSoft.Modularity.ModuleDescriptor
+PubSoft.Modularity.ModuleDescriptor.<Clone>$() -> PubSoft.Modularity.ModuleDescriptor!
+PubSoft.Modularity.ModuleDescriptor.Deconstruct(out string! Name, out System.Type! ModuleType, out System.Type![]? Dependencies, out bool Optional) -> void
+PubSoft.Modularity.ModuleDescriptor.Dependencies.get -> System.Type![]?
+PubSoft.Modularity.ModuleDescriptor.Dependencies.init -> void
+PubSoft.Modularity.ModuleDescriptor.Equals(PubSoft.Modularity.ModuleDescriptor? other) -> bool
+PubSoft.Modularity.ModuleDescriptor.ModuleDescriptor(string! Name, System.Type! ModuleType, System.Type![]? Dependencies = null, bool Optional = false) -> void
+PubSoft.Modularity.ModuleDescriptor.ModuleType.get -> System.Type!
+PubSoft.Modularity.ModuleDescriptor.ModuleType.init -> void
+PubSoft.Modularity.ModuleDescriptor.Name.get -> string!
+PubSoft.Modularity.ModuleDescriptor.Name.init -> void
+PubSoft.Modularity.ModuleDescriptor.Optional.get -> bool
+PubSoft.Modularity.ModuleDescriptor.Optional.init -> void
+PubSoft.Modularity.ModuleOrchestrator
+PubSoft.Modularity.ModuleOrchestrator.ConfigureServicesAll(PubSoft.Modularity.ModuleContext! ctx) -> void
+PubSoft.Modularity.ModuleOrchestrator.FailedModules.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+PubSoft.Modularity.ModuleOrchestrator.GetModule(System.Type! moduleType) -> PubSoft.Modularity.IPubSoftModule?
+PubSoft.Modularity.ModuleOrchestrator.GetModule<T>() -> T?
+PubSoft.Modularity.ModuleOrchestrator.ModuleCount.get -> int
+PubSoft.Modularity.ModuleOrchestrator.ModuleOrchestrator(PubSoft.Modularity.ModuleDescriptor![]! modules, System.Func<System.Type!, PubSoft.Modularity.IPubSoftModule!>! moduleFactory, System.Type![]? topologicalOrder = null) -> void
+PubSoft.Modularity.ModuleOrchestrator.OnInitializationAll(PubSoft.Modularity.ModuleContext! ctx) -> void
+PubSoft.Modularity.ModuleOrchestrator.OnShutdownAll(PubSoft.Modularity.ModuleContext! ctx) -> void
+PubSoft.Modularity.ModuleOrchestrator.ShutdownOrder.get -> System.Collections.Generic.IReadOnlyList<System.Type!>!
+PubSoft.Modularity.ModuleOrchestrator.TopologicalOrder.get -> System.Collections.Generic.IReadOnlyList<System.Type!>!
+PubSoft.Modularity.ModuleOrchestrator.TryReinitModule(string! name, PubSoft.Modularity.ModuleContext! ctx, out string? error) -> bool
+static PubSoft.Modularity.ModuleDescriptor.FromType(System.Type! moduleType, string? name = null, bool optional = false) -> PubSoft.Modularity.ModuleDescriptor!
+static PubSoft.Modularity.ModuleDescriptor.operator !=(PubSoft.Modularity.ModuleDescriptor? left, PubSoft.Modularity.ModuleDescriptor? right) -> bool
+static PubSoft.Modularity.ModuleDescriptor.operator ==(PubSoft.Modularity.ModuleDescriptor? left, PubSoft.Modularity.ModuleDescriptor? right) -> bool

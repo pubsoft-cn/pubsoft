@@ -4,4 +4,7 @@
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Framework-independent permission definitions and catalog for PubSoft applications.</Description>
   </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 </Project>

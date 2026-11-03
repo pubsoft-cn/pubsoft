@@ -6,6 +6,35 @@ PubSoft.Tokens.HttpTokenProvider.InvalidateAsync(string! credentialKey, System.T
 PubSoft.Tokens.ITokenProvider
 PubSoft.Tokens.ITokenProvider.GetTokenAsync(string! credentialKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string?>!
 PubSoft.Tokens.ITokenProvider.InvalidateAsync(string! credentialKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Tokens.MachineTokenCredential
+PubSoft.Tokens.MachineTokenCredential.Claims.get -> System.Collections.Generic.Dictionary<string!, string!>!
+PubSoft.Tokens.MachineTokenCredential.Claims.set -> void
+PubSoft.Tokens.MachineTokenCredential.KeyId.get -> string?
+PubSoft.Tokens.MachineTokenCredential.KeyId.set -> void
+PubSoft.Tokens.MachineTokenCredential.MachineTokenCredential() -> void
+PubSoft.Tokens.MachineTokenCredential.SigningKey.get -> string?
+PubSoft.Tokens.MachineTokenCredential.SigningKey.set -> void
+PubSoft.Tokens.MachineTokenOptions
+PubSoft.Tokens.MachineTokenOptions.Audience.get -> string!
+PubSoft.Tokens.MachineTokenOptions.Audience.set -> void
+PubSoft.Tokens.MachineTokenOptions.Credentials.get -> System.Collections.Generic.Dictionary<string!, PubSoft.Tokens.MachineTokenCredential!>!
+PubSoft.Tokens.MachineTokenOptions.Credentials.set -> void
+PubSoft.Tokens.MachineTokenOptions.Issuer.get -> string!
+PubSoft.Tokens.MachineTokenOptions.Issuer.set -> void
+PubSoft.Tokens.MachineTokenOptions.KeyId.get -> string!
+PubSoft.Tokens.MachineTokenOptions.KeyId.set -> void
+PubSoft.Tokens.MachineTokenOptions.Lifetime.get -> System.TimeSpan
+PubSoft.Tokens.MachineTokenOptions.Lifetime.set -> void
+PubSoft.Tokens.MachineTokenOptions.MachineTokenOptions() -> void
+PubSoft.Tokens.MachineTokenOptions.RefreshBefore.get -> System.TimeSpan
+PubSoft.Tokens.MachineTokenOptions.RefreshBefore.set -> void
+PubSoft.Tokens.MachineTokenOptions.SigningKey.get -> string!
+PubSoft.Tokens.MachineTokenOptions.SigningKey.set -> void
+PubSoft.Tokens.MachineTokenProvider
+PubSoft.Tokens.MachineTokenProvider.Dispose() -> void
+PubSoft.Tokens.MachineTokenProvider.GetTokenAsync(string! credentialKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string?>!
+PubSoft.Tokens.MachineTokenProvider.InvalidateAsync(string! credentialKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Tokens.MachineTokenProvider.MachineTokenProvider(Microsoft.Extensions.Options.IOptions<PubSoft.Tokens.MachineTokenOptions!>! options) -> void
 PubSoft.Tokens.TokenCredential
 PubSoft.Tokens.TokenCredential.Body.get -> string!
 PubSoft.Tokens.TokenCredential.Body.set -> void

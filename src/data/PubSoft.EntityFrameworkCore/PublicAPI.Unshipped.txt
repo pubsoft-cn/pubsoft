@@ -1,4 +1,12 @@
 #nullable enable
+abstract PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.CachePrefix.get -> string!
+abstract PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.ConfigKey(TInfo! info) -> string!
+abstract PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.DbPredicate(string! key) -> System.Linq.Expressions.Expression<System.Func<TEntity!, bool>!>!
+abstract PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.FallbackSectionName.get -> string!
+abstract PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.ToInfo(TEntity! entity) -> TInfo!
+override PubSoft.EntityFrameworkCore.SlowQueryInterceptor.NonQueryExecutedAsync(System.Data.Common.DbCommand! command, Microsoft.EntityFrameworkCore.Diagnostics.CommandExecutedEventData! eventData, int result, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<int>
+override PubSoft.EntityFrameworkCore.SlowQueryInterceptor.ReaderExecutedAsync(System.Data.Common.DbCommand! command, Microsoft.EntityFrameworkCore.Diagnostics.CommandExecutedEventData! eventData, System.Data.Common.DbDataReader! result, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<System.Data.Common.DbDataReader!>
+override PubSoft.EntityFrameworkCore.SlowQueryInterceptor.ScalarExecutedAsync(System.Data.Common.DbCommand! command, Microsoft.EntityFrameworkCore.Diagnostics.CommandExecutedEventData! eventData, object? result, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<object?>
 PubSoft.EntityFrameworkCore.AuditChangeCaptureHook
 PubSoft.EntityFrameworkCore.AuditChangeCaptureHook.AuditChangeCaptureHook(PubSoft.Auditing.IAuditChangeCollector! collector, PubSoft.Auditing.AuditChangeCollectorOptions? options = null, System.TimeProvider? timeProvider = null) -> void
 PubSoft.EntityFrameworkCore.AuditChangeCaptureHook.BeforeSaveChanges(Microsoft.EntityFrameworkCore.DbContext! context) -> void
@@ -76,6 +84,11 @@ PubSoft.EntityFrameworkCore.Auditing.AuditRetentionCleanup<TDbContext>.DeleteSta
 PubSoft.EntityFrameworkCore.Auditing.EfCoreAuditSnapshotSink<TDbContext>
 PubSoft.EntityFrameworkCore.Auditing.EfCoreAuditSnapshotSink<TDbContext>.EfCoreAuditSnapshotSink(TDbContext! dbContext) -> void
 PubSoft.EntityFrameworkCore.Auditing.EfCoreAuditSnapshotSink<TDbContext>.WriteAsync(PubSoft.Auditing.AuditRequestSnapshot! snapshot, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>
+PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.DbFirstConfigProvider(System.IServiceProvider! serviceProvider, Microsoft.Extensions.Configuration.IConfiguration! configuration, Microsoft.Extensions.Caching.Memory.IMemoryCache! cache, Microsoft.Extensions.Logging.ILogger? logger = null) -> void
+PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.GetAllConfigsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TInfo!>!>!
+PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.GetConfigAsync(string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TInfo?>!
+PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.InvalidateCache(string! key) -> void
 PubSoft.EntityFrameworkCore.DbQueryDiagnostics
 PubSoft.EntityFrameworkCore.DbQueryDiagnostics.DbQueryDiagnostics(PubSoft.EntityFrameworkCore.DbQueryDiagnosticsOptions? options = null, Microsoft.Extensions.Logging.ILogger<PubSoft.EntityFrameworkCore.DbQueryDiagnostics!>? logger = null) -> void
 PubSoft.EntityFrameworkCore.DbQueryDiagnostics.ExecuteAsync<TResult>(string! operation, string! sql, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<TResult>!>! executor, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>!
@@ -108,6 +121,11 @@ PubSoft.EntityFrameworkCore.DiagnosticSnapshot.TotalErrors.get -> long
 PubSoft.EntityFrameworkCore.DiagnosticSnapshot.TotalErrors.init -> void
 PubSoft.EntityFrameworkCore.DiagnosticSnapshot.TotalQueries.get -> long
 PubSoft.EntityFrameworkCore.DiagnosticSnapshot.TotalQueries.init -> void
+PubSoft.EntityFrameworkCore.EfCoreHealthCheck<TDbContext>
+PubSoft.EntityFrameworkCore.EfCoreHealthCheck<TDbContext>.CheckAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.Monitoring.AppHealthCheckResult>
+PubSoft.EntityFrameworkCore.EfCoreHealthCheck<TDbContext>.EfCoreHealthCheck(System.IServiceProvider! serviceProvider, string! name = "db", string! probeSql = "SELECT 1") -> void
+PubSoft.EntityFrameworkCore.EfCoreHealthCheck<TDbContext>.Name.get -> string!
+PubSoft.EntityFrameworkCore.EfCoreHealthCheckExtensions
 PubSoft.EntityFrameworkCore.EfCorePermissionGrantManager<TDbContext>
 PubSoft.EntityFrameworkCore.EfCorePermissionGrantManager<TDbContext>.AssignSubjectRolesAsync(long subjectId, long? tenantId, System.Collections.Generic.IEnumerable<long>! roleIds, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 PubSoft.EntityFrameworkCore.EfCorePermissionGrantManager<TDbContext>.AssignSubjectRolesAsync(long subjectId, long? tenantId, string! clientCode, System.Collections.Generic.IEnumerable<long>! roleIds, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
@@ -135,6 +153,7 @@ PubSoft.EntityFrameworkCore.EfCoreRoleDataScopeProvider<TDbContext>
 PubSoft.EntityFrameworkCore.EfCoreRoleDataScopeProvider<TDbContext>.EfCoreRoleDataScopeProvider(TDbContext! dbContext) -> void
 PubSoft.EntityFrameworkCore.EfCoreRoleDataScopeProvider<TDbContext>.GetRoleScopesAsync(long subjectId, long? tenantId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<PubSoft.Domain.DataScopeDimension!>!>!
 PubSoft.EntityFrameworkCore.EfCoreServiceCollectionExtensions
+PubSoft.EntityFrameworkCore.EfCoreServiceDefaultsExtensions
 PubSoft.EntityFrameworkCore.IEfCoreRepository<TEntity, TKey>
 PubSoft.EntityFrameworkCore.IEfCoreRepository<TEntity, TKey>.GetDbSetAsync() -> System.Threading.Tasks.Task<Microsoft.EntityFrameworkCore.DbSet<TEntity!>!>!
 PubSoft.EntityFrameworkCore.IPubSoftUnitOfWork<TDbContext>
@@ -192,6 +211,9 @@ PubSoft.EntityFrameworkCore.QuerySnapshot.QuerySnapshot(string! Operation, strin
 PubSoft.EntityFrameworkCore.QuerySnapshot.TotalMs.get -> double
 PubSoft.EntityFrameworkCore.QuerySnapshot.TotalMs.init -> void
 PubSoft.EntityFrameworkCore.RoleDataScopeModelBuilderExtensions
+PubSoft.EntityFrameworkCore.SlowQueryInterceptor
+PubSoft.EntityFrameworkCore.SlowQueryInterceptor.SlowQueryInterceptor(System.TimeSpan slowQueryThreshold, Microsoft.Extensions.Logging.ILogger<PubSoft.EntityFrameworkCore.SlowQueryInterceptor!>? logger = null) -> void
+PubSoft.EntityFrameworkCore.SnowflakeModelBuilderExtensions
 PubSoft.EntityFrameworkCore.TenantModelBuilderExtensions
 const PubSoft.EntityFrameworkCore.DbQueryDiagnosticsOptions.MaximumCapacity = 100000 -> int
 const PubSoft.EntityFrameworkCore.PubSoftDbContext.MemberFilter = "PubSoft.Member" -> string!
@@ -206,11 +228,16 @@ override PubSoft.EntityFrameworkCore.PubSoftDbContext.SaveChangesAsync(bool acce
 override PubSoft.EntityFrameworkCore.QuerySnapshot.Equals(object? obj) -> bool
 override PubSoft.EntityFrameworkCore.QuerySnapshot.GetHashCode() -> int
 override PubSoft.EntityFrameworkCore.QuerySnapshot.ToString() -> string!
+readonly PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.Cache -> Microsoft.Extensions.Caching.Memory.IMemoryCache!
+readonly PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.Configuration -> Microsoft.Extensions.Configuration.IConfiguration!
+readonly PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.Logger -> Microsoft.Extensions.Logging.ILogger?
+readonly PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.ServiceProvider -> System.IServiceProvider!
 static PubSoft.EntityFrameworkCore.Auditing.AuditPersistenceModelBuilderExtensions.ConfigurePubSoftAuditPersistence(this Microsoft.EntityFrameworkCore.ModelBuilder! modelBuilder) -> Microsoft.EntityFrameworkCore.ModelBuilder!
 static PubSoft.EntityFrameworkCore.Auditing.AuditPersistenceServiceCollectionExtensions.AddPubSoftEfCoreAuditPersistence<TDbContext>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.EntityFrameworkCore.DbQueryDiagnosticsServiceCollectionExtensions.AddPubSoftDbQueryDiagnostics(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.EntityFrameworkCore.DbQueryDiagnosticsOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.EntityFrameworkCore.DiagnosticSnapshot.operator !=(PubSoft.EntityFrameworkCore.DiagnosticSnapshot? left, PubSoft.EntityFrameworkCore.DiagnosticSnapshot? right) -> bool
 static PubSoft.EntityFrameworkCore.DiagnosticSnapshot.operator ==(PubSoft.EntityFrameworkCore.DiagnosticSnapshot? left, PubSoft.EntityFrameworkCore.DiagnosticSnapshot? right) -> bool
+static PubSoft.EntityFrameworkCore.EfCoreHealthCheckExtensions.AddPubSoftEfCoreHealthCheck<TDbContext>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! name = "db", string! probeSql = "SELECT 1") -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.EntityFrameworkCore.EfCoreQueryExtensions.IgnoreScopeFilters<TEntity>(this System.Linq.IQueryable<TEntity!>! source) -> System.Linq.IQueryable<TEntity!>!
 static PubSoft.EntityFrameworkCore.EfCoreServiceCollectionExtensions.AddPubSoftAuditChangeCapture(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Auditing.AuditChangeCollectorOptions!>? configure = null, System.Action<PubSoft.Auditing.AuditScopeOptions!>? configureScope = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.EntityFrameworkCore.EfCoreServiceCollectionExtensions.AddPubSoftEfCorePermissionGrantManager<TDbContext>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
@@ -221,6 +248,7 @@ static PubSoft.EntityFrameworkCore.EfCoreServiceCollectionExtensions.AddPubSoftR
 static PubSoft.EntityFrameworkCore.EfCoreServiceCollectionExtensions.AddPubSoftSaveChangesHook<TDbContext, THook>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.EntityFrameworkCore.EfCoreServiceCollectionExtensions.AddPubSoftSaveParticipant<TDbContext>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.EntityFrameworkCore.EfCoreServiceCollectionExtensions.AddPubSoftUnitOfWork<TDbContext>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.EntityFrameworkCore.EfCoreServiceDefaultsExtensions.AddPubSoftEfCoreServiceDefaults<TDbContext>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! healthCheckName = "db") -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.EntityFrameworkCore.IdentityModelBuilderExtensions.ConfigurePubSoftIdentityUsers(this Microsoft.EntityFrameworkCore.ModelBuilder! modelBuilder, string! tableName = "pubsoft_identity_user") -> Microsoft.EntityFrameworkCore.ModelBuilder!
 static PubSoft.EntityFrameworkCore.Migrations.DatabaseMigrationServiceCollectionExtensions.AddPubSoftDatabaseMigrationService(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.EntityFrameworkCore.Migrations.DatabaseMigrationServiceCollectionExtensions.AddPubSoftEfCoreMigration<TDbContext>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
@@ -228,4 +256,9 @@ static PubSoft.EntityFrameworkCore.PermissionGrantModelBuilderExtensions.Configu
 static PubSoft.EntityFrameworkCore.QuerySnapshot.operator !=(PubSoft.EntityFrameworkCore.QuerySnapshot? left, PubSoft.EntityFrameworkCore.QuerySnapshot? right) -> bool
 static PubSoft.EntityFrameworkCore.QuerySnapshot.operator ==(PubSoft.EntityFrameworkCore.QuerySnapshot? left, PubSoft.EntityFrameworkCore.QuerySnapshot? right) -> bool
 static PubSoft.EntityFrameworkCore.RoleDataScopeModelBuilderExtensions.ConfigurePubSoftRoleDataScopes(this Microsoft.EntityFrameworkCore.ModelBuilder! modelBuilder, string! tableName = "pubsoft_role_data_scope") -> Microsoft.EntityFrameworkCore.ModelBuilder!
+static PubSoft.EntityFrameworkCore.SnowflakeModelBuilderExtensions.ApplySnowflakeIdConventions(this Microsoft.EntityFrameworkCore.ModelBuilder! builder) -> Microsoft.EntityFrameworkCore.ModelBuilder!
 static PubSoft.EntityFrameworkCore.TenantModelBuilderExtensions.ConfigurePubSoftTenants(this Microsoft.EntityFrameworkCore.ModelBuilder! modelBuilder, string! tableName = "PubSoftTenants") -> Microsoft.EntityFrameworkCore.ModelBuilder!
+virtual PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.CacheTtl.get -> System.TimeSpan
+virtual PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.EnabledPredicate.get -> System.Linq.Expressions.Expression<System.Func<TEntity!, bool>!>?
+virtual PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.FallbackList() -> System.Collections.Generic.List<TInfo!>!
+virtual PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.FindFallbackInfo(string! key) -> TInfo?

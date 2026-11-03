@@ -1,9 +1,14 @@
 #nullable enable
+const PubSoft.Cryptography.ClientSigner.HeaderClientId = "X-Client-Id" -> string!
+const PubSoft.Cryptography.ClientSigner.HeaderNonce = "X-Nonce" -> string!
+const PubSoft.Cryptography.ClientSigner.HeaderSignature = "X-Signature" -> string!
+const PubSoft.Cryptography.ClientSigner.HeaderTimestamp = "X-Timestamp" -> string!
 PubSoft.Cryptography.AesEncryptor
 PubSoft.Cryptography.AesGcmEncryptor
 PubSoft.Cryptography.AesGcmEncryptor.AesGcmEncryptor(PubSoft.Cryptography.IEncryptionKeyRing! keyRing) -> void
 PubSoft.Cryptography.AesGcmEncryptor.Decrypt(string! envelope, System.ReadOnlySpan<byte> additionalAuthenticatedData = default(System.ReadOnlySpan<byte>)) -> string!
 PubSoft.Cryptography.AesGcmEncryptor.Encrypt(string! plaintext, System.ReadOnlySpan<byte> additionalAuthenticatedData = default(System.ReadOnlySpan<byte>)) -> string!
+PubSoft.Cryptography.ClientSigner
 PubSoft.Cryptography.CredentialEncryptionService
 PubSoft.Cryptography.CredentialEncryptionService.CredentialEncryptionService(PubSoft.Cryptography.AesGcmEncryptor! encryptor, string! legacyKeyMaterial) -> void
 PubSoft.Cryptography.CredentialEncryptionService.Decrypt(string! ciphertext, System.ReadOnlySpan<byte> additionalAuthenticatedData = default(System.ReadOnlySpan<byte>)) -> PubSoft.Cryptography.DecryptedCredential!
@@ -34,6 +39,10 @@ override PubSoft.Cryptography.DecryptedCredential.ToString() -> string!
 static PubSoft.Cryptography.AesEncryptor.Decrypt(string! encrypted, string! masterKey) -> string!
 static PubSoft.Cryptography.AesEncryptor.Encrypt(string! plaintext, string! masterKey) -> string!
 static PubSoft.Cryptography.AesEncryptor.GenerateSecretKey() -> string!
+static PubSoft.Cryptography.ClientSigner.ComputeBodyHash(byte[]? body) -> string!
+static PubSoft.Cryptography.ClientSigner.IsTimestampValid(string! timestamp) -> bool
+static PubSoft.Cryptography.ClientSigner.Sign(string! clientSecret, string! method, string! path, string! timestamp, string! nonce, string! bodyHash) -> string!
+static PubSoft.Cryptography.ClientSigner.Verify(string! clientSecret, string! method, string! path, string! timestamp, string! nonce, string! bodyHash, string! signature) -> bool
 static PubSoft.Cryptography.DecryptedCredential.operator !=(PubSoft.Cryptography.DecryptedCredential? left, PubSoft.Cryptography.DecryptedCredential? right) -> bool
 static PubSoft.Cryptography.DecryptedCredential.operator ==(PubSoft.Cryptography.DecryptedCredential? left, PubSoft.Cryptography.DecryptedCredential? right) -> bool
 static PubSoft.Cryptography.Sm3.Hash(System.ReadOnlySpan<byte> data) -> byte[]!
@@ -46,3 +55,5 @@ static PubSoft.Cryptography.Sm4.DecryptEcbHex(string! hexKey, string! cipherHex)
 static PubSoft.Cryptography.Sm4.EncryptEcb(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> plaintext) -> byte[]!
 static PubSoft.Cryptography.Sm4.EncryptEcbBase64Key(string! base64Key, string! plaintext) -> string!
 static PubSoft.Cryptography.Sm4.EncryptEcbHex(string! hexKey, string! plaintext) -> string!
+static readonly PubSoft.Cryptography.ClientSigner.NonceTtl -> System.TimeSpan
+static readonly PubSoft.Cryptography.ClientSigner.TimestampTolerance -> System.TimeSpan
