@@ -61,5 +61,7 @@
     <ProjectReference Include="../../src/platform/PubSoft.Scheduling.EntityFrameworkCore/PubSoft.Scheduling.EntityFrameworkCore.csproj" />
     <ProjectReference Include="../../src/platform/PubSoft.Scheduling.Http/PubSoft.Scheduling.Http.csproj" />
     <ProjectReference Include="../../src/platform/PubSoft.Tokens/PubSoft.Tokens.csproj" />
+  
+    <ProjectReference Include="../../src/core/PubSoft.Contracts/PubSoft.Contracts.csproj" />
   </ItemGroup>
 </Project>

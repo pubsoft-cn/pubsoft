@@ -26,6 +26,7 @@
     <ProjectReference Include="../../src/platform/PubSoft.Caching.Redis/PubSoft.Caching.Redis.csproj" />
     <ProjectReference Include="../../src/platform/PubSoft.Scheduling/PubSoft.Scheduling.csproj" />
     <ProjectReference Include="../../src/platform/PubSoft.Scheduling.Http/PubSoft.Scheduling.Http.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Outbound/PubSoft.Outbound.csproj" />
     <ProjectReference Include="../../src/platform/PubSoft.Scheduling.EntityFrameworkCore/PubSoft.Scheduling.EntityFrameworkCore.csproj" />
     <ProjectReference Include="../../src/platform/PubSoft.Modularity/PubSoft.Modularity.csproj" />
     <ProjectReference Include="../../src/platform/PubSoft.Notifications/PubSoft.Notifications.csproj" />
