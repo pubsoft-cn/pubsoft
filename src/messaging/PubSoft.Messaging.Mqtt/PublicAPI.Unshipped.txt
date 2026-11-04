@@ -1,0 +1,58 @@
+#nullable enable
+PubSoft.Messaging.Mqtt.MqttOutboxDispatcher
+PubSoft.Messaging.Mqtt.MqttOutboxDispatcher.DisposeAsync() -> System.Threading.Tasks.ValueTask
+PubSoft.Messaging.Mqtt.MqttOutboxDispatcher.DispatchAsync(PubSoft.Messaging.Outbox.OutboxMessage! message, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Messaging.Mqtt.MqttOutboxDispatcher.MqttOutboxDispatcher(PubSoft.Messaging.Mqtt.MqttOutboxOptions! options) -> void
+PubSoft.Messaging.Mqtt.MqttOutboxOptions
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.BrokerUri.get -> string!
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.BrokerUri.set -> void
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.ClientId.get -> string!
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.ClientId.set -> void
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.MaxPayloadBytes.get -> int
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.MaxPayloadBytes.set -> void
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.MqttOutboxOptions() -> void
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.Password.get -> string?
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.Password.set -> void
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.PersistentSession.get -> bool
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.PersistentSession.set -> void
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.PublishTimeout.get -> System.TimeSpan
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.PublishTimeout.set -> void
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.QualityOfService.get -> int
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.QualityOfService.set -> void
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.TopicPrefix.get -> string!
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.TopicPrefix.set -> void
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.Username.get -> string?
+PubSoft.Messaging.Mqtt.MqttOutboxOptions.Username.set -> void
+PubSoft.Messaging.Mqtt.MqttOutboxServiceCollectionExtensions
+static PubSoft.Messaging.Mqtt.MqttOutboxServiceCollectionExtensions.AddPubSoftMqttOutboxDispatcher(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Messaging.Mqtt.MqttOutboxOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+PubSoft.Messaging.Mqtt.MqttInboxHeaders
+const PubSoft.Messaging.Mqtt.MqttInboxHeaders.OutboxAggregateKey = "x-outbox-aggkey" -> string!
+const PubSoft.Messaging.Mqtt.MqttInboxHeaders.OutboxMessageId = "x-outbox-id" -> string!
+PubSoft.Messaging.Mqtt.MqttInboxOptions
+PubSoft.Messaging.Mqtt.MqttInboxOptions.BrokerUri.get -> string!
+PubSoft.Messaging.Mqtt.MqttInboxOptions.BrokerUri.set -> void
+PubSoft.Messaging.Mqtt.MqttInboxOptions.ClientId.get -> string!
+PubSoft.Messaging.Mqtt.MqttInboxOptions.ClientId.set -> void
+PubSoft.Messaging.Mqtt.MqttInboxOptions.ConsumerName.get -> string!
+PubSoft.Messaging.Mqtt.MqttInboxOptions.ConsumerName.set -> void
+PubSoft.Messaging.Mqtt.MqttInboxOptions.EventTypePrefix.get -> string!
+PubSoft.Messaging.Mqtt.MqttInboxOptions.EventTypePrefix.set -> void
+PubSoft.Messaging.Mqtt.MqttInboxOptions.MqttInboxOptions() -> void
+PubSoft.Messaging.Mqtt.MqttInboxOptions.Password.get -> string?
+PubSoft.Messaging.Mqtt.MqttInboxOptions.Password.set -> void
+PubSoft.Messaging.Mqtt.MqttInboxOptions.PersistentSession.get -> bool
+PubSoft.Messaging.Mqtt.MqttInboxOptions.PersistentSession.set -> void
+PubSoft.Messaging.Mqtt.MqttInboxOptions.QualityOfService.get -> int
+PubSoft.Messaging.Mqtt.MqttInboxOptions.QualityOfService.set -> void
+PubSoft.Messaging.Mqtt.MqttInboxOptions.ReconnectDelay.get -> System.TimeSpan
+PubSoft.Messaging.Mqtt.MqttInboxOptions.ReconnectDelay.set -> void
+PubSoft.Messaging.Mqtt.MqttInboxOptions.ShareGroup.get -> string?
+PubSoft.Messaging.Mqtt.MqttInboxOptions.ShareGroup.set -> void
+PubSoft.Messaging.Mqtt.MqttInboxOptions.TopicFilter.get -> string!
+PubSoft.Messaging.Mqtt.MqttInboxOptions.TopicFilter.set -> void
+PubSoft.Messaging.Mqtt.MqttInboxOptions.Username.get -> string?
+PubSoft.Messaging.Mqtt.MqttInboxOptions.Username.set -> void
+PubSoft.Messaging.Mqtt.MqttInboxSubscriber
+PubSoft.Messaging.Mqtt.MqttInboxSubscriber.MqttInboxSubscriber(PubSoft.Messaging.Mqtt.MqttInboxOptions! options, PubSoft.Messaging.Outbox.IInboxMessageProcessor! inbox, System.Func<string!, string!, System.Threading.CancellationToken, System.Threading.Tasks.Task!>! handler) -> void
+PubSoft.Messaging.Mqtt.MqttInboxOptions.SessionExpirySeconds.get -> uint
+PubSoft.Messaging.Mqtt.MqttInboxOptions.SessionExpirySeconds.set -> void

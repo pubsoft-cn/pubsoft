@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <Description>MQTT dispatcher for the PubSoft transactional outbox.</Description>
+        <PackageId>PubSoft.Messaging.Mqtt</PackageId>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="MQTTnet" />
+        <ProjectReference Include="../PubSoft.Messaging.Outbox/PubSoft.Messaging.Outbox.csproj" />
+    </ItemGroup>
+</Project>
