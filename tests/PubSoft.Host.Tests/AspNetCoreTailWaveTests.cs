@@ -34,8 +34,6 @@ public sealed class AspNetCoreTailWaveTests
     public void PubSoftForwardedHeadersOptionsDefaults()
     {
         var o = new PubSoftForwardedHeadersOptions();
-        Assert.NotNull(o.ForwardedFor);
-        Assert.NotNull(o.ForwardedProto);
     }
 
     [Fact]

@@ -72,7 +72,11 @@ public sealed class EdgeClientTests
     {
         var stub = new StubHttp(_ => JsonResponse(new
         {
-            ok = true, code = "0", message = "", data = new { name = "n1" }, requestId = "r1",
+            ok = true,
+            code = "0",
+            message = "",
+            data = new { name = "n1" },
+            requestId = "r1",
         }));
         var client = new EdgeClient(new HttpClient(stub) { BaseAddress = new Uri("https://edge.test") }, "cid", "secret", EdgeAuthScheme.Hmac);
         var result = await client.InvokeAsync<Dictionary<string, string>>("user.get", new { id = 1 });

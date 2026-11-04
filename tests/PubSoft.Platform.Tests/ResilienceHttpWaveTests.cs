@@ -41,7 +41,8 @@ public sealed class ResilienceHttpWaveTests
         var handler = new PubSoftHttpResilienceHandler(new HttpResilienceOptions
         {
             Retry = new RetryPolicy { MaxRetries = 2, InitialDelay = TimeSpan.FromMilliseconds(1) },
-        }) { InnerHandler = inner };
+        })
+        { InnerHandler = inner };
         var res = await new HttpClient(handler).GetAsync("https://x.test/api");
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
         Assert.Equal(2, inner.Calls);
@@ -54,7 +55,8 @@ public sealed class ResilienceHttpWaveTests
         var handler = new PubSoftHttpResilienceHandler(new HttpResilienceOptions
         {
             Retry = new RetryPolicy { MaxRetries = 1, InitialDelay = TimeSpan.FromMilliseconds(1) },
-        }) { InnerHandler = inner };
+        })
+        { InnerHandler = inner };
         var res = await new HttpClient(handler).GetAsync("https://x.test/api");
         Assert.Equal(HttpStatusCode.InternalServerError, res.StatusCode);
         Assert.Equal(2, inner.Calls); // 1 attempt + 1 retry

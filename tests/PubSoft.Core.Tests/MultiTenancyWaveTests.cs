@@ -10,8 +10,12 @@ public sealed class MultiTenancyWaveTests
     {
         var dto = new TenantDto
         {
-            Id = 1, Code = "c1", Name = "n1", DisplayName = "d1",
-            IsEnabled = true, Description = "desc",
+            Id = 1,
+            Code = "c1",
+            Name = "n1",
+            DisplayName = "d1",
+            IsEnabled = true,
+            Description = "desc",
         };
         Assert.Equal(1, dto.Id);
         Assert.Equal("c1", dto.Code);

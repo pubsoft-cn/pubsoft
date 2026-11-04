@@ -42,7 +42,7 @@ public sealed class AuditingWaveTests
         var el = AuditValueSerializer.Serialize(new string('x', 100), 10);
         Assert.NotNull(el);
         var s = el!.Value.GetString()!;
-        Assert.True(s.EndsWith("..."));
+        Assert.EndsWith("...", s);
         Assert.Equal(13, s.Length); // 10 chars + "..."
     }
 

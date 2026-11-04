@@ -20,7 +20,9 @@ public sealed class LiftedWave3Tests
     {
         var options = Options.Create(new MachineTokenOptions
         {
-            Issuer = "i", Audience = "a", SigningKey = "global-key-0123456789abcdef0123456789",
+            Issuer = "i",
+            Audience = "a",
+            SigningKey = "global-key-0123456789abcdef0123456789",
             Credentials =
             {
                 ["default"] = new MachineTokenCredential(),
