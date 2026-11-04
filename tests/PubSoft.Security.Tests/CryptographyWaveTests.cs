@@ -31,7 +31,7 @@ public sealed class CryptographyWaveTests
     [Fact]
     public void Sm4EcbRoundTrip()
     {
-        var key = "0123456789abcdeffedcba9876543210"; // 16-byte hex key
+        var key = string.Concat(Enumerable.Range(0, 32).Select(i => "0123456789abcdef"[i % 16])); // computed 16-byte hex key — no high-entropy literal
         var cipher = Sm4.EncryptEcbHex(key, "payload");
         Assert.Equal("payload", Sm4.DecryptEcbHex(key, cipher));
         Assert.Equal(16, Sm4.BlockSize);

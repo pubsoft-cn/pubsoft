@@ -1,0 +1,15 @@
+title = "PubSoft gitleaks config"
+
+[extend]
+useDefault = true
+
+# Allowlist: synthetic fixtures & PEM markers in source, not real secrets.
+# Path-scoped (commit/line-independent — survives formatting moves).
+[allowlist]
+description = "test fixtures and key-parsing code"
+paths = [
+    '''tests/PubSoft\.Core\.Tests/LiftedWave3Tests\.cs''',
+    '''tests/PubSoft\.Core\.Tests/MachineTokenAndEfHealthTests\.cs''',
+    '''src/security/PubSoft\.Authentication\.OAuthProviders/AlipayOAuthProvider\.cs''',
+    '''tests/PubSoft\.Security\.Tests/CryptographyWaveTests\.cs''',
+]
