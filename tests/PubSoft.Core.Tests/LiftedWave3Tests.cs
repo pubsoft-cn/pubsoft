@@ -22,13 +22,13 @@ public sealed class LiftedWave3Tests
         {
             Issuer = "i",
             Audience = "a",
-            SigningKey = "global-key-0123456789abcdef0123456789",
+            SigningKey = "unit-test-signing-key-not-a-real-secret-1",
             Credentials =
             {
                 ["default"] = new MachineTokenCredential(),
                 ["override"] = new MachineTokenCredential
                 {
-                    SigningKey = "override-key-0123456789abcdef01234567",
+                    SigningKey = "unit-test-override-key-not-a-real-secret-1",
                     Claims = { ["scope"] = "mallbook" },
                 },
             },

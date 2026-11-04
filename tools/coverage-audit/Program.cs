@@ -35,6 +35,7 @@ foreach (var dll in dlls)
         members.Add($"T:{t.Name}");
         var ifaces = new List<string>();
         try { foreach (var i in t.GetInterfaces()) ifaces.Add(i.Name); } catch { }
+        if (t.IsInterface) continue; // interface members have no implementation — coverage accrues on concrete impls
         foreach (var m in t.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
             if (m is MethodInfo mi && !mi.IsSpecialName || m is ConstructorInfo || m is PropertyInfo || m is FieldInfo)
             {

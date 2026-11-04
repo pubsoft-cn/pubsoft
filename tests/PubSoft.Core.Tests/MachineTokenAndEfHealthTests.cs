@@ -73,7 +73,7 @@ public sealed class MachineTokenAndEfHealthTests
     {
         Issuer = "issuer",
         Audience = "api",
-        SigningKey = "test-signing-key-0123456789abcdef0123",
+        SigningKey = "unit-test-signing-key-not-a-real-secret-2",
         Credentials = { ["svc"] = new MachineTokenCredential { Claims = { ["caller_type"] = "Machine" } } }
     });
 

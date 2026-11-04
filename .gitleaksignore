@@ -3,3 +3,5 @@ a29c1b1c51397fdeebf553b3b8b6a3ff24e4dcc6:tests/PubSoft.Core.Tests/LiftedWave3Tes
 5fced5f51c6d91118605403d752037fd8578dc9a:tests/PubSoft.Core.Tests/MachineTokenAndEfHealthTests.cs:generic-api-key:76
 # PEM header strings stripped during key parsing — code, not a key
 10c103c89ef0db9c9b488ce4c29b89197277a059:src/security/PubSoft.Authentication.OAuthProviders/AlipayOAuthProvider.cs:private-key:267
+# Same fixture key pre-replacement at shifted line (format commit)
+1c8d66b1de5bc13b29f821702f9d71f32ec89e7c:tests/PubSoft.Core.Tests/LiftedWave3Tests.cs:generic-api-key:25
