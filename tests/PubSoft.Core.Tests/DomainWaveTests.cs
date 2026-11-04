@@ -25,7 +25,7 @@ public sealed class DomainWaveTests
     public void AuditedRootHasNoSoftDelete()
     {
         var e = new AuditedEntity();
-        Assert.False(e is ISoftDelete);
+        Assert.IsNotAssignableFrom<ISoftDelete>(e);
         Assert.True(e is IMultiTenant);
         Assert.Null(e.TenantId);
     }
@@ -36,7 +36,7 @@ public sealed class DomainWaveTests
         var e = new CreationEntity { CreatorId = 5 };
         Assert.Equal(5, e.CreatorId);
         Assert.Null(e.TenantId);
-        Assert.False(e is ISoftDelete);
+        Assert.IsNotAssignableFrom<ISoftDelete>(e);
     }
 
     [Fact]

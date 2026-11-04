@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftCoverageEmitSkip>true</PubSoftCoverageEmitSkip> <!-- build-time analyzer — no runtime surface to contract-test -->
     <!-- Build-time guardrails only — analyzer assemblies are never shipped. -->
     <TargetFramework>netstandard2.0</TargetFramework>
     <IsPackable>false</IsPackable>

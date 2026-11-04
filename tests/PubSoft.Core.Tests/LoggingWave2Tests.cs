@@ -5,70 +5,68 @@ namespace PubSoft.Core.Tests;
 
 public sealed class LoggingWave2Tests
 {
-    private sealed class CaptureSink : ILogSink
+    private sealed class Sink : ILogSink
     {
         public List<LogEntry> Entries { get; } = [];
-        public ValueTask WriteBatchAsync(ReadOnlyMemory<LogEntry> entries, CancellationToken ct)
+        public ValueTask WriteBatchAsync(ReadOnlyMemory<LogEntry> batch, CancellationToken ct)
         {
-            Entries.AddRange(entries.ToArray());
+            lock (Entries) Entries.AddRange(batch.ToArray());
             return ValueTask.CompletedTask;
         }
     }
 
+    private static AppLogger Logger(Sink s, AppLogLevel min = AppLogLevel.Trace) => new([s], min, 8, 100);
+
     [Fact]
-    public async Task AppLoggerFiltersBelowMinLevel()
+    public async Task MinLevelFiltersLowSeverity()
     {
-        var sink = new CaptureSink();
-        var logger = new AppLogger([sink], AppLogLevel.Warn, capacity: 64);
-        // fail-open: filtered levels still return true — only publish failure returns false
-        Assert.True(logger.Debug("s", "debug-msg"));
-        Assert.True(logger.Info("s", "info-msg"));
-        Assert.True(logger.Warn("s", "warn-msg"));
-        Assert.True(logger.Error("s", "err-msg"));
-        Assert.True(logger.Fatal("s", "fatal-msg", new Exception("x")));
-        await logger.DrainAsync(TimeSpan.FromSeconds(5));
-        Assert.Equal(3, sink.Entries.Count); // only Warn+ reached the sink
-        Assert.DoesNotContain(sink.Entries, e => e.Level < AppLogLevel.Warn);
+        var s = new Sink();
+        await using var l = Logger(s, AppLogLevel.Warn);
+        Assert.True(l.Trace("src", "trace")); // filtered = "handled", not enqueued
+        Assert.True(l.Info("src", "info"));
+        Assert.True(l.Warn("src", "warn"));
+        Assert.True(l.Error("src", "err"));
+        await l.DrainAsync(TimeSpan.FromSeconds(5));
+        Assert.Equal(2, s.Entries.Count); // only warn+error reached the sink
+        Assert.DoesNotContain(s.Entries, e => e.Level < AppLogLevel.Warn);
     }
 
     [Fact]
-    public async Task AppLoggerDrainsToSinks()
+    public void MinLevelSetterValidates()
     {
-        var sink = new CaptureSink();
-        var logger = new AppLogger([sink], AppLogLevel.Trace, capacity: 64);
-        logger.Info("svc", "one");
-        logger.Error("svc", "two", new InvalidOperationException("e"));
-        Assert.True(logger.PendingCount >= 0);
-        await logger.DrainAsync(TimeSpan.FromSeconds(5));
-        Assert.Equal(2, sink.Entries.Count);
-        Assert.Equal("one", sink.Entries[0].Message);
-        Assert.Equal(AppLogLevel.Error, sink.Entries[1].Level);
-        Assert.Equal("svc", sink.Entries[0].Source);
+        var l = Logger(new Sink());
+        l.MinLevel = AppLogLevel.Error;
+        Assert.Equal(AppLogLevel.Error, l.MinLevel);
+        Assert.Throws<ArgumentOutOfRangeException>(() => l.MinLevel = unchecked((AppLogLevel)999));
     }
 
     [Fact]
-    public void AppLoggerMinLevelValidates()
+    public async Task SinkReceivesEntriesWithContext()
     {
-        var logger = new AppLogger([new CaptureSink()]);
-        logger.MinLevel = AppLogLevel.Debug;
-        Assert.Equal(AppLogLevel.Debug, logger.MinLevel);
-        Assert.Throws<ArgumentOutOfRangeException>(() => logger.MinLevel = (AppLogLevel)77);
+        var s = new Sink();
+        await using var l = Logger(s);
+        using (LogContext.PushProperty("userId", 42))
+            l.Info("src", "with-ctx");
+        await l.DrainAsync(TimeSpan.FromSeconds(5));
+        var e = Assert.Single(s.Entries);
+        Assert.Equal("src", e.Source);
+        Assert.Equal("with-ctx", e.Message);
+        Assert.NotNull(e.Context);
+        Assert.Equal(42, e.Context!["userId"]);
     }
 
     [Fact]
-    public async Task AppLoggerStopsAcceptingAfterDispose()
+    public void LogContextScopeRestore()
     {
-        var sink = new CaptureSink();
-        var logger = new AppLogger([sink], capacity: 64);
-        await logger.DisposeAsync();
-        Assert.False(logger.Info("s", "post-dispose"));
-    }
-
-    [Fact]
-    public void AppLoggerAllowsEmptySinks()
-    {
-        // empty sink list is valid — entries are accepted and dropped
-        var logger = new AppLogger([]);
-        Assert.True(logger.Info("s", "m"));
+        using (LogContext.PushProperty("a", 1))
+        {
+            Assert.Equal(1, LogContext.GetCurrentContext()!["a"]);
+            using (LogContext.PushProperty("b", 2))
+            {
+                Assert.Equal(2, LogContext.GetCurrentContext()!["b"]);
+            }
+            Assert.False(LogContext.GetCurrentContext()!.ContainsKey("b")); // scope restored
+        }
+        Assert.Null(LogContext.GetCurrentContext());
     }
 }

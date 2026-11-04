@@ -64,6 +64,8 @@ public sealed class MqttInboxSubscriber : BackgroundService
     private readonly IInboxMessageProcessor _inbox;
     private readonly Func<string, string, CancellationToken, Task> _handler;
 
+    /// <param name="options">Inbox subscriber configuration (broker, topic filter, session).</param>
+    /// <param name="inbox">Inbox dedup pipeline — receipts are recorded through IInboxMessageProcessor.</param>
     /// <param name="handler">(eventType, payloadJson, ct) — invoked once per unique message id.</param>
     public MqttInboxSubscriber(
         MqttInboxOptions options,

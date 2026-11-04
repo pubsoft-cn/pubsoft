@@ -7,7 +7,7 @@ namespace PubSoft.Core.Tests;
 
 public sealed class NotificationsTailWave2Tests
 {
-    private sealed class F(string url) : IHttpClientFactory
+    private sealed class F : IHttpClientFactory
     {
         public HttpClient CreateClient(string name) => new();
     }
@@ -15,7 +15,7 @@ public sealed class NotificationsTailWave2Tests
     [Fact]
     public void ChannelNameConstants()
     {
-        var f = new F("x");
+        var f = new F();
         var t = new TeamsWebhookChannel(f, Microsoft.Extensions.Options.Options.Create(new TeamsWebhookOptions { WebhookUrl = "https://t/h" }));
         Assert.Equal("teams", t.Name);
         var d = new DingTalkWebhookChannel(f, Microsoft.Extensions.Options.Options.Create(new DingTalkWebhookOptions { WebhookUrl = "https://d/h" }));

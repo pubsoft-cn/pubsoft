@@ -38,7 +38,7 @@ public sealed class DomainWave2Tests
         Assert.Equal(9, e.LastModifierId);
         Assert.NotEqual(default, e.CreationTime);
         Assert.Null(e.LastModificationTime);
-        Assert.False(e is ISoftDelete); // AuditedEntity has no soft-delete
+        Assert.IsNotAssignableFrom<ISoftDelete>(e); // AuditedEntity has no soft-delete
     }
 
     [Fact]

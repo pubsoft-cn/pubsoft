@@ -34,7 +34,7 @@ public sealed class ContractsWaveTests
         Assert.True(CGuard.IsValid((string?)null, (string?)null));
         Assert.False(CGuard.IsValid(null, "err"));
         // params-array edge: single null binds the array itself → NRE inside TryValidate
-        Assert.Throws<ArgumentNullException>(() => CGuard.TryValidate(out _, null));
+        Assert.Throws<ArgumentNullException>(() => CGuard.TryValidate(out _, (string[])null!));
         Assert.False(CGuard.TryValidate(out var e1, "ok?")); // non-empty string = error present → invalid
         Assert.Equal("ok?", e1);
         Assert.False(CGuard.TryValidate(out var e2, "bad", null)); // first non-empty wins
