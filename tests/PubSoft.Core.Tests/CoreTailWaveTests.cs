@@ -48,9 +48,9 @@ public sealed class CoreTailWaveTests
     public void GuardValidators()
     {
         Assert.Equal("v", Guard.NotNull("v"));
-        Assert.Throws<ArgumentNullException>(() => Guard.NotNull(null));
-        Assert.Throws<ArgumentException>(() => Guard.NotEmpty(" "));
-        Assert.Throws<ArgumentException>(() => Guard.MaxLength("toolong", 3));
+        Assert.Throws<DomainException>(() => Guard.NotNull(null));
+        Assert.Throws<DomainException>(() => Guard.NotEmpty(" "));
+        Assert.Throws<DomainException>(() => Guard.MaxLength("toolong", 3));
         Assert.Throws<DomainException>(() => Guard.Phone("123abc"));
         Assert.Equal("13800138000", Guard.Phone("13800138000"));
         Assert.Equal(Tiny.A, Guard.EnumDefined(Tiny.A));
