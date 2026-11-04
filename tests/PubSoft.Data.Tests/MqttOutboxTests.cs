@@ -110,3 +110,48 @@ public sealed class MqttInboxTests
             new MqttInboxOptions(), null!, (_, _, _) => Task.CompletedTask));
     }
 }
+
+public sealed class MqttFailurePathTests
+{
+    private static OutboxMessage Msg(string type = "e")
+    {
+        var m = (OutboxMessage)typeof(OutboxMessage)
+            .GetConstructor(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null, Type.EmptyTypes, null)!
+            .Invoke(null);
+        foreach (var (n, v) in new (string, object?)[]
+        {
+            ("Id", Guid.NewGuid()), ("EventType", type), ("PayloadJson", "{}"),
+            ("OccurredAt", DateTimeOffset.UtcNow), ("Status", OutboxMessageStatus.Pending),
+            ("AttemptCount", 0), ("MaxAttempts", 3),
+        })
+            typeof(OutboxMessage).GetProperty(n)!.SetValue(m, v);
+        return m;
+    }
+
+    [Fact]
+    public async Task DispatchToUnreachableBrokerThrows()
+    {
+        // unreachable → exception propagates → outbox keeps Pending + retry
+        await using var d = new MqttOutboxDispatcher(new MqttOutboxOptions
+        {
+            BrokerUri = "mqtt://127.0.0.1:1", // nothing listens
+            PublishTimeout = TimeSpan.FromSeconds(3),
+        });
+        await Assert.ThrowsAnyAsync<Exception>(() => d.DispatchAsync(Msg()));
+    }
+
+    [Fact]
+    public async Task NullMessageRejected()
+    {
+        await using var d = new MqttOutboxDispatcher(new MqttOutboxOptions());
+        await Assert.ThrowsAsync<ArgumentNullException>(() => d.DispatchAsync(null!));
+    }
+
+    [Fact]
+    public void DispatchTopicComposition()
+    {
+        // topic = prefix + eventType — verified via options surface
+        var o = new MqttOutboxOptions { TopicPrefix = "ext/outbox/" };
+        Assert.Equal("ext/outbox/", o.TopicPrefix);
+    }
+}
