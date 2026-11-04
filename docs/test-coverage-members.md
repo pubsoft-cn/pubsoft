@@ -4,8 +4,8 @@
 <!-- Regenerate: dotnet run --project tools/coverage-audit -->
 <!-- Interface members are excluded — no implementation to cover; coverage accrues on concrete impls. -->
 
-member-level coverage: 2191/2608 = 84%
-uncovered breakdown: 308 members + 109 types
+member-level coverage: 2195/2608 = 84%
+uncovered breakdown: 304 members + 109 types
 
 ## PubSoft.EntityFrameworkCore (63 uncovered)
    T:DbFirstConfigProvider`2
@@ -422,13 +422,6 @@ uncovered breakdown: 308 members + 109 types
    M:MappingBuilder`2.Ignore
    M:MappingBuilder`2..ctor
 
-## PubSoft.Security (5 uncovered)
-   M:HmacSignatureResult..ctor
-   T:INonceStore
-   M:PasswordVerificationResult..ctor
-   M:RateLimitResult..ctor
-   M:RateLimitStats..ctor
-
 ## PubSoft.Events (4 uncovered)
    M:DomainEventBackgroundService..ctor
    T:IDomainEvent
@@ -494,6 +487,9 @@ uncovered breakdown: 308 members + 109 types
 ## PubSoft.Scheduling.Http (2 uncovered)
    M:ProbeExecutor..ctor
    M:ResilientExecutor.Type
+
+## PubSoft.Security (1 uncovered)
+   T:INonceStore
 
 ## PubSoft.Edge.Client (1 uncovered)
    M:EdgeRpcException..ctor

@@ -4,7 +4,7 @@
 <!-- Regenerate: dotnet run --project tools/coverage-audit -->
 <!-- Interface members are excluded — no implementation to cover; coverage accrues on concrete impls. -->
 
-member-level coverage: 2191/2608 = 84%
+member-level coverage: 2195/2608 = 84%
 
 ## PubSoft.EntityFrameworkCore (16 types + 47 members uncovered)
    DbFirstConfigProvider`2
@@ -139,9 +139,6 @@ member-level coverage: 2191/2608 = 84%
 ## PubSoft.Mapping (1 types + 4 members uncovered)
    MappingBuilder`2
 
-## PubSoft.Security (1 types + 4 members uncovered)
-   INonceStore
-
 ## PubSoft.Events (3 types + 1 members uncovered)
    IDomainEvent
    IDomainEventHandler`1
@@ -186,6 +183,9 @@ member-level coverage: 2191/2608 = 84%
    IFencedLockHandle
 
 ## PubSoft.Scheduling.Http (0 types + 2 members uncovered)
+
+## PubSoft.Security (1 types + 0 members uncovered)
+   INonceStore
 
 ## PubSoft.Edge.Client (0 types + 1 members uncovered)
 
