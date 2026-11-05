@@ -48,4 +48,34 @@ public sealed class EfCoreHealthCheckWaveTests
         var check = new EfCoreHealthCheck<Ctx>(sc.BuildServiceProvider(), "db");
         await Assert.ThrowsAnyAsync<Exception>(async () => await check.CheckAsync());
     }
+
+    [Fact]
+    public void BaseAndAbstractContextsRejectedAtConstruction()
+    {
+        var sp = new ServiceCollection().BuildServiceProvider();
+        Assert.Throws<ArgumentException>(() => new EfCoreHealthCheck<DbContext>(sp, "db"));
+        Assert.Throws<ArgumentException>(() => new EfCoreHealthCheck<AbstractCtx>(sp, "db"));
+    }
+
+    [Fact]
+    public void BaseAndAbstractContextsRejectedAtRegistration()
+    {
+        var services = new ServiceCollection();
+        Assert.Throws<ArgumentException>(() => services.AddPubSoftEfCoreHealthCheck<DbContext>());
+        Assert.Throws<ArgumentException>(() => services.AddPubSoftEfCoreHealthCheck<AbstractCtx>());
+    }
+
+    [Fact]
+    public async Task FactoryRegistrationResolvesContext()
+    {
+        var conn = new Microsoft.Data.Sqlite.SqliteConnection("Data Source=:memory:");
+        conn.Open();
+        var sc = new ServiceCollection();
+        sc.AddDbContextFactory<Ctx>(o => o.UseSqlite(conn)); // registers IDbContextFactory<Ctx>, not Ctx
+        var check = new EfCoreHealthCheck<Ctx>(sc.BuildServiceProvider(), "db");
+        var r = await check.CheckAsync();
+        Assert.Equal(AppHealthStatus.Healthy, r.Status);
+    }
+
+    private abstract class AbstractCtx(DbContextOptions o) : DbContext(o);
 }

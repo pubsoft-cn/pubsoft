@@ -10,6 +10,8 @@ public static class EfCoreHealthCheckExtensions
         this IServiceCollection services, string name = "db", string probeSql = "SELECT 1")
         where TDbContext : DbContext
     {
+        // Fail at registration, not at first /health probe (silent-503 in alpha.10).
+        EfCoreHealthCheckGuards.RequireConcreteContextType<TDbContext>();
         services.AddSingleton<IAppHealthCheck>(sp => new EfCoreHealthCheck<TDbContext>(sp, name, probeSql));
         return services;
     }
