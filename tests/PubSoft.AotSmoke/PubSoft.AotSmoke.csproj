@@ -10,6 +10,15 @@
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
 
+  <!-- PublishAot injects the SDK-matched ILCompiler (10.0.13 with this SDK);
+       an explicit package ref breaks the native toolchain layout
+       (PrivateSdkAssemblies). The GHSA flags the build-time compiler, not
+       shipped artifacts — suppress this one advisory until the SDK train
+       carries the fix. -->
+  <ItemGroup>
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-p3jp-9v83-76w9" />
+  </ItemGroup>
+
   <!-- Build-time invariant: the set of PubSoft packages marked IsAotCompatible must
        equal the set referenced here — otherwise a new leaf package silently drops
        out of AOT coverage. TrimmerRootAssembly roots every marked assembly so
