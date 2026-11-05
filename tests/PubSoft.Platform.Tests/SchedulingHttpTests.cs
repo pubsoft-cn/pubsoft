@@ -610,4 +610,34 @@ public sealed class SchedulingHttpTests
             return await _responseFactory(request, cancellationToken);
         }
     }
+
+    [Fact]
+    public async Task OversizedResponseIsRejectedByDeclaredLengthCap()
+    {
+        var handler = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(new string('x', 128)),
+        });
+        var executor = CreateResilient(handler, new HttpExecutorOptions { MaxResponseBytes = 64 });
+
+        var result = await executor.ExecuteAsync(
+            CreateJob(new HttpExecutorConfig { Url = "https://service.test/big" }), default);
+
+        Assert.False(result.Success);
+    }
+
+    [Fact]
+    public async Task ResponseWithinDeclaredLengthCapPasses()
+    {
+        var handler = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("ok"),
+        });
+        var executor = CreateResilient(handler, new HttpExecutorOptions { MaxResponseBytes = 64 });
+
+        var result = await executor.ExecuteAsync(
+            CreateJob(new HttpExecutorConfig { Url = "https://service.test/ok" }), default);
+
+        Assert.True(result.Success);
+    }
 }

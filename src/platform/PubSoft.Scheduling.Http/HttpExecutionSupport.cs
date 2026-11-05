@@ -186,6 +186,10 @@ internal sealed class HttpExecutionSupport
                 && response.Headers.Location is { } location)
                 return (HttpAttemptResult.Response(false, statusCode, stopwatch.Elapsed), location);
 
+            if (response.Content?.Headers.ContentLength is { } declared
+                && declared > _options.MaxResponseBytes)
+                return (HttpAttemptResult.Failure(statusCode, stopwatch.Elapsed, "response body exceeds configured limit"), null);
+
             var succeeded = config.ExpectStatusCodes.Contains(statusCode);
             if (!succeeded)
                 _logger?.LogDebug("HTTP scheduler request returned status {StatusCode}.", statusCode);

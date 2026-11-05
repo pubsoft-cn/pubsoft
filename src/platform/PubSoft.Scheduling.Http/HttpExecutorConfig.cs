@@ -45,6 +45,13 @@ public sealed class HttpExecutorOptions
     public bool BlockPrivateNetworks { get; set; } = true;
 
     /// <summary>
+    /// Max declared response body size (Content-Length). Bodies are never buffered
+    /// by the executor; a declared length above the cap fails the attempt. Default
+    /// 8 MiB. Chunked/undeclared bodies are not bounded by this check.
+    /// </summary>
+    public long MaxResponseBytes { get; set; } = 8 * 1024 * 1024;
+
+    /// <summary>
     /// Follow 3xx redirects. Default false — a redirect can bounce an allowed host to
     /// an internal target, so redirects are returned as the job result instead.
     /// </summary>
@@ -63,7 +70,8 @@ public sealed class HttpExecutorOptions
             && AllowedHosts.All(entry => IsValidHostEntry(entry))
             // Under a proxy the connect-time check sees the proxy, not the target —
             // the combination silently weakens egress control, so it fails fast.
-            && !(UseSystemProxy && BlockPrivateNetworks);
+            && !(UseSystemProxy && BlockPrivateNetworks)
+            && MaxResponseBytes > 0;
 
     private static bool IsValidHostEntry(string entry)
     {

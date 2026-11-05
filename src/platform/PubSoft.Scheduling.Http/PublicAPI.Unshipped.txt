@@ -32,6 +32,8 @@ PubSoft.Scheduling.Http.HttpExecutorOptions.DefaultTimeout.set -> void
 PubSoft.Scheduling.Http.HttpExecutorOptions.FollowRedirects.get -> bool
 PubSoft.Scheduling.Http.HttpExecutorOptions.FollowRedirects.set -> void
 PubSoft.Scheduling.Http.HttpExecutorOptions.HttpExecutorOptions() -> void
+PubSoft.Scheduling.Http.HttpExecutorOptions.MaxResponseBytes.get -> long
+PubSoft.Scheduling.Http.HttpExecutorOptions.MaxResponseBytes.set -> void
 PubSoft.Scheduling.Http.HttpExecutorOptions.UseSystemProxy.get -> bool
 PubSoft.Scheduling.Http.HttpExecutorOptions.UseSystemProxy.set -> void
 PubSoft.Scheduling.Http.HttpExecutorServiceCollectionExtensions
