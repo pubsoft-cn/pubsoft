@@ -34,13 +34,14 @@ jobs:
         run: bash scripts/verify-package-consumer.sh feed
 
       - name: NuGet trusted publishing login
+        id: login
         uses: nuget/login@ebc737b6fc418a6ca0073cf116ec8dc156d8b81e # v1
         with:
           user: pubsoft
 
       - name: Push to nuget.org
-        # nuget/login supplies the short-lived credential — no API key needed.
-        run: dotnet nuget push feed/PubSoft.*.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate
+        # nuget/login outputs a short-lived API key — pass it explicitly.
+        run: dotnet nuget push feed/PubSoft.*.nupkg --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
 
       - name: Push to internal feed (optional)
         env:
