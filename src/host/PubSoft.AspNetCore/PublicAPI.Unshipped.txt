@@ -213,6 +213,7 @@ PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.RealIp.get -> bool
 PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.RealIp.set -> void
 PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.TrustAnyProxy.get -> bool
 PubSoft.AspNetCore.PubSoftForwardedHeadersOptions.TrustAnyProxy.set -> void
+PubSoft.AspNetCore.PubSoftModuleAspNetCoreExtensions
 PubSoft.AspNetCore.PubSoftRateLimitPolicy
 PubSoft.AspNetCore.PubSoftRateLimitPolicy.CountFailuresOnly.get -> bool
 PubSoft.AspNetCore.PubSoftRateLimitPolicy.Name.get -> string!
@@ -284,6 +285,13 @@ PubSoft.AspNetCore.SecurityHeadersOptions.XFrameOptions.set -> void
 const PubSoft.AspNetCore.HealthEndpointRouteBuilderExtensions.DefaultPath = "/health" -> string!
 PubSoft.AspNetCore.ServiceDefaultsExtensions
 PubSoft.AspNetCore.TenantContextServiceCollectionExtensions
+PubSoft.AspNetCore.WebModuleContext
+PubSoft.AspNetCore.WebModuleContext.App.get -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+PubSoft.AspNetCore.WebModuleContext.App.init -> void
+PubSoft.AspNetCore.WebModuleContext.Environment.get -> Microsoft.Extensions.Hosting.IHostEnvironment?
+PubSoft.AspNetCore.WebModuleContext.Environment.init -> void
+PubSoft.AspNetCore.WebModuleContext.WebModuleContext() -> void
+PubSoft.AspNetCore.WebModuleContextExtensions
 static PubSoft.AspNetCore.AuditMiddlewareExtensions.UsePubSoftAudit(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, PubSoft.AspNetCore.AuditMiddlewareOptions? options = null) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
 static PubSoft.AspNetCore.Authentication.ClientCredentialAuthorizationExtensions.AddPubSoftClientCredential(this Microsoft.AspNetCore.Builder.RouteHandlerBuilder! endpoint) -> Microsoft.AspNetCore.Builder.RouteHandlerBuilder!
 static PubSoft.AspNetCore.Authentication.ClientCredentialAuthorizationExtensions.AddPubSoftClientCredential(this Microsoft.AspNetCore.Routing.RouteGroupBuilder! group) -> Microsoft.AspNetCore.Routing.RouteGroupBuilder!
@@ -308,6 +316,7 @@ static PubSoft.AspNetCore.IpNormalizer.Normalize(string? ip) -> string!
 static PubSoft.AspNetCore.ProxyDeploymentDiagnostics.HasUnprocessedForwardedHeaders(Microsoft.AspNetCore.Http.HttpContext! context) -> bool
 static PubSoft.AspNetCore.PubSoftForwardedHeadersExtensions.AddPubSoftForwardedHeaders(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.AspNetCore.PubSoftForwardedHeadersOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.PubSoftForwardedHeadersExtensions.UsePubSoftForwardedHeaders(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, System.Action<PubSoft.AspNetCore.PubSoftForwardedHeadersOptions!>? configure = null) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+static PubSoft.AspNetCore.PubSoftModuleAspNetCoreExtensions.UsePubSoftModulesAsync(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> System.Threading.Tasks.Task<Microsoft.AspNetCore.Builder.IApplicationBuilder!>!
 static PubSoft.AspNetCore.PubSoftRateLimitPolicyExtensions.AddPubSoftRateLimitPolicy(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.PubSoftRateLimitPolicyExtensions.UsePubSoftRateLimitPolicies(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
 static PubSoft.AspNetCore.PubSoftRateLimitRejectionExtensions.AddPubSoftRateLimitRejection(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Func<Microsoft.AspNetCore.Http.HttpContext!, System.Threading.Tasks.Task!>! bodyWriter) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
@@ -343,3 +352,4 @@ static PubSoft.AspNetCore.ServiceDefaultsExtensions.AddPubSoftServiceDefaults(th
 static PubSoft.AspNetCore.ServiceDefaultsExtensions.UsePubSoftServiceDefaults(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
 static PubSoft.AspNetCore.ServiceDefaultsExtensions.UsePubSoftServiceDefaults(this Microsoft.AspNetCore.Builder.WebApplication! app) -> Microsoft.AspNetCore.Builder.WebApplication!
 static PubSoft.AspNetCore.TenantContextServiceCollectionExtensions.AddPubSoftTenantContext(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.AspNetCore.HttpContextTenantOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.AspNetCore.WebModuleContextExtensions.GetAppBuilder(this PubSoft.Modularity.ModuleContext! context) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!

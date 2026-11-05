@@ -51,45 +51,54 @@ public sealed class ModuleOrchestrator
     }
 
     public void OnInitializationAll(ModuleContext ctx)
+        => OnInitializationAllAsync(ctx).AsTask().GetAwaiter().GetResult();
+
+    public async ValueTask OnInitializationAllAsync(ModuleContext ctx)
     {
         foreach (var moduleType in _topologicalOrder)
         {
             if (DepFailed(moduleType) || _failedTypes.Contains(moduleType)) continue;
             var module = GetOrCreateModule(moduleType);
-            try { module.OnInitialization(ctx); }
-            catch (Exception ex) when (IsOptional(moduleType)) { MarkFailed(moduleType, ex, nameof(OnInitializationAll), ctx); }
+            try { await module.OnInitializationAsync(ctx).ConfigureAwait(false); }
+            catch (Exception ex) when (IsOptional(moduleType)) { MarkFailed(moduleType, ex, nameof(OnInitializationAllAsync), ctx); }
         }
     }
 
     public void OnShutdownAll(ModuleContext ctx)
+        => OnShutdownAllAsync(ctx).AsTask().GetAwaiter().GetResult();
+
+    public async ValueTask OnShutdownAllAsync(ModuleContext ctx)
     {
         foreach (var moduleType in _shutdownOrder)
         {
             if (_failedTypes.Contains(moduleType)) continue;
             if (_instances.TryGetValue(moduleType, out var module))
             {
-                try { module.OnShutdown(ctx); }
-                catch (Exception ex) when (IsOptional(moduleType)) { MarkFailed(moduleType, ex, nameof(OnShutdownAll), ctx); }
+                try { await module.OnShutdownAsync(ctx).ConfigureAwait(false); }
+                catch (Exception ex) when (IsOptional(moduleType)) { MarkFailed(moduleType, ex, nameof(OnShutdownAllAsync), ctx); }
             }
         }
     }
 
     public bool TryReinitModule(string name, ModuleContext ctx, out string? error)
     {
-        error = null;
+        var result = TryReinitModuleAsync(name, ctx).AsTask().GetAwaiter().GetResult();
+        error = result.Error;
+        return result.Ok;
+    }
+
+    public async ValueTask<(bool Ok, string? Error)> TryReinitModuleAsync(string name, ModuleContext ctx)
+    {
         var desc = _modules.FirstOrDefault(m => m.Name == name);
         if (desc is null)
-        {
-            error = $"unknown module: {name}";
-            return false;
-        }
-        if (!desc.Optional) { error = $"module {name} is critical — restart requires process recycle"; return false; }
-        if (!_failedTypes.Contains(desc.ModuleType)) { error = $"module {name} is not in failed state"; return false; }
-        if (DepFailed(desc.ModuleType)) { error = $"dependency still failed: {_failedModules[desc.Name]}"; return false; }
+            return (false, $"unknown module: {name}");
+        if (!desc.Optional) return (false, $"module {name} is critical — restart requires process recycle");
+        if (!_failedTypes.Contains(desc.ModuleType)) return (false, $"module {name} is not in failed state");
+        if (DepFailed(desc.ModuleType)) return (false, $"dependency still failed: {_failedModules[desc.Name]}");
 
         if (_instances.TryGetValue(desc.ModuleType, out var inst))
         {
-            try { inst.OnShutdown(ctx); }
+            try { await inst.OnShutdownAsync(ctx).ConfigureAwait(false); }
             catch (Exception se) { ctx.Logger?.LogWarning(se, "module {Module} shutdown during reinit", desc.Name); }
         }
         inst ??= GetOrCreateModule(desc.ModuleType);
@@ -98,20 +107,19 @@ public sealed class ModuleOrchestrator
         try
         {
             inst.ConfigureServices(ctx);
-            inst.OnInitialization(ctx);
+            await inst.OnInitializationAsync(ctx).ConfigureAwait(false);
             ctx.Logger?.LogInformation("module {Module} reinitialized in place", desc.Name);
             foreach (var dependent in _modules.Where(m =>
                 m.Optional && _failedTypes.Contains(m.ModuleType) && (m.Dependencies?.Contains(desc.ModuleType) ?? false)))
-                TryReinitModule(dependent.Name, ctx, out _);
-            return true;
+                await TryReinitModuleAsync(dependent.Name, ctx).ConfigureAwait(false);
+            return (true, null);
         }
         catch (Exception ex)
         {
             _failedTypes.Add(desc.ModuleType);
             _failedModules[desc.Name] = $"reinit: {ex.GetType().Name}: {ex.Message}";
-            error = ex.Message;
             ctx.Logger?.LogWarning(ex, "module {Module} reinit failed", desc.Name);
-            return false;
+            return (false, ex.Message);
         }
     }
 

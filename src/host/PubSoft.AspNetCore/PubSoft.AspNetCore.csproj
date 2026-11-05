@@ -10,6 +10,7 @@
     <ProjectReference Include="../../data/PubSoft.Auditing/PubSoft.Auditing.csproj" />
     <ProjectReference Include="../../core/PubSoft.Core/PubSoft.Core.csproj" />
     <ProjectReference Include="../../core/PubSoft.Domain/PubSoft.Domain.csproj" />
+    <ProjectReference Include="../../platform/PubSoft.Modularity/PubSoft.Modularity.csproj" />
     <ProjectReference Include="../../platform/PubSoft.Monitoring/PubSoft.Monitoring.csproj" />
     <ProjectReference Include="../../security/PubSoft.Security/PubSoft.Security.csproj" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
