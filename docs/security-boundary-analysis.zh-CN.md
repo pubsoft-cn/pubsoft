@@ -226,6 +226,117 @@ Scheduled HTTP 与 Outbound 也可以从宿主后台任务直接调用外部系�
 - [Edge 指引](../src/host/PubSoft.Edge/README.md)描述了 OpenAPI 方法目录、Swagger UI CDN 资源与 `subMessage` 中上游诊断细节的暴露边界。生产宿主应限制可见性，避免向最终用户返回内部传输细节。
 - 许多队列、缓存、审计收集器与限流器有容量上限，满了即拒绝。这些是可用性边界，不是集群级公平性或拒绝服务防护。宿主还需要请求体、并发、超时、连接与全局配额控制。
 
+## 潜在漏洞点清单
+
+本节把审计从已确认发现（R1-R6）扩展到系统化的*潜在*漏洞点清单：按各包功能与公共 API 面逐包梳理，并叠加第三方依赖的上游威胁情报。列出的每一项是带前置条件的评审目标——不是已确认缺陷。已被发现或控制矩阵覆盖的项只做交叉引用不重复。CWE/OWASP 标注便于对接外部工具。
+
+### 漏洞类别对照
+
+| 类别（CWE / OWASP） | 主要 PubSoft 面 | 状态与边界 |
+|---|---|---|
+| 认证绕过 / 混淆代理（CWE-287/-441；API2） | `PermissionEndpointFilter`、`ClientCredentialEndpointFilter`、Dual JWT、Edge scheme、`IClientCredentialVerifier` | 库只强制已注册的部分；未覆盖路由与宿主 verifier 正确性是残余风险。 |
+| 租户隔离破坏（CWE-639；API1） | `HttpContextTenantContext`、EF 命名过滤器、`IOutboundSdk` 租户选择器、Outbox scope provider | 读侧已过滤；写侧 stamping 只填充 *null* TenantId——宿主在 `Added` 实体上显式赋外租户 ID 会落库跨租户（宿主信任边界）。过滤器旁路仍是特权操作。 |
+| 注入（CWE-89/-94；API3/API8） | path/header 输入、任务配置、topic 字符串、EF `IgnoreQueryFilters`、宿主原生 SQL | 库内查询构造不接原始输入；Redis Lua 为定参脚本。宿主原生 SQL/Redis 脚本在范围外。 |
+| 密码学误用（CWE-327/-329） | SM4 ECB（标注仅兼容）、CBC 迁移读取、`IEncryptionKeyRing`、PBKDF2 工作因子、HS256 secret | AES-GCM 信封是正轨；弱 key-ring 实现、低迭代数与 ECB/遗留复用皆宿主可控。 |
+| SSRF（CWE-918；API7） | `PubSoft.Scheduling.Http` 目标、`HttpTokenProvider` URL、`JwksUri`、通知 webhook URL、OAuth provider 端点 | Scheduled HTTP 是已加固路径；其余出方向 URL 属运维配置信任面——限制可编辑者。 |
+| 重放（CWE-294） | HMAC nonce 存储、JWT 有效期、Edge 时间戳容差、token 401 重试 | 原子共享 nonce 存储 + 偏移上界已覆盖；JWT `nbf/exp` 已强制；内存实现仅单进程。 |
+| DoS / 资源耗尽（CWE-400；API4） | 限流 identifier 容量、有界收集器/队列、PBKDF2 成本、Scheduled-HTTP 响应体、body-hash 缓冲 | 多数汇点有界且 fail closed。缺口：Scheduled-HTTP 无包级响应体上限；identifier 容量耗尽拒绝新 identifier（攻击者可饿死*新*客户端）；PBKDF2 成本与登录 DoS 权衡。 |
+| 反序列化 / 模式（CWE-502） | MQTT 载荷、Outbox/Inbox 载荷、token JSON 路径提取、Edge envelope、Redis 缓存 blob | MQTT/Edge 有载荷上界；库不做多态反序列化；宿主序列化器决定内容安全。 |
+| 信息泄露 / 日志泄漏（CWE-532） | `subMessage` 诊断、dev 异常细节、审计值捕获、correlation 头、`X-Fend-*` 处理 | 默认已脱敏；面向运维的诊断与审计捕获在触达终端用户/日志前需评审。 |
+| 并发 / TOCTOU（CWE-367/-362） | fencing token、nonce 原子性、在飞失败计数、`Lazy` JWKS provider（已移除）、`Change()` ambient 作用域 | 提供原子 Redis 脚本与 fencing；内存变体单进程；`async` 流上的作用域泄漏归宿主管理。 |
+| 配置错误（CWE-16；API8） | `TrustAnyProxy`、空网关信任清单、`ReadHeader`、`UseSystemProxy`、`AllowInsecureJwksUri`、`none` scheme、MD5 | 高影响选项 opt-in 或有文档；若干已在启动期校验。生产配置评审仍是控制点。 |
+| 供应链 / 构建（CWE-494；API9） | NuGet 公告、gitleaks、固定 action、公共 API 台账、消费者冒烟 | NU1903/NU1904 已为硬错误；台账漂移检查已入 CI。尚无签名发布/SBOM。 |
+| 上游故障传导的可用性 | JWKS 拉取失败 → AuthServer token 全拒；Redis 中断 → nonce 存储 fail closed；broker 中断 → Outbox 重试 | 默认 fail closed——安全，但是值得写进 runbook 的可用性杠杆。 |
+
+### 逐包潜在漏洞点
+
+**`src/core/`**
+
+| 包 | 潜在点（前置条件 → 影响） |
+|---|---|
+| PubSoft.Contracts | `ApiFieldAttribute.IsEncrypted` 被误当强制 → 敏感字段以明文序列化（宿主误用）。 |
+| PubSoft.Core | 顺序/雪花标识符助长 IDOR 枚举 → 对象级授权不能依赖不可猜测 ID（宿主）。 |
+| PubSoft.Cryptography | AEAD 路径之外的自实现 SM4/AES → 自研密码实现需评审；ECB 泄露分组模式（仅兼容）；若 CBC 迁移读取错误可区分则存在 padding-oracle 风险（待核实的实现细节）。 |
+| PubSoft.DependencyInjection | 注册顺序/替换——宿主以 `MemoryNonceStore` 覆盖 Redis 实现会静默降级重放防护到单进程（组合风险）。 |
+| PubSoft.Domain | `AmbientTenantContext`/`Change()` 跨 async 续体或池化任务泄漏 → 后台流错租户读写（宿主生命周期）。 |
+| PubSoft.Events | handler 异常/恶意 handler 进程内执行；事件载荷跨租户作用域 → 上下文错配（随应用）。 |
+| PubSoft.Identity | 账号/凭据契约——错误差异可枚举用户；口令策略与锁定归宿主。 |
+| PubSoft.Logging | 不可信值造成结构化日志注入；消息模板带 secret（宿主纪律）。 |
+| PubSoft.Mapping | 映射配置暴露敏感属性 → over-posting/字段泄漏（随宿主）。 |
+| PubSoft.MultiTenancy | 管理契约无内置管理员授权 → 朴素接线即无保护 create/update/delete。 |
+| PubSoft.Resilience | 重试/熔断状态进程内 → 多副本决策分裂；`ShouldRetry` 配置过宽引发重试风暴。 |
+
+**`src/data/`**
+
+| 包 | 潜在点（前置条件 → 影响） |
+|---|---|
+| PubSoft.Auditing | 敏感属性掩码配置错误会捕获 secret/PII；有界收集器溢出丢事件 → 洪泛下审计完整性缺口（可用性与完整性权衡，需定容）。 |
+| PubSoft.Auditing.Outbox | 审计行经 DB 访问可篡改；留存清理与投递/重放时序（运维控制）。 |
+| PubSoft.EntityFrameworkCore | `Added` 实体显式赋外租户 `TenantId` 会跨租户落库——stamping 仅补 null（宿主写路径须复核）；无参 `IgnoreQueryFilters()` 连带绕过 soft-delete；原生 SQL/`FromSql` 绕过全部过滤器。 |
+
+**`src/host/`**
+
+| 包 | 潜在点（前置条件 → 影响） |
+|---|---|
+| PubSoft.AspNetCore | Development 下异常细节/堆栈泄露内部信息（dev 模式入生产即暴露）；correlation/client-ID 头仅验证后可信；`ExcludedPathPrefixes` 过宽静默免签路由；`DevelopmentOnly` 约定被误当授权；`IsEncrypted` 类元数据被误读为强制。 |
+| PubSoft.AspNetCore.Docs | 方法目录=全量路由表——`DevelopmentOnly` 被绕过或误配即暴露攻击面地图。 |
+| PubSoft.Edge | 伪路径 method 覆盖——任一代理改写路径则入签 method 与路由 method 分叉（规范化风险，已文档化）；非公开 handler 挂 `none`；新客户端用 MD5；`subMessage` 上游细节直达终端用户。 |
+| PubSoft.Edge.Client | 构造函数默认 `None` → 跳过带密钥构造即静默无认证（客户端显式选 scheme）。 |
+| PubSoft.Edge.Core | envelope/载荷上界，以及代理规范化后网关与客户端签名规范化分叉（见 HMAC 边界注记）。 |
+
+**`src/messaging/`**
+
+| 包 | 潜在点（前置条件 → 影响） |
+|---|---|
+| PubSoft.Messaging | 仅契约：不可信载荷形状、超大 envelope、handler 授权——随消费方。 |
+| PubSoft.Messaging.Mqtt | `mqtt://` 明文暴露凭据/消息（须 `mqtts://`）；口令为托管 string（上游设计注记——无法从堆擦除）；MQTT 3.1.1 静默丢去重元数据 → 重放/重复处理；topic 含租户数据经通配订阅泄漏（broker ACL）。 |
+| PubSoft.Messaging.Outbox | at-least-once 在无幂等键时重复外部副作用；毒消息无死信策略会无限重试；`IOutboxScopeProvider` 枚举错租户 → 跨租户派发。 |
+
+**`src/platform/`**
+
+| 包 | 潜在点（前置条件 → 影响） |
+|---|---|
+| PubSoft.Caching | 跨租户共享缓存命名空间 → 键碰撞/数据串味（宿主键设计）。 |
+| PubSoft.Caching.Redis | fencing token 被丢弃 → 租约失效后旧持有者仍写；共享缓存中不可信 blob 反序列化；集群下 `KEYS` 式清理在压力下扫全键空间；连接串 TLS/AUTH 误配。 |
+| PubSoft.Modularity | 模块注册顺序/配置组合改变有效服务（组合评审）。 |
+| PubSoft.Monitoring / PubSoft.Monitoring.Scheduling | 未认证健康/指标端点泄露拓扑与任务内部 → 盘点并授权。 |
+| PubSoft.Notifications | webhook URL 是低可信配置的 SSRF/外泄通道（目的地变更须运维门禁）；DingTalk secret 入配置；分发内容可能携 PII 至三方端点；进程内去重跨副本重复发送。 |
+| PubSoft.Outbound | tenant/profile 选择器无权限校验 → 跨租户调用；provider 凭据/日志脱敏归宿主；上游响应被隐式信任。 |
+| PubSoft.Resilience.Http | 总超时与业务期限错配；单次重试放大上游负载（预算评审）。 |
+| PubSoft.Scheduling / PubSoft.Scheduling.EntityFrameworkCore | 低可信任务编辑 → 任意周期副作用；持久化任务行经 DB 访问可篡改；cron/配置校验缺口（宿主编写控制）。 |
+| PubSoft.Scheduling.Http | 已覆盖：SSRF 控制、逐跳重定向校验、跨源丢凭据、代理/私网校验。残余：无包级响应体上限（内存）；任务供给头可能携 secret 到攻击者选定 URL（编写控制）；DNS 在解析与连接间变化由 pinning 缓解——核实解析器信任（DoH/hosts）。 |
+| PubSoft.Tokens | 可配置 token 端点 URL = 低可信配置下的凭据外泄目标；token 响应无大小上限；401 重放缓冲请求体（内存）；HS256 机器令牌 secret 低于 256-bit 会削弱抗伪造（校验密钥材料）。 |
+
+**`src/security/`**
+
+| 包 | 潜在点（前置条件 → 影响） |
+|---|---|
+| PubSoft.Authentication | subject 解析信任 issuer 声明映射；账号状态/角色语义归宿主。 |
+| PubSoft.Authentication.Jwt | 对称签名密钥熵不足；跨密钥源 `kid` 碰撞（算法已固定；密钥源隔离仍是宿主配置）。 |
+| PubSoft.Authentication.Jwt.AspNetCore | 修复后残余：`AuthServer:Audience` 未配仍跳过校验（宿主显式选择）；`ForwardDefaultSelector` 按攻击者可选的 `alg` 路由——严格校验可收敛，但将来新增 scheme 必须各自固定算法；JWKS 中断 → AuthServer token 全拒（可用性）。 |
+| PubSoft.Authentication.OAuthProviders | state/nonce 未绑定 user-agent 事务 → CSRF/登录 CSRF；缺 PKCE；redirect URI 未 allowlist → 授权码外泄；按未验证 provider 邮箱自动绑账号 → 账号接管（皆宿主流程决策）。 |
+| PubSoft.Authorization | grant/verifier 实现返回过宽 scope；module/flag 键笔误 fail closed（安全方向）；宿主 resolver 不得引入通配语义。 |
+| PubSoft.Security | 时间戳偏移 300 秒在时钟漂移下放宽重放窗口；多副本环境误注册 `MemoryNonceStore`；identifier 容量耗尽拒绝*新* identifier（攻击者灌唯一 ID → 合法新客户端被拒——identifier 应绑定已验证来源）；PBKDF2 最小迭代与登录 CPU 成本权衡。 |
+| PubSoft.Security.Redis | Redis 中断返回拒绝（fail closed——可用性杠杆）；共享 Redis 无前缀/库隔离 → 跨服务 nonce 键碰撞。 |
+
+**`src/testing/`** — `PubSoft.Testing`：测试辅助件绝不可进入生产接线；internal 仅对测试程序集可见（经 InternalsVisibleTo 目标核实）。
+
+### 依赖威胁情报观察表
+
+第三方运行时面（取自 `Directory.Packages.props` 中央版本），按评审时点公开公告核查；NU1903/NU1904 已在 restore 期硬性拦截：
+
+| 包 | 版本 | 公告状态 / 注记 |
+|---|---|---|
+| MQTTnet | 5.2.0.1603 | 未发现包级 GHSA/CVE。注：有漏洞史的代码路径在 `MQTTnet.AspNetCore`/`MQTTnet.Extensions.WebSocket4Net`——**均未引用**；客户端口令为托管 string（无法堆擦除）。 |
+| StackExchange.Redis | 3.4.29 | 未发现客户端侧 GHSA/CVE；扫描器命中的 CVE-2021-32626/2022-24735 等属 Redis *服务端*问题（误报）。`ssl`、AUTH、证书校验须显式配置。 |
+| Microsoft.IdentityModel.* / System.IdentityModel.Tokens.Jwt | 8.23.0 | CVE-2024-21319（JWE 解压 DoS）≥7.1.2 已修复——当前版本高于下限。 |
+| Microsoft.AspNetCore.Authentication.JwtBearer | 10.0.14 | 核查时无适用公告；metadata 拉取由运维配置。 |
+| Microsoft.EntityFrameworkCore(.Relational/.Sqlite) | 10.0.14 | 核查时无适用公告；宿主原生 SQL 在 EF 过滤器之外才是真正边界。 |
+| BouncyCastle.Cryptography | 2.7.0 | 仅测试范围——不进任何运行时包。 |
+| MySql.EntityFrameworkCore | 10.0.12 | 仅测试/集成范围。 |
+
+观察表维护：依赖升级时重跑 `dotnet list PubSoft.sln package --vulnerable --include-transitive`；公告状态易变，每次发布前应复查 GHSA/NVD 源。
+
 ## 测试与供应链证据
 
 以下检查在本评审基线执行：

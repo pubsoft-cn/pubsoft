@@ -226,6 +226,117 @@ The following items were rechecked at baseline `81a7f52`. Severity is a consumer
 - The [Edge guide](../src/host/PubSoft.Edge/README.md) describes exposure boundaries for OpenAPI method catalogs, Swagger UI CDN assets, and upstream diagnostic details in `subMessage`. Production hosts should restrict visibility and avoid returning internal transport details to end users.
 - Many queues, caches, audit collectors, and limiters have capacity limits and reject when full. These are availability bounds, not cluster-wide fairness or denial-of-service protection. Hosts also need request-body, concurrency, timeout, connection, and global quota controls.
 
+## Potential Vulnerability Inventory
+
+This section extends the audit from confirmed findings (R1-R6) to a systematic inventory of *potential* vulnerability points, compiled per package from its functionality and public API surface, plus upstream threat intelligence for third-party dependencies. A listed point is a review target with stated preconditions — not a confirmed defect. Items already covered by the findings or the controls matrix are cross-referenced rather than repeated. CWE/OWASP tags aid external tooling alignment.
+
+### Vulnerability-Class Crosswalk
+
+| Class (CWE / OWASP) | Primary PubSoft surfaces | Status and boundary |
+|---|---|---|
+| Auth bypass / confused deputy (CWE-287/-441; API2) | `PermissionEndpointFilter`, `ClientCredentialEndpointFilter`, Dual JWT, Edge schemes, `IClientCredentialVerifier` | Library enforces only what is registered; uncovered routes and host verifier correctness are the residual risk. |
+| Tenant isolation breach (CWE-639; API1) | `HttpContextTenantContext`, EF named filters, `IOutboundSdk` tenant selector, Outbox scope provider | Read-side is filtered; write-side stamping only fills *null* TenantIds — host code assigning a foreign `TenantId` on `Added` entities persists cross-tenant (host trust boundary). Filter bypasses remain privileged. |
+| Injection (CWE-89/-94; API3/API8) | Path/header inputs, job config, topic strings, EF `IgnoreQueryFilters`, raw SQL in host code | No library query builder accepts raw input; Redis Lua is fixed-parameter. Host raw SQL/Redis scripting is out of scope. |
+| Crypto misuse (CWE-327/-329) | SM4 ECB (documented compat-only), CBC migration reads, `IEncryptionKeyRing`, PBKDF2 work factor, HS256 secrets | AES-GCM envelopes are the sanctioned path; weak key-ring implementations, low iteration counts, and ECB/legacy reuse are host-controlled. |
+| SSRF (CWE-918; API7) | `PubSoft.Scheduling.Http` targets, `HttpTokenProvider` URL, `JwksUri`, notification webhook URLs, OAuth provider endpoints | Scheduled HTTP is the hardened path; the other outbound URLs are operator-config trust surfaces — restrict who edits them. |
+| Replay (CWE-294) | HMAC nonce stores, JWT lifetime, Edge timestamp tolerance, token 401 retry | Atomic shared nonce store + skew bounds covered; JWT `nbf/exp` enforced; in-memory stores are single-process only. |
+| DoS / resource exhaustion (CWE-400; API4) | Rate-limit identifier capacity, bounded collectors/queues, PBKDF2 cost, Scheduled-HTTP response body, body-hash buffer | Most sinks are bounded and fail closed. Gaps: Scheduled-HTTP has no package-level response-body cap; identifier-capacity exhaustion rejects new identifiers (attacker can starve *new* clients); PBKDF2 cost trades against login DoS. |
+| Deserialization / schema (CWE-502) | MQTT payloads, Outbox/Inbox payloads, token JSON path extraction, Edge envelopes, Redis-cached blobs | Payload bounds exist on MQTT/Edge; library does not polymorphic-deserialize; host serializers decide content safety. |
+| Info disclosure / log leakage (CWE-532) | `subMessage` diagnostics, dev exception detail, audit value capture, correlation headers, `X-Fend-*` handling | Sanitized defaults exist; operator-facing diagnostics and audit capture need review before reaching end users/logs. |
+| Concurrency / TOCTOU (CWE-367/-362) | Fencing tokens, nonce atomicity, in-flight failure counting, `Lazy` JWKS provider (removed), `Change()` ambient scopes | Atomic Redis scripts and fencing are provided; in-memory variants are single-process; scope leaks across `async` flows are host-managed. |
+| Misconfiguration (CWE-16; API8) | `TrustAnyProxy`, empty gateway trust lists, `ReadHeader`, `UseSystemProxy`, `AllowInsecureJwksUri`, `none` scheme, MD5 | High-impact options are opt-in or documented; several now validate at startup. Production config review remains the control. |
+| Supply chain / build (CWE-494; API9) | NuGet advisories, gitleaks, pinned actions, public API ledgers, consumer smoke | NU1903/NU1904 are hard errors; ledger drift check now runs in CI. No signed releases/SBOM yet. |
+| Availability via upstream failure | JWKS fetch failure → all AuthServer tokens rejected; Redis outage → nonce store fails closed; broker outage → Outbox retries | Fail-closed by default — secure, but an availability lever worth runbook coverage. |
+
+### Per-Package Potential-Vulnerability Points
+
+**`src/core/`**
+
+| Package | Potential points (precondition → impact) |
+|---|---|
+| PubSoft.Contracts | `ApiFieldAttribute.IsEncrypted` mistaken for enforcement → sensitive fields serialized unprotected (host misuse). |
+| PubSoft.Core | Sequential/snowflake identifiers aid IDOR enumeration → object-level authorization must not rely on unguessable IDs (host). |
+| PubSoft.Cryptography | Custom SM4/AES implementations outside AEAD path → self-implemented crypto needs review; ECB reveals block patterns (compat-only); padding-oracle risk if CBC migration errors differentiate (implementation detail to verify). |
+| PubSoft.DependencyInjection | Registration order/substitution — a host registering `MemoryNonceStore` over Redis silently downgrades replay protection to single-process (composition risk). |
+| PubSoft.Domain | `AmbientTenantContext`/`Change()` leaks across async continuations or pooled tasks → wrong-tenant reads/writes in background flows (host lifecycle). |
+| PubSoft.Events | Handler exceptions/malicious handlers run in-process; event payloads crossing tenant scope → context mismatch (application-specific). |
+| PubSoft.Identity | Account/credential contract — error differentiation enables user enumeration; password policy and lockout live host-side. |
+| PubSoft.Logging | Structured-log injection via untrusted values; secrets in message templates (host discipline). |
+| PubSoft.Mapping | Mapping configuration exposing sensitive properties → over-posting/field leakage (host-specific). |
+| PubSoft.MultiTenancy | Management contract has no admin authorization → unprotected create/update/delete if wired naively. |
+| PubSoft.Resilience | Retry/breaker state is process-local → split-brain decisions across replicas; retry storms if `ShouldRetry` configured permissively. |
+
+**`src/data/`**
+
+| Package | Potential points (precondition → impact) |
+|---|---|
+| PubSoft.Auditing | Mis-configured sensitive-property masking captures secrets/PII; bounded collector drops overflow events → audit-integrity gap under flood (availability vs. integrity trade-off to size). |
+| PubSoft.Auditing.Outbox | Audit rows tamperable via DB access; delivery/replay ordering with retention cleanup (operational control). |
+| PubSoft.EntityFrameworkCore | Added entity with explicitly set foreign `TenantId` persists cross-tenant — stamping only fills nulls (host write path must re-validate); parameterless `IgnoreQueryFilters()` also lifts soft-delete; raw SQL/`FromSql` bypasses all filters. |
+
+**`src/host/`**
+
+| Package | Potential points (precondition → impact) |
+|---|---|
+| PubSoft.AspNetCore | Exception detail/stack in Development leaks internals if dev mode reaches production; correlation/client-ID headers trusted post-verification only; `ExcludedPathPrefixes` too broad silently unsigns routes; `DevelopmentOnly` convention mistaken for authorization; `IsEncrypted`-style metadata misread as enforcement. |
+| PubSoft.AspNetCore.Docs | Method catalog = full route table — `DevelopmentOnly` bypassed or misconfigured exposes surface map. |
+| PubSoft.Edge | Pseudo-path method override — if any proxy rewrites path, signed method and routed method diverge (canonicalization risk, documented); `none` scheme on non-public handlers; MD5 for new clients; `subMessage` upstream detail to end users. |
+| PubSoft.Edge.Client | Constructor defaulting to `None` → silently unauthenticated client when secret-bearing ctor is skipped (choose scheme explicitly). |
+| PubSoft.Edge.Core | Envelope/payload bounds and canonical-signing divergence between gateway and client after proxy normalization (see HMAC boundary notes). |
+
+**`src/messaging/`**
+
+| Package | Potential points (precondition → impact) |
+|---|---|
+| PubSoft.Messaging | Contract-only: untrusted payload shapes, oversized envelopes, handler authorization — consumer-specific. |
+| PubSoft.Messaging.Mqtt | `mqtt://` plaintext exposes credentials/messages (must use `mqtts://`); password held as managed string (upstream design note — cannot be scrubbed from heap); MQTT 3.1.1 silently drops dedup metadata → replay/duplicate processing; topic strings containing tenant data leak in wildcard subs (broker ACLs). |
+| PubSoft.Messaging.Outbox | At-least-once duplicates external effects without idempotency keys; poison message retries indefinitely if no dead-letter policy; `IOutboxScopeProvider` enumerating wrong tenants → cross-tenant dispatch. |
+
+**`src/platform/`**
+
+| Package | Potential points (precondition → impact) |
+|---|---|
+| PubSoft.Caching | Shared cache namespace across tenants → key collision/data bleed (host key design). |
+| PubSoft.Caching.Redis | Fencing token discarded → stale lock holder writes after lease loss; untrusted blob deserialization from shared cache; cluster `KEYS`-based cleanup patterns scan keyspace under load; TLS/AUTH misconfig in connection string. |
+| PubSoft.Modularity | Module registration order/config composition changes effective services (composition review). |
+| PubSoft.Monitoring / PubSoft.Monitoring.Scheduling | Unauthenticated health/metrics endpoint leaks topology and job internals → map and authorize it. |
+| PubSoft.Notifications | Webhook URL is a low-trust-config SSRF/exfil vector (destination changes must be operator-gated); DingTalk secret in config; dispatch content may carry PII to third-party endpoints; process-local dedup duplicates sends across replicas. |
+| PubSoft.Outbound | Tenant/profile selectors without entitlement checks → cross-tenant invocation; provider credentials/log redaction host-side; upstream response trusted implicitly. |
+| PubSoft.Resilience.Http | Total-timeout misconfiguration against business deadlines; per-attempt retry multiplies upstream load (budget review). |
+| PubSoft.Scheduling / PubSoft.Scheduling.EntityFrameworkCore | Low-trust job editing → arbitrary recurring side effects; persisted job rows tamperable via DB access; cron/config validation gaps (host authoring control). |
+| PubSoft.Scheduling.Http | Covered: SSRF controls, redirect re-validation, credential-drop on origin change, proxy/private-network validation. Residual: no package-level response-body cap (memory); job-supplied headers may carry secrets to attacker-chosen URLs (authoring control); DNS answers changing between resolve and connect mitigated by pinning — verify resolver trust (DoH/hosts). |
+| PubSoft.Tokens | Configurable token endpoint URL = credential exfiltration target if config is low-trust; token response has no size cap; 401-replay buffers bodies (memory); HS256 machine-token secret entropy below 256-bit would weaken forgery resistance (validate key material). |
+
+**`src/security/`**
+
+| Package | Potential points (precondition → impact) |
+|---|---|
+| PubSoft.Authentication | Subject resolution trusts issuer claim mapping; account-status/role semantics host-side. |
+| PubSoft.Authentication.Jwt | Symmetric signing keys below recommended entropy; `kid` collisions across key sources (pinning covers algorithm; key-source separation remains host config). |
+| PubSoft.Authentication.Jwt.AspNetCore | Post-fix residuals: unset `AuthServer:Audience` still skips validation (explicit host choice); `ForwardDefaultSelector` routes on attacker-chosen `alg` — strict validation contains it, but any future scheme added must pin its own algorithm; JWKS outage → all AuthServer tokens rejected (availability). |
+| PubSoft.Authentication.OAuthProviders | State/nonce not bound to user-agent transaction → CSRF/login-CSRF; missing PKCE; un-allowlisted redirect URIs → code exfiltration; auto account-linking on unverified provider emails → account takeover (all host flow decisions). |
+| PubSoft.Authorization | Grant/verifier implementations returning broad scopes; module/flag key typos fail closed (safe direction); wildcard-like semantics must not be introduced by host resolvers. |
+| PubSoft.Security | Timestamp skew 300 s widens replay window on clock drift; `MemoryNonceStore` registered where replicas exist; identifier-capacity exhaustion rejects *new* identifiers (attacker floods unique IDs → legit new clients denied — bound identifiers to verified sources); PBKDF2 minimum iteration vs login CPU cost. |
+| PubSoft.Security.Redis | Redis outage returns deny (fail closed — availability lever); shared Redis without prefix/database isolation → nonce key collision across services. |
+
+**`src/testing/`** — `PubSoft.Testing`: helpers must never ship into production wiring; internals visible only to test assemblies (verified by InternalsVisibleTo targets).
+
+### Dependency Threat-Intelligence Watchlist
+
+Runtime third-party surface (central versions from `Directory.Packages.props`), checked against public advisories at review time; NU1903/NU1904 already hard-gates these on restore:
+
+| Package | Version | Advisory status / note |
+|---|---|---|
+| MQTTnet | 5.2.0.1603 | No package-level GHSA/CVE found. Note: vulnerable-history code paths were `MQTTnet.AspNetCore`/`MQTTnet.Extensions.WebSocket4Net` — **not referenced**; client password is a managed string (cannot be heap-scrubbed). |
+| StackExchange.Redis | 3.4.29 | No client-side GHSA/CVE found; scanner hits for CVE-2021-32626/2022-24735 etc. are Redis *server* issues (false positives). Configure `ssl`, AUTH, certificate validation deliberately. |
+| Microsoft.IdentityModel.* / System.IdentityModel.Tokens.Jwt | 8.23.0 | CVE-2024-21319 (JWE decompression DoS) patched ≥ 7.1.2 — current versions are above the floor. |
+| Microsoft.AspNetCore.Authentication.JwtBearer | 10.0.14 | No applicable advisory at check time; metadata fetch is operator-configured. |
+| Microsoft.EntityFrameworkCore(.Relational/.Sqlite) | 10.0.14 | No applicable advisory at check time; host raw SQL outside EF filters is the real boundary. |
+| BouncyCastle.Cryptography | 2.7.0 | Test scope only — not shipped in any runtime package. |
+| MySql.EntityFrameworkCore | 10.0.12 | Test/integration scope only. |
+
+Watchlist hygiene: re-run `dotnet list PubSoft.sln package --vulnerable --include-transitive` on dependency bumps; GHSA/NVD feeds should be rechecked before each release since advisory state is volatile.
+
 ## Test and Supply-Chain Evidence
 
 The following checks were run at this review baseline:
