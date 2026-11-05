@@ -1,3 +1,10 @@
+---
+purpose: package-level hosting guide for PubSoft.Scheduling.Http
+audience: integrating host developers
+owner: PubSoft maintainers
+last-reviewed: 2026-10-13
+---
+
 # PubSoft.Scheduling.Http
 
 **English** | [简体中文](README.zh-CN.md)

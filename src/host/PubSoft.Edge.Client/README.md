@@ -1,3 +1,10 @@
+---
+purpose: package-level hosting guide for PubSoft.Edge.Client
+audience: integrating host developers
+owner: PubSoft maintainers
+last-reviewed: 2026-10-14
+---
+
 # PubSoft.Edge.Client
 
 Client SDK for Edge RPC — auto-signs requests for every credential scheme.

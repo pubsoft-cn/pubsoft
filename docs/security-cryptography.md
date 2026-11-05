@@ -1,3 +1,10 @@
+---
+purpose: security and cryptography inventory and defaults
+audience: integrating hosts and reviewers
+owner: PubSoft maintainers
+last-reviewed: 2026-10-13
+---
+
 # Security and Cryptography
 
 **English** | [简体中文](security-cryptography.zh-CN.md)

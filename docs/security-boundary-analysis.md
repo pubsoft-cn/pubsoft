@@ -1,3 +1,10 @@
+---
+purpose: security and trust-boundary analysis — enforced vs. host-owned
+audience: integrating hosts, auditors, reviewers
+owner: PubSoft maintainers
+last-reviewed: 2026-11-05
+---
+
 # PubSoft Security and Trust-Boundary Analysis
 
 **English** | [简体中文](security-boundary-analysis.zh-CN.md)

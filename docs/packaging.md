@@ -1,3 +1,10 @@
+---
+purpose: packaging, versioning, and release engineering
+audience: contributors and release maintainers
+owner: PubSoft maintainers
+last-reviewed: 2026-10-13
+---
+
 # Packaging & Release Engineering
 
 **English** | [简体中文](packaging.zh-CN.md)

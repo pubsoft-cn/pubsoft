@@ -1,3 +1,10 @@
+---
+purpose: host-side security integration checklist
+audience: integrating host teams and reviewers
+owner: PubSoft maintainers
+last-reviewed: 2026-11-03
+---
+
 # Host security integration checklist
 
 PubSoft packages are fail-closed by default, but several security boundaries are

@@ -1,3 +1,10 @@
+---
+purpose: 包集合的 Native AOT 可行性评估
+audience: 面向 AOT 的贡献者与集成方
+owner: PubSoft 维护组
+last-reviewed: 2026-10-13
+---
+
 # Native AOT 可行性分析（2026-10-12，2026-10-12 落地）
 
 [English](aot-feasibility.md) | **简体中文**

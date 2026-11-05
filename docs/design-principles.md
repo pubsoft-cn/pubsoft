@@ -1,3 +1,10 @@
+---
+purpose: design principles and fail-closed conventions all packages follow
+audience: contributors and reviewers
+owner: PubSoft maintainers
+last-reviewed: 2026-10-13
+---
+
 # Design Principles
 
 **English** | [简体中文](design-principles.zh-CN.md)

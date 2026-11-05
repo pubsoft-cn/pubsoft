@@ -1,0 +1,74 @@
+# PubSoft — AI Integration Guide
+
+.NET 10 infrastructure building blocks for microservices. Independent `PubSoft.*`
+packages, each one honest job. Read this file first; it maps the repo and the
+pitfalls. API ground truth: `src/*/PublicAPI.Unshipped.txt` per package — a symbol
+not in the ledger does not exist; never invent API names.
+
+## Source map (navigate by layer)
+
+| `src/` | Contents | Depends on |
+|---|---|---|
+| `core/` | pure contracts/algorithms — no ASP.NET/EF/Redis | nothing |
+| `platform/` | Redis, caching, scheduling, monitoring, outbound, tokens, notifications, modularity | core |
+| `data/` | EF Core contexts/providers, auditing, outbox | platform |
+| `messaging/` | message/outbox/inbox infrastructure | data |
+| `security/` | JWT/OAuth/authorization/cryptography/HMAC | platform |
+| `host/` | ASP.NET adapters: AspNetCore middleware, Edge entry | all |
+| `testing/` | `PubSoft.Testing` helpers | — |
+
+Typical wiring: host registers `AddDbContext<AppDbContext>` (concrete type!) →
+data/platform packages → `AddPubSoft*` feature extensions → middleware via
+`app.UsePubSoft*()`.
+
+## Task → package
+
+| You need | Use |
+|---|---|
+| multi-tenant EF + scope filters + audit + health | `PubSoft.EntityFrameworkCore` (`PubSoftDbContext`, `AddPubSoftEfCoreHealthCheck<T>`) |
+| local + IdP JWT on one API | `PubSoft.Authentication.Jwt.AspNetCore` `AddPubSoftDualJwtAuthentication(config)` |
+| HMAC request signing + replay | `PubSoft.Security` (+`.Redis` for multi-replica) `AddPubSoftHmacValidation` |
+| gateway/entry rate limiting | `PubSoft.AspNetCore` `AddPubSoftGatewayRateLimiting` |
+| Redis cache / distributed lock | `PubSoft.Caching.Redis` |
+| outbound token acquisition (client-credentials) | `PubSoft.Tokens` `AddPubSoftTokens` |
+| local machine-token issuance | `PubSoft.Tokens` `MachineTokenProvider` |
+| reliable event delivery | `PubSoft.Messaging.Outbox` (`PublishAsync` + `IOutboxProcessor`) |
+| DingTalk/Teams notifications | `PubSoft.Notifications` |
+| scheduled HTTP jobs | `PubSoft.Scheduling.Http` |
+| module/plugin architecture | `PubSoft.Modularity` |
+| health endpoints/diagnostics | `PubSoft.Monitoring`, `PubSoft.AspNetCore` |
+
+## Wiring prerequisites (order matters)
+
+- `AddDbContext<AppDbContext>` with the **concrete** context — base/abstract throws.
+- `ICache` before `AddPubSoftTokens` — token provider resolves it at validation.
+- Shared `INonceStore` (Redis) for multi-replica replay protection; memory fallback logs a warning.
+- `AddPubSoftHealthChecks()` before health endpoints.
+
+## Top pitfalls (ranked by observed frequency)
+
+1. `EfCoreHealthCheck<DbContext>` — base type never resolves → permanent 503 → now fails at registration with the fix message.
+2. `services.BuildServiceProvider()` inside registration — nested container resolves different singletons; use `AddOptions<T>().Configure<Provider>(...)`.
+3. `http://` on token/JWKS/webhook URLs (non-loopback) — options validation rejects; opt-in per config `AllowInsecure*` only when deliberate.
+4. Explicit `TenantId`/`MemberId` outside ambient scope — write guard throws; switch scope (`tenantContext.Change(id)`) or use host scope.
+5. Assuming tenant filters after `IgnoreQueryFilters()`/`IgnoreScopeFilters()` — both are privileged; review every call.
+6. Rate-limit selectors keyed on attacker-controlled IDs without the cardinality guard — per-IP aggregates exist for exactly this.
+7. Missing `AuthServer:Audience` — JWKS scheme accepts tokens minted for other services; startup warning fires; set it unless intentional.
+
+## Compatibility & environment flags (AI-relevant facts)
+
+- **AOT**: pure-managed leaf packages are marked `IsAotCompatible` and verified by
+  `tests/PubSoft.AotSmoke` (asserts every marked package is referenced). Packages
+  using reflection-JSON are intentionally NOT marked — don't force them into
+  AOT-only hosts; add a source-gen `JsonSerializerContext` if you must.
+- **Dependency gate**: NU1903/NU1904 are errors — packages with advisories fail
+  restore; run restore before claiming a build works.
+- **Integration tests**: Redis/MySQL suites skip without env vars
+  (`PUBSOFT_REDIS=localhost:7000`, `PUBSOFT_MYSQL=...`) — run them before delivery.
+- **Fail-closed defaults**: private-network block, no redirects, bounded
+  bodies/queues/caches. Opt-outs are explicit and validated.
+
+## Failure messages teach the fix
+
+Every `ArgumentException`/`OptionsValidationException` in this library names the
+correct call shape — read the message, it contains the remedy, not just the error.

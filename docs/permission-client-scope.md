@@ -1,3 +1,10 @@
+---
+purpose: permission client-scope semantics and enforcement
+audience: integrating hosts and reviewers
+owner: PubSoft maintainers
+last-reviewed: 2026-10-13
+---
+
 # Permission Client Scope
 
 **English** | [简体中文](permission-client-scope.zh-CN.md)

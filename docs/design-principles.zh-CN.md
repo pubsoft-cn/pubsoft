@@ -1,3 +1,10 @@
+---
+purpose: 所有包遵循的设计原则与 fail-closed 约定
+audience: 贡献者与评审者
+owner: PubSoft 维护组
+last-reviewed: 2026-10-13
+---
+
 # 设计原则
 
 [English](design-principles.md) | **简体中文**

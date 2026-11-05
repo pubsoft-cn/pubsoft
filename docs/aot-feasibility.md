@@ -1,3 +1,10 @@
+---
+purpose: Native AOT feasibility assessment for the package set
+audience: contributors and integrators targeting AOT
+owner: PubSoft maintainers
+last-reviewed: 2026-10-13
+---
+
 # Native AOT Feasibility (2026-10-12 — landed 2026-10-12)
 
 **English** | [简体中文](aot-feasibility.zh-CN.md)

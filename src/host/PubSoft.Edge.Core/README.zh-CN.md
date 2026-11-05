@@ -1,3 +1,10 @@
+---
+purpose: PubSoft.Edge.Core 包级接入指南
+audience: 集成方宿主开发者
+owner: PubSoft 维护组
+last-reviewed: 2026-10-14
+---
+
 # PubSoft.Edge.Core
 
 Edge RPC 基础件：请求/响应信封、凭证方案、规范化签名与共享错误码。

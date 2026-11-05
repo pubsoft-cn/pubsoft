@@ -1,3 +1,10 @@
+---
+purpose: 打包、版本与发布工程
+audience: 贡献者与发布维护者
+owner: PubSoft 维护组
+last-reviewed: 2026-10-13
+---
+
 # 打包与发布工程
 
 [English](packaging.md) | **简体中文**

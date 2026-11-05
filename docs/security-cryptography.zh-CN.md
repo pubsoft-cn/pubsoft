@@ -1,3 +1,10 @@
+---
+purpose: 安全与密码学清单及默认
+audience: 集成宿主与评审者
+owner: PubSoft 维护组
+last-reviewed: 2026-10-13
+---
+
 # 安全与密码学
 
 [English](security-cryptography.md) | **简体中文**

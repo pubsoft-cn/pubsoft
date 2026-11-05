@@ -1,3 +1,10 @@
+---
+purpose: package-level hosting guide for PubSoft.Edge
+audience: integrating host developers
+owner: PubSoft maintainers
+last-reviewed: 2026-10-14
+---
+
 # PubSoft.Edge
 
 Server-side Edge RPC gateway — a single POST endpoint dispatching `method` to handlers with pluggable credential schemes, session management, and rate limiting.

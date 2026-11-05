@@ -1,3 +1,10 @@
+---
+purpose: package-level hosting guide for PubSoft.AspNetCore.Docs
+audience: integrating host developers
+owner: PubSoft maintainers
+last-reviewed: 2026-10-22
+---
+
 # PubSoft.AspNetCore.Docs
 
 **English** | [简体中文](README.zh-CN.md)

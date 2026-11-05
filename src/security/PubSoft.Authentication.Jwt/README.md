@@ -1,3 +1,10 @@
+---
+purpose: package-level hosting guide for PubSoft.Authentication.Jwt
+audience: integrating host developers
+owner: PubSoft maintainers
+last-reviewed: 2026-10-13
+---
+
 # PubSoft.Authentication.Jwt
 
 **English** | [简体中文](README.zh-CN.md)

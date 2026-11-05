@@ -1,3 +1,10 @@
+---
+purpose: PubSoft.Edge.Client 包级接入指南
+audience: 集成方宿主开发者
+owner: PubSoft 维护组
+last-reviewed: 2026-10-14
+---
+
 # PubSoft.Edge.Client
 
 Edge RPC 客户端 SDK——自动完成各凭证方案的签名。

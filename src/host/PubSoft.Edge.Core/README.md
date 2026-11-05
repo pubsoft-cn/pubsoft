@@ -1,3 +1,10 @@
+---
+purpose: package-level hosting guide for PubSoft.Edge.Core
+audience: integrating host developers
+owner: PubSoft maintainers
+last-reviewed: 2026-10-14
+---
+
 # PubSoft.Edge.Core
 
 Edge RPC primitives: request/response envelope, credential schemes, canonical signing, and the shared error-code vocabulary.

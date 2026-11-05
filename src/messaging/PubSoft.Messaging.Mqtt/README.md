@@ -1,3 +1,10 @@
+---
+purpose: package-level hosting guide for PubSoft.Messaging.Mqtt
+audience: integrating host developers
+owner: PubSoft maintainers
+last-reviewed: 2026-11-04
+---
+
 # PubSoft.Messaging.Mqtt
 
 MQTT transport for the PubSoft transactional outbox — `MqttOutboxDispatcher` publishes

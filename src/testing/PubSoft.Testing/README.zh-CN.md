@@ -1,3 +1,10 @@
+---
+purpose: PubSoft.Testing 包级接入指南
+audience: 集成方宿主开发者
+owner: PubSoft 维护组
+last-reviewed: 2026-10-13
+---
+
 # PubSoft.Testing
 
 [English](README.md) | **简体中文**

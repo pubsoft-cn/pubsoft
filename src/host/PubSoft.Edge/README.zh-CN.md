@@ -1,3 +1,10 @@
+---
+purpose: PubSoft.Edge 包级接入指南
+audience: 集成方宿主开发者
+owner: PubSoft 维护组
+last-reviewed: 2026-10-14
+---
+
 # PubSoft.Edge
 
 服务端 Edge RPC 网关——单 POST 入口按 `method` 分发到 handler，支持可插拔凭证方案、会话管理与限流。

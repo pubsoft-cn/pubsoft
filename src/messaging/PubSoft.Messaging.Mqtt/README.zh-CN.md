@@ -1,3 +1,10 @@
+---
+purpose: PubSoft.Messaging.Mqtt 包级接入指南
+audience: 集成方宿主开发者
+owner: PubSoft 维护组
+last-reviewed: 2026-11-04
+---
+
 # PubSoft.Messaging.Mqtt
 
 PubSoft 事务性 outbox 的 MQTT 传输——`MqttOutboxDispatcher` 将 `OutboxMessage`

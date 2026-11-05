@@ -1,3 +1,10 @@
+---
+purpose: 权限 client scope 语义与执行
+audience: 集成宿主与评审者
+owner: PubSoft 维护组
+last-reviewed: 2026-10-13
+---
+
 # 权限 Client Scope
 
 [English](permission-client-scope.md) | **简体中文**

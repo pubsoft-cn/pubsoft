@@ -1,3 +1,10 @@
+---
+purpose: 安全与信任边界分析——库强制 vs 宿主责任
+audience: 集成宿主、审计、评审者
+owner: PubSoft 维护组
+last-reviewed: 2026-11-05
+---
+
 # PubSoft 安全与信任边界分析
 
 [English](security-boundary-analysis.md) | **简体中文**
