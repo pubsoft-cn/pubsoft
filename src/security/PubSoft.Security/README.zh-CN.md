@@ -21,7 +21,7 @@ PBKDF2-HMAC-SHA256，随机 16 字节盐、默认 600,000 迭代。`VerifyAndReh
 
 ## HMAC 防重放
 
-`HmacSignatureValidator` 验证 `method`/`path`/`timestamp`/`nonce`/`bodyHash` 签名，定时常量比较。nonce 经 `INonceStore` **仅在签名验证通过后**占用；`MemoryNonceStore` 有界且进程内——多实例部署须注册分布式实现（`PubSoft.Security.Redis`）。
+`HmacSignatureValidator` 验证 `method`/`path+rawQuery`/`timestamp`/`nonce`/`bodyHash` 签名，定时常量比较。nonce 经 `INonceStore` **仅在签名验证通过后**占用；`MemoryNonceStore` 有界且进程内——多实例部署须注册分布式实现（`PubSoft.Security.Redis`）。
 
 ## 限流
 

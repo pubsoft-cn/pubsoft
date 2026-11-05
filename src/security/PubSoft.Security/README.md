@@ -21,7 +21,7 @@ PBKDF2-HMAC-SHA256 with a random 16-byte salt and 600,000 default iterations. `V
 
 ## HMAC Replay Protection
 
-`HmacSignatureValidator` verifies `method`/`path`/`timestamp`/`nonce`/`bodyHash` signatures with constant-time comparison. The nonce is reserved via `INonceStore` **only after** the signature verifies; `MemoryNonceStore` is bounded and process-local — multi-instance deployments register a distributed implementation (`PubSoft.Security.Redis`).
+`HmacSignatureValidator` verifies `method`/`path+rawQuery`/`timestamp`/`nonce`/`bodyHash` signatures with constant-time comparison. The nonce is reserved via `INonceStore` **only after** the signature verifies; `MemoryNonceStore` is bounded and process-local — multi-instance deployments register a distributed implementation (`PubSoft.Security.Redis`).
 
 ## Rate Limiting
 

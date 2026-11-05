@@ -10,6 +10,7 @@
 - [打包与发布工程](packaging.zh-CN.md) — 版本管理、Public API 基线、依赖 allowlist、隔离 consumer 验证、AOT smoke、发布门槛
 - [Native AOT 可行性](aot-feasibility.zh-CN.md) — 上游支持面、已标注包清单、落地验证结果
 - [安全模型](security-cryptography.zh-CN.md) — Security/Cryptography/AspNetCore 包边界、AEAD 包封格式、nonce/HMAC 语义
+- [安全与信任边界分析](security-boundary-analysis.zh-CN.md) — 外部审计：控制/责任矩阵、API 清单、优先级发现 R1-R6、宿主部署清单
 - [Permission Client Scope](permission-client-scope.zh-CN.md) — `ClientCode` 权限命名空间语义（跨 Authorization/EF/ASP.NET 层）
 
 ## 包文档索引

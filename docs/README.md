@@ -10,6 +10,7 @@
 - [Packaging & Release Engineering](packaging.md) — versioning, Public API baselines, dependency consistency checks, isolated-consumer verification, AOT smoke, release gates
 - [Native AOT Feasibility](aot-feasibility.md) — upstream support surface, annotated packages, verified publish results
 - [Security Model](security-cryptography.md) — Security/Cryptography/AspNetCore package boundaries, AEAD envelope format, nonce/HMAC semantics
+- [Security & Trust-Boundary Analysis](security-boundary-analysis.md) — external audit: controls/responsibility matrix, API inventory, prioritized findings R1-R6, host deployment checklist
 - [Permission Client Scope](permission-client-scope.md) — `ClientCode` authorization namespace semantics across Authorization/EF/ASP.NET
 
 ## Package guide index
