@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Authentication
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/security/PubSoft.Authentication/README.zh-CN.md)
 
 
 `PubSoft.Authentication` provides a framework-neutral immutable snapshot of a `ClaimsPrincipal`. It copies the principal's authenticated flag and each claim's type, value, value type, and issuer:

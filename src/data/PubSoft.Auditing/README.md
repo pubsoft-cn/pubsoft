@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Auditing
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/data/PubSoft.Auditing/README.zh-CN.md)
 
 Framework-independent audit primitives — no ASP.NET Core or EF Core dependency. Covers two write paths that converge on a single sink pipeline:
 

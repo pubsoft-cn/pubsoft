@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Core
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/core/PubSoft.Core/README.zh-CN.md)
 
 
 `PubSoft.Core` contains framework-neutral value types and helpers for common application code. It does not define HTTP response handling, persistence, or business-specific validation policy.

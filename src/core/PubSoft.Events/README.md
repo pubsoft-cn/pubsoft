@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Events
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/core/PubSoft.Events/README.zh-CN.md)
 
 
 `PubSoft.Events` provides in-process domain event dispatch. It supports awaited synchronous dispatch and a bounded background queue, but it does not persist events, coordinate across processes, or recover queued events after a restart. Use `PubSoft.Messaging.Outbox` when events must commit durably with database changes.

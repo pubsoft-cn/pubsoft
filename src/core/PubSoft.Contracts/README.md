@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Contracts
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/core/PubSoft.Contracts/README.zh-CN.md)
 
 
 `PubSoft.Contracts` contains dependency-free request/response pairing, API operation and field metadata, naming policies, normalization/validation interfaces, reusable guards, and generic outbound provider/engine/SDK contracts.

@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Testing
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/testing/PubSoft.Testing/README.zh-CN.md)
 
 Deterministic test doubles for PubSoft contracts — plain classes with no test-framework dependency, usable from xUnit/NUnit/MSTest or a console harness.
 

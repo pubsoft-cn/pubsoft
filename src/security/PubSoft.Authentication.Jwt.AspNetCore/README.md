@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Authentication.Jwt.AspNetCore
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/security/PubSoft.Authentication.Jwt.AspNetCore/README.zh-CN.md)
 
 `JwtBearer` adapter validating tokens issued by `JwtSigning` or compatible RS256 issuers.
 

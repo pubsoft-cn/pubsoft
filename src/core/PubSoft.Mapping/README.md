@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Mapping
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/core/PubSoft.Mapping/README.zh-CN.md)
 
 
 `PubSoft.Mapping` is a dependency-free object mapper that compiles and caches expression-based delegates. It does not scan assemblies or discover mappings automatically. Register explicit configuration during application startup when name matching is not sufficient.

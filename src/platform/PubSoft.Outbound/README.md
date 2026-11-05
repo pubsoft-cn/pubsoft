@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Outbound
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/platform/PubSoft.Outbound/README.zh-CN.md)
 
 
 `PubSoft.Contracts` defines framework-neutral API requests/responses, `[ApiOperation]` and `[ApiField]` metadata, naming policies, and normalization/validation contracts. `PubSoft.Outbound` adds assembly scanning, alias lookup, parameter construction, response mapping, and provider dispatch.

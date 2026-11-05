@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Cryptography
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/core/PubSoft.Cryptography/README.zh-CN.md)
 
 Versioned AEAD encryption with key rotation support — no package dependencies.
 

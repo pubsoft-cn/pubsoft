@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Resilience
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/core/PubSoft.Resilience/README.zh-CN.md)
 
 Provider-neutral resilience primitives with no framework dependency — the policy layer that `PubSoft.Resilience.Http` and `PubSoft.Scheduling.Http` build on.
 

@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Scheduling.EntityFrameworkCore
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/platform/PubSoft.Scheduling.EntityFrameworkCore/README.zh-CN.md)
 
 Durable `IStateStore` for `PubSoft.Scheduling` on EF Core:
 

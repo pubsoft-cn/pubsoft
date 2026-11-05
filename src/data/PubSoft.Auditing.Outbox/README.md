@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Auditing.Outbox
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/data/PubSoft.Auditing.Outbox/README.zh-CN.md)
 
 Routes finalized `AuditRequestSnapshot`s through the durable Outbox instead of writing audit tables directly:
 

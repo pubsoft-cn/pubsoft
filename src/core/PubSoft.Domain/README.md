@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Domain
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/core/PubSoft.Domain/README.zh-CN.md)
 
 
 `PubSoft.Domain` contains framework-neutral entity bases, scope contracts, repository interfaces, and data-scope metadata. It does not provide database mappings, query filters, a current-user implementation, or authorization evaluation. EF behavior is opt-in through `PubSoft.EntityFrameworkCore`.

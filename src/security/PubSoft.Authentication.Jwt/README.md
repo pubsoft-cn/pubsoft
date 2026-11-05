@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Authentication.Jwt
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/security/PubSoft.Authentication.Jwt/README.zh-CN.md)
 
 
 `PubSoft.Authentication.Jwt.AspNetCore` validates bearer tokens issued by a trusted identity provider. It does not issue tokens, store signing secrets, map identities to application users, choose tenants, or define authorization policies.

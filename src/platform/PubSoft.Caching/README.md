@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Caching
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/platform/PubSoft.Caching/README.zh-CN.md)
 
 
 `PubSoft.Caching` defines the provider-neutral `ICache` contract. The built-in memory provider and optional Redis provider share basic get/set, TTL, batch, and pattern-removal operations, but their concurrency and persistence semantics differ. Both providers are data caches only. Distributed coordination uses a separate `IDistributedLock` contract — see [Distributed Locks](#distributed-locks).

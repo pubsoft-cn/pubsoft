@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Logging
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/core/PubSoft.Logging/README.zh-CN.md)
 
 
 `PubSoft.Logging` provides a bounded asynchronous logger, console and NDJSON sinks, immutable log entries/context snapshots, and a `Microsoft.Extensions.Logging` provider. It is an alternative logging provider, not a replacement for application-specific retention, redaction, or export policy.
