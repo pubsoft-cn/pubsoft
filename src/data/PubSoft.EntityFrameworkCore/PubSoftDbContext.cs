@@ -97,21 +97,35 @@ public abstract class PubSoftDbContext : DbContext, IPubSoftSaveParticipant
         {
             if (entry.State == EntityState.Added && entry.Entity.TenantId is null)
                 entry.Entity.TenantId = CurrentTenantId;
-            else if (entry.State == EntityState.Added
+            else if (entry.State is EntityState.Added or EntityState.Modified
                      && CurrentTenantId is { } scoped
                      && entry.Entity.TenantId != scoped)
                 throw new InvalidOperationException(
-                    $"Cannot add {entry.Entity.GetType().Name} with TenantId {entry.Entity.TenantId} " +
+                    $"Cannot write {entry.Entity.GetType().Name} with TenantId {entry.Entity.TenantId} " +
                     $"outside the current tenant scope {scoped}.");
+            else if (entry.State == EntityState.Deleted
+                     && CurrentTenantId is { } delScoped
+                     && entry.Entity.TenantId is { } delTenant
+                     && delTenant != delScoped)
+                throw new InvalidOperationException(
+                    $"Cannot delete {entry.Entity.GetType().Name} with TenantId {delTenant} " +
+                    $"outside the current tenant scope {delScoped}.");
         }
 
         foreach (var entry in ChangeTracker.Entries<IMemberScoped>())
         {
-            if (entry.State == EntityState.Added
+            if (entry.State is EntityState.Added or EntityState.Modified
                 && IsMemberScoped
                 && entry.Entity.MemberId != CurrentMemberId)
                 throw new InvalidOperationException(
-                    $"Cannot add {entry.Entity.GetType().Name} with MemberId {entry.Entity.MemberId?.ToString() ?? "null"} " +
+                    $"Cannot write {entry.Entity.GetType().Name} with MemberId {entry.Entity.MemberId?.ToString() ?? "null"} " +
+                    "outside the current member scope.");
+            if (entry.State == EntityState.Deleted
+                && IsMemberScoped
+                && entry.Entity.MemberId is { } delMember
+                && delMember != CurrentMemberId)
+                throw new InvalidOperationException(
+                    $"Cannot delete {entry.Entity.GetType().Name} with MemberId {delMember} " +
                     "outside the current member scope.");
         }
 

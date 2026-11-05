@@ -66,7 +66,9 @@ public sealed class InboxRetentionCleanupTests
 
         time.SetUtcNow(epoch + TimeSpan.FromDays(30));
 
-        await using var context = new ReceiptDbContext(options, new FixedTenantContext(1));
+        // Cleanup is a host-scoped maintenance path (spans all rows by design);
+        // the write guard requires host scope to delete foreign-tenant rows.
+        await using var context = new ReceiptDbContext(options, new FixedTenantContext(null));
         var cleanup = new InboxRetentionCleanup<ReceiptDbContext>(context, time);
 
         var tenantOneOnly = await cleanup.DeleteProcessedBeforeAsync(TimeSpan.FromDays(1), tenantKey: "1");

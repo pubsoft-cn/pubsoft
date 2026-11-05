@@ -61,6 +61,48 @@ public sealed class ScopeWriteGuardWaveTests
     }
 
     [Fact]
+    public void ModifiedEntityRescopedToForeignTenantIsRejected()
+    {
+        var c = Setup(7, null, false);
+        var e = new E();
+        c.Es.Add(e);
+        c.SaveChanges();
+        e.TenantId = 8;
+        Assert.Throws<InvalidOperationException>(() => c.SaveChanges());
+    }
+
+    [Fact]
+    public void ModifiedEntityRescopedToForeignMemberIsRejected()
+    {
+        var c = Setup(7, 3, true);
+        var e = new E { MemberId = 3 };
+        c.Es.Add(e);
+        c.SaveChanges();
+        e.MemberId = 9;
+        Assert.Throws<InvalidOperationException>(() => c.SaveChanges());
+    }
+
+    [Fact]
+    public void DeletedEntityWithExplicitForeignTenantIdIsRejected()
+    {
+        var c = Setup(7, null, false);
+        c.Es.Remove(new E { Id = 99, TenantId = 8 });
+        Assert.Throws<InvalidOperationException>(() => c.SaveChanges());
+    }
+
+    [Fact]
+    public void LoadThenDeleteWithinScopePersists()
+    {
+        var c = Setup(7, null, false);
+        var e = new E();
+        c.Es.Add(e);
+        c.SaveChanges();
+        c.Es.Remove(e);
+        c.SaveChanges();
+        Assert.Empty(c.Es.IgnoreQueryFilters());
+    }
+
+    [Fact]
     public void NullTenantContextAllowsExplicitIds()
     {
         var c = Setup(null, null, false);
