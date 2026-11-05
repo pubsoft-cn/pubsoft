@@ -328,6 +328,46 @@ public sealed class TokenTests
         Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IOptions<TokenManagerOptions>>().Value);
     }
 
+    [Fact]
+    public void OptionsRejectPlaintextHttpTokenEndpointForRemoteHost()
+    {
+        var services = new ServiceCollection();
+        services.AddPubSoftTokens(options => options.Credentials["bad"] = new TokenCredential
+        {
+            Url = "http://auth.example.com/token"
+        });
+        using var provider = services.BuildServiceProvider();
+
+        Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IOptions<TokenManagerOptions>>().Value);
+    }
+
+    [Fact]
+    public void OptionsAllowPlaintextHttpTokenEndpointOnLoopback()
+    {
+        var services = new ServiceCollection();
+        services.AddPubSoftTokens(options => options.Credentials["dev"] = new TokenCredential
+        {
+            Url = "http://localhost:8080/token"
+        });
+        using var provider = services.BuildServiceProvider();
+
+        Assert.NotNull(provider.GetRequiredService<IOptions<TokenManagerOptions>>().Value);
+    }
+
+    [Fact]
+    public void OptionsAllowPlaintextHttpTokenEndpointWithExplicitOptIn()
+    {
+        var services = new ServiceCollection();
+        services.AddPubSoftTokens(options => options.Credentials["legacy"] = new TokenCredential
+        {
+            Url = "http://auth.example.com/token",
+            AllowInsecureUrl = true
+        });
+        using var provider = services.BuildServiceProvider();
+
+        Assert.NotNull(provider.GetRequiredService<IOptions<TokenManagerOptions>>().Value);
+    }
+
     private static HttpTokenProvider CreateProvider(
         HttpMessageHandler handler,
         ICache cache,

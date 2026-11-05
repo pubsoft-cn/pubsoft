@@ -4,6 +4,13 @@ public sealed class TokenCredential
 {
     public string Method { get; set; } = "POST";
     public string Url { get; set; } = "";
+
+    /// <summary>
+    /// Permits plaintext <c>http</c> endpoints for this credential. Credentials travel
+    /// over this URL — non-loopback <c>http</c> is rejected by <see cref="HttpTokenProvider"/>
+    /// unless this flag is set. Loopback endpoints are exempt for local development.
+    /// </summary>
+    public bool AllowInsecureUrl { get; set; }
     public Dictionary<string, string> Headers { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public string Body { get; set; } = "";
     public string TokenPath { get; set; } = "token";

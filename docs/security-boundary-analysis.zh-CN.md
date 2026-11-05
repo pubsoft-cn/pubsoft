@@ -272,7 +272,7 @@ Scheduled HTTP 与 Outbound 也可以从宿主后台任务直接调用外部系�
 |---|---|
 | PubSoft.Auditing | 敏感属性掩码配置错误会捕获 secret/PII；有界收集器溢出丢事件 → 洪泛下审计完整性缺口（可用性与完整性权衡，需定容）。 |
 | PubSoft.Auditing.Outbox | 审计行经 DB 访问可篡改；留存清理与投递/重放时序（运维控制）。 |
-| PubSoft.EntityFrameworkCore | `Added` 实体显式赋外租户 `TenantId` 会跨租户落库——stamping 仅补 null（宿主写路径须复核）；无参 `IgnoreQueryFilters()` 连带绕过 soft-delete；原生 SQL/`FromSql` 绕过全部过滤器。 |
+| PubSoft.EntityFrameworkCore | **写守卫已强制**：`Added`/`Modified` 实体超出当前租户/成员 scope 即抛错；`Deleted` 实体携带显式外 scope id 同样拒绝。残余：仅含键的 delete stub 无 scope 可证——scope 安全的删除需经过滤器核实的 load 或宿主检查。无参 `IgnoreQueryFilters()` 连带绕过 soft-delete；原生 SQL/`FromSql` 绕过全部过滤器。 |
 
 **`src/host/`**
 
@@ -305,7 +305,7 @@ Scheduled HTTP 与 Outbound 也可以从宿主后台任务直接调用外部系�
 | PubSoft.Resilience.Http | 总超时与业务期限错配；单次重试放大上游负载（预算评审）。 |
 | PubSoft.Scheduling / PubSoft.Scheduling.EntityFrameworkCore | 低可信任务编辑 → 任意周期副作用；持久化任务行经 DB 访问可篡改；cron/配置校验缺口（宿主编写控制）。 |
 | PubSoft.Scheduling.Http | 已覆盖：SSRF 控制、逐跳重定向校验、跨源丢凭据、代理/私网校验。残余：无包级响应体上限（内存）；任务供给头可能携 secret 到攻击者选定 URL（编写控制）；DNS 在解析与连接间变化由 pinning 缓解——核实解析器信任（DoH/hosts）。 |
-| PubSoft.Tokens | 可配置 token 端点 URL = 低可信配置下的凭据外泄目标；token 响应无大小上限；401 重放缓冲请求体（内存）；HS256 机器令牌 secret 低于 256-bit 会削弱抗伪造（校验密钥材料）。 |
+| PubSoft.Tokens | 可配置 token 端点 URL = 低可信配置下的凭据外泄目标——**现已强制**：非 loopback `http` 端点在 options 校验期拒绝，逐凭据 `AllowInsecureUrl` 为文档化豁免；token 响应无大小上限；401 重放缓冲请求体（内存）；HS256 机器令牌 secret 低于 256-bit 会削弱抗伪造（校验密钥材料）。 |
 
 **`src/security/`**
 

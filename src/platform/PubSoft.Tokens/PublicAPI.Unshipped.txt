@@ -36,6 +36,8 @@ PubSoft.Tokens.MachineTokenProvider.GetTokenAsync(string! credentialKey, System.
 PubSoft.Tokens.MachineTokenProvider.InvalidateAsync(string! credentialKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 PubSoft.Tokens.MachineTokenProvider.MachineTokenProvider(Microsoft.Extensions.Options.IOptions<PubSoft.Tokens.MachineTokenOptions!>! options) -> void
 PubSoft.Tokens.TokenCredential
+PubSoft.Tokens.TokenCredential.AllowInsecureUrl.get -> bool
+PubSoft.Tokens.TokenCredential.AllowInsecureUrl.set -> void
 PubSoft.Tokens.TokenCredential.Body.get -> string!
 PubSoft.Tokens.TokenCredential.Body.set -> void
 PubSoft.Tokens.TokenCredential.Expiry.get -> System.TimeSpan

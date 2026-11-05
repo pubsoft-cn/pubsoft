@@ -100,6 +100,11 @@ public sealed class HttpTokenProvider : ITokenProvider
             || credential.RefreshBefore >= credential.Expiry || credential.Timeout <= TimeSpan.Zero)
             return false;
 
+        // Credentials are sent to this URL — plaintext http is rejected for
+        // non-loopback endpoints unless explicitly opted in per credential.
+        if (uri.Scheme == Uri.UriSchemeHttp && !uri.IsLoopback && !credential.AllowInsecureUrl)
+            return false;
+
         if (credential.ExpiryPath is { } expiryPath
             && (string.IsNullOrWhiteSpace(expiryPath) || expiryPath.Split('.').Any(string.IsNullOrWhiteSpace)))
             return false;

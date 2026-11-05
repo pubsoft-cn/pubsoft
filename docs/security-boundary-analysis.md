@@ -272,7 +272,7 @@ This section extends the audit from confirmed findings (R1-R6) to a systematic i
 |---|---|
 | PubSoft.Auditing | Mis-configured sensitive-property masking captures secrets/PII; bounded collector drops overflow events → audit-integrity gap under flood (availability vs. integrity trade-off to size). |
 | PubSoft.Auditing.Outbox | Audit rows tamperable via DB access; delivery/replay ordering with retention cleanup (operational control). |
-| PubSoft.EntityFrameworkCore | Added entity with explicitly set foreign `TenantId` persists cross-tenant — stamping only fills nulls (host write path must re-validate); parameterless `IgnoreQueryFilters()` also lifts soft-delete; raw SQL/`FromSql` bypasses all filters. |
+| PubSoft.EntityFrameworkCore | **Write guard now enforced**: `Added`/`Modified` entities outside the current tenant/member scope throw; `Deleted` entities carrying an explicit foreign scope id also throw. Residual: key-only delete stubs carry no scope to verify — scope-safe deletes need a filter-verified load or host check. Parameterless `IgnoreQueryFilters()` also lifts soft-delete; raw SQL/`FromSql` bypasses all filters. |
 
 **`src/host/`**
 
@@ -305,7 +305,7 @@ This section extends the audit from confirmed findings (R1-R6) to a systematic i
 | PubSoft.Resilience.Http | Total-timeout misconfiguration against business deadlines; per-attempt retry multiplies upstream load (budget review). |
 | PubSoft.Scheduling / PubSoft.Scheduling.EntityFrameworkCore | Low-trust job editing → arbitrary recurring side effects; persisted job rows tamperable via DB access; cron/config validation gaps (host authoring control). |
 | PubSoft.Scheduling.Http | Covered: SSRF controls, redirect re-validation, credential-drop on origin change, proxy/private-network validation. Residual: no package-level response-body cap (memory); job-supplied headers may carry secrets to attacker-chosen URLs (authoring control); DNS answers changing between resolve and connect mitigated by pinning — verify resolver trust (DoH/hosts). |
-| PubSoft.Tokens | Configurable token endpoint URL = credential exfiltration target if config is low-trust; token response has no size cap; 401-replay buffers bodies (memory); HS256 machine-token secret entropy below 256-bit would weaken forgery resistance (validate key material). |
+| PubSoft.Tokens | Configurable token endpoint URL = credential exfiltration target if config is low-trust — **now enforced**: non-loopback `http` endpoints fail options validation, per-credential `AllowInsecureUrl` is the documented opt-out; token response has no size cap; 401-replay buffers bodies (memory); HS256 machine-token secret entropy below 256-bit would weaken forgery resistance (validate key material). |
 
 **`src/security/`**
 
