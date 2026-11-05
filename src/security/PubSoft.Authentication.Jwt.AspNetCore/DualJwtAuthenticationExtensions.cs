@@ -33,6 +33,10 @@ public static class DualJwtAuthenticationExtensions
         JwksOptions? jwksOptions = null;
         if (hasAuthServer)
         {
+            jwksOptions = authServerSection.Get<JwksOptions>() ?? new JwksOptions();
+            if (string.IsNullOrWhiteSpace(jwksOptions.JwksUri) && !string.IsNullOrWhiteSpace(jwksOptions.Issuer))
+                jwksOptions.JwksUri = $"{jwksOptions.Issuer.TrimEnd('/')}/.well-known/jwks.json";
+            ValidateJwksOptions(jwksOptions);
             services.Configure<JwksOptions>(authServerSection);
             services.AddHttpClient(nameof(JwksKeyProvider));
             services.AddSingleton(sp => new JwksKeyProvider(
@@ -40,13 +44,7 @@ public static class DualJwtAuthenticationExtensions
                 sp.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>(),
                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<JwksKeyProvider>>(),
                 sp.GetRequiredService<System.Net.Http.IHttpClientFactory>().CreateClient(nameof(JwksKeyProvider))));
-            jwksOptions = authServerSection.Get<JwksOptions>() ?? new JwksOptions();
-            if (string.IsNullOrWhiteSpace(jwksOptions.JwksUri) && !string.IsNullOrWhiteSpace(jwksOptions.Issuer))
-                jwksOptions.JwksUri = $"{jwksOptions.Issuer.TrimEnd('/')}/.well-known/jwks.json";
         }
-
-        var _keyProvider = new Lazy<JwksKeyProvider>(
-            () => services.BuildServiceProvider().GetRequiredService<JwksKeyProvider>());
 
         var authBuilder = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
 
@@ -61,6 +59,7 @@ public static class DualJwtAuthenticationExtensions
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = jwtOptions.Issuer,
                 ValidAudience = jwtOptions.Audience,
+                ValidAlgorithms = ["HS256"],
                 IssuerSigningKey = baseKey,
                 ClockSkew = TimeSpan.FromMinutes(1),
                 NameClaimType = "name",
@@ -93,28 +92,48 @@ public static class DualJwtAuthenticationExtensions
 
         if (hasAuthServer && jwksOptions is not null)
         {
-            authBuilder.AddJwtBearer(AuthServerScheme, options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
+            authBuilder.AddJwtBearer(AuthServerScheme);
+            // Resolved through the host container when JwtBearerOptions are created —
+            // building a second provider here would split singleton/cache/disposal lifetimes.
+            services.AddOptions<JwtBearerOptions>(AuthServerScheme)
+                .Configure<JwksKeyProvider>((options, keyProvider) =>
                 {
-                    ValidateIssuer = true,
-                    ValidIssuer = jwksOptions.Issuer,
-                    ValidateAudience = false,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ClockSkew = TimeSpan.FromMinutes(1),
-                    IssuerSigningKeyResolver = (_, _, kid, _) =>
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        var provider = _keyProvider.Value;
-                        var key = provider.ResolveSigningKeyAsync(kid ?? "").GetAwaiter().GetResult();
-                        return key is null ? Array.Empty<SecurityKey>() : new[] { key };
-                    },
-                };
-            });
+                        ValidateIssuer = true,
+                        ValidIssuer = jwksOptions.Issuer,
+                        ValidateAudience = !string.IsNullOrWhiteSpace(jwksOptions.Audience),
+                        ValidAudience = string.IsNullOrWhiteSpace(jwksOptions.Audience) ? null : jwksOptions.Audience,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidAlgorithms = ["RS256"],
+                        ClockSkew = TimeSpan.FromMinutes(1),
+                        IssuerSigningKeyResolver = (_, _, kid, _) =>
+                        {
+                            var key = keyProvider.ResolveSigningKeyAsync(kid ?? "").GetAwaiter().GetResult();
+                            return key is null ? Array.Empty<SecurityKey>() : new[] { key };
+                        },
+                    };
+                });
         }
 
         return services;
     }
+
+    private static void ValidateJwksOptions(JwksOptions options)
+    {
+        if (options.CacheMinutes <= 0)
+            throw new InvalidOperationException("AuthServer:CacheMinutes must be a positive number of minutes.");
+        if (!Uri.TryCreate(options.JwksUri, UriKind.Absolute, out var uri)
+            || (uri.Scheme != Uri.UriSchemeHttps && !IsLoopbackHost(uri.Host) && !options.AllowInsecureJwksUri))
+            throw new InvalidOperationException(
+                "AuthServer:JwksUri must be an absolute https URI (loopback hosts are permitted for development); " +
+                "set AuthServer:AllowInsecureJwksUri = true to allow plaintext metadata on other hosts.");
+    }
+
+    private static bool IsLoopbackHost(string host)
+        => host.Equals("localhost", StringComparison.OrdinalIgnoreCase)
+           || host is "127.0.0.1" or "::1" or "[::1]";
 
     private static string PadBase64(string base64) =>
         base64.PadRight(base64.Length + (4 - base64.Length % 4) % 4, '=')

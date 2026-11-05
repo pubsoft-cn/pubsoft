@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
@@ -13,7 +12,18 @@ public sealed class JwksOptions
     public const string SectionName = "AuthServer";
     public string Issuer { get; set; } = "";
     public string JwksUri { get; set; } = "";
+    /// <summary>
+    /// Expected token audience for the AuthServer scheme. When set, audience is
+    /// validated; when empty it is not — configure it whenever the issuer mints
+    /// tokens for more than one API.
+    /// </summary>
+    public string Audience { get; set; } = "";
     public int CacheMinutes { get; set; } = 15;
+    /// <summary>
+    /// Permits a non-https <see cref="JwksUri"/> outside loopback. Default false —
+    /// a plaintext JWKS fetch lets an on-path attacker substitute signing keys.
+    /// </summary>
+    public bool AllowInsecureJwksUri { get; set; }
 }
 
 public sealed class JwksKeyProvider
@@ -22,7 +32,6 @@ public sealed class JwksKeyProvider
     private readonly IMemoryCache _cache;
     private readonly ILogger<JwksKeyProvider> _logger;
     private readonly HttpClient _httpClient;
-    private readonly ConcurrentDictionary<string, SecurityKey> _keyCache = new();
 
     public JwksKeyProvider(IOptions<JwksOptions> options, IMemoryCache cache,
         ILogger<JwksKeyProvider> logger, HttpClient httpClient)
@@ -35,16 +44,13 @@ public sealed class JwksKeyProvider
 
     public async Task<SecurityKey?> ResolveSigningKeyAsync(string keyId, CancellationToken ct = default)
     {
-        if (_keyCache.TryGetValue(keyId, out var cached))
-            return cached;
+        // Resolved keys share the JWKS set's CacheMinutes lifetime — a per-key
+        // cache that outlived the set would keep accepting revoked key IDs.
         var keys = await GetJwksAsync(ct).ConfigureAwait(false);
         if (keys is null) return null;
         foreach (var key in keys)
             if (key.KeyId == keyId)
-            {
-                _keyCache[keyId] = key;
                 return key;
-            }
         return null;
     }
 
@@ -57,8 +63,9 @@ public sealed class JwksKeyProvider
         {
             var set = await _httpClient.GetFromJsonAsync<JsonWebKeySet>(NormalizeUri(_options.JwksUri), ct).ConfigureAwait(false);
             var keys = set?.GetSigningKeys()?.ToArray() ?? Array.Empty<SecurityKey>();
-            if (keys.Length > 0)
-                _cache.Set(cacheKey, keys, TimeSpan.FromMinutes(_options.CacheMinutes));
+            // Empty sets are cached too — a key-removal response must hold for the
+            // TTL, and caching avoids refetching once per token while JWKS is empty.
+            _cache.Set(cacheKey, keys, TimeSpan.FromMinutes(_options.CacheMinutes));
             return keys;
         }
         catch (Exception ex)

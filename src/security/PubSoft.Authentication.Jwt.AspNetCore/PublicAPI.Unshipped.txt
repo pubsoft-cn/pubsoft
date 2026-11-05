@@ -15,6 +15,10 @@ PubSoft.Authentication.Jwt.AspNetCore.JwksKeyProvider
 PubSoft.Authentication.Jwt.AspNetCore.JwksKeyProvider.JwksKeyProvider(Microsoft.Extensions.Options.IOptions<PubSoft.Authentication.Jwt.AspNetCore.JwksOptions!>! options, Microsoft.Extensions.Caching.Memory.IMemoryCache! cache, Microsoft.Extensions.Logging.ILogger<PubSoft.Authentication.Jwt.AspNetCore.JwksKeyProvider!>! logger, System.Net.Http.HttpClient! httpClient) -> void
 PubSoft.Authentication.Jwt.AspNetCore.JwksKeyProvider.ResolveSigningKeyAsync(string! keyId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.SecurityKey?>!
 PubSoft.Authentication.Jwt.AspNetCore.JwksOptions
+PubSoft.Authentication.Jwt.AspNetCore.JwksOptions.AllowInsecureJwksUri.get -> bool
+PubSoft.Authentication.Jwt.AspNetCore.JwksOptions.AllowInsecureJwksUri.set -> void
+PubSoft.Authentication.Jwt.AspNetCore.JwksOptions.Audience.get -> string!
+PubSoft.Authentication.Jwt.AspNetCore.JwksOptions.Audience.set -> void
 PubSoft.Authentication.Jwt.AspNetCore.JwksOptions.CacheMinutes.get -> int
 PubSoft.Authentication.Jwt.AspNetCore.JwksOptions.CacheMinutes.set -> void
 PubSoft.Authentication.Jwt.AspNetCore.JwksOptions.Issuer.get -> string!
