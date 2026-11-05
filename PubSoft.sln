@@ -95,7 +95,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PubSoft.AspNetCore.Docs", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "analyzers", "analyzers", "{FF259D05-2E14-DC0F-2A34-9764A5D9A6BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PubSoft.Analyzers", "src\analyzers\PubSoft.Analyzers\PubSoft.Analyzers.csproj", "{5DD3565B-53E6-4057-933F-C1502231C23F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PubSoft.Analyzers", "tools\PubSoft.Analyzers\PubSoft.Analyzers.csproj", "{5DD3565B-53E6-4057-933F-C1502231C23F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "platform", "platform", "{4DF80442-A1E5-CC28-AE7B-27B5F9BFE52B}"
 EndProject

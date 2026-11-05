@@ -10,7 +10,7 @@
     <!-- Repo analyzers on every source project (each scans its own syntax trees);
          markdown files feed the sentinel project only so doc rules report once. -->
     <ProjectReference Condition="'$(MSBuildProjectName)' != 'PubSoft.Analyzers'"
-        Include="$(MSBuildThisFileDirectory)analyzers/PubSoft.Analyzers/PubSoft.Analyzers.csproj"
+        Include="$(MSBuildThisFileDirectory)../tools/PubSoft.Analyzers/PubSoft.Analyzers.csproj"
         OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
     <AdditionalFiles Condition="'$(MSBuildProjectName)' == 'PubSoft.Core'"
         Include="$(MSBuildThisFileDirectory)../docs/**/*.md;$(MSBuildThisFileDirectory)../README*.md;$(MSBuildThisFileDirectory)**/README*.md" />
