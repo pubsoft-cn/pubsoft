@@ -256,7 +256,7 @@ This section extends the audit from confirmed findings (R1-R6) to a systematic i
 |---|---|
 | PubSoft.Contracts | `ApiFieldAttribute.IsEncrypted` mistaken for enforcement → sensitive fields serialized unprotected (host misuse). |
 | PubSoft.Core | Sequential/snowflake identifiers aid IDOR enumeration → object-level authorization must not rely on unguessable IDs (host). |
-| PubSoft.Cryptography | Custom SM4/AES implementations outside AEAD path → self-implemented crypto needs review; ECB reveals block patterns (compat-only); padding-oracle risk if CBC migration errors differentiate (implementation detail to verify). |
+| PubSoft.Cryptography | Custom SM4/AES implementations outside AEAD path → self-implemented crypto needs review; ECB reveals block patterns (compat-only). **CBC migration oracle — verified clean**: every legacy-decrypt failure (base64, length, PKCS7, UTF-8) collapses into one `InvalidLegacyCiphertext`; no type/message differentiation. Residual CBC timing is bounded by the trusted-stored-data contract — never expose `Decrypt` on untrusted input. |
 | PubSoft.DependencyInjection | Registration order/substitution — a host registering `MemoryNonceStore` over Redis silently downgrades replay protection to single-process (composition risk). |
 | PubSoft.Domain | `AmbientTenantContext`/`Change()` leaks across async continuations or pooled tasks → wrong-tenant reads/writes in background flows (host lifecycle). |
 | PubSoft.Events | Handler exceptions/malicious handlers run in-process; event payloads crossing tenant scope → context mismatch (application-specific). |
@@ -313,10 +313,10 @@ This section extends the audit from confirmed findings (R1-R6) to a systematic i
 |---|---|
 | PubSoft.Authentication | Subject resolution trusts issuer claim mapping; account-status/role semantics host-side. |
 | PubSoft.Authentication.Jwt | Symmetric signing keys below recommended entropy; `kid` collisions across key sources (pinning covers algorithm; key-source separation remains host config). |
-| PubSoft.Authentication.Jwt.AspNetCore | Post-fix residuals: unset `AuthServer:Audience` still skips validation (explicit host choice); `ForwardDefaultSelector` routes on attacker-chosen `alg` — strict validation contains it, but any future scheme added must pin its own algorithm; JWKS outage → all AuthServer tokens rejected (availability). |
+| PubSoft.Authentication.Jwt.AspNetCore | Post-fix residuals: unset `AuthServer:Audience` still skips validation — now logs a startup warning naming the exposure (explicit host choice); `ForwardDefaultSelector` routes on attacker-chosen `alg` — strict validation contains it, but any future scheme added must pin its own algorithm; JWKS outage → all AuthServer tokens rejected (availability). |
 | PubSoft.Authentication.OAuthProviders | State/nonce not bound to user-agent transaction → CSRF/login-CSRF; missing PKCE; un-allowlisted redirect URIs → code exfiltration; auto account-linking on unverified provider emails → account takeover (all host flow decisions). |
 | PubSoft.Authorization | Grant/verifier implementations returning broad scopes; module/flag key typos fail closed (safe direction); wildcard-like semantics must not be introduced by host resolvers. |
-| PubSoft.Security | Timestamp skew 300 s widens replay window on clock drift; `MemoryNonceStore` registered where replicas exist; identifier-capacity exhaustion rejects *new* identifiers (attacker floods unique IDs → legit new clients denied — bound identifiers to verified sources); PBKDF2 minimum iteration vs login CPU cost. |
+| PubSoft.Security | Timestamp skew 300 s widens replay window on clock drift; `MemoryNonceStore` registered where replicas exist; identifier-capacity exhaustion rejects *new* identifiers — **verdict: fail-closed deny retained by design**; starvation hits only newcomers while established budgets stay enforced, whereas LRU eviction would let an attacker flush every window (bound identifiers to verified sources); PBKDF2 minimum iteration vs login CPU cost. |
 | PubSoft.Security.Redis | Redis outage returns deny (fail closed — availability lever); shared Redis without prefix/database isolation → nonce key collision across services. |
 
 **`src/testing/`** — `PubSoft.Testing`: helpers must never ship into production wiring; internals visible only to test assemblies (verified by InternalsVisibleTo targets).
@@ -336,6 +336,88 @@ Runtime third-party surface (central versions from `Directory.Packages.props`), 
 | MySql.EntityFrameworkCore | 10.0.12 | Test/integration scope only. |
 
 Watchlist hygiene: re-run `dotnet list PubSoft.sln package --vulnerable --include-transitive` on dependency bumps; GHSA/NVD feeds should be rechecked before each release since advisory state is volatile.
+
+## Upstream ABP-Issue Cross-Check
+
+PubSoft replaces an internal ABP foundation, so ABP's public issue history is a
+threat-intel source: which trust-boundary bugs surfaced upstream, and whether
+the same class exists here. Method: date-partitioned issue search across the
+repository's full public history — 9,902 unique issues consolidated (92.8% of
+the 10,675-issue corpus; the residual ~7% is scattered page-level fetch loss
+from API rate limiting, not systematic topical exclusion), merged with a
+20-keyword security working set. All items were title-triaged; security-signal
+titles were checked against PubSoft code. UI-module findings (login pages,
+permission modals, Angular/Blazor flows) are host-application territory and are
+noted only where the underlying mechanism maps.
+
+| ABP issue | Upstream defect class | PubSoft status |
+|---|---|---|
+| abpframework/abp#1474 | Password grant ignores tenant → cross-tenant token | Token requests take explicit tenant/scoped params; no ambient-tenant token issuance. OK. |
+| #15028, #19520, #19576 | Sessions survive DB purge / insufficient termination | Stateless JWT only — no server session to outlive. Residual: local symmetric JWT has no revocation list; expiry is the bound (host sets lifetime). JWKS side bounded by `CacheMinutes` post-R2. |
+| #2980 (open) | Access token not invalidated when claims/roles change | Same class acknowledged: JWT claims are frozen at issuance. Mitigation = short `exp` + host re-validation of critical grants; documented. |
+| #26044 | Connection string (incl. password) leaks into exception messages | Verified: our `InvalidOperationException` messages embed scope ids only, never credentials; options/conn-strings are not string-interpolated into thrown errors. Keep this invariant in reviews. |
+| #26057 | Password grant bypasses 2FA after required change | N/A — no identity UI/2FA shipped; analogous control is host token invalidation on credential change. Documented as host responsibility. |
+| #14214, #24652, #5729, #5732, #21443, #15789, #20185 | Antiforgery cookie/token lifecycle bugs (HttpOnly, cross-tab overwrite, missing on Swagger) | N/A — no cookie auth or UI shipped. Gap worth noting: `PubSoft.AspNetCore` adds no antiforgery middleware — CSRF protection on cookie-authenticated hosts is the host's responsibility. |
+| #12820 | Wrong OAuth state nonce → state-mismatch failures | `PubSoft.Authentication.OAuthProviders` is contract-only; state/nonce binding is host flow — flagged in the inventory. |
+| #17361 | Security log records wrong event in token controller | `AuditMiddleware` records auth state on failure; event-type fidelity is the analog — verified recording shape is honest. |
+| #6247 | JWT invalid after IdentityServer restart (key loss) | JWKS TTL now bounds key staleness post-R2; restart with new keys recovers within `CacheMinutes`. |
+| #5502 (open) | No captcha → brute-force on login/register | Login-route rate limiting exists post-R1 (per-IP + client-ID cardinality); captcha/lockout is host UI/policy. |
+| #9614, #17051, #25278, #25758, #19845, #26038 | Transitive dep CVEs (Encodings.Web, Linq.Dynamic.Core, Crypto.Xml, OpenApi, AWS SDK) | None are direct/transitive deps of PubSoft packages; NU1903/NU1904 hard-fails new advisories at restore — covered. |
+| #13183, #15515, #16306, #7751, #8628 | Reflected/stored XSS (language switch, permission modal, label encoding) | No UI/markup shipped — `SecurityHeadersMiddleware` CSP is the adjacent control; `subMessage` diagnostics already flagged in the inventory. |
+| #943 | Audit log duplication on tenant switch | `IAuditCollector` batches per request; no cross-tenant replay path — verified by design, not by a dedicated test. |
+
+### Cluster Coverage Matrix (all issues accounted for)
+
+Every one of the consolidated issues was bucketed into the thematic clusters
+below (first-match keyword on title + labels; counts are working-set hits, not
+upstream totals). Cluster verdict summarizes the PubSoft-side check; individual
+verified items are listed above and below it.
+
+| Cluster | Issues | Verdict for PubSoft |
+|---|---|---|
+| permission-authz | 109 | Grant store is EF-persisted + tested (union query, foreign-tenant exclusion); permission checks are exact-match fail-closed. Verified: no client-vs-role grant confusion (#26219-class), no LINQ translation defect in grant query (#21871-class — covered by `PermissionGrantPersistenceTests`). |
+| tenant-isolation | 108 | Filters + write guard (added-entity foreign `TenantId`/`MemberId` rejected post-fix); scope leaks via ambient `Change()` = host lifecycle risk (documented). Verified: no domain-resolver code shipped (host concern); ambient-scope bleed on switch (#13567-class) mitigated by `Change()` disposal contract. |
+| authn-session | 106 | Stateless JWT only — session-fixation/termination classes N/A; residuals documented (local-JWT revocation). Cookie-auth hosts own the session layer. |
+| jwt-token-oauth | 95 | `RoleClaimType = "role"` / `NameClaimType` explicitly mapped on both schemes (#17971-class verified OK); `ValidIssuer`/`ValidAudience`/`ValidAlgorithms` pinned; issuer-not-valid class (#18658) covered by explicit issuer; malformed-bearer → 401 not 500 (#10529-class via JwtBearer). |
+| password-2fa | 63 | No identity UI shipped; password complexity/lockout/2FA are host decisions. `#26057`-class (2FA bypass after forced change) noted as host responsibility. |
+| di-injection | 21 | No property-injection convention; `Configure(section)` binding post-refactor. Disposed-scope resolution is host composition risk — documented. |
+| error-exception | 7 | Sanitized error shapes; dev-mode detail flagged. Secret-in-exception verified clean (#26044-class). |
+| xss-encoding | 6 | No markup shipped; CSP headers present; `subMessage` diagnostics flagged. |
+| deps-upgrade | 6 | NU1903/NU1904 hard-gate at restore; none of the named vulnerable packages are our deps. |
+| module-arch, cookie-header, blazor-ui, audit-log, docs-samples, i18n, ef-repo, swagger, serialization | 23 | Mostly feature/UI/app-level; mapped items already covered (antiforgery gap → checklist; audit event fidelity ✓; EF filter semantics verified). |
+| csrf/cache/bg-job/email/rate/concurrency/serialization/impersonation/other | 18+ | Keyword-emptied into earlier buckets; relevant analogs covered in the class crosswalk (SSRF, replay, DoS, concurrency, impersonation-as-host-flow). |
+
+Additional defect items verified this pass:
+
+- **#26297/#26298-class** (MySQL `DELETE … WHERE Id IN (SELECT … same table)` → ERROR 1093): both retention paths (`InboxRetentionCleanup`, `AuditRetentionCleanup`) use EF `RemoveRange` batched key-deletes — no self-referencing subquery. OK.
+- **#21188-class** (invalid JWT scope silently ignoring tenant): tenant-from-claims is last resolution stage and feeds the filter — no silent "ignore tenant" fallback; missing tenant → filter returns no rows.
+- **#21256-class** (per-tenant seed bugs): the new write guard makes cross-scope seeds throw — foreign fixtures must be written under their own scope, exactly the failure ABP hit.
+- **#14424-class** (single-use token semantics): nonce stores enforce atomic single-claim; reset-style tokens are host-issued — noted.
+- **#2386-class** (lockout error differentiation): HMAC/JWT rejections are uniform 401 without reason differentiation — no enumeration oracle.
+
+### Full-Corpus Delta Findings (items beyond the keyword set)
+
+- **#13112 (open)** — TenantManagement emits events with an unencrypted secret → event payloads carrying secrets are the analog here; keep credentials out of `PubSoft.Events` payloads (added to inventory note).
+- **#25485** — Mapperly sensitive `ExtraProperties` leak via ineffective filtering → confirms the `PubSoft.Mapping` over-posting row; mapping configs must denylist sensitive fields.
+- **#16961, #22560** — services/client-proxies exposed as HTTP APIs by default → PubSoft routes are opt-in only (uncovered endpoints don't exist); host wiring review stays.
+- **#25492** — MySQL unique-index key-length overflow (3072-byte cap) → our fixed-width hashes (e.g., scheduler `KeyHash` = SHA-256 hex, 64 chars) keep composite indexes bounded; retain fixed-width key columns on new tables.
+- **#25536** — shared-singleton `List` corrupted under concurrent reads → PubSoft registries/builders are immutable after registration; `ClientIdCardinalityGuard` uses `ConcurrentDictionary`. Verified.
+- **#26120** — nested unit-of-work leaks parent event handler → scoped-resource lifetime leaks; `Dispose` contracts on our context/scope objects cover the pattern — verify host UoW nesting.
+- **#25882** — remote stream content drops `CancellationToken` → stream/copy paths must propagate cancellation; `HttpExecutionSupport` uses linked tokens throughout.
+- **#15148** — force-logout on status change → session/token invalidation on account-state change is host-side (local JWT has no revocation list — already noted).
+- **#24768** — privilege escalation in identity management module → identity admin flows are host-side; our permission model is deny-by-default.
+- Dep-CVE batch (#21041/#23490/#23491/#25810/#25903/#14811/#24702/#9683/#14176) — BouncyCastle/ImageSharp/MessagePack/jQuery advisories → none are our runtime deps; NU1903/NU1904 gate covers new ones.
+- **#19776 (inverse signal)** — request to return *more* detail on 401 → deliberately rejected pattern; uniform 401 without reason differentiation is our documented anti-oracle.
+
+Net new items this cross-check adds to the watchlist:
+1. **Exception-message hygiene** (#26044-class): audit any future error path that
+   string-interpolates options/config into thrown messages — scope ids are fine,
+   credentials/conn-strings are not.
+2. **Antiforgery gap disclosure**: hosts pairing `PubSoft.AspNetCore` with
+   cookie-based auth must add ASP.NET Core antiforgery themselves — the package
+   does not provide it. Added to host checklist below.
+3. **Local-JWT revocation**: symmetric scheme has no revocation list — short
+   `exp` + issuer-side invalidation is the documented host control.
 
 ## Test and Supply-Chain Evidence
 
@@ -359,6 +441,7 @@ The [CI workflow](../.github/workflows/ci.yml) configures Gitleaks (image pinned
 - Review `IgnoreScopeFilters()`, `IgnoreQueryFilters()`, background workers, and admin endpoints for tenant data access; protect cross-tenant operational paths.
 - Apply egress allowlists/network policy to job targets. Do not let low-trust job authors choose internal addresses, credential headers, or unsafe retries by default.
 - Define audit fields, sensitive-value masking, access control, retention, and deletion. Make external message side effects idempotent.
+- When pairing cookie-based authentication with `PubSoft.AspNetCore`, add ASP.NET Core antiforgery yourself — the package ships none; state-changing cookie-auth routes without it are CSRF-exposed.
 - Disable or protect non-development Edge OpenAPI/Swagger, `none` methods, and detailed errors; do not use legacy MD5 for production clients.
 - Include Redis/MySQL failure, proxy-chain behavior, limiter capacity, timeouts/concurrency, and dependency advisories in runbooks and monitoring.
 

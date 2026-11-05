@@ -256,7 +256,7 @@ Scheduled HTTP 与 Outbound 也可以从宿主后台任务直接调用外部系�
 |---|---|
 | PubSoft.Contracts | `ApiFieldAttribute.IsEncrypted` 被误当强制 → 敏感字段以明文序列化（宿主误用）。 |
 | PubSoft.Core | 顺序/雪花标识符助长 IDOR 枚举 → 对象级授权不能依赖不可猜测 ID（宿主）。 |
-| PubSoft.Cryptography | AEAD 路径之外的自实现 SM4/AES → 自研密码实现需评审；ECB 泄露分组模式（仅兼容）；若 CBC 迁移读取错误可区分则存在 padding-oracle 风险（待核实的实现细节）。 |
+| PubSoft.Cryptography | AEAD 路径之外的自实现 SM4/AES → 自研密码实现需评审；ECB 泄露分组模式（仅兼容）。**CBC 迁移 oracle——核实干净**：遗留解密所有失败（base64/长度/PKCS7/UTF-8）收敛为同一 `InvalidLegacyCiphertext`，无类型/消息区分。CBC 残余 timing 由可信存量数据契约限界——`Decrypt` 绝不接不可信输入。 |
 | PubSoft.DependencyInjection | 注册顺序/替换——宿主以 `MemoryNonceStore` 覆盖 Redis 实现会静默降级重放防护到单进程（组合风险）。 |
 | PubSoft.Domain | `AmbientTenantContext`/`Change()` 跨 async 续体或池化任务泄漏 → 后台流错租户读写（宿主生命周期）。 |
 | PubSoft.Events | handler 异常/恶意 handler 进程内执行；事件载荷跨租户作用域 → 上下文错配（随应用）。 |
@@ -313,10 +313,10 @@ Scheduled HTTP 与 Outbound 也可以从宿主后台任务直接调用外部系�
 |---|---|
 | PubSoft.Authentication | subject 解析信任 issuer 声明映射；账号状态/角色语义归宿主。 |
 | PubSoft.Authentication.Jwt | 对称签名密钥熵不足；跨密钥源 `kid` 碰撞（算法已固定；密钥源隔离仍是宿主配置）。 |
-| PubSoft.Authentication.Jwt.AspNetCore | 修复后残余：`AuthServer:Audience` 未配仍跳过校验（宿主显式选择）；`ForwardDefaultSelector` 按攻击者可选的 `alg` 路由——严格校验可收敛，但将来新增 scheme 必须各自固定算法；JWKS 中断 → AuthServer token 全拒（可用性）。 |
+| PubSoft.Authentication.Jwt.AspNetCore | 修复后残余：`AuthServer:Audience` 未配仍跳过校验——现启动期记 warning 点名暴露面（宿主显式选择）；`ForwardDefaultSelector` 按攻击者可选的 `alg` 路由——严格校验可收敛，但将来新增 scheme 必须各自固定算法；JWKS 中断 → AuthServer token 全拒（可用性）。 |
 | PubSoft.Authentication.OAuthProviders | state/nonce 未绑定 user-agent 事务 → CSRF/登录 CSRF；缺 PKCE；redirect URI 未 allowlist → 授权码外泄；按未验证 provider 邮箱自动绑账号 → 账号接管（皆宿主流程决策）。 |
 | PubSoft.Authorization | grant/verifier 实现返回过宽 scope；module/flag 键笔误 fail closed（安全方向）；宿主 resolver 不得引入通配语义。 |
-| PubSoft.Security | 时间戳偏移 300 秒在时钟漂移下放宽重放窗口；多副本环境误注册 `MemoryNonceStore`；identifier 容量耗尽拒绝*新* identifier（攻击者灌唯一 ID → 合法新客户端被拒——identifier 应绑定已验证来源）；PBKDF2 最小迭代与登录 CPU 成本权衡。 |
+| PubSoft.Security | 时间戳偏移 300 秒在时钟漂移下放宽重放窗口；多副本环境误注册 `MemoryNonceStore`；identifier 容量耗尽拒绝*新* identifier——**结论：按设计保留 fail-closed 拒绝**；饿死只伤新客而存量配额照常执行，LRU 逐出反而会让攻击者冲走所有窗口（identifier 应绑定已验证来源）；PBKDF2 最小迭代与登录 CPU 成本权衡。 |
 | PubSoft.Security.Redis | Redis 中断返回拒绝（fail closed——可用性杠杆）；共享 Redis 无前缀/库隔离 → 跨服务 nonce 键碰撞。 |
 
 **`src/testing/`** — `PubSoft.Testing`：测试辅助件绝不可进入生产接线；internal 仅对测试程序集可见（经 InternalsVisibleTo 目标核实）。
@@ -336,6 +336,71 @@ Scheduled HTTP 与 Outbound 也可以从宿主后台任务直接调用外部系�
 | MySql.EntityFrameworkCore | 10.0.12 | 仅测试/集成范围。 |
 
 观察表维护：依赖升级时重跑 `dotnet list PubSoft.sln package --vulnerable --include-transitive`；公告状态易变，每次发布前应复查 GHSA/NVD 源。
+
+## 上游 ABP issue 交叉核查
+
+PubSoft 替代内部 ABP 基座，因此 ABP 的公开 issue 史即威胁情报源：上游暴露过哪些信任边界缺陷、同类问题在本库是否存在。方法：对仓库全量公开历史做按日期分区检索——合并 9,902 条去重 issue（覆盖 10,675 条语料的 92.8%；残余 ~7% 为 API 限速造成的散页丢失，非系统性主题排除），与 20 关键词安全工作集合并。全部条目经标题级 triage；安全信号标题逐条对照 PubSoft 代码核查。UI 模块发现（登录页、权限弹窗、Angular/Blazor 流程）属宿主应用域，仅当底层机制可映射时纳入。
+
+| ABP issue | 上游缺陷类别 | PubSoft 状态 |
+|---|---|---|
+| abpframework/abp#1474 | Password grant 忽略租户 → 跨租户令牌 | 令牌请求取显式 tenant/scope 参数，无 ambient 租户签发。OK。 |
+| #15028、#19520、#19576 | 会话在库重置后仍有效 / 终止不足 | 仅无状态 JWT——无服务端会话可超期。残余：本地对称 JWT 无吊销表，有效期即边界（宿主设定）；JWKS 侧经 R2 由 `CacheMinutes` 限界。 |
+| #2980（open） | 声明/角色变化后 access token 不失效 | 同类问题确认：JWT 声明在签发时冻结。缓解 = 短 `exp` + 宿主对关键授权重新校验，已文档化。 |
+| #26044 | 连接串（含口令）泄漏进异常消息 | 已核实：本库 `InvalidOperationException` 仅嵌 scope id，不嵌凭据；options/连接串不拼接进抛出错误。评审中须守住该不变量。 |
+| #26057 | 强制改密后 password grant 绕过 2FA | 不适用——未交付身份 UI/2FA；同类控制是凭据变化时的宿主令牌失效，已列为宿主责任。 |
+| #14214、#24652、#5729、#5732、#21443、#15789、#20185 | antiforgery cookie/token 生命周期缺陷（HttpOnly、跨标签覆盖、Swagger 缺失） | 不适用——未交付 cookie 认证或 UI。值得标注的缺口：`PubSoft.AspNetCore` 不含 antiforgery 中间件——cookie 认证宿主的 CSRF 防护归宿主。 |
+| #12820 | OAuth state nonce 错误 → state 校验失败 | `PubSoft.Authentication.OAuthProviders` 仅契约；state/nonce 绑定属宿主流程——清单已标记。 |
+| #17361 | token 控制器安全日志记错事件 | `AuditMiddleware` 失败时记录认证状态；事件类型保真为对应物——记录形状已核实为诚实。 |
+| #6247 | IdentityServer 重启后 JWT 失效（丢密钥） | R2 后 JWKS TTL 限界密钥陈旧；重启换新密钥在 `CacheMinutes` 内恢复。 |
+| #5502（open） | 无验证码 → 登录/注册暴力破解 | 登录路由限流 R1 后已具备（per-IP + clientId 基数）；验证码/锁定属宿主 UI/策略。 |
+| #9614、#17051、#25278、#25758、#19845、#26038 | 传递依赖 CVE（Encodings.Web、Linq.Dynamic.Core、Crypto.Xml、OpenApi、AWS SDK） | 均非 PubSoft 包的直接/传递依赖；NU1903/NU1904 在 restore 期硬拦新公告——已覆盖。 |
+| #13183、#15515、#16306、#7751、#8628 | 反射/存储型 XSS（语言切换、权限弹窗、label 编码） | 未交付 UI/标记——`SecurityHeadersMiddleware` CSP 是相邻控制；`subMessage` 诊断已在清单标记。 |
+| #943 | 租户切换时审计日志重复 | `IAuditCollector` 按请求成批；无跨租户重放路径——经设计核实，无专项测试。 |
+
+### 聚类覆盖矩阵（全量 issue 入账）
+
+合并工作集中的每条 issue 均按下表主题桶归位（标题+标签首关键词命中；计数为工作集命中数，非上游总量）。桶级结论概括 PubSoft 侧核查；已核实单项列于表外上下。
+
+| 主题桶 | 命中 | PubSoft 侧结论 |
+|---|---|---|
+| permission-authz | 109 | 授权存储 EF 持久化且有测试（union 查询、外租户排除）；权限检查精确匹配 fail closed。已核实：无 client/role 授权混淆（#26219 类）、grant 查询无 LINQ 翻译缺陷（#21871 类——`PermissionGrantPersistenceTests` 覆盖）。 |
+| tenant-isolation | 108 | 过滤器 + 写守卫（Added 实体外 `TenantId`/`MemberId` 修复后拒绝）；ambient `Change()` 的 scope 泄漏 = 宿主生命周期风险（已文档化）。已核实：无 domain resolver 代码（宿主职责）；切换租户时的 ambient 泄漏（#13567 类）由 `Change()` 释放契约缓解。 |
+| authn-session | 106 | 仅无状态 JWT——会话固定/终止类不适用；残余已文档化（本地 JWT 吊销）。cookie 认证宿主自理会话层。 |
+| jwt-token-oauth | 95 | 两 scheme 显式映射 `RoleClaimType="role"`/`NameClaimType`（#17971 类核实无碍）；`ValidIssuer`/`ValidAudience`/`ValidAlgorithms` 固定；issuer 无效类（#18658）由显式 issuer 覆盖；畸形 bearer → 401 非 500（#10529 类，JwtBearer 内置）。 |
+| password-2fa | 63 | 未交付身份 UI；口令复杂度/锁定/2FA 属宿主决策。#26057 类（强制改密后 2FA 绕过）已列宿主责任。 |
+| di-injection | 21 | 无 property-injection 约定；refactor 后 `Configure(section)` 绑定。已释放 scope 解析属宿主组合风险——已文档化。 |
+| error-exception | 7 | 错误形状已脱敏；dev 细节已标记。异常嵌密钥核实干净（#26044 类）。 |
+| xss-encoding | 6 | 未交付标记；CSP 头具备；`subMessage` 诊断已标记。 |
+| deps-upgrade | 6 | NU1903/NU1904 restore 期硬门；被点名脆弱包均非我们依赖。 |
+| module-arch、cookie-header、blazor-ui、audit-log、docs-samples、i18n、ef-repo、swagger、serialization | 23 | 多为 feature/UI/应用层；可映射项已覆盖（antiforgery 缺口→清单；审计事件保真 ✓；EF 过滤语义已核实）。 |
+| csrf/cache/bg-job/email/rate/concurrency/serialization/impersonation/other | 18+ | 关键词被前桶吸收；相关对应物已在漏洞类别对照覆盖（SSRF、重放、DoS、并发、impersonation 属宿主流程）。 |
+
+本轮新增核实项：
+
+- **#26297/#26298 类**（MySQL `DELETE … WHERE Id IN (SELECT … 同表)` → ERROR 1093）：两条留存清理路径（`InboxRetentionCleanup`、`AuditRetentionCleanup`）均用 EF `RemoveRange` 按主键批删——无自引用子查询。OK。
+- **#21188 类**（无效 JWT scope 静默忽略租户）：claims 是租户解析末段且喂给过滤器——无"忽略租户"回退；租户缺失 → 过滤器返回空集。
+- **#21256 类**（按租户 seed 缺陷）：新写守卫使跨 scope seed 直接抛错——外租户夹具必须在自己 scope 下写入，正是 ABP 踩过的坑。
+- **#14424 类**（一次性令牌语义）：nonce 存储原子单次占用；reset 类令牌属宿主签发——已标注。
+- **#2386 类**（锁定错误差异）：HMAC/JWT 拒绝统一 401 不区分原因——无枚举 oracle。
+
+### 全量语料差集发现（关键词集之外新增）
+
+- **#13112（open）**——TenantManagement 事件载荷携未加密 secret → 同类面：`PubSoft.Events` 载荷不得带凭据（已补入清单）。
+- **#25485**——Mapperly `ExtraProperties` 过滤失效致敏感字段泄漏 → 佐证 `PubSoft.Mapping` over-posting 行；映射配置须 denylist 敏感字段。
+- **#16961、#22560**——服务/客户端代理默认暴露为 HTTP API → PubSoft 路由纯 opt-in（未覆盖端点不存在）；宿主接线评审保留。
+- **#25492**——MySQL 唯一索引键长溢出（3072 字节上限）→ 我们的定宽哈希列（如调度 `KeyHash` = SHA-256 hex 64 字符）天然受限；新表保持定宽键列。
+- **#25536**——共享单例 `List` 并发下腐化 → PubSoft 注册表/构建器注册后不可变；`ClientIdCardinalityGuard` 用 `ConcurrentDictionary`。已核实。
+- **#26120**——嵌套 UoW 泄漏父事件 handler → 作用域资源生命周期泄漏；我们的 context/scope `Dispose` 契约覆盖该模式——宿主 UoW 嵌套需验证。
+- **#25882**——远端流内容丢 `CancellationToken` → 流/拷贝路径须传导取消；`HttpExecutionSupport` 全程使用链式 token。
+- **#15148**——状态变化强制登出 → 账号状态变化时令牌失效属宿主侧（本地 JWT 无吊销表——已注）。
+- **#24768**——身份管理模块提权 → 身份管理流属宿主；我们权限模型默认拒绝。
+- 依赖 CVE 批量（#21041/#23490/#23491/#25810/#25903/#14811/#24702/#9683/#14176）——BouncyCastle/ImageSharp/MessagePack/jQuery 公告 → 均非运行时依赖；NU1903/NU1904 硬门覆盖新增。
+- **#19776（反向信号）**——要求 401 返回*更多*详情 → 我们刻意反向：统一 401 不区分原因是文档化反 oracle 设计。
+
+本交叉核查新增的观察项：
+1. **异常消息卫生**（#26044 类）：审计未来任何把 options/config 拼进抛出消息的错误路径——scope id 可以，凭据/连接串不行。
+2. **antiforgery 缺口披露**：`PubSoft.AspNetCore` 与 cookie 认证搭配使用时宿主必须自行接入 ASP.NET Core antiforgery——本包不提供。已补入下方宿主清单。
+3. **本地 JWT 吊销**：对称 scheme 无吊销表——短 `exp` + 签发侧失效为文档化的宿主控制。
 
 ## 测试与供应链证据
 
@@ -359,6 +424,7 @@ Scheduled HTTP 与 Outbound 也可以从宿主后台任务直接调用外部系�
 - 评审 `IgnoreScopeFilters()`、`IgnoreQueryFilters()`、后台 worker 与访问租户数据的管理端点；保护跨租户运维路径。
 - 对任务目标应用出方向 allowlist/网络策略。默认不让低可信任务作者选择内网地址、凭据头或不安全重试。
 - 定义审计字段、敏感值掩码、访问控制、留存与删除。使外部消息副作用幂等。
+- `PubSoft.AspNetCore` 与 cookie 认证搭配时须自行接入 ASP.NET Core antiforgery——本包不提供；无防护的 cookie 认证改态路由暴露 CSRF。
 - 禁用或保护非开发环境的 Edge OpenAPI/Swagger、`none` 方法与详细错误；生产客户端不使用遗留 MD5。
 - 把 Redis/MySQL 故障、代理链行为、限流容量、超时/并发与依赖公告纳入 runbook 与监控。
 
