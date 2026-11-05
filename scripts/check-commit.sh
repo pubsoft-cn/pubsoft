@@ -25,6 +25,14 @@ for d in docs/*.md; do
   esac
 done; [ $miss -eq 0 ] && ok "docs/* bilingual pairs complete"
 
+echo "== [3a] root-file bilingual pairs =="
+miss=0
+# Governance-facing root docs must carry zh-CN pairs; legal/AI-index files are exempt.
+for f in CONTRIBUTING.md CODE_OF_CONDUCT.md CHANGELOG.md SECURITY.md README.md; do
+  [ -f "$f" ] && [ ! -f "${f%.md}.zh-CN.md" ] && { bad "missing zh-CN pair: $f"; miss=1; }
+done
+[ $miss -eq 0 ] && ok "root governance docs bilingual pairs complete"
+
 echo "== [3] docs governance (warn-level rollout) =="
 warn=0
 for f in docs/*.md; do
