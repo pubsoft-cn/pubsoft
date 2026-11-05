@@ -46,6 +46,8 @@ jobs:
         run: dotnet restore PubSoft.sln
       - name: Format check
         run: dotnet format PubSoft.sln --verify-no-changes --no-restore
+      - name: Public API ledger drift check
+        run: bash scripts/sync-public-api.sh --check
       - name: Test (with coverage)
         run: dotnet test PubSoft.sln --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory coverage-results
       - name: Coverage gate (>=70% union line coverage)
