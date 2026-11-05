@@ -14,4 +14,7 @@
     <ProjectReference Include="../../security/PubSoft.Security/PubSoft.Security.csproj" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="PubSoft.Host.Tests" />
+  </ItemGroup>
 </Project>

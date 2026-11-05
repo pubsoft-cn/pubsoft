@@ -68,6 +68,8 @@ PubSoft.AspNetCore.ExceptionHandlingMiddleware.InvokeAsync(Microsoft.AspNetCore.
 PubSoft.AspNetCore.ExceptionHandlingMiddlewareExtensions
 PubSoft.AspNetCore.GatewayRateLimitingExtensions
 PubSoft.AspNetCore.GatewayRateLimitOptions
+PubSoft.AspNetCore.GatewayRateLimitOptions.ClientIdWindowSeconds.get -> int
+PubSoft.AspNetCore.GatewayRateLimitOptions.ClientIdWindowSeconds.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.Enabled.get -> bool
 PubSoft.AspNetCore.GatewayRateLimitOptions.Enabled.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.FailurePermitLimit.get -> int
@@ -76,6 +78,8 @@ PubSoft.AspNetCore.GatewayRateLimitOptions.FailureRateLimitEnabled.get -> bool
 PubSoft.AspNetCore.GatewayRateLimitOptions.FailureRateLimitEnabled.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.FailureWindowSeconds.get -> int
 PubSoft.AspNetCore.GatewayRateLimitOptions.FailureWindowSeconds.set -> void
+PubSoft.AspNetCore.GatewayRateLimitOptions.ForwardLimit.get -> int?
+PubSoft.AspNetCore.GatewayRateLimitOptions.ForwardLimit.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.GatewayRateLimitOptions() -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.HealthPathPrefixes.get -> string!
 PubSoft.AspNetCore.GatewayRateLimitOptions.HealthPathPrefixes.set -> void
@@ -89,6 +93,10 @@ PubSoft.AspNetCore.GatewayRateLimitOptions.LoginPermitLimit.get -> int
 PubSoft.AspNetCore.GatewayRateLimitOptions.LoginPermitLimit.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.LoginWindowSeconds.get -> int
 PubSoft.AspNetCore.GatewayRateLimitOptions.LoginWindowSeconds.set -> void
+PubSoft.AspNetCore.GatewayRateLimitOptions.MaxClientIdsPerIp.get -> int
+PubSoft.AspNetCore.GatewayRateLimitOptions.MaxClientIdsPerIp.set -> void
+PubSoft.AspNetCore.GatewayRateLimitOptions.MaxTrackedIps.get -> int
+PubSoft.AspNetCore.GatewayRateLimitOptions.MaxTrackedIps.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.NotFoundPermitLimit.get -> int
 PubSoft.AspNetCore.GatewayRateLimitOptions.NotFoundPermitLimit.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.NotFoundRateLimitEnabled.get -> bool
@@ -99,6 +107,8 @@ PubSoft.AspNetCore.GatewayRateLimitOptions.OAuthFailureLimit.get -> int
 PubSoft.AspNetCore.GatewayRateLimitOptions.OAuthFailureLimit.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.OAuthPathPrefixes.get -> string!
 PubSoft.AspNetCore.GatewayRateLimitOptions.OAuthPathPrefixes.set -> void
+PubSoft.AspNetCore.GatewayRateLimitOptions.OAuthPerIpPermitLimit.get -> int
+PubSoft.AspNetCore.GatewayRateLimitOptions.OAuthPerIpPermitLimit.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.OAuthPermitLimit.get -> int
 PubSoft.AspNetCore.GatewayRateLimitOptions.OAuthPermitLimit.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.OAuthWindowSeconds.get -> int
@@ -109,12 +119,18 @@ PubSoft.AspNetCore.GatewayRateLimitOptions.PermitLimit.get -> int
 PubSoft.AspNetCore.GatewayRateLimitOptions.PermitLimit.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.QueueLimit.get -> int
 PubSoft.AspNetCore.GatewayRateLimitOptions.QueueLimit.set -> void
+PubSoft.AspNetCore.GatewayRateLimitOptions.TrustedNetworks.get -> string![]!
+PubSoft.AspNetCore.GatewayRateLimitOptions.TrustedNetworks.set -> void
+PubSoft.AspNetCore.GatewayRateLimitOptions.TrustedProxies.get -> string![]!
+PubSoft.AspNetCore.GatewayRateLimitOptions.TrustedProxies.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.ValidateAnonymousPermitLimit.get -> int
 PubSoft.AspNetCore.GatewayRateLimitOptions.ValidateAnonymousPermitLimit.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.ValidateFailureLimit.get -> int
 PubSoft.AspNetCore.GatewayRateLimitOptions.ValidateFailureLimit.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.ValidatePathPrefixes.get -> string!
 PubSoft.AspNetCore.GatewayRateLimitOptions.ValidatePathPrefixes.set -> void
+PubSoft.AspNetCore.GatewayRateLimitOptions.ValidatePerIpPermitLimit.get -> int
+PubSoft.AspNetCore.GatewayRateLimitOptions.ValidatePerIpPermitLimit.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.ValidatePermitLimit.get -> int
 PubSoft.AspNetCore.GatewayRateLimitOptions.ValidatePermitLimit.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.ValidateWindowSeconds.get -> int

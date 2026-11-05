@@ -58,10 +58,10 @@ Scheduled HTTP 与 Outbound 也可以从宿主后台任务直接调用外部系�
 | 包/API 面 | 安全相关契约 | 消费方所需决策与证据边界 |
 |---|---|---|
 | `PubSoft.AspNetCore`：`AddPubSoftPermissionAuthorization`、`AddPubSoftClientCredential`、`PermissionEndpointFilter`、`ClientCredentialEndpointFilter`、`IClientCredentialVerifier` | 授权 filter 显式 opt-in；客户端凭据经可配置头传入并委派给宿主 verifier；verifier 结果可设置 client ID、tenant ID 与 claims。 | 枚举受保护路由并证明每条被覆盖。校验 secret 时不得记日志；把返回的 tenant/claims 绑定到已验证凭据与最小权限范围。公共 API 声明边界，不证明宿主 verifier 正确。 |
-| `PubSoft.Authentication.Jwt.AspNetCore`：`PubSoftJwtBearerOptions`、`DualJwtOptions`、`JwksOptions`、`JwksKeyProvider` | 公共设置含 issuer、audience、metadata/JWKS 来源与对称密钥备选；JWKS 缓存期可配。Dual JWT AuthServer 当前存在单独报告的 audience 校验与 key 缓存生命周期发现 R2-R3。 | 固定接受的 issuer、audience、算法与密钥来源；metadata 端点置于管理控制下；演练密钥轮换与跨 audience 拒绝。不要把普通 bearer 路径的校验推及 Dual JWT。 |
+| `PubSoft.Authentication.Jwt.AspNetCore`：`PubSoftJwtBearerOptions`、`DualJwtOptions`、`JwksOptions`、`JwksKeyProvider` | 公共设置含 issuer、audience、metadata/JWKS 来源与对称密钥备选；JWKS 缓存期可配。Dual JWT AuthServer 曾有单独报告的 audience 校验与 key 缓存生命周期发现 R2-R3，均已在基线后修复。 | 固定接受的 issuer、audience、算法与密钥来源；metadata 端点置于管理控制下；演练密钥轮换与跨 audience 拒绝。不要把普通 bearer 路径的校验推及 Dual JWT。 |
 | `PubSoft.AspNetCore`：`HttpContextTenantOptions.ReadHeader`、`ClaimNames`、`HeaderName`；`PermissionEndpointFilter` | 租户头读取默认关闭；启用的头是租户选择器而非身份证明。授权以 subject 与租户上下文为输入。 | 只允许经服务端验证的主体选择其有权访问的租户。在真实仓储路径上测试跨租户对象访问、缺失租户/成员上下文与特权过滤器旁路。 |
 | `PubSoft.AspNetCore`：`PubSoftForwardedHeadersOptions` 与 gateway/custom 限流选项 | 适配器中 forwarded-for/proto 处理默认开启；`TrustAnyProxy` 默认 false，`ForwardLimit` 默认 null，可配置精确的可信代理/网段列表。自定义策略接受 `IdentifierSelector` 并限制 identifier 数量；Gateway 有独立的 anonymous/client/failure 桶。 | 只配置真实代理对端与代理链上限；隔离后端并在 IP 消费方之前运行该中间件。除非在认证之后派生，自定义 identifier 一律视为不可信；保留聚合限流。Gateway 的独立信任假设见 R1 与 R6。 |
-| `PubSoft.Security`：`HmacSignatureValidator`、`INonceStore`、`MemoryNonceStore`、`RateLimiter`；ASP.NET Core `HmacValidationOptions` | 签名输入含 method、path、query 与可选 body digest；豁免路径前缀与最大 body 可配。body 哈希默认开启（`RequireBodyHash`，默认 1 MiB，硬上限 16 MiB）。内存 nonce 存储默认 100,000 条且进程内有效。 | 收窄旁路前缀、按请求语义要求 body digest、限制请求体、保护 secret 解析，并在多副本间使用原子共享 nonce 存储。确保每个入签字段与代理规范化及客户端 canonicalization 一致。 |
+| `PubSoft.Security`：`HmacSignatureValidator`、`INonceStore`、`MemoryNonceStore`、`RateLimiter`；ASP.NET Core `HmacValidationOptions` | 签名输入含 method、path、query 与可选 body digest；豁免路径前缀与最大 body 可配。body 哈希默认开启（`RequireBodyHash`，默认 1 MiB，硬上限 16 MiB）。内存 nonce 存储默认上限十万条且进程内有效。 | 收窄旁路前缀、按请求语义要求 body digest、限制请求体、保护 secret 解析，并在多副本间使用原子共享 nonce 存储。确保每个入签字段与代理规范化及客户端 canonicalization 一致。 |
 | `PubSoft.Scheduling.Http`：`HttpExecutorOptions`、`HttpExecutorConfig`、`TokenRef` | 私网阻断默认开启；宿主 allowlist 默认空；重定向与系统代理默认关闭；不安全重试需 opt-in。options 校验拒绝 `UseSystemProxy` 与 `BlockPrivateNetworks` 组合。凭据与任意头可经任务配置提供。 | 限制可创建/编辑任务的主体；可行时设置显式宿主 allowlist；无书面豁免不启用私网目标、代理或不安全重试。安全的执行器无法授权任务作者，也无法保证连接路径之外的网络安全。 |
 | `PubSoft.Contracts` / `PubSoft.Outbound`：`ApiFieldAttribute.IsEncrypted`、`IOutboundSdk.ExecuteAsync(request, profileId, tenantId)` | `IsEncrypted` 是元数据而非密码学变换。Outbound 调用接受 tenant 与 profile 选择器，但其本身不做授权。 | 调用前强制 tenant/profile 授权，并在具体 provider 中保护凭据、传输、日志与重试。不要把元数据或必填参数当作强制手段。 |
 | `PubSoft.Edge.Client` / `PubSoft.Edge.Core` / `PubSoft.Edge`：`EdgeClient` 构造函数、`EdgeAuthScheme.None/Md5`、`EnablePseudoPaths`、`TimestampToleranceSeconds`、OpenAPI 选项 | 一个客户端构造函数默认 `None`；handler scheme 默认按包 README 为 HMAC + session。MD5 与 `None` 仍作为公开兼容/匿名 scheme。伪路径默认关闭；OpenAPI 默认仅 Development，Swagger UI 使用可配置 CDN 资源。 | 客户端显式选择 scheme；`None` 只用于有意公开的 handler，MD5 只用于遗留互通。生产环境管控方法目录与文档，评审 CDN 策略，不向最终用户返回 `subMessage` 诊断。 |
@@ -78,7 +78,7 @@ Scheduled HTTP 与 Outbound 也可以从宿主后台任务直接调用外部系�
 
 ### 逐包台账对账
 
-本对账在包级别完整，而非逐符号级别。一条声明按台账中非空、非注释行计。本检出中 43 个 `PublicAPI.Shipped.txt` 台账全部为零声明；43 个 `PublicAPI.Unshipped.txt` 台账共 3,558 条声明。因此检入的台账快照把所列 API 契约记为未发布；这不构成对包发布状态的断言。包列链接到其 unshipped 台账。"已分析"表示其安全相关契约组在上文或所引章节讨论；"仅登记"表示该包已入账但并未声称做了直接的安全契约评审。
+本对账在包级别完整，而非逐符号级别。一条声明按台账中非空、非注释行计。本检出中所有 `PublicAPI.Shipped.txt` 台账均为零声明；全部 API 契约以未发布形式记录在 `PublicAPI.Unshipped.txt` 台账中。因此检入的台账快照把所列 API 契约记为未发布；这不构成对包发布状态的断言。包列链接到其 unshipped 台账。"已分析"表示其安全相关契约组在上文或所引章节讨论；"仅登记"表示该包已入账但并未声称做了直接的安全契约评审。
 
 | 包 / 台账 | 本报告中的对账 |
 |---|---|
@@ -126,7 +126,7 @@ Scheduled HTTP 与 Outbound 也可以从宿主后台任务直接调用外部系�
 | [PubSoft.Security.Redis](../src/security/PubSoft.Security.Redis/PublicAPI.Unshipped.txt) | 已分析：分布式 nonce 占用与 Redis 可用性/故障转移边界。 |
 | [PubSoft.Testing](../src/testing/PubSoft.Testing/PublicAPI.Unshipped.txt) | 仅登记：测试辅助件不是运行时控制，也不证明消费方部署安全。 |
 
-本对账不声称 3,558 条声明逐条经过安全评审。它确立包级入账并把安全相关组指向分析；"仅登记"是明确的限制声明，不是健康证明。部署的 HTTP 端点无法从这些库台账枚举，因为端点由消费宿主定义。
+本对账不声称台账中的声明逐条经过安全评审。它确立包级入账并把安全相关组指向分析；"仅登记"是明确的限制声明，不是健康证明。部署的 HTTP 端点无法从这些库台账枚举，因为端点由消费宿主定义。
 
 本清单明确了责任划分：NuGet 公共 API 定义可用机制与 opt-in 开关；消费宿主决定注册、端点覆盖、身份/secret provider 与中间件顺序；部署层控制代理可达性、broker/DB ACL、出方向、TLS 与运维监控。API 台账是有用的评审输入，但不是安全规格，也不证明所有组合都安全。
 
@@ -137,14 +137,14 @@ Scheduled HTTP 与 Outbound 也可以从宿主后台任务直接调用外部系�
 | OWASP API 风险 | 需评估的 PubSoft 面 | 评估 / 待证事项 |
 |---|---|---|
 | API1 对象级授权失效 | 权限过滤器、租户上下文、EF 作用域过滤器、Outbound tenant ID | 机制存在，但路由/资源授权、过滤器旁路与消费方业务查询需要宿主级负向测试。 |
-| API2 认证失效 | JWT、Dual JWT/JWKS、HMAC、客户端凭据、Edge 会话 | 提供多种认证机制；按部署验证 issuer/audience/密钥生命周期、secret 校验、重放行为与会话存储。R2-R4 是具体的条件性发现。 |
+| API2 认证失效 | JWT、Dual JWT/JWKS、HMAC、客户端凭据、Edge 会话 | 提供多种认证机制；按部署验证 issuer/audience/密钥生命周期、secret 校验、重放行为与会话存储。R2-R4 曾是具体的条件性发现，均已在基线后修复。 |
 | API3 对象属性级授权失效 | `ApiFieldAttribute.IsEncrypted`、DTO/契约、审计值捕获 | 加密元数据是描述性的，不强制字段级机密性或授权。在每个宿主中评审序列化、批量赋值与敏感字段策略。 |
-| API4 资源消耗无限制 | Gateway/自定义限流、口令工作因子、请求体上限、队列与 worker 池 | 部分控制有界且进程内；不确立集群级公平性、并发上限、登录防滥用或全部载荷/队列上限。R1 是条件性配额分区风险。 |
+| API4 资源消耗无限制 | Gateway/自定义限流、口令工作因子、请求体上限、队列与 worker 池 | 部分控制有界且进程内；不确立集群级公平性、并发上限、登录防滥用或全部载荷/队列上限。R1 曾是条件性配额分区风险，已在基线后修复。 |
 | API5 功能级授权失效 | 权限 endpoint/MVC filter、客户端凭据 filter、Edge handler scheme | opt-in filter 与逐 handler scheme 必须一致应用。盘点端点并测试未认证、错角色、错客户端与跨租户调用。 |
 | API6 敏感业务流访问无限制 | 登录/validate、OAuth 流程、出站任务、Edge 方法、管理 API | 业务流限流与事务授权随应用而定；在消费方验证配额、滥用检测与 step-up/审批控制。 |
 | API7 服务端请求伪造 | Scheduled HTTP、JWKS metadata/JWKS URI、OAuth provider 配置 | Scheduled HTTP 文档化了连接时地址固定与逐跳重定向校验；宿主 allowlist 与禁用不安全代理组合仍是部署决策。身份 metadata URL 保持可信且固定。 |
-| API8 安全配置错误 | `TrustAnyProxy`、转发头链、`ReadHeader`、`UseSystemProxy`、OpenAPI、`None` scheme | 高影响选项是公开的，其中一些明确标注在受限拓扑外不安全。验证生产生效配置而非仅源码默认值。R6 以代理拓扑为条件。 |
-| API9 资产清单管理不当 | 86 个包公共 API 台账、API 文档、Swagger/OpenAPI、包消费者 | 逐包台账与消费者冒烟项目有助于资产盘点。`scripts/sync-public-api.sh --check` 存在，但所评审 CI 工作流未显式调用；路由清单与外部 API 版本仍是宿主责任。 |
+| API8 安全配置错误 | `TrustAnyProxy`、转发头链、`ReadHeader`、`UseSystemProxy`、OpenAPI、`None` scheme | 高影响选项是公开的，其中一些明确标注在受限拓扑外不安全。验证生产生效配置而非仅源码默认值。R6 以代理拓扑为条件，已在基线后部分缓解。 |
+| API9 资产清单管理不当 | 逐包公共 API 台账、API 文档、Swagger/OpenAPI、包消费者 | 逐包台账与消费者冒烟项目有助于资产盘点。`scripts/sync-public-api.sh --check` 存在，但所评审 CI 工作流未显式调用；路由清单与外部 API 版本仍是宿主责任。 |
 | API10 API 消费不安全 | OAuth provider 适配器、MQTT/Outbox、出站 HTTP、错误传播 | 校验上游 TLS/身份、响应模式与信任边界；清洗上游错误并使外部副作用幂等。MQTT README 记录了 MQTT 5 依赖与 at-least-once 语义。 |
 
 与发现最直接相关的外部建议：RFC 8725 要求应用选定 JWT 算法，并在 issuer/audience 声明用于区分接收方时校验之；Microsoft ASP.NET Core 指引要求转发头只来自可信代理/网段，且先于依赖它们的中间件处理；OWASP 多租户指引把客户端提供的租户标识视为需要服务端授权的选择器；OWASP 口令指引建议自适应散列并平衡工作因子与登录期拒绝服务风险。这些建议为宿主清单提供依据；它们本身不确立 PubSoft 缺陷。
@@ -165,25 +165,25 @@ Scheduled HTTP 与 Outbound 也可以从宿主后台任务直接调用外部系�
 
 **严重级：中；置信度：高。** 在 [GatewayRateLimitingExtensions.cs](../src/host/PubSoft.AspNetCore/GatewayRateLimitingExtensions.cs) 中，`/api/auth/validate` 路由读取 `X-Client-Id`（`Basic` 授权头用户名被接受为等价来源）；任何非空值会选择 `validate-client` 策略而非匿名策略。默认限额分别为每分钟 2,000 与 10 次，客户端桶按 `clientId@IP` 键控。同一标识也参与 failure 限流与默认策略的标识计算。两个来源都不证明客户端凭据已通过验证，因此调用方可改变其取值创建独立分区，削弱聚合节流。通用 RateLimiter 将 identifier 上限设为 100,000；达到容量即拒绝新 identifier。该风险是配额碎片化与容量消耗，而非无界建桶。
 
-**前置条件/影响：** 宿主启用该 Gateway 策略、validate 路由可从不可信网络到达、且边缘未移除或未权威改写该头。它削弱匿名滥用防护；限流器本身不构成认证绕过证明。**建议：** 把匿名限流绑定到可信来源；仅在凭据验证后允许按已认证主体/客户端分区，并保留独立的 IP/全局限流。为任意头取值与失败响应增加回归测试。
+**前置条件/影响：** 宿主启用该 Gateway 策略、validate 路由可从不可信网络到达、且边缘未移除或未权威改写该头。它削弱匿名滥用防护；限流器本身不构成认证绕过证明。**建议：** 把匿名限流绑定到可信来源；仅在凭据验证后允许按已认证主体/客户端分区，并保留独立的 IP/全局限流。为任意头取值与失败响应增加回归测试。**状态：** 已在评审基线后修复——伪造客户端身份被双重约束：单 IP 的 clientId 基数上限将超额身份退化到按 IP 桶，且无条件的 `validate-ip`/`oauth-ip` 聚合策略为单地址总请求量封顶。
 
 ### R2：JWKS Key-ID 缓存绕过 JWKS TTL
 
 **严重级：中；置信度：高。** [JwksKeyProvider.cs](../src/security/PubSoft.Authentication.Jwt.AspNetCore/JwksKeyProvider.cs) 中的 `_keyCache` 是无过期的 `ConcurrentDictionary`。key ID 命中直接返回缓存键；`CacheMinutes` 只作用于 `IMemoryCache` 中的 JWKS 集合。旧 key 从 JWKS 移除后，该进程仍可无限期接受用旧 key 签名的令牌——只要其余校验通过。
 
-**前置条件/影响：** 使用远端 JWKS 的 Dual JWT 路径，且该 key 已在进程内解析过。撤销响应时间不受配置的 `CacheMinutes` 约束。**建议：** 让按 key 缓存共享 JWKS 生命周期，或在刷新后驱逐已撤销 key；增加模拟密钥轮换/撤销测试并定义重叠期。
+**前置条件/影响：** 使用远端 JWKS 的 Dual JWT 路径，且该 key 已在进程内解析过。撤销响应时间不受配置的 `CacheMinutes` 约束。**建议：** 让按 key 缓存共享 JWKS 生命周期，或在刷新后驱逐已撤销 key；增加模拟密钥轮换/撤销测试并定义重叠期。**状态：** 已在评审基线后修复——按 key 字典已移除；已解析 key 与 JWKS 集合共享 `CacheMinutes` 生命周期，空 JWKS 响应也按 TTL 缓存。
 
 ### R3：AuthServer JWT Scheme 不校验 Audience
 
 **严重级：中；置信度：高，影响随部署而定。** [DualJwtAuthenticationExtensions.cs](../src/security/PubSoft.Authentication.Jwt.AspNetCore/DualJwtAuthenticationExtensions.cs) 为 `AuthServerJwks` 设置 `ValidateAudience = false`。若同一 issuer 为多个 API 签发不同 audience 的令牌，本 API 可能接受并非发给它的令牌。
 
-**前置条件/影响：** 该 scheme 已启用、issuer 使用 audience 隔离、且无上层强制目标 audience。issuer、签名与有效期仍会校验；本发现不意味着可伪造任意令牌。**建议：** 配置并校验预期 audience，或文档化 AuthServer 令牌共享等价 audience 边界的理由，并增加跨 audience 拒绝测试。
+**前置条件/影响：** 该 scheme 已启用、issuer 使用 audience 隔离、且无上层强制目标 audience。issuer、签名与有效期仍会校验；本发现不意味着可伪造任意令牌。**建议：** 配置并校验预期 audience，或文档化 AuthServer 令牌共享等价 audience 边界的理由，并增加跨 audience 拒绝测试。**状态：** 已在评审基线后修复——新增 `JwksOptions.Audience`；配置后 scheme 校验 `aud`（且 `ValidAlgorithms` 固定为 RS256）。未配置仍跳过校验，残余暴露成为宿主显式选择。
 
 ### R4：JWKS Provider 经由第二个 DI 容器解析
 
 **严重级：低至中；置信度：高。** 同一扩展在认证选项回调中捕获 `Lazy<JwksKeyProvider>`，并通过 `services.BuildServiceProvider()` 创建。这从服务描述符构建 provider，而非从真实宿主容器解析；singleton、缓存与资源释放生命周期可能发生分裂。可能后果包括依赖实例/配置不一致，以及 provider/HttpClient 资源不随应用容器释放。
 
-**前置条件/影响：** 仅适用于配置了 AuthServer JWKS 的 Dual JWT；具体资源影响取决于注册方式。**建议：** 改用由真实宿主容器解析的认证运行时服务，或其他不构建第二个 provider 的集成方式；验证生命周期与释放。
+**前置条件/影响：** 仅适用于配置了 AuthServer JWKS 的 Dual JWT；具体资源影响取决于注册方式。**建议：** 改用由真实宿主容器解析的认证运行时服务，或其他不构建第二个 provider 的集成方式；验证生命周期与释放。**状态：** 已在评审基线后修复——`Lazy`/`BuildServiceProvider()` 路径已替换为 `AddOptions<JwtBearerOptions>(AuthServerScheme).Configure<JwksKeyProvider>(...)`，provider 经宿主容器解析，生命周期遵循常规 DI 规则。
 
 ### R5：HMAC Query-String 文档与行为冲突
 
@@ -195,7 +195,7 @@ Scheduled HTTP 与 Outbound 也可以从宿主后台任务直接调用外部系�
 
 **严重级：中（条件性）；置信度：高。** Gateway 限流清空 Forwarded Headers 的 `KnownIPNetworks`/`KnownProxies` 并移除跳数上限（`ForwardLimit = null`），以支持可信前置网关拓扑；代码注释与 [ASP.NET Core README](../src/host/PubSoft.AspNetCore/README.md) 要求网关剥离外部供给的 `X-Forwarded-For`。若后端直连可达或代理透传客户端供给值，调用方可影响限流标识与依赖 IP 的审计逻辑。`ProxyDeploymentDiagnostics.HasUnprocessedForwardedHeaders` 在运行时检测一类常见错配（私网 socket peer 搭配公网宣告客户端），两个限流中间件都会发出一次性告警，但检测不等于防护。
 
-**建议：** 将后端可达性限制在可信代理；对外部转发头覆写而非追加；逐跳验证中间件顺序与信任；通过真实代理部署测试验证服务端实际观测到的 `RemoteIpAddress`。
+**建议：** 将后端可达性限制在可信代理；对外部转发头覆写而非追加；逐跳验证中间件顺序与信任；通过真实代理部署测试验证服务端实际观测到的 `RemoteIpAddress`。**状态：** 已在评审基线后部分缓解——`GatewayRateLimitOptions.TrustedProxies`/`TrustedNetworks`/`ForwardLimit` 支持固定可信对端（非法条目启动期报错）；两个清单皆空时保留信任任意 peer 的行为以支持纯网关拓扑，部署前置条件仍然适用。
 
 ## 补充边界细节
 
@@ -255,7 +255,7 @@ Scheduled HTTP 与 Outbound 也可以从宿主后台任务直接调用外部系�
 
 本分析未验证具体消费应用、云账号、真实网关配置、生产密钥权限、数据库账号、第三方 OAuth provider、broker ACL、Redis 持久性、容器镜像溯源或发布操作。源码评审与现有测试也无法确立真实中间件顺序、端点覆盖、操作员权限或运行时告警质量。
 
-先按 R1-R6 复验实现与宿主部署；再对齐所有包指引、测试与消费者示例中的 HMAC query-string 格式；最后考虑静态分析、依赖来源映射/供应链溯源，以及针对生产拓扑的集成测试。这些是后续建议，不是本评审作出的实现变更。
+六项发现均已在评审基线后修复或缓解（见各发现的状态注记）；按新选项复验宿主部署仍然必要。进一步建议：考虑静态分析、依赖来源映射/供应链溯源，以及针对生产拓扑的集成测试。
 
 ## 主要证据
 
