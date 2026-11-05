@@ -56,6 +56,10 @@ public static class DualJwtAuthenticationExtensions
                 sp.GetRequiredService<System.Net.Http.IHttpClientFactory>().CreateClient(nameof(JwksKeyProvider))));
         }
 
+        if (Encoding.UTF8.GetByteCount(jwtOptions.SecretKey) < 32)
+            throw new ArgumentException(
+                "Jwt:SecretKey must contain at least 256 bits (32 bytes) of key material.", nameof(configuration));
+
         var authBuilder = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
 
         authBuilder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>

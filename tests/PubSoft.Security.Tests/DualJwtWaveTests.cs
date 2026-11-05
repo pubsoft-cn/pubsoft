@@ -44,6 +44,7 @@ public sealed class DualJwtWaveTests
     {
         using var provider = BuildProvider(new Dictionary<string, string?>
         {
+            ["Jwt:SecretKey"] = new string('k', 48),
             ["AuthServer:Issuer"] = Issuer,
             ["AuthServer:JwksUri"] = "https://id.test/jwks.json",
         });
@@ -78,6 +79,7 @@ public sealed class DualJwtWaveTests
     {
         using var provider = BuildProvider(new Dictionary<string, string?>
         {
+            ["Jwt:SecretKey"] = new string('k', 48),
             ["AuthServer:Issuer"] = Issuer,
             ["AuthServer:JwksUri"] = "https://id.test/jwks.json",
         });
@@ -110,10 +112,24 @@ public sealed class DualJwtWaveTests
     }
 
     [Fact]
+    public void ShortSecretKeyFailsStartup()
+    {
+        var config = BuildConfig(new Dictionary<string, string?>
+        {
+            ["Jwt:SecretKey"] = new string('k', 16),
+        });
+        var services = new ServiceCollection();
+
+        Assert.Throws<ArgumentException>(
+            () => services.AddPubSoftDualJwtAuthentication(config));
+    }
+
+    [Fact]
     public void LoopbackHttpJwksUriIsAllowedForDevelopment()
     {
         var config = BuildConfig(new Dictionary<string, string?>
         {
+            ["Jwt:SecretKey"] = new string('k', 48),
             ["AuthServer:Issuer"] = "http://localhost:8080",
             ["AuthServer:JwksUri"] = "http://localhost:8080/jwks.json",
         });
