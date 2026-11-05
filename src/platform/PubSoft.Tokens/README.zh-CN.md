@@ -1,3 +1,10 @@
+---
+purpose: PubSoft.Tokens 包级接入指南
+audience: 集成方宿主开发者
+owner: PubSoft 维护组
+last-reviewed: 2026-10-13
+---
+
 # PubSoft.Tokens
 
 [English](README.md) | **简体中文**
@@ -85,11 +92,24 @@ bash scripts/verify-package-consumer.sh
 `MachineTokenProvider` 本地签发 HS256 access token（走 `PubSoft.Authentication.Jwt`），按 credential key 缓存到 `Lifetime - RefreshBefore`——无外部 STS 场景的标准机到机凭证。配合 `TokenDelegatingHandler` 为出站 `HttpClient` 注入 Bearer。
 
 ```csharp
-services.Configure<MachineTokenOptions>(o =>
+// 绑定 Jwt:Issuer / Jwt:Audience / Jwt:SecretKey（SigningKey 别名同样接受），
+// 以及可选 KeyId / Lifetime / RefreshBefore / Credentials；启动期校验。
+services.AddPubSoftMachineTokens(configuration);
+```
+
+issuer/audience 与验证面 `ValidIssuer`/`ValidAudience` 按序数比较（区分大小写）——签发方
+与验证方必须读同一份配置值，任一侧都不得硬编码字面量。签名密钥需含 256–1024 bit 密钥材料；
+生产密钥走 secret manager，不进源码管控配置。
+
+不走配置绑定、显式给 options 时：
+
+```csharp
+services.AddPubSoftMachineTokens(o =>
 {
     o.Issuer = "orders"; o.Audience = "inventory";
     o.SigningKey = configuration["Jwt:SecretKey"]!;
     o.Credentials["inventory"] = new MachineTokenCredential { Claims = { ["caller_type"] = "Machine" } };
 });
-services.AddSingleton<ITokenProvider, MachineTokenProvider>();
 ```
+HTTP 提供方与本机签发共存时，经 keyed DI 确定性解析本机签发：`[FromKeyedServices(MachineTokenProvider.ServiceKey)]`（`"machine"`）。
+

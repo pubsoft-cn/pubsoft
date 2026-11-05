@@ -1,3 +1,10 @@
+---
+purpose: package-level hosting guide for PubSoft.Tokens
+audience: integrating host developers
+owner: PubSoft maintainers
+last-reviewed: 2026-10-13
+---
+
 # PubSoft.Tokens
 
 **English** | [简体中文](README.zh-CN.md)
@@ -86,11 +93,25 @@ Tests cover token caching, dynamic expiry, concurrent refresh within one process
 `MachineTokenProvider` issues HS256 access tokens locally (via `PubSoft.Authentication.Jwt`) and caches them per credential key until `Lifetime - RefreshBefore` — the standard machine-to-machine credential when no external STS is involved. Compose with `TokenDelegatingHandler` for outbound `HttpClient` Bearer injection.
 
 ```csharp
-services.Configure<MachineTokenOptions>(o =>
+// Binds Jwt:Issuer / Jwt:Audience / Jwt:SecretKey (SigningKey is accepted as an alias)
+// plus optional KeyId, Lifetime, RefreshBefore, and Credentials; validated at startup.
+services.AddPubSoftMachineTokens(configuration);
+```
+
+Issuer and audience are compared ordinally (case-sensitive) against the validator's
+`ValidIssuer`/`ValidAudience`, so signers and validators must read the same configured
+values — never hardcode literals on one side. The signing key must hold 256–1024 bits
+of key material; keep production keys in a secret manager, not source-controlled config.
+
+For explicit options instead of configuration binding:
+
+```csharp
+services.AddPubSoftMachineTokens(o =>
 {
     o.Issuer = "orders"; o.Audience = "inventory";
     o.SigningKey = configuration["Jwt:SecretKey"]!;
     o.Credentials["inventory"] = new MachineTokenCredential { Claims = { ["caller_type"] = "Machine" } };
 });
-services.AddSingleton<ITokenProvider, MachineTokenProvider>();
 ```
+When both an HTTP provider and machine tokens coexist, resolve the local issuer deterministically via keyed DI: `[FromKeyedServices(MachineTokenProvider.ServiceKey)]` (`"machine"`).
+
