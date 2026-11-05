@@ -76,4 +76,10 @@ public sealed class TeamsWebhookChannel : INotificationChannel
 public sealed class TeamsWebhookOptions
 {
     public string WebhookUrl { get; set; } = "";
+
+    /// <summary>
+    /// Permits a plaintext <c>http</c> webhook URL. Non-loopback <c>http</c> is rejected
+    /// unless this is set. Loopback endpoints are exempt for local development.
+    /// </summary>
+    public bool AllowInsecureUrl { get; set; }
 }

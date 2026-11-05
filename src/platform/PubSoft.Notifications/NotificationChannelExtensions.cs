@@ -47,6 +47,7 @@ public static class NotificationChannelExtensions
         return services.AddTeamsNotificationChannel(o =>
         {
             o.WebhookUrl = section["WebhookUrl"] ?? "";
+            o.AllowInsecureUrl = bool.TryParse(section["AllowInsecureUrl"], out var allow) && allow;
         });
     }
 
@@ -55,8 +56,19 @@ public static class NotificationChannelExtensions
         this IServiceCollection services, Action<TeamsWebhookOptions> configure)
     {
         ArgumentNullException.ThrowIfNull(services);
-        services.Configure(configure);
+        services.AddOptions<TeamsWebhookOptions>().Configure(configure)
+            .Validate(o => IsValidWebhookUrl(o.WebhookUrl, o.AllowInsecureUrl),
+                "TeamsWebhookOptions.WebhookUrl must be an absolute https URL; http is allowed only for loopback or with AllowInsecureUrl.");
         return AddTeamsChannelCore(services);
+    }
+
+    private static bool IsValidWebhookUrl(string url, bool allowInsecure)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)
+            || uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+            return false;
+
+        return uri.Scheme == Uri.UriSchemeHttps || uri.IsLoopback || allowInsecure;
     }
 
     private static IServiceCollection AddTeamsChannelCore(IServiceCollection services)
@@ -77,6 +89,7 @@ public static class NotificationChannelExtensions
         {
             o.WebhookUrl = section["WebhookUrl"] ?? "";
             o.Secret = section["Secret"] ?? "";
+            o.AllowInsecureUrl = bool.TryParse(section["AllowInsecureUrl"], out var allow) && allow;
         });
     }
 
@@ -94,7 +107,9 @@ public static class NotificationChannelExtensions
         this IServiceCollection services, Action<DingTalkWebhookOptions> configure)
     {
         ArgumentNullException.ThrowIfNull(services);
-        services.Configure(configure);
+        services.AddOptions<DingTalkWebhookOptions>().Configure(configure)
+            .Validate(o => IsValidWebhookUrl(o.WebhookUrl, o.AllowInsecureUrl),
+                "DingTalkWebhookOptions.WebhookUrl must be an absolute https URL; http is allowed only for loopback or with AllowInsecureUrl.");
         return AddDingTalkChannelCore(services);
     }
 

@@ -300,7 +300,7 @@ Scheduled HTTP 与 Outbound 也可以从宿主后台任务直接调用外部系�
 | PubSoft.Caching.Redis | fencing token 被丢弃 → 租约失效后旧持有者仍写；共享缓存中不可信 blob 反序列化；集群下 `KEYS` 式清理在压力下扫全键空间；连接串 TLS/AUTH 误配。 |
 | PubSoft.Modularity | 模块注册顺序/配置组合改变有效服务（组合评审）。 |
 | PubSoft.Monitoring / PubSoft.Monitoring.Scheduling | 未认证健康/指标端点泄露拓扑与任务内部 → 盘点并授权。 |
-| PubSoft.Notifications | webhook URL 是低可信配置的 SSRF/外泄通道（目的地变更须运维门禁）；DingTalk secret 入配置；分发内容可能携 PII 至三方端点；进程内去重跨副本重复发送。 |
+| PubSoft.Notifications | webhook URL 是低可信配置的 SSRF/外泄通道——**现已强制**：非 loopback `http` webhook URL 在 options 校验期拒绝，逐通道 `AllowInsecureUrl` 为文档化豁免；目的地变更仍需运维门禁。DingTalk secret 入配置；分发内容可能携 PII 至三方端点；进程内去重跨副本重复发送。 |
 | PubSoft.Outbound | tenant/profile 选择器无权限校验 → 跨租户调用；provider 凭据/日志脱敏归宿主；上游响应被隐式信任。 |
 | PubSoft.Resilience.Http | 总超时与业务期限错配；单次重试放大上游负载（预算评审）。 |
 | PubSoft.Scheduling / PubSoft.Scheduling.EntityFrameworkCore | 低可信任务编辑 → 任意周期副作用；持久化任务行经 DB 访问可篡改；cron/配置校验缺口（宿主编写控制）。 |

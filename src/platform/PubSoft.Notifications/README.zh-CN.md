@@ -28,7 +28,7 @@ services.AddPubSoftNotifications(options =>
 });
 ```
 
-内置通道的 HTTP 调用走命名 `IHttpClientFactory` 客户端 + `PubSoft.Resilience.Http` 默认策略（总超时 10s、单次 5s、重试 1 次）。
+内置通道的 HTTP 调用走命名 `IHttpClientFactory` 客户端 + `PubSoft.Resilience.Http` 默认策略（总超时 10s、单次 5s、重试 1 次）。Webhook URL 须为绝对 `https`；非 loopback `http` 在 options 校验期拒绝，loopback 为本地开发豁免，确需例外可逐通道 `AllowInsecureUrl` 显式放行。
 
 `AddPubSoftNotifications` 将 `NotificationDispatcher` 注册为单例——通道实例解析一次即长期持有，通道实现及其依赖必须可安全用于单例；HTTP 集成请用 `IHttpClientFactory`，勿向通道注入 scoped 服务。通道名必须非空且大小写不敏感唯一。
 

@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using PubSoft.Notifications;
@@ -161,5 +162,41 @@ public sealed class TeamsWaveTests
         Assert.True(r.Success);
         Assert.Contains("MessageCard", factory.LastBody);
         Assert.Contains("FF0000", factory.LastBody); // critical → red theme
+    }
+
+    [Theory]
+    [InlineData("dingtalk")]
+    [InlineData("teams")]
+    public void WebhookChannelRejectsPlaintextHttpForRemoteHost(string channel)
+    {
+        var services = new ServiceCollection();
+        if (channel == "dingtalk")
+            services.AddDingTalkNotificationChannel(o => o.WebhookUrl = "http://bot.example.com/robot/send");
+        else
+            services.AddTeamsNotificationChannel(o => o.WebhookUrl = "http://bot.example.com/webhook");
+        using var provider = services.BuildServiceProvider();
+
+        if (channel == "dingtalk")
+            Assert.Throws<OptionsValidationException>(
+                () => provider.GetRequiredService<IOptions<DingTalkWebhookOptions>>().Value);
+        else
+            Assert.Throws<OptionsValidationException>(
+                () => provider.GetRequiredService<IOptions<TeamsWebhookOptions>>().Value);
+    }
+
+    [Fact]
+    public void WebhookChannelAllowsLoopbackHttpAndExplicitOptIn()
+    {
+        var services = new ServiceCollection();
+        services.AddTeamsNotificationChannel(o => o.WebhookUrl = "http://localhost:5000/hook");
+        services.AddDingTalkNotificationChannel(o =>
+        {
+            o.WebhookUrl = "http://bot.example.com/robot/send";
+            o.AllowInsecureUrl = true;
+        });
+        using var provider = services.BuildServiceProvider();
+
+        Assert.NotNull(provider.GetRequiredService<IOptions<TeamsWebhookOptions>>().Value);
+        Assert.NotNull(provider.GetRequiredService<IOptions<DingTalkWebhookOptions>>().Value);
     }
 }

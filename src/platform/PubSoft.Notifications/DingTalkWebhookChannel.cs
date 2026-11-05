@@ -87,4 +87,11 @@ public sealed class DingTalkWebhookOptions
 {
     public string WebhookUrl { get; set; } = "";
     public string Secret { get; set; } = "";
+
+    /// <summary>
+    /// Permits a plaintext <c>http</c> webhook URL. Signed DingTalk requests embed the
+    /// signature in the query — non-loopback <c>http</c> is rejected unless this is set.
+    /// Loopback endpoints are exempt for local development.
+    /// </summary>
+    public bool AllowInsecureUrl { get; set; }
 }
