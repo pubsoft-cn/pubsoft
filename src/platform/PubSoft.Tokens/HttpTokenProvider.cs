@@ -11,6 +11,8 @@ namespace PubSoft.Tokens;
 
 public sealed class HttpTokenProvider : ITokenProvider
 {
+    private const long MaxTokenResponseBytes = 64 * 1024;
+
     public const string HttpClientName = "PubSoft.Tokens";
 
     private readonly IHttpClientFactory _httpClientFactory;
@@ -155,6 +157,18 @@ public sealed class HttpTokenProvider : ITokenProvider
             if (!response.IsSuccessStatusCode)
             {
                 _logger?.LogWarning("Token endpoint returned HTTP {StatusCode}.", (int)response.StatusCode);
+                return null;
+            }
+
+            try
+            {
+                // Bound the endpoint response — token payloads are small JSON; an
+                // oversized or chunked body must not exhaust memory mid-parse.
+                await response.Content.LoadIntoBufferAsync(MaxTokenResponseBytes, timeout.Token).ConfigureAwait(false);
+            }
+            catch (HttpRequestException)
+            {
+                _logger?.LogWarning("Token endpoint response exceeded the size limit.");
                 return null;
             }
 

@@ -368,6 +368,19 @@ public sealed class TokenTests
         Assert.NotNull(provider.GetRequiredService<IOptions<TokenManagerOptions>>().Value);
     }
 
+    [Fact]
+    public async Task OversizedTokenEndpointResponseIsRejected()
+    {
+        var huge = "{\"token\":\"tok\",\"pad\":\"" + new string('x', 70 * 1024) + "\"}";
+        var handler = new QueueHandler(_ => Task.FromResult(JsonResponse(huge)));
+        var provider = CreateProvider(handler, new RecordingCache(), new TokenCredential
+        {
+            Url = "https://auth.test/token",
+        });
+
+        Assert.Null(await provider.GetTokenAsync("primary"));
+    }
+
     private static HttpTokenProvider CreateProvider(
         HttpMessageHandler handler,
         ICache cache,
