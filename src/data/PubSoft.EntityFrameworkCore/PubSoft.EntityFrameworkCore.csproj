@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../data/PubSoft.Auditing/PubSoft.Auditing.csproj" />
+    <ProjectReference Include="../../core/PubSoft.Core/PubSoft.Core.csproj" />
     <ProjectReference Include="../../core/PubSoft.Domain/PubSoft.Domain.csproj" />
     <ProjectReference Include="../../core/PubSoft.MultiTenancy/PubSoft.MultiTenancy.csproj" />
     <ProjectReference Include="../../security/PubSoft.Authorization/PubSoft.Authorization.csproj" />
