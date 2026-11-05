@@ -43,8 +43,10 @@ jobs:
         run: dotnet nuget push feed/PubSoft.*.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate
 
       - name: Push to internal feed (optional)
-        if: ${{ secrets.PUBSOFT_NUGET_URL != '' }}
         env:
           PUBSOFT_NUGET_URL: ${{ secrets.PUBSOFT_NUGET_URL }}
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: bash scripts/push-internal-feed.sh feed
+        # secrets are not allowed in job `if:` — check inside the step instead.
+        run: |
+          if [ -z "$PUBSOFT_NUGET_URL" ]; then echo "PUBSOFT_NUGET_URL not configured — skipping"; exit 0; fi
+          bash scripts/push-internal-feed.sh feed
