@@ -34,7 +34,7 @@ jobs:
         run: bash scripts/verify-package-consumer.sh feed
 
       - name: NuGet trusted publishing login
-        uses: nuget/login@ba093760cc1d31d57b0af70f9f7698cffd6c1e42 # v1
+        uses: nuget/login@ebc737b6fc418a6ca0073cf116ec8dc156d8b81e # v1
         with:
           user: pubsoft
 
