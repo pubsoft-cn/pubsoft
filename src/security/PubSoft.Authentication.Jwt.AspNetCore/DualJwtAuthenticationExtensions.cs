@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace PubSoft.Authentication.Jwt.AspNetCore;
@@ -38,6 +39,15 @@ public static class DualJwtAuthenticationExtensions
                 jwksOptions.JwksUri = $"{jwksOptions.Issuer.TrimEnd('/')}/.well-known/jwks.json";
             ValidateJwksOptions(jwksOptions);
             services.Configure<JwksOptions>(authServerSection);
+            services.AddOptions<JwksOptions>()
+                .PostConfigure<Microsoft.Extensions.Logging.ILogger<JwksOptions>>((options, logger) =>
+                {
+                    if (string.IsNullOrWhiteSpace(options.Audience))
+                        logger.LogWarning(
+                            "AuthServer:Audience is not configured — 'aud' is not validated on the " +
+                            "AuthServerJwks scheme. Any token the issuer mints for other services is " +
+                            "accepted here. Set AuthServer:Audience unless this is intentional.");
+                });
             services.AddHttpClient(nameof(JwksKeyProvider));
             services.AddSingleton(sp => new JwksKeyProvider(
                 sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<JwksOptions>>(),
