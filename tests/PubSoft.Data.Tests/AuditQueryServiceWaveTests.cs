@@ -28,8 +28,17 @@ public sealed class AuditQueryServiceWaveTests
     }
 
     private static AuditLogRecord Rec(string path, bool ok = true, string? cat = null, string? act = null, long? tenant = null)
-        => new() { HttpMethod = "GET", RequestPath = path, Success = ok, StatusCode = ok ? 200 : 500,
-                   Category = cat, Action = act, TenantId = tenant, StartedAt = DateTimeOffset.UtcNow };
+        => new()
+        {
+            HttpMethod = "GET",
+            RequestPath = path,
+            Success = ok,
+            StatusCode = ok ? 200 : 500,
+            Category = cat,
+            Action = act,
+            TenantId = tenant,
+            StartedAt = DateTimeOffset.UtcNow
+        };
 
     [Fact]
     public async Task GetListFiltersByCategoryAndSuccess()
