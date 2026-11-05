@@ -97,6 +97,22 @@ public abstract class PubSoftDbContext : DbContext, IPubSoftSaveParticipant
         {
             if (entry.State == EntityState.Added && entry.Entity.TenantId is null)
                 entry.Entity.TenantId = CurrentTenantId;
+            else if (entry.State == EntityState.Added
+                     && CurrentTenantId is { } scoped
+                     && entry.Entity.TenantId != scoped)
+                throw new InvalidOperationException(
+                    $"Cannot add {entry.Entity.GetType().Name} with TenantId {entry.Entity.TenantId} " +
+                    $"outside the current tenant scope {scoped}.");
+        }
+
+        foreach (var entry in ChangeTracker.Entries<IMemberScoped>())
+        {
+            if (entry.State == EntityState.Added
+                && IsMemberScoped
+                && entry.Entity.MemberId != CurrentMemberId)
+                throw new InvalidOperationException(
+                    $"Cannot add {entry.Entity.GetType().Name} with MemberId {entry.Entity.MemberId?.ToString() ?? "null"} " +
+                    "outside the current member scope.");
         }
 
         _saveChangesHook?.BeforeSaveChanges(this);

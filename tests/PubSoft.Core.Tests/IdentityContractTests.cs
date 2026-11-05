@@ -106,10 +106,16 @@ public class IdentityContractTests
         var options = new DbContextOptionsBuilder<IdentityDbContext>().UseSqlite(connection).Options;
         await using var context = new IdentityDbContext(options, new TestTenantContext(7));
         await context.Database.EnsureCreatedAsync();
-        context.Users.AddRange(
-            new IdentityUser(101, "jane.doe", tenantId: 7),
-            new IdentityUser(102, "jane.doe", tenantId: 8));
+        context.Users.Add(new IdentityUser(101, "jane.doe", tenantId: 7));
         await context.SaveChangesAsync();
+
+        // Foreign-tenant fixture goes in under tenant 8's own scope — the write
+        // guard rejects explicit foreign TenantIds on Added entities.
+        await using (var foreign = new IdentityDbContext(options, new TestTenantContext(8)))
+        {
+            foreign.Users.Add(new IdentityUser(102, "jane.doe", tenantId: 8));
+            await foreign.SaveChangesAsync();
+        }
 
         context.Users.Add(new IdentityUser(103, " JANE.DOE ", tenantId: 7));
         await Assert.ThrowsAsync<DbUpdateException>(() => context.SaveChangesAsync());

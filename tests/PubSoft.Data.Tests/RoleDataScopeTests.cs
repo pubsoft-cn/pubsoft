@@ -59,20 +59,27 @@ public sealed class RoleDataScopeTests
             seed.Roles.AddRange(
                 new PermissionRole(10, "reader"),
                 new PermissionRole(11, "store-admin"),
-                new PermissionRole(12, "disabled") { IsEnabled = false },
-                new PermissionRole(13, "foreign-tenant", tenantId: 41));
+                new PermissionRole(12, "disabled") { IsEnabled = false });
             seed.SubjectRoles.AddRange(
                 new SubjectPermissionRole(20, 90, 10),
                 new SubjectPermissionRole(21, 90, 11),
-                new SubjectPermissionRole(22, 90, 12),
-                new SubjectPermissionRole(23, 90, 13, tenantId: 41));
+                new SubjectPermissionRole(22, 90, 12));
             seed.RoleDataScopes.AddRange(
                 new RoleDataScope(30, 10, "store", 7),
                 new RoleDataScope(31, 11, "STORE", 8),
                 new RoleDataScope(32, 11, "device", 0, isAll: true),
-                new RoleDataScope(33, 12, "store", 99),
-                new RoleDataScope(34, 13, "store", 100, tenantId: 41));
+                new RoleDataScope(33, 12, "store", 99));
             await seed.SaveChangesAsync();
+        }
+
+        // Foreign-tenant fixture rows are written under that tenant's own scope —
+        // the write guard now rejects explicit foreign TenantIds on Added entities.
+        await using (var foreign = new RoleDataScopeDbContext(options, new TestTenantContext(41)))
+        {
+            foreign.Roles.Add(new PermissionRole(13, "foreign-tenant", tenantId: 41));
+            foreign.SubjectRoles.Add(new SubjectPermissionRole(23, 90, 13, tenantId: 41));
+            foreign.RoleDataScopes.Add(new RoleDataScope(34, 13, "store", 100, tenantId: 41));
+            await foreign.SaveChangesAsync();
         }
 
         await using var context = new RoleDataScopeDbContext(options, new TestTenantContext(73));

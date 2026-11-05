@@ -27,19 +27,26 @@ public sealed class PermissionGrantPersistenceTests
             seed.Roles.AddRange(
                 new PermissionRole(1, "reader"),
                 new PermissionRole(2, "editor"),
-                new PermissionRole(3, "disabled") { IsEnabled = false },
-                new PermissionRole(4, "other-tenant", tenantId: 8));
+                new PermissionRole(3, "disabled") { IsEnabled = false });
             seed.SubjectRoles.AddRange(
                 new SubjectPermissionRole(11, 42, 1),
                 new SubjectPermissionRole(12, 42, 2),
-                new SubjectPermissionRole(13, 42, 3),
-                new SubjectPermissionRole(14, 42, 4, tenantId: 8));
+                new SubjectPermissionRole(13, 42, 3));
             seed.Grants.AddRange(
                 new PermissionGrantRecord(21, 1, "records", flags: (byte)PermissionFlags.Query),
                 new PermissionGrantRecord(22, 2, "records", flags: (byte)PermissionFlags.Modify),
-                new PermissionGrantRecord(23, 3, "records", flags: (byte)PermissionFlags.Delete),
-                new PermissionGrantRecord(24, 4, "records", tenantId: 8, flags: (byte)PermissionFlags.Delete));
+                new PermissionGrantRecord(23, 3, "records", flags: (byte)PermissionFlags.Delete));
             await seed.SaveChangesAsync();
+        }
+
+        // Foreign-tenant fixture rows go in under that tenant's own scope — the
+        // write guard now rejects explicit foreign TenantIds on Added entities.
+        await using (var foreign = CreateContext(options, 8))
+        {
+            foreign.Roles.Add(new PermissionRole(4, "other-tenant", tenantId: 8));
+            foreign.SubjectRoles.Add(new SubjectPermissionRole(14, 42, 4, tenantId: 8));
+            foreign.Grants.Add(new PermissionGrantRecord(24, 4, "records", tenantId: 8, flags: (byte)PermissionFlags.Delete));
+            await foreign.SaveChangesAsync();
         }
 
         await using var context = CreateContext(options, 7);

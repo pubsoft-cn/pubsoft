@@ -51,13 +51,19 @@ public sealed class PubSoftDbContextTests
         await using (var seed = CreateContext(options, tenantId: 1, memberId: 10, isMemberScoped: true, clock))
         {
             await seed.Database.EnsureCreatedAsync();
-            seed.Records.AddRange(
-                new ScopeRecord { Id = 1, MemberId = 10 },
-                new ScopeRecord { Id = 2, MemberId = 20 });
+            seed.Records.Add(new ScopeRecord { Id = 1, MemberId = 10 });
             await seed.SaveChangesAsync();
 
             seed.Records.Remove(await seed.Records.SingleAsync(record => record.Id == 1));
             seed.SaveChanges();
+        }
+
+        // Foreign-member fixture rows are written under that member's own scope —
+        // the write guard rejects explicit foreign MemberIds on Added entities.
+        await using (var foreign = CreateContext(options, tenantId: 1, memberId: 20, isMemberScoped: true, clock))
+        {
+            foreign.Records.Add(new ScopeRecord { Id = 2, MemberId = 20 });
+            await foreign.SaveChangesAsync();
         }
 
         await using var scoped = CreateContext(options, tenantId: 1, memberId: 10, isMemberScoped: true, clock);

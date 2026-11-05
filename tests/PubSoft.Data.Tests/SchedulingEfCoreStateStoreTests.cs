@@ -67,7 +67,8 @@ public sealed class SchedulingEfCoreStateStoreTests
         await connection.OpenAsync();
         var services = new ServiceCollection();
         services.AddDbContext<TestStateDbContext>(options => options.UseSqlite(connection));
-        services.AddSingleton<ITenantContext>(new TestTenantContext(1));
+        var tenantContext = new TestTenantContext(1);
+        services.AddSingleton<ITenantContext>(tenantContext);
         await using var provider = services.BuildServiceProvider();
         await using var scope = provider.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<TestStateDbContext>();
@@ -98,6 +99,9 @@ public sealed class SchedulingEfCoreStateStoreTests
         await Assert.ThrowsAsync<DbUpdateException>(() => context.SaveChangesAsync());
         context.Entry(duplicate).State = EntityState.Detached;
 
+        // The foreign-tenant row must be written under tenant 2's own scope — the
+        // write guard rejects explicit foreign TenantIds on Added entities.
+        tenantContext.TenantId = 2;
         context.Set<SchedulerStateRecord>().Add(new SchedulerStateRecord
         {
             TenantId = 2,
@@ -108,6 +112,7 @@ public sealed class SchedulingEfCoreStateStoreTests
             UpdatedAt = DateTimeOffset.UtcNow
         });
         await context.SaveChangesAsync();
+        tenantContext.TenantId = 1;
 
         Assert.Equal(2, await context.Set<SchedulerStateRecord>().IgnoreQueryFilters().CountAsync());
     }
