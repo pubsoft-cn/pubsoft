@@ -397,6 +397,19 @@ PubSoft 替代内部 ABP 基座，因此 ABP 的公开 issue 史即威胁情报�
 - 依赖 CVE 批量（#21041/#23490/#23491/#25810/#25903/#14811/#24702/#9683/#14176）——BouncyCastle/ImageSharp/MessagePack/jQuery 公告 → 均非运行时依赖；NU1903/NU1904 硬门覆盖新增。
 - **#19776（反向信号）**——要求 401 返回*更多*详情 → 我们刻意反向：统一 401 不区分原因是文档化反 oracle 设计。
 
+第二轮缺陷信号扫描（对已合并语料全部标题跑正则，去噪后）：
+
+- **#24549**——RabbitMQ 事件直接+收件箱双通道重复投递 → 我们的 `InboxReceipt` 在派发前原子占用消息；通道重叠天然幂等。
+- **#26108**——单活策略下其他主机签发的 reset 令牌被拒 → 跨实例工件落在共享存储（Redis nonce/cache）；进程内实现已标注仅单进程。
+- **#24247**——并发 `GetOrNullAsync` 死锁 → 库内 provider 链路全异步；无 sync-over-async 等待。
+- **#26259**——`UseUnitOfWork` 把失败提交报成 200 → 我们的写路径故障向上透传；中间件输出真实状态码。
+- **#23370**——缓存应用配置可能变陈旧 → 缓存条目皆有界 TTL；失效钩子已文档化。
+- **#22700**——Hangfire `Hash.Key` 索引过长（与 #25492 同 MySQL 3072 字节类）→ 定宽哈希键列让所有复合索引受限——已是库规。
+- **#19985**——`AbpRedisCache.ConnectAsync` 连接期 `InvalidCastException` → 我们的 Redis 存储在真实集群上跑过（`PUBSOFT_REDIS` 套件实测）；连接错误如实上浮。
+- **#25310**——broker 重启后后台任务在入队挂起 → MQTT/outbox 走有界重试 + 熔断，非无限等待。
+- **#26097**——匹配不到描述符的配置项静默造出幽灵状态 → 我们的 options 校验对畸形输入 fail fast，不产生幽灵默认值。
+- **#26052**——错 2FA 登录后 `AccessFailedCount` 未重置 → 锁定/2FA 计数属宿主身份层语义；未交付。
+
 本交叉核查新增的观察项：
 1. **异常消息卫生**（#26044 类）：审计未来任何把 options/config 拼进抛出消息的错误路径——scope id 可以，凭据/连接串不行。
 2. **antiforgery 缺口披露**：`PubSoft.AspNetCore` 与 cookie 认证搭配使用时宿主必须自行接入 ASP.NET Core antiforgery——本包不提供。已补入下方宿主清单。

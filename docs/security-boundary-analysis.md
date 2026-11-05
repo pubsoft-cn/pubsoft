@@ -409,6 +409,19 @@ Additional defect items verified this pass:
 - Dep-CVE batch (#21041/#23490/#23491/#25810/#25903/#14811/#24702/#9683/#14176) — BouncyCastle/ImageSharp/MessagePack/jQuery advisories → none are our runtime deps; NU1903/NU1904 gate covers new ones.
 - **#19776 (inverse signal)** — request to return *more* detail on 401 → deliberately rejected pattern; uniform 401 without reason differentiation is our documented anti-oracle.
 
+Second defect-signal sweep over the consolidated corpus (title regex over all fetched items, noise-filtered):
+
+- **#24549** — RabbitMQ event delivered twice (direct + inbox paths) → our `InboxReceipt` dedup claims the message atomically before dispatch; direct+inbox overlap is idempotent by design.
+- **#26108** — password-reset tokens minted on another host rejected under single-active policy → cross-instance artifacts live in shared stores (Redis nonce/cache); process-local stores are documented single-process only.
+- **#24247** — concurrent `GetOrNullAsync` deadlock → our provider paths are async end-to-end; no sync-over-async waits in library code.
+- **#26259** — `UseUnitOfWork` reports failed commits as 200 → our save paths propagate failures; middleware surfaces real status codes.
+- **#23370** — cached application configuration may go stale → our cache entries carry bounded TTLs; invalidation hooks documented.
+- **#22700** — Hangfire `Hash.Key` index too long (same MySQL 3072-byte class as #25492) → fixed-width hash key columns keep every composite index bounded — already the house rule.
+- **#19985** — `AbpRedisCache.ConnectAsync` `InvalidCastException` on connect → our Redis stores were exercised against a real cluster (`PUBSOFT_REDIS` runs live in the suite); connect-time errors surface, not miscast.
+- **#25310** — background job hangs on enqueue after broker restart → MQTT/outbox paths use bounded retries + circuit breaker rather than unbounded waits.
+- **#26097** — config entry matching no descriptor silently creates phantom state → our options validation fails fast on malformed entries (URLs, ranges, trust lists) rather than producing phantom defaults.
+- **#26052** — `AccessFailedCount` not reset after wrong-2FA login → lockout/2FA counters are host identity-layer semantics; not shipped.
+
 Net new items this cross-check adds to the watchlist:
 1. **Exception-message hygiene** (#26044-class): audit any future error path that
    string-interpolates options/config into thrown messages — scope ids are fine,
