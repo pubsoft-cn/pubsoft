@@ -1,13 +1,15 @@
 name: Release
 
 # Tag-driven publish: v0.1.0-alpha.N → pack → nuget.org (+ optional internal feed).
-# Secrets: NUGET_ORG_API_KEY (required), PUBSOFT_NUGET_URL + NUGET_API_KEY (internal, optional).
+# Auth: nuget.org Trusted Publishing (OIDC) — no API key secret needed.
+# Optional secrets for the internal feed: PUBSOFT_NUGET_URL + NUGET_API_KEY.
 on:
   push:
     tags: ["v*"]
 
 permissions:
   contents: read
+  id-token: write  # OIDC — nuget.org Trusted Publishing
 
 jobs:
   publish:
@@ -27,10 +29,14 @@ jobs:
       - name: Verify package consumer smoke
         run: bash scripts/verify-package-consumer.sh feed
 
+      - name: NuGet trusted publishing login
+        uses: nuget/login@ba093760cc1d31d57b0af70f9f7698cffd6c1e42 # v1
+        with:
+          user: pubsoft
+
       - name: Push to nuget.org
-        env:
-          NUGET_ORG_API_KEY: ${{ secrets.NUGET_ORG_API_KEY }}
-        run: bash scripts/push-nuget-org.sh feed
+        # nuget/login supplies the short-lived credential — no API key needed.
+        run: dotnet nuget push feed/PubSoft.*.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate
 
       - name: Push to internal feed (optional)
         if: ${{ secrets.PUBSOFT_NUGET_URL != '' }}
