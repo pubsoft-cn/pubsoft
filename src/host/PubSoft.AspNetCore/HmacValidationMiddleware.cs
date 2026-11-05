@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PubSoft.Security;
 
@@ -29,7 +30,16 @@ public static class HmacValidationServiceCollectionExtensions
         Action<HmacValidationOptions>? configure = null,
         Action<HmacSignatureOptions>? configureSignature = null)
     {
-        services.TryAddSingleton<INonceStore, MemoryNonceStore>();
+        services.TryAddSingleton<INonceStore>(sp =>
+        {
+            sp.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()
+                ?.CreateLogger("PubSoft.AspNetCore.HmacValidation")
+                .LogWarning(
+                    "INonceStore fell back to process-local MemoryNonceStore — replay " +
+                    "protection is per-instance; register a shared INonceStore " +
+                    "(e.g. Redis) when running multiple replicas.");
+            return new MemoryNonceStore();
+        });
         services.AddSingleton(sp =>
         {
             var options = new HmacSignatureOptions();
