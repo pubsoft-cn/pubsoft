@@ -37,6 +37,14 @@ public sealed class OutboxMessage : IMultiTenant
     public DateTimeOffset? DeliveredAt { get; private set; }
     public string? LastErrorCode { get; private set; }
 
+    /// <summary>
+    /// Correlation id propagated from the publishing context — explicit
+    /// <see cref="IOutboxPublisher.PublishAsync{TEvent}"/> argument wins, otherwise
+    /// the ambient <see cref="System.Diagnostics.Activity.TraceId"/> is used.
+    /// Hosts re-emit this value when dispatching so traces survive the bus hop.
+    /// </summary>
+    public string? CorrelationId { get; private set; }
+
     internal OutboxMessage(
         Guid id,
         string eventType,
@@ -44,7 +52,8 @@ public sealed class OutboxMessage : IMultiTenant
         string? targetModule,
         string? aggregateKey,
         DateTimeOffset occurredAt,
-        int maxAttempts)
+        int maxAttempts,
+        string? correlationId = null)
     {
         // 列上限对齐 OnModelCreating——超长原样入库会整批 SaveChanges 失败，宁可截断留痕
         Id = id;
@@ -52,6 +61,7 @@ public sealed class OutboxMessage : IMultiTenant
         PayloadJson = payloadJson;
         TargetModule = Truncate(targetModule, 128);
         AggregateKey = Truncate(aggregateKey, 256);
+        CorrelationId = Truncate(correlationId, 128);
         OccurredAt = occurredAt;
         Status = OutboxMessageStatus.Pending;
         MaxAttempts = maxAttempts;
@@ -105,6 +115,7 @@ public interface IOutboxPublisher
         TEvent @event,
         string? targetModule = null,
         string? aggregateKey = null,
+        string? correlationId = null,
         CancellationToken cancellationToken = default)
         where TEvent : notnull;
 }
@@ -146,6 +157,7 @@ public static class OutboxModelBuilderExtensions
         builder.Property(message => message.PayloadJson).IsRequired();
         builder.Property(message => message.TargetModule).HasMaxLength(128);
         builder.Property(message => message.AggregateKey).HasMaxLength(256);
+        builder.Property(message => message.CorrelationId).HasMaxLength(128);
         builder.Property(message => message.LastErrorCode).HasMaxLength(128);
     }
 
@@ -215,6 +227,7 @@ public sealed class EfCoreOutboxPublisher<TDbContext> : IOutboxPublisher
         TEvent @event,
         string? targetModule = null,
         string? aggregateKey = null,
+        string? correlationId = null,
         CancellationToken cancellationToken = default)
         where TEvent : notnull
     {
@@ -233,7 +246,8 @@ public sealed class EfCoreOutboxPublisher<TDbContext> : IOutboxPublisher
             targetModule,
             aggregateKey,
             _timeProvider.GetUtcNow(),
-            _options.MaxAttempts);
+            _options.MaxAttempts,
+            correlationId ?? System.Diagnostics.Activity.Current?.TraceId.ToString());
         _dbContext.Set<OutboxMessage>().Add(message);
         return Task.FromResult(message.Id);
     }

@@ -43,10 +43,11 @@ public sealed class OutboxTailWave2Tests
     {
         var m = (OutboxMessage)typeof(OutboxMessage)
             .GetConstructor(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null,
-                new[] { typeof(Guid), typeof(string), typeof(string), typeof(string), typeof(string), typeof(DateTimeOffset), typeof(int) }, null)!
-            .Invoke(new object?[] { Guid.NewGuid(), "type", "{}", "mod", "agg", DateTimeOffset.UtcNow, 5 });
+                new[] { typeof(Guid), typeof(string), typeof(string), typeof(string), typeof(string), typeof(DateTimeOffset), typeof(int), typeof(string) }, null)!
+            .Invoke(new object?[] { Guid.NewGuid(), "type", "{}", "mod", "agg", DateTimeOffset.UtcNow, 5, "corr-1" });
         Assert.Equal("mod", m.TargetModule);
         Assert.Equal("agg", m.AggregateKey);
+        Assert.Equal("corr-1", m.CorrelationId);
         Assert.Equal(5, m.MaxAttempts);
         Assert.Null(m.NextAttemptAt);
         Assert.Null(m.LeaseExpiresAt);

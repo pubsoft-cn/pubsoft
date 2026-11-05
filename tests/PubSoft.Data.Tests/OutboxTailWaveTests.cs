@@ -42,6 +42,39 @@ public sealed class OutboxTailWaveTests
         Assert.NotEqual(default, saved.OccurredAt);
         Assert.Null(saved.DeliveredAt);
         Assert.Null(saved.LeaseToken);
+        Assert.Null(saved.CorrelationId);
+    }
+
+    [Fact]
+    public async Task PublisherPersistsExplicitCorrelationId()
+    {
+        using var ctx = Db();
+        var pub = new EfCoreOutboxPublisher<Ctx>(ctx);
+        var id = await pub.PublishAsync(new { orderId = 1 }, correlationId: "corr-42");
+        await ctx.SaveChangesAsync();
+        var saved = await ctx.Messages.FindAsync(id);
+        Assert.Equal("corr-42", saved!.CorrelationId);
+    }
+
+    [Fact]
+    public async Task PublisherFallsBackToAmbientActivityTraceId()
+    {
+        using var ctx = Db();
+        var pub = new EfCoreOutboxPublisher<Ctx>(ctx);
+        using var listener = new System.Diagnostics.ActivityListener
+        {
+            ShouldListenTo = _ => true,
+            Sample = (ref _) => System.Diagnostics.ActivitySamplingResult.AllData,
+        };
+        System.Diagnostics.ActivitySource.AddActivityListener(listener);
+        using var source = new System.Diagnostics.ActivitySource("test");
+        using var activity = source.StartActivity("op");
+        Assert.NotNull(activity);
+
+        var id = await pub.PublishAsync(new { orderId = 1 });
+        await ctx.SaveChangesAsync();
+        var saved = await ctx.Messages.FindAsync(id);
+        Assert.Equal(activity!.TraceId.ToString(), saved!.CorrelationId);
     }
 
     private sealed class OrderEvent { public long OrderId { get; init; } }
