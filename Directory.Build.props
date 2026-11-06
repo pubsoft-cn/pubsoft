@@ -9,13 +9,19 @@
     <!-- Internal-validation releases carry a prerelease suffix so they never
          collide with the eventual stable public version. Bump the counter per
          validation drop; drop the suffix entirely for the public stable release. -->
-    <PubSoftVersion>0.1.0-alpha.11</PubSoftVersion>
+    <PubSoftVersion>0.1.0-alpha.12</PubSoftVersion>
     <Version>$(PubSoftVersion)</Version>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/pubsoft-cn/pubsoft</RepositoryUrl>
     <Authors>PubSoft Contributors</Authors>
     <Company>PubSoft</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <!-- SDK built-in SourceLink (no package, no advisory): F12-into-source for consumers. -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
       <!-- NuGet audit hard gate: high/critical advisories fail restore. -->
     <NuGetAudit>true</NuGetAudit>
     <NuGetAuditMode>all</NuGetAuditMode>
