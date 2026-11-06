@@ -33,6 +33,12 @@ await writer.WriteAsync(new AuditLogEntry(
 
 `IAuditActorAccessor` 为 opt-in——宿主把 claims 映射为 actor 身份，默认不做任何推断。
 
+## 敏感字段
+
+实体属性值在两种情况会被脱敏：`SensitiveProperties` 名字匹配，或属性上标注
+`[AuditSensitive]` —— 特性是声明式路径、选项是批量/覆盖路径，任一命中即在
+捕获的新旧值写 `[REDACTED]`。脱敏需要 `CaptureValues = true`。
+
 ## 边界
 
 collector 容量满时整批拒绝而非静默截断。持久化（`EfCoreAuditSnapshotSink`、`AuditRetentionCleanup`、`ArchiveStartedBeforeAsync`）在 `PubSoft.EntityFrameworkCore`；Outbox 转发在 `PubSoft.Auditing.Outbox`；HTTP 捕获中间件在 `PubSoft.AspNetCore`（`UsePubSoftAudit`）。

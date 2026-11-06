@@ -78,7 +78,8 @@ public sealed class AuditChangeCaptureHook : ISaveChangesHook
             {
                 properties.Add(new AuditPropertyChange(property.Metadata.Name, null, null));
             }
-            else if (_options.SensitiveProperties.Contains(property.Metadata.Name))
+            else if (_options.SensitiveProperties.Contains(property.Metadata.Name)
+                || property.Metadata.PropertyInfo?.GetCustomAttributes(typeof(PubSoft.Auditing.AuditSensitiveAttribute), inherit: true).Any() == true)
             {
                 var redacted = AuditValueSerializer.Serialize("[REDACTED]", _options.MaxStringValueLength);
                 properties.Add(new AuditPropertyChange(property.Metadata.Name,

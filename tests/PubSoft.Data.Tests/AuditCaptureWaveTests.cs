@@ -11,6 +11,7 @@ public sealed class AuditCaptureWaveTests
     {
         public int Id { get; set; }
         public string Name { get; set; } = "";
+        [PubSoft.Auditing.AuditSensitive] public string? BankAccount { get; set; }
     }
 
     private sealed class Ctx(DbContextOptions<Ctx> o) : DbContext(o)
@@ -58,6 +59,19 @@ public sealed class AuditCaptureWaveTests
         col.Clear();
         hook.BeforeSaveChanges(ctx); // nothing dirty
         Assert.Empty(col.Changes);
+    }
+
+    [Fact]
+    public void AuditSensitiveAttributeRedactsValue()
+    {
+        var (ctx, col, _) = Setup();
+        var hook = new AuditChangeCaptureHook(col,
+            new AuditChangeCollectorOptions { CaptureValues = true });
+        ctx.Probes.Add(new ProbeEntity { Name = "x", BankAccount = "top-secret" });
+        hook.BeforeSaveChanges(ctx);
+        var change = col.Changes[0].Properties.First(p => p.Name == "BankAccount");
+        Assert.Contains("REDACTED", change.NewValue?.GetString() ?? "");
+        Assert.DoesNotContain("top-secret", change.NewValue?.GetString() ?? "");
     }
 
     [Fact]

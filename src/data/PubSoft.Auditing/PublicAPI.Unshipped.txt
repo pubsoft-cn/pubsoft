@@ -148,6 +148,8 @@ PubSoft.Auditing.AuditScopeOptions.AuditGetRequests.set -> void
 PubSoft.Auditing.AuditScopeOptions.AuditScopeOptions() -> void
 PubSoft.Auditing.AuditScopeOptions.Enabled.get -> bool
 PubSoft.Auditing.AuditScopeOptions.Enabled.set -> void
+PubSoft.Auditing.AuditSensitiveAttribute
+PubSoft.Auditing.AuditSensitiveAttribute.AuditSensitiveAttribute() -> void
 PubSoft.Auditing.AuditValueSerializer
 PubSoft.Auditing.IAuditActorAccessor
 PubSoft.Auditing.IAuditActorAccessor.GetCurrentActor() -> PubSoft.Auditing.AuditActorContext?
