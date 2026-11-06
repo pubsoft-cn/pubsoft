@@ -66,4 +66,4 @@ var subject = httpContext.RequestServices
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
-- `PubSoft.Authentication`: `AuthenticatedSubject` `AuthenticatedSubjectResolver` `IAuthenticatedSubjectAccessor` `IPrincipalSnapshotAccessor` `PrincipalClaim` `PrincipalSnapshot`
+- `PubSoft.Authentication`: `AuthenticatedSubject` `AuthenticatedSubjectResolver` `IAuthenticatedSubjectAccessor` `IPrincipalSnapshotAccessor` `PrincipalClaim` `PrincipalSnapshot` `CurrentSubject` `CurrentSubjectResolver` `SubjectClaimDialect` `ICurrentSubjectAccessor`

@@ -9,7 +9,7 @@ namespace PubSoft.Authentication.Jwt;
 
 /// <summary>
 /// Explicitly selected symmetric (HMAC) JWT signing key. This exists for hosts that
-/// deliberately run symmetric service-to-service tokens — the algorithm is always an
+/// deliberately run symmetric service-to-service tokens -- the algorithm is always an
 /// explicit choice and is never a fallback from an asymmetric path.
 /// </summary>
 public sealed class SymmetricSigningKeyMaterial : IDisposable
@@ -24,9 +24,12 @@ public sealed class SymmetricSigningKeyMaterial : IDisposable
         SecurityKey = new SymmetricSecurityKey(keyBytes) { KeyId = keyId };
     }
 
+    /// <summary>Key id.</summary>
     public string KeyId { get; }
+    /// <summary>SecurityKey wrapper.</summary>
     public SymmetricSecurityKey SecurityKey { get; }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_disposed)

@@ -4,16 +4,16 @@ using System.Text;
 namespace PubSoft.Cryptography;
 
 /// <summary>
-/// SM4 分组密码（GB/T 32907-2016）—— 纯托管实现，零外部依赖。
-/// <para>提供 ECB + PKCS7 便捷封装，用于银联/政务等存量国密互通场景。</para>
-/// <para><b>边界</b>：ECB 模式泄露明文分组模式，仅限协议兼容；新设计的机密存储请用 <see cref="AesEncryptor"/>（AES-GCM）。</para>
+/// SM4 block cipher (GB/T 32907-2016) -- pure managed implementation, zero external dependencies.
+/// <para>Provides ECB + PKCS7 convenience wrappers for legacy SM4 interoperability scenarios (legacy banking/government integrations).</para>
+/// <para><b>Boundary</b>: ECB mode leaks plaintext block patterns -- protocol compatibility only; use <see cref="AesEncryptor"/> (AES-GCM) for new confidential storage.</para>
 /// </summary>
 public static class Sm4
 {
-    /// <summary>SM4 分组长（字节）。</summary>
+    /// <summary>SM4 block size in bytes.</summary>
     public const int BlockSize = 16;
 
-    /// <summary>SM4 密钥长（字节）。</summary>
+    /// <summary>SM4 key size in bytes.</summary>
     public const int KeySize = 16;
 
     private static readonly byte[] SBox =
@@ -50,7 +50,7 @@ public static class Sm4
         0x10171E25,0x2C333A41,0x484F565D,0x646B7279,
     ];
 
-    /// <summary>SM4-ECB 加密（自动 PKCS7 填充）。key/明文 → 密文。</summary>
+    /// <summary>SM4-ECB encrypt (auto PKCS7 padding). key/plaintext -> ciphertext.</summary>
     public static byte[] EncryptEcb(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext)
     {
         var rk = ExpandKey(key);
@@ -67,7 +67,7 @@ public static class Sm4
         return output;
     }
 
-    /// <summary>SM4-ECB 解密并去 PKCS7 填充。填充非法时抛 <see cref="System.Security.Cryptography.CryptographicException"/>。</summary>
+    /// <summary>SM4-ECB decrypt and strip PKCS7 padding. Throws <see cref="System.Security.Cryptography.CryptographicException"/> on invalid padding.</summary>
     public static byte[] DecryptEcb(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext)
     {
         if (ciphertext.Length == 0 || ciphertext.Length % BlockSize != 0)
@@ -88,7 +88,7 @@ public static class Sm4
         return output[..^pad];
     }
 
-    /// <summary>SM4-ECB 加密：hex 密钥 + UTF-8 明文 → 小写 hex 密文。</summary>
+    /// <summary>SM4-ECB encrypt: hex key + UTF-8 plaintext -> lowercase hex ciphertext.</summary>
     public static string EncryptEcbHex(string hexKey, string plaintext)
     {
         var key = Convert.FromHexString(hexKey);
@@ -96,7 +96,7 @@ public static class Sm4
         return Convert.ToHexString(cipher).ToLowerInvariant();
     }
 
-    /// <summary>SM4-ECB 解密：hex 密钥 + hex 密文 → UTF-8 明文。</summary>
+    /// <summary>SM4-ECB decrypt: hex key + hex ciphertext -> UTF-8 plaintext.</summary>
     public static string DecryptEcbHex(string hexKey, string cipherHex)
     {
         var key = Convert.FromHexString(hexKey);
@@ -104,7 +104,7 @@ public static class Sm4
         return Encoding.UTF8.GetString(plain);
     }
 
-    /// <summary>SM4-ECB 加密：Base64 密钥 + UTF-8 明文 → 小写 hex 密文。</summary>
+    /// <summary>SM4-ECB encrypt: base64 key + UTF-8 plaintext -> lowercase hex ciphertext.</summary>
     public static string EncryptEcbBase64Key(string base64Key, string plaintext)
         => EncryptEcbHex(Convert.ToHexString(Convert.FromBase64String(base64Key)), plaintext);
 
@@ -127,7 +127,7 @@ public static class Sm4
 
     private static uint TPrime(uint x) => LPrime(Tau(x));
 
-    /// <summary>展开 32 轮密钥。decrypt 时逆序使用。</summary>
+    /// <summary>Expands the 32-round key schedule; used in reverse order for decryption.</summary>
     private static uint[] ExpandKey(ReadOnlySpan<byte> key)
     {
         if (key.Length != KeySize)
@@ -150,7 +150,7 @@ public static class Sm4
         return rk;
     }
 
-    /// <summary>对单个 16 字节分组做 SM4 变换（原地输入输出均为大端块）。</summary>
+    /// <summary>Transforms one 16-byte block with SM4 (in-place, big-endian input and output).</summary>
     private static void CryptBlock(ReadOnlySpan<byte> input, Span<byte> output, uint[] rk, bool decrypt)
     {
         Span<uint> x = stackalloc uint[36];

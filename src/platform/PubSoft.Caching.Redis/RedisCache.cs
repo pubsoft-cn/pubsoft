@@ -6,6 +6,7 @@ using StackExchange.Redis;
 
 namespace PubSoft.Caching.Redis;
 
+/// <summary>Redis-backed <see cref="ICache"/> - JSON values, key prefix, size cap.</summary>
 public sealed class RedisCache : ICache
 {
     private const int DeleteBatchSize = 500;
@@ -15,6 +16,7 @@ public sealed class RedisCache : ICache
     private readonly JsonSerializerOptions _serializerOptions;
     private readonly int _maxValueBytes;
 
+    /// <summary>Creates the cache over a shared multiplexer.</summary>
     public RedisCache(IConnectionMultiplexer connection, RedisCacheOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(connection);
@@ -37,6 +39,7 @@ public sealed class RedisCache : ICache
 
     private IDatabase Database => _connection.GetDatabase(_database);
 
+    /// <inheritdoc />
     public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default) where T : class
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -46,6 +49,7 @@ public sealed class RedisCache : ICache
         return value.HasValue ? JsonSerializer.Deserialize<T>(value.ToString(), _serializerOptions) : null;
     }
 
+    /// <inheritdoc />
     public async Task SetAsync<T>(string key, T value, TimeSpan? expiry = null, CancellationToken cancellationToken = default) where T : class
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -59,6 +63,7 @@ public sealed class RedisCache : ICache
             .WaitAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -67,6 +72,7 @@ public sealed class RedisCache : ICache
             .WaitAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public async Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -75,6 +81,7 @@ public sealed class RedisCache : ICache
             .WaitAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public async Task<T> GetOrSetAsync<T>(string key, Func<Task<T>> factory, TimeSpan? expiry = null, CancellationToken cancellationToken = default) where T : class
     {
         ArgumentNullException.ThrowIfNull(factory);
@@ -92,6 +99,7 @@ public sealed class RedisCache : ICache
         return value!;
     }
 
+    /// <inheritdoc />
     public async Task<Dictionary<string, T?>> GetManyAsync<T>(IEnumerable<string> keys, CancellationToken cancellationToken = default) where T : class
     {
         ArgumentNullException.ThrowIfNull(keys);
@@ -122,6 +130,7 @@ public sealed class RedisCache : ICache
         return result;
     }
 
+    /// <inheritdoc />
     [PubSoft.Core.BoundedCost("batch size is bounded by the caller-supplied input")]
     public async Task SetManyAsync<T>(IEnumerable<KeyValuePair<string, T>> items, TimeSpan? expiry = null, CancellationToken cancellationToken = default) where T : class
     {
@@ -151,6 +160,7 @@ public sealed class RedisCache : ICache
         }
     }
 
+    /// <inheritdoc />
     public async Task RemoveManyAsync(IEnumerable<string> keys, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(keys);
@@ -171,6 +181,7 @@ public sealed class RedisCache : ICache
         }
     }
 
+    /// <inheritdoc />
     public async Task RemoveByPatternAsync(string pattern, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

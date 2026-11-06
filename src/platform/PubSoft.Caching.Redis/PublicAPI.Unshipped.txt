@@ -39,3 +39,8 @@ PubSoft.Caching.Redis.RedisDistributedLockOptions.RedisDistributedLockOptions() 
 PubSoft.Caching.Redis.RedisDistributedLockServiceCollectionExtensions
 static PubSoft.Caching.Redis.CachingRedisServiceCollectionExtensions.AddPubSoftRedisCache(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, StackExchange.Redis.IConnectionMultiplexer! connection, System.Action<PubSoft.Caching.Redis.RedisCacheOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Caching.Redis.RedisDistributedLockServiceCollectionExtensions.AddPubSoftRedisDistributedLock(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, StackExchange.Redis.IConnectionMultiplexer! connection, System.Action<PubSoft.Caching.Redis.RedisDistributedLockOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+PubSoft.Caching.Redis.RedisHealthCheck
+PubSoft.Caching.Redis.RedisHealthCheck.RedisHealthCheck(StackExchange.Redis.IConnectionMultiplexer! multiplexer) -> void
+PubSoft.Caching.Redis.RedisHealthCheck.CheckHealthAsync(Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckContext! context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult>!
+PubSoft.Caching.Redis.RedisHealthCheckExtensions
+static PubSoft.Caching.Redis.RedisHealthCheckExtensions.AddPubSoftRedisCheck(this Microsoft.Extensions.DependencyInjection.IHealthChecksBuilder! builder, string! name = "redis") -> Microsoft.Extensions.DependencyInjection.IHealthChecksBuilder!

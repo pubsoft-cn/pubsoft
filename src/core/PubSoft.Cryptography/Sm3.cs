@@ -4,12 +4,12 @@ using System.Text;
 namespace PubSoft.Cryptography;
 
 /// <summary>
-/// SM3 密码杂凑算法（GB/T 32905-2016）+ HMAC-SM3 —— 纯托管实现，零外部依赖。
-/// <para>用于国密互通场景（银联/政务/渠道签名）。输出固定 256-bit。</para>
+/// SM3 cryptographic hash (GB/T 32905-2016) and HMAC-SM3 -- pure managed implementation, zero external dependencies.
+/// <para>For SM-crypto interoperability scenarios (legacy banking/government/channel signing). Fixed 256-bit output.</para>
 /// </summary>
 public static class Sm3
 {
-    /// <summary>SM3 摘要长度（字节）。</summary>
+    /// <summary>SM3 digest size in bytes.</summary>
     public const int DigestSize = 32;
 
     private const int BlockSize = 64;
@@ -21,7 +21,7 @@ public static class Sm3
         0xA96F30BC, 0x163138AA, 0xE38DEE4D, 0xB0FB0E4E,
     ];
 
-    /// <summary>计算 SM3 摘要，返回 32 字节。</summary>
+    /// <summary>Computes the SM3 digest, returns 32 bytes.</summary>
     public static byte[] Hash(ReadOnlySpan<byte> data)
     {
         var state = (uint[])Iv.Clone();
@@ -32,10 +32,10 @@ public static class Sm3
         return output;
     }
 
-    /// <summary>计算 SM3 摘要（UTF-8 文本），返回小写 hex。</summary>
+    /// <summary>Computes the SM3 digest of a UTF-8 string, returns lowercase hex.</summary>
     public static string HashHex(string data) => ToLowerHex(Hash(Encoding.UTF8.GetBytes(data)));
 
-    /// <summary>计算 HMAC-SM3（HMAC 结构套 SM3，块长 64 字节）。</summary>
+    /// <summary>Computes HMAC-SM3 (HMAC construction over SM3, 64-byte block).</summary>
     public static byte[] Hmac(ReadOnlySpan<byte> key, ReadOnlySpan<byte> data)
     {
         // HMAC: H((K' ^ opad) || H((K' ^ ipad) || data)),  K' = key 超块长则先 H(key)，后补零至块长
@@ -68,11 +68,11 @@ public static class Sm3
         return result;
     }
 
-    /// <summary>计算 HMAC-SM3（UTF-8 文本），返回 Base64。</summary>
+    /// <summary>Computes HMAC-SM3 over a UTF-8 string, returns base64.</summary>
     public static string HmacBase64(string key, string data)
         => Convert.ToBase64String(Hmac(Encoding.UTF8.GetBytes(key), Encoding.UTF8.GetBytes(data)));
 
-    /// <summary>计算 HMAC-SM3，返回小写 hex。</summary>
+    /// <summary>Computes HMAC-SM3, returns lowercase hex.</summary>
     public static string HmacHex(ReadOnlySpan<byte> key, ReadOnlySpan<byte> data)
         => ToLowerHex(Hmac(key, data));
 
@@ -90,7 +90,7 @@ public static class Sm3
 
     private static uint Rotl(uint x, int n) => (x << n) | (x >> (32 - n));
 
-    /// <summary>Merkle–Damgård 主循环：填充 → 分块压缩，就地更新 state。</summary>
+    /// <summary>Merkle-Damgard main loop: pad -> compress blocks, updates state in place.</summary>
     private static void HashCore(uint[] state, ReadOnlySpan<byte> data)
         => HashCore(state, data, ReadOnlySpan<byte>.Empty);
 

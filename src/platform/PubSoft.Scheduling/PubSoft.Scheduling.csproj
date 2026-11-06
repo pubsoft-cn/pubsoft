@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>PubSoft.Scheduling</RootNamespace>
     <PackageId>PubSoft.Scheduling</PackageId>
@@ -20,6 +21,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../core/PubSoft.Core/PubSoft.Core.csproj" />
+    <ProjectReference Include="../PubSoft.Caching/PubSoft.Caching.csproj" />
   </ItemGroup>
 
 </Project>

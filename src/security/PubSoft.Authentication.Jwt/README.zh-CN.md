@@ -92,7 +92,7 @@ var hsParsed = JwtSigning.ValidateAccessToken(hsToken, issuer, audience, sym);
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
-- `PubSoft.Authentication.Jwt`: `JwtJwksDocument` `JwtJwksKey` `JwtSigning` `RefreshTokenGenerator` `RsaSigningKeyMaterial` `SymmetricSigningKeyMaterial`
+- `PubSoft.Authentication.Jwt`: `JwtJwksDocument` `JwtJwksKey` `JwtSigning` `RefreshTokenGenerator` `IClientSigningKeyProvider` `RsaSigningKeyMaterial` `SymmetricSigningKeyMaterial`
 ## 验证
 
 ```bash

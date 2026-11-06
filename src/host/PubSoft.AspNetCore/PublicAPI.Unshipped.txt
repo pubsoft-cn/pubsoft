@@ -1,5 +1,4 @@
 #nullable enable
-const PubSoft.AspNetCore.GatewayRateLimitOptions.SectionName = "Gateway:RateLimit" -> string!
 PubSoft.AspNetCore.AuditMiddleware
 PubSoft.AspNetCore.AuditMiddleware.AuditMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, PubSoft.AspNetCore.AuditMiddlewareOptions? options = null) -> void
 PubSoft.AspNetCore.AuditMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
@@ -12,6 +11,7 @@ PubSoft.AspNetCore.AuditMiddlewareOptions.CaptureClientIp.get -> bool
 PubSoft.AspNetCore.AuditMiddlewareOptions.CaptureClientIp.set -> void
 PubSoft.AspNetCore.AuditMiddlewareOptions.CaptureUserAgent.get -> bool
 PubSoft.AspNetCore.AuditMiddlewareOptions.CaptureUserAgent.set -> void
+PubSoft.AspNetCore.Auditing.AuditActorServiceCollectionExtensions
 PubSoft.AspNetCore.Authentication.ClientCredentialAuthorizationExtensions
 PubSoft.AspNetCore.Authentication.ClientCredentialEndpointFilter
 PubSoft.AspNetCore.Authentication.ClientCredentialEndpointFilter.ClientCredentialEndpointFilter() -> void
@@ -31,6 +31,12 @@ PubSoft.AspNetCore.Authentication.ClientCredentialOptions.ClientIdHeader.get -> 
 PubSoft.AspNetCore.Authentication.ClientCredentialOptions.ClientIdHeader.set -> void
 PubSoft.AspNetCore.Authentication.ClientCredentialOptions.ClientSecretHeader.get -> string!
 PubSoft.AspNetCore.Authentication.ClientCredentialOptions.ClientSecretHeader.set -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.NonceHeader.get -> string!
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.NonceHeader.set -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.SignatureHeader.get -> string!
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.SignatureHeader.set -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.TimestampHeader.get -> string!
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.TimestampHeader.set -> void
 PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult
 PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.Claims.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>?
 PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.Claims.init -> void
@@ -41,8 +47,31 @@ PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.Success.get
 PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.Success.init -> void
 PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.TenantId.get -> long?
 PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.TenantId.init -> void
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.<Clone>$() -> PubSoft.AspNetCore.Authentication.ClientSignatureRequest!
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.ClientId.get -> string!
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.ClientId.init -> void
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.ClientSignatureRequest(string! ClientId, string! Signature, string! Timestamp, string! Nonce, string! Method, string! Path, string? QueryString, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<byte[]!>>! ReadBody) -> void
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Deconstruct(out string! ClientId, out string! Signature, out string! Timestamp, out string! Nonce, out string! Method, out string! Path, out string? QueryString, out System.Func<System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<byte[]!>>! ReadBody) -> void
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Equals(PubSoft.AspNetCore.Authentication.ClientSignatureRequest? other) -> bool
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Method.get -> string!
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Method.init -> void
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Nonce.get -> string!
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Nonce.init -> void
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Path.get -> string!
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Path.init -> void
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.QueryString.get -> string?
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.QueryString.init -> void
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.ReadBody.get -> System.Func<System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<byte[]!>>!
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.ReadBody.init -> void
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Signature.get -> string!
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Signature.init -> void
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Timestamp.get -> string!
+PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Timestamp.init -> void
 PubSoft.AspNetCore.Authentication.IClientCredentialVerifier
 PubSoft.AspNetCore.Authentication.IClientCredentialVerifier.VerifyAsync(string! clientId, string! clientSecret, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult!>!
+PubSoft.AspNetCore.Authentication.IClientSignatureVerifier
+PubSoft.AspNetCore.Authentication.IClientSignatureVerifier.VerifyAsync(PubSoft.AspNetCore.Authentication.ClientSignatureRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult!>
 PubSoft.AspNetCore.Authentication.PrincipalSnapshotServiceCollectionExtensions
 PubSoft.AspNetCore.Authentication.RequireClientCredentialAttribute
 PubSoft.AspNetCore.Authentication.RequireClientCredentialAttribute.AllowAuthenticatedUser.get -> bool
@@ -56,6 +85,25 @@ PubSoft.AspNetCore.Authorization.PermissionMvcAuthorizationExtensions
 PubSoft.AspNetCore.Authorization.PermissionMvcAuthorizationFilter
 PubSoft.AspNetCore.Authorization.PermissionMvcAuthorizationFilter.OnAuthorizationAsync(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext! context) -> System.Threading.Tasks.Task!
 PubSoft.AspNetCore.Authorization.PermissionMvcAuthorizationFilter.PermissionMvcAuthorizationFilter(PubSoft.Authentication.IAuthenticatedSubjectAccessor! subjectAccessor, PubSoft.Domain.ITenantContext! tenantContext, PubSoft.Authorization.PermissionAuthorizationService! authorizationService) -> void
+PubSoft.AspNetCore.CorrelationAmbient
+PubSoft.AspNetCore.CorrelationIdMiddleware
+PubSoft.AspNetCore.CorrelationIdMiddleware.CorrelationIdMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, PubSoft.AspNetCore.CorrelationIdOptions? options = null) -> void
+PubSoft.AspNetCore.CorrelationIdMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
+PubSoft.AspNetCore.CorrelationIdMiddlewareExtensions
+PubSoft.AspNetCore.CorrelationIdOptions
+PubSoft.AspNetCore.CorrelationIdOptions.CorrelationIdOptions() -> void
+PubSoft.AspNetCore.CorrelationIdOptions.EchoResponseHeader.get -> bool
+PubSoft.AspNetCore.CorrelationIdOptions.EchoResponseHeader.set -> void
+PubSoft.AspNetCore.CorrelationIdOptions.Enabled.get -> bool
+PubSoft.AspNetCore.CorrelationIdOptions.Enabled.set -> void
+PubSoft.AspNetCore.CorrelationIdOptions.InboundHeaderNames.get -> string![]!
+PubSoft.AspNetCore.CorrelationIdOptions.InboundHeaderNames.set -> void
+PubSoft.AspNetCore.CorrelationIdOptions.ResponseHeaderName.get -> string!
+PubSoft.AspNetCore.CorrelationIdOptions.ResponseHeaderName.set -> void
+PubSoft.AspNetCore.CorrelationPropagationHandler
+PubSoft.AspNetCore.CorrelationPropagationHandler.CorrelationHeaderName.get -> string?
+PubSoft.AspNetCore.CorrelationPropagationHandler.CorrelationHeaderName.set -> void
+PubSoft.AspNetCore.CorrelationPropagationHandler.CorrelationPropagationHandler() -> void
 PubSoft.AspNetCore.DevelopmentOnlyAttribute
 PubSoft.AspNetCore.DevelopmentOnlyAttribute.DevelopmentOnlyAttribute() -> void
 PubSoft.AspNetCore.DevelopmentOnlyControllerConvention
@@ -66,7 +114,6 @@ PubSoft.AspNetCore.ExceptionHandlingMiddleware
 PubSoft.AspNetCore.ExceptionHandlingMiddleware.ExceptionHandlingMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, Microsoft.Extensions.Logging.ILogger<PubSoft.AspNetCore.ExceptionHandlingMiddleware!>! logger, Microsoft.Extensions.Hosting.IHostEnvironment! environment) -> void
 PubSoft.AspNetCore.ExceptionHandlingMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
 PubSoft.AspNetCore.ExceptionHandlingMiddlewareExtensions
-PubSoft.AspNetCore.GatewayRateLimitingExtensions
 PubSoft.AspNetCore.GatewayRateLimitOptions
 PubSoft.AspNetCore.GatewayRateLimitOptions.ClientIdWindowSeconds.get -> int
 PubSoft.AspNetCore.GatewayRateLimitOptions.ClientIdWindowSeconds.set -> void
@@ -137,6 +184,7 @@ PubSoft.AspNetCore.GatewayRateLimitOptions.ValidateWindowSeconds.get -> int
 PubSoft.AspNetCore.GatewayRateLimitOptions.ValidateWindowSeconds.set -> void
 PubSoft.AspNetCore.GatewayRateLimitOptions.WindowSeconds.get -> int
 PubSoft.AspNetCore.GatewayRateLimitOptions.WindowSeconds.set -> void
+PubSoft.AspNetCore.GatewayRateLimitingExtensions
 PubSoft.AspNetCore.GlobalExceptionHandler
 PubSoft.AspNetCore.GlobalExceptionHandler.GlobalExceptionHandler(Microsoft.Extensions.Logging.ILogger<PubSoft.AspNetCore.GlobalExceptionHandler!>! logger, PubSoft.AspNetCore.GlobalExceptionHandlerOptions? options = null) -> void
 PubSoft.AspNetCore.GlobalExceptionHandler.TryHandleAsync(Microsoft.AspNetCore.Http.HttpContext! httpContext, System.Exception! exception, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<bool>
@@ -164,13 +212,21 @@ PubSoft.AspNetCore.HmacValidationMiddleware
 PubSoft.AspNetCore.HmacValidationMiddleware.HmacValidationMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, PubSoft.AspNetCore.IAppSecretResolver! secretResolver, PubSoft.Security.HmacSignatureValidator! validator, Microsoft.Extensions.Options.IOptions<PubSoft.AspNetCore.HmacValidationOptions!>! options) -> void
 PubSoft.AspNetCore.HmacValidationMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
 PubSoft.AspNetCore.HmacValidationOptions
+PubSoft.AspNetCore.HmacValidationOptions.AppIdHeader.get -> string!
+PubSoft.AspNetCore.HmacValidationOptions.AppIdHeader.set -> void
 PubSoft.AspNetCore.HmacValidationOptions.ExcludedPathPrefixes.get -> string![]!
 PubSoft.AspNetCore.HmacValidationOptions.ExcludedPathPrefixes.set -> void
 PubSoft.AspNetCore.HmacValidationOptions.HmacValidationOptions() -> void
 PubSoft.AspNetCore.HmacValidationOptions.MaximumBodyBytes.get -> int
 PubSoft.AspNetCore.HmacValidationOptions.MaximumBodyBytes.set -> void
+PubSoft.AspNetCore.HmacValidationOptions.NonceHeader.get -> string!
+PubSoft.AspNetCore.HmacValidationOptions.NonceHeader.set -> void
 PubSoft.AspNetCore.HmacValidationOptions.RequireBodyHash.get -> bool
 PubSoft.AspNetCore.HmacValidationOptions.RequireBodyHash.set -> void
+PubSoft.AspNetCore.HmacValidationOptions.SignatureHeader.get -> string!
+PubSoft.AspNetCore.HmacValidationOptions.SignatureHeader.set -> void
+PubSoft.AspNetCore.HmacValidationOptions.TimestampHeader.get -> string!
+PubSoft.AspNetCore.HmacValidationOptions.TimestampHeader.set -> void
 PubSoft.AspNetCore.HmacValidationServiceCollectionExtensions
 PubSoft.AspNetCore.HttpContextTenantContext
 PubSoft.AspNetCore.HttpContextTenantContext.Change(long? tenantId) -> System.IDisposable!
@@ -282,7 +338,6 @@ PubSoft.AspNetCore.SecurityHeadersOptions.XContentTypeOptions.get -> string!
 PubSoft.AspNetCore.SecurityHeadersOptions.XContentTypeOptions.set -> void
 PubSoft.AspNetCore.SecurityHeadersOptions.XFrameOptions.get -> string!
 PubSoft.AspNetCore.SecurityHeadersOptions.XFrameOptions.set -> void
-const PubSoft.AspNetCore.HealthEndpointRouteBuilderExtensions.DefaultPath = "/health" -> string!
 PubSoft.AspNetCore.ServiceDefaultsExtensions
 PubSoft.AspNetCore.TenantContextServiceCollectionExtensions
 PubSoft.AspNetCore.WebModuleContext
@@ -292,18 +347,30 @@ PubSoft.AspNetCore.WebModuleContext.Environment.get -> Microsoft.Extensions.Host
 PubSoft.AspNetCore.WebModuleContext.Environment.init -> void
 PubSoft.AspNetCore.WebModuleContext.WebModuleContext() -> void
 PubSoft.AspNetCore.WebModuleContextExtensions
+const PubSoft.AspNetCore.GatewayRateLimitOptions.SectionName = "Gateway:RateLimit" -> string!
+const PubSoft.AspNetCore.HealthEndpointRouteBuilderExtensions.DefaultPath = "/health" -> string!
+override PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Equals(object? obj) -> bool
+override PubSoft.AspNetCore.Authentication.ClientSignatureRequest.GetHashCode() -> int
+override PubSoft.AspNetCore.Authentication.ClientSignatureRequest.ToString() -> string!
 static PubSoft.AspNetCore.AuditMiddlewareExtensions.UsePubSoftAudit(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, PubSoft.AspNetCore.AuditMiddlewareOptions? options = null) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+static PubSoft.AspNetCore.Auditing.AuditActorServiceCollectionExtensions.AddCurrentSubjectAuditActor(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.Authentication.ClientCredentialAuthorizationExtensions.AddPubSoftClientCredential(this Microsoft.AspNetCore.Builder.RouteHandlerBuilder! endpoint) -> Microsoft.AspNetCore.Builder.RouteHandlerBuilder!
 static PubSoft.AspNetCore.Authentication.ClientCredentialAuthorizationExtensions.AddPubSoftClientCredential(this Microsoft.AspNetCore.Routing.RouteGroupBuilder! group) -> Microsoft.AspNetCore.Routing.RouteGroupBuilder!
 static PubSoft.AspNetCore.Authentication.ClientCredentialAuthorizationExtensions.AddPubSoftClientCredentialAuthorization(this Microsoft.Extensions.DependencyInjection.IMvcBuilder! mvcBuilder) -> Microsoft.Extensions.DependencyInjection.IMvcBuilder!
 static PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.Fail() -> PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult!
 static PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult.Ok(string! clientId, long? tenantId = null, System.Collections.Generic.IReadOnlyDictionary<string!, string!>? claims = null) -> PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult!
+static PubSoft.AspNetCore.Authentication.ClientSignatureRequest.operator !=(PubSoft.AspNetCore.Authentication.ClientSignatureRequest? left, PubSoft.AspNetCore.Authentication.ClientSignatureRequest? right) -> bool
+static PubSoft.AspNetCore.Authentication.ClientSignatureRequest.operator ==(PubSoft.AspNetCore.Authentication.ClientSignatureRequest? left, PubSoft.AspNetCore.Authentication.ClientSignatureRequest? right) -> bool
 static PubSoft.AspNetCore.Authentication.PrincipalSnapshotServiceCollectionExtensions.AddAuthenticatedSubjectAccessor(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! subjectClaimType, string! trustedIssuer, string? tenantClaimType = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.AspNetCore.Authentication.PrincipalSnapshotServiceCollectionExtensions.AddCurrentSubjectAccessor(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, PubSoft.Authentication.SubjectClaimDialect! dialect, string! trustedIssuer) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.Authentication.PrincipalSnapshotServiceCollectionExtensions.AddPrincipalSnapshotAccessor(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.Authorization.PermissionEndpointFilterExtensions.AddPubSoftPermissionAuthorization(this Microsoft.AspNetCore.Builder.RouteHandlerBuilder! endpoint) -> Microsoft.AspNetCore.Builder.RouteHandlerBuilder!
 static PubSoft.AspNetCore.Authorization.PermissionEndpointFilterExtensions.AddPubSoftPermissionAuthorization(this Microsoft.AspNetCore.Routing.RouteGroupBuilder! group) -> Microsoft.AspNetCore.Routing.RouteGroupBuilder!
 static PubSoft.AspNetCore.Authorization.PermissionMvcAuthorizationExtensions.AddPubSoftPermissionAuthorization(this Microsoft.Extensions.DependencyInjection.IMvcBuilder! mvcBuilder) -> Microsoft.Extensions.DependencyInjection.IMvcBuilder!
 static PubSoft.AspNetCore.CorrelationAmbient.Current.get -> (string! TraceId, string! SpanId)?
+static PubSoft.AspNetCore.CorrelationAmbient.NewSpanId() -> string!
+static PubSoft.AspNetCore.CorrelationIdMiddleware.CurrentId(Microsoft.AspNetCore.Http.HttpContext! context) -> string!
+static PubSoft.AspNetCore.CorrelationIdMiddlewareExtensions.UsePubSoftCorrelationId(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, PubSoft.AspNetCore.CorrelationIdOptions? options = null) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
 static PubSoft.AspNetCore.DevelopmentOnlyControllerConventionExtensions.AddPubSoftDevelopmentOnlyControllerConvention(this Microsoft.Extensions.DependencyInjection.IMvcBuilder! builder, Microsoft.Extensions.Hosting.IHostEnvironment! environment) -> Microsoft.Extensions.DependencyInjection.IMvcBuilder!
 static PubSoft.AspNetCore.ExceptionHandlingMiddlewareExtensions.UsePubSoftExceptionHandling(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
 static PubSoft.AspNetCore.GatewayRateLimitingExtensions.AddPubSoftGatewayRateLimiting(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! configuration) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
@@ -326,28 +393,6 @@ static PubSoft.AspNetCore.PubSoftRequestSaveChangesExtensions.AddPubSoftRequestS
 static PubSoft.AspNetCore.PubSoftRequestSaveChangesExtensions.UsePubSoftRequestSaveChanges(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
 static PubSoft.AspNetCore.PubSoftSecurityExtensions.AddPubSoftSecurity(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration? configuration = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.SecurityHeadersMiddlewareExtensions.UsePubSoftSecurityHeaders(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, PubSoft.AspNetCore.SecurityHeadersOptions? options = null) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
-PubSoft.AspNetCore.CorrelationIdMiddleware
-PubSoft.AspNetCore.CorrelationIdMiddleware.CorrelationIdMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, PubSoft.AspNetCore.CorrelationIdOptions? options = null) -> void
-PubSoft.AspNetCore.CorrelationIdMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
-PubSoft.AspNetCore.CorrelationIdMiddlewareExtensions
-PubSoft.AspNetCore.CorrelationIdOptions
-PubSoft.AspNetCore.CorrelationIdOptions.CorrelationIdOptions() -> void
-PubSoft.AspNetCore.CorrelationIdOptions.EchoResponseHeader.get -> bool
-PubSoft.AspNetCore.CorrelationIdOptions.EchoResponseHeader.set -> void
-PubSoft.AspNetCore.CorrelationIdOptions.Enabled.get -> bool
-PubSoft.AspNetCore.CorrelationIdOptions.Enabled.set -> void
-PubSoft.AspNetCore.CorrelationIdOptions.InboundHeaderNames.get -> string![]!
-PubSoft.AspNetCore.CorrelationIdOptions.InboundHeaderNames.set -> void
-PubSoft.AspNetCore.CorrelationIdOptions.ResponseHeaderName.get -> string!
-PubSoft.AspNetCore.CorrelationIdOptions.ResponseHeaderName.set -> void
-static PubSoft.AspNetCore.CorrelationIdMiddleware.CurrentId(Microsoft.AspNetCore.Http.HttpContext! context) -> string!
-static PubSoft.AspNetCore.CorrelationIdMiddlewareExtensions.UsePubSoftCorrelationId(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, PubSoft.AspNetCore.CorrelationIdOptions? options = null) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
-PubSoft.AspNetCore.CorrelationAmbient
-PubSoft.AspNetCore.CorrelationPropagationHandler
-PubSoft.AspNetCore.CorrelationPropagationHandler.CorrelationPropagationHandler() -> void
-PubSoft.AspNetCore.CorrelationPropagationHandler.CorrelationHeaderName.get -> string?
-PubSoft.AspNetCore.CorrelationPropagationHandler.CorrelationHeaderName.set -> void
-static PubSoft.AspNetCore.CorrelationAmbient.NewSpanId() -> string!
 static PubSoft.AspNetCore.ServiceDefaultsExtensions.AddPubSoftServiceDefaults(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! configuration) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.ServiceDefaultsExtensions.UsePubSoftServiceDefaults(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
 static PubSoft.AspNetCore.ServiceDefaultsExtensions.UsePubSoftServiceDefaults(this Microsoft.AspNetCore.Builder.WebApplication! app) -> Microsoft.AspNetCore.Builder.WebApplication!

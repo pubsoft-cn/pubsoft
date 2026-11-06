@@ -4,6 +4,7 @@ namespace PubSoft.Security;
 /// <summary>Atomically reserves a nonce until its signed timestamp can no longer be accepted.</summary>
 public interface INonceStore
 {
+    /// <summary>Atomically reserves a nonce. Returns false when the nonce was already used or its expiry has passed.</summary>
     ValueTask<bool> TryUseAsync(
         string scope,
         string nonce,
@@ -19,6 +20,7 @@ public sealed class MemoryNonceStore : INonceStore
     private readonly int _maxEntries;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
+    /// <summary>Creates a store capped at <paramref name="maxEntries"/> entries; expired nonces are swept lazily at capacity.</summary>
     public MemoryNonceStore(int maxEntries = 100_000, TimeProvider? timeProvider = null)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxEntries);
@@ -26,6 +28,7 @@ public sealed class MemoryNonceStore : INonceStore
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
+    /// <inheritdoc />
     [PubSoft.Core.BoundedCost("expiry sweep materializes only when at capacity")]
     public ValueTask<bool> TryUseAsync(
         string scope,
@@ -50,7 +53,7 @@ public sealed class MemoryNonceStore : INonceStore
 
             if (_entries.Count >= _maxEntries)
             {
-                // lazy expiry — sweep only when at capacity; still flagged by PUBSOFT003, marked below
+                // lazy expiry - sweep only when at capacity; still flagged by PUBSOFT003, marked below
                 foreach (var expired in _entries.Where(pair => pair.Value <= now).Select(pair => pair.Key).ToArray())
                     _entries.Remove(expired);
                 if (_entries.Count >= _maxEntries)

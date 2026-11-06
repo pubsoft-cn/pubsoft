@@ -13,11 +13,16 @@ public sealed class IdentityUserSnapshot : IIdentityUser
         PhoneNumber = phoneNumber;
     }
 
+    /// <inheritdoc />
     public long Id { get; }
+    /// <inheritdoc />
     public string UserName { get; }
+    /// <inheritdoc />
     public string Name { get; }
+    /// <inheritdoc />
     public string? PhoneNumber { get; }
 
+    /// <summary>Copies a user into an immutable snapshot.</summary>
     public static IdentityUserSnapshot FromUser(IIdentityUser user)
     {
         ArgumentNullException.ThrowIfNull(user);

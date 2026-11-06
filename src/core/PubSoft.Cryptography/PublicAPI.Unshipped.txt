@@ -1,14 +1,14 @@
 #nullable enable
-const PubSoft.Cryptography.ClientSigner.HeaderClientId = "X-Client-Id" -> string!
-const PubSoft.Cryptography.ClientSigner.HeaderNonce = "X-Nonce" -> string!
-const PubSoft.Cryptography.ClientSigner.HeaderSignature = "X-Signature" -> string!
-const PubSoft.Cryptography.ClientSigner.HeaderTimestamp = "X-Timestamp" -> string!
 PubSoft.Cryptography.AesEncryptor
 PubSoft.Cryptography.AesGcmEncryptor
 PubSoft.Cryptography.AesGcmEncryptor.AesGcmEncryptor(PubSoft.Cryptography.IEncryptionKeyRing! keyRing) -> void
 PubSoft.Cryptography.AesGcmEncryptor.Decrypt(string! envelope, System.ReadOnlySpan<byte> additionalAuthenticatedData = default(System.ReadOnlySpan<byte>)) -> string!
 PubSoft.Cryptography.AesGcmEncryptor.Encrypt(string! plaintext, System.ReadOnlySpan<byte> additionalAuthenticatedData = default(System.ReadOnlySpan<byte>)) -> string!
 PubSoft.Cryptography.ClientSigner
+PubSoft.Cryptography.ConfigEncryptionKeyRing
+PubSoft.Cryptography.ConfigEncryptionKeyRing.ActiveKeyId.get -> string!
+PubSoft.Cryptography.ConfigEncryptionKeyRing.ConfigEncryptionKeyRing(PubSoft.Cryptography.EncryptionKeyRingOptions! options) -> void
+PubSoft.Cryptography.ConfigEncryptionKeyRing.TryGetKey(string! keyId, out System.ReadOnlyMemory<byte> key) -> bool
 PubSoft.Cryptography.CredentialEncryptionService
 PubSoft.Cryptography.CredentialEncryptionService.CredentialEncryptionService(PubSoft.Cryptography.AesGcmEncryptor! encryptor, string! legacyKeyMaterial) -> void
 PubSoft.Cryptography.CredentialEncryptionService.Decrypt(string! ciphertext, System.ReadOnlySpan<byte> additionalAuthenticatedData = default(System.ReadOnlySpan<byte>)) -> PubSoft.Cryptography.DecryptedCredential!
@@ -25,11 +25,21 @@ PubSoft.Cryptography.DecryptedCredential.ReplacementCiphertext.get -> string?
 PubSoft.Cryptography.DecryptedCredential.ReplacementCiphertext.init -> void
 PubSoft.Cryptography.DecryptedCredential.RequiresReEncryption.get -> bool
 PubSoft.Cryptography.DecryptedCredential.RequiresReEncryption.init -> void
+PubSoft.Cryptography.EncryptionKeyRingOptions
+PubSoft.Cryptography.EncryptionKeyRingOptions.ActiveKeyId.get -> string!
+PubSoft.Cryptography.EncryptionKeyRingOptions.ActiveKeyId.set -> void
+PubSoft.Cryptography.EncryptionKeyRingOptions.EncryptionKeyRingOptions() -> void
+PubSoft.Cryptography.EncryptionKeyRingOptions.Keys.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+PubSoft.Cryptography.EncryptionKeyRingOptions.Keys.set -> void
 PubSoft.Cryptography.IEncryptionKeyRing
 PubSoft.Cryptography.IEncryptionKeyRing.ActiveKeyId.get -> string!
 PubSoft.Cryptography.IEncryptionKeyRing.TryGetKey(string! keyId, out System.ReadOnlyMemory<byte> key) -> bool
 PubSoft.Cryptography.Sm3
 PubSoft.Cryptography.Sm4
+const PubSoft.Cryptography.ClientSigner.HeaderClientId = "X-Client-Id" -> string!
+const PubSoft.Cryptography.ClientSigner.HeaderNonce = "X-Nonce" -> string!
+const PubSoft.Cryptography.ClientSigner.HeaderSignature = "X-Signature" -> string!
+const PubSoft.Cryptography.ClientSigner.HeaderTimestamp = "X-Timestamp" -> string!
 const PubSoft.Cryptography.Sm3.DigestSize = 32 -> int
 const PubSoft.Cryptography.Sm4.BlockSize = 16 -> int
 const PubSoft.Cryptography.Sm4.KeySize = 16 -> int

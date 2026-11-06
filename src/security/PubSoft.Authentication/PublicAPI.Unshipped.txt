@@ -43,3 +43,46 @@ static PubSoft.Authentication.AuthenticatedSubject.operator ==(PubSoft.Authentic
 static PubSoft.Authentication.PrincipalClaim.operator !=(PubSoft.Authentication.PrincipalClaim? left, PubSoft.Authentication.PrincipalClaim? right) -> bool
 static PubSoft.Authentication.PrincipalClaim.operator ==(PubSoft.Authentication.PrincipalClaim? left, PubSoft.Authentication.PrincipalClaim? right) -> bool
 static PubSoft.Authentication.PrincipalSnapshot.FromClaimsPrincipal(System.Security.Claims.ClaimsPrincipal! principal) -> PubSoft.Authentication.PrincipalSnapshot!
+PubSoft.Authentication.CurrentSubject
+PubSoft.Authentication.CurrentSubject.<Clone>$() -> PubSoft.Authentication.CurrentSubject!
+PubSoft.Authentication.CurrentSubject.ClientId.get -> string?
+PubSoft.Authentication.CurrentSubject.ClientId.init -> void
+PubSoft.Authentication.CurrentSubject.CurrentSubject(long SubjectId, long? TenantId, string? Name, string? Email, string? ClientId, System.Collections.Generic.IReadOnlyList<string!>! Roles) -> void
+PubSoft.Authentication.CurrentSubject.Deconstruct(out long SubjectId, out long? TenantId, out string? Name, out string? Email, out string? ClientId, out System.Collections.Generic.IReadOnlyList<string!>! Roles) -> void
+PubSoft.Authentication.CurrentSubject.Email.get -> string?
+PubSoft.Authentication.CurrentSubject.Email.init -> void
+PubSoft.Authentication.CurrentSubject.Equals(PubSoft.Authentication.CurrentSubject? other) -> bool
+PubSoft.Authentication.CurrentSubject.Name.get -> string?
+PubSoft.Authentication.CurrentSubject.Name.init -> void
+PubSoft.Authentication.CurrentSubject.Roles.get -> System.Collections.Generic.IReadOnlyList<string!>!
+PubSoft.Authentication.CurrentSubject.Roles.init -> void
+PubSoft.Authentication.CurrentSubject.SubjectId.get -> long
+PubSoft.Authentication.CurrentSubject.SubjectId.init -> void
+PubSoft.Authentication.CurrentSubject.TenantId.get -> long?
+PubSoft.Authentication.CurrentSubject.TenantId.init -> void
+PubSoft.Authentication.CurrentSubjectResolver
+PubSoft.Authentication.CurrentSubjectResolver.CurrentSubjectResolver(PubSoft.Authentication.SubjectClaimDialect! dialect, string! trustedIssuer) -> void
+PubSoft.Authentication.CurrentSubjectResolver.Resolve(PubSoft.Authentication.PrincipalSnapshot! snapshot) -> PubSoft.Authentication.CurrentSubject?
+PubSoft.Authentication.ICurrentSubjectAccessor
+PubSoft.Authentication.ICurrentSubjectAccessor.GetCurrent() -> PubSoft.Authentication.CurrentSubject?
+PubSoft.Authentication.PrincipalSnapshot.FindValue(string! claimType, string? issuer = null) -> string?
+PubSoft.Authentication.PrincipalSnapshot.FindValues(string! claimType, string? issuer = null) -> System.Collections.Generic.IReadOnlyList<string!>!
+PubSoft.Authentication.SubjectClaimDialect
+PubSoft.Authentication.SubjectClaimDialect.ClientId.get -> string?
+PubSoft.Authentication.SubjectClaimDialect.ClientId.set -> void
+PubSoft.Authentication.SubjectClaimDialect.Email.get -> string?
+PubSoft.Authentication.SubjectClaimDialect.Email.set -> void
+PubSoft.Authentication.SubjectClaimDialect.Name.get -> string?
+PubSoft.Authentication.SubjectClaimDialect.Name.set -> void
+PubSoft.Authentication.SubjectClaimDialect.Roles.get -> string?
+PubSoft.Authentication.SubjectClaimDialect.Roles.set -> void
+PubSoft.Authentication.SubjectClaimDialect.SubjectClaimDialect() -> void
+PubSoft.Authentication.SubjectClaimDialect.SubjectId.get -> string!
+PubSoft.Authentication.SubjectClaimDialect.SubjectId.set -> void
+PubSoft.Authentication.SubjectClaimDialect.TenantId.get -> string?
+PubSoft.Authentication.SubjectClaimDialect.TenantId.set -> void
+override PubSoft.Authentication.CurrentSubject.Equals(object? obj) -> bool
+override PubSoft.Authentication.CurrentSubject.GetHashCode() -> int
+override PubSoft.Authentication.CurrentSubject.ToString() -> string!
+static PubSoft.Authentication.CurrentSubject.operator !=(PubSoft.Authentication.CurrentSubject? left, PubSoft.Authentication.CurrentSubject? right) -> bool
+static PubSoft.Authentication.CurrentSubject.operator ==(PubSoft.Authentication.CurrentSubject? left, PubSoft.Authentication.CurrentSubject? right) -> bool

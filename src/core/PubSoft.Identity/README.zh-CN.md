@@ -40,4 +40,6 @@ EF mapping 为 opt-in，不自行建表/迁移；将 `IdentityUser` 加入宿主
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
-- `PubSoft.Identity`: `IIdentityUser` `IdentityUser` `IdentityUserSnapshot`
+`IdentityUserLogin` 存外部登录绑定（provider + provider key → user），对齐标准身份模型；`PubSoft.EntityFrameworkCore.ConfigurePubSoftIdentityUserLogins()` 映射为 `(TenantId, LoginProvider, ProviderKey)` 唯一索引 + `UserId` 查询索引 + `ExtJson` 扩展列。
+
+- `PubSoft.Identity`: `IIdentityUser` `IdentityUser` `IdentityUserSnapshot` `IdentityUserLogin`

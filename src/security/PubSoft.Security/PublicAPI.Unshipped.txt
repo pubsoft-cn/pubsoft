@@ -31,6 +31,9 @@ PubSoft.Security.DataMaskingService.MaskGeneric(string? value, int prefixLength 
 PubSoft.Security.DataMaskingService.MaskIdCard(string? idCard) -> string!
 PubSoft.Security.DataMaskingService.MaskName(string? name) -> string!
 PubSoft.Security.DataMaskingService.MaskPhoneNumber(string? phone) -> string!
+PubSoft.Security.HmacSignatureEncoding
+PubSoft.Security.HmacSignatureEncoding.Base64 = 1 -> PubSoft.Security.HmacSignatureEncoding
+PubSoft.Security.HmacSignatureEncoding.LowerHex = 0 -> PubSoft.Security.HmacSignatureEncoding
 PubSoft.Security.HmacSignatureHeaders
 PubSoft.Security.HmacSignatureOptions
 PubSoft.Security.HmacSignatureOptions.HmacSignatureOptions() -> void
@@ -40,6 +43,10 @@ PubSoft.Security.HmacSignatureOptions.MaxNonceLength.get -> int
 PubSoft.Security.HmacSignatureOptions.MaxNonceLength.set -> void
 PubSoft.Security.HmacSignatureOptions.MaxTimestampSkewSeconds.get -> int
 PubSoft.Security.HmacSignatureOptions.MaxTimestampSkewSeconds.set -> void
+PubSoft.Security.HmacSignatureOptions.SignatureEncoding.get -> PubSoft.Security.HmacSignatureEncoding
+PubSoft.Security.HmacSignatureOptions.SignatureEncoding.set -> void
+PubSoft.Security.HmacSignatureOptions.TimestampUnit.get -> PubSoft.Security.HmacTimestampUnit
+PubSoft.Security.HmacSignatureOptions.TimestampUnit.set -> void
 PubSoft.Security.HmacSignatureResult
 PubSoft.Security.HmacSignatureResult.AppId.get -> string?
 PubSoft.Security.HmacSignatureResult.AppId.init -> void
@@ -51,6 +58,9 @@ PubSoft.Security.HmacSignatureResult.IsValid.init -> void
 PubSoft.Security.HmacSignatureValidator
 PubSoft.Security.HmacSignatureValidator.HmacSignatureValidator(PubSoft.Security.INonceStore! nonceStore, PubSoft.Security.HmacSignatureOptions? options = null, System.TimeProvider? timeProvider = null) -> void
 PubSoft.Security.HmacSignatureValidator.ValidateAsync(string? appId, string? signature, string? timestamp, string? nonce, string? method, string? path, string? queryString, string? bodyHash, string? secret, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.Security.HmacSignatureResult!>
+PubSoft.Security.HmacTimestampUnit
+PubSoft.Security.HmacTimestampUnit.Milliseconds = 1 -> PubSoft.Security.HmacTimestampUnit
+PubSoft.Security.HmacTimestampUnit.Seconds = 0 -> PubSoft.Security.HmacTimestampUnit
 PubSoft.Security.INonceStore
 PubSoft.Security.INonceStore.TryUseAsync(string! scope, string! nonce, System.DateTimeOffset expiresAt, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<bool>
 PubSoft.Security.MemoryNonceStore
@@ -107,10 +117,10 @@ PubSoft.Security.RateLimiterOptions.RequestsPerWindow.get -> int
 PubSoft.Security.RateLimiterOptions.RequestsPerWindow.set -> void
 PubSoft.Security.RateLimiterOptions.WindowSize.get -> System.TimeSpan
 PubSoft.Security.RateLimiterOptions.WindowSize.set -> void
-const PubSoft.Security.HmacSignatureHeaders.AppId = "X-Fend-App-Id" -> string!
-const PubSoft.Security.HmacSignatureHeaders.Nonce = "X-Fend-Nonce" -> string!
-const PubSoft.Security.HmacSignatureHeaders.Signature = "X-Fend-Signature" -> string!
-const PubSoft.Security.HmacSignatureHeaders.Timestamp = "X-Fend-Timestamp" -> string!
+const PubSoft.Security.HmacSignatureHeaders.AppId = "X-App-Id" -> string!
+const PubSoft.Security.HmacSignatureHeaders.Nonce = "X-Nonce" -> string!
+const PubSoft.Security.HmacSignatureHeaders.Signature = "X-Signature" -> string!
+const PubSoft.Security.HmacSignatureHeaders.Timestamp = "X-Timestamp" -> string!
 const PubSoft.Security.PasswordHasher.DefaultIterations = 600000 -> int
 override PubSoft.Security.PasswordVerificationResult.GetHashCode() -> int
 static PubSoft.Security.HmacSignatureValidator.BuildSignature(string! secret, string! method, string! path, string! timestamp, string! nonce, string? queryString = null, string? bodyHash = null) -> string!

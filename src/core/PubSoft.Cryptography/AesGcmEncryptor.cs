@@ -20,6 +20,7 @@ public sealed class AesGcmEncryptor
 
     private readonly IEncryptionKeyRing _keyRing;
 
+    /// <summary>Creates an encryptor bound to a key ring - rotation works by adding keys, never mutating stored ciphertext.</summary>
     public AesGcmEncryptor(IEncryptionKeyRing keyRing)
     {
         _keyRing = keyRing ?? throw new ArgumentNullException(nameof(keyRing));

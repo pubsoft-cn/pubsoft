@@ -19,4 +19,11 @@ public sealed class ClientCredentialOptions
     public string ClientIdClaimType { get; set; } = "client_id";
     public string CallerTypeClaimType { get; set; } = "caller_type";
     public string CallerTypeMachine { get; set; } = "Machine";
+
+    /// <summary>Header carrying the request signature -- presence switches to signed-credential mode.</summary>
+    public string SignatureHeader { get; set; } = "X-Signature";
+    /// <summary>Header carrying the signing timestamp.</summary>
+    public string TimestampHeader { get; set; } = "X-Timestamp";
+    /// <summary>Header carrying the per-request nonce.</summary>
+    public string NonceHeader { get; set; } = "X-Nonce";
 }

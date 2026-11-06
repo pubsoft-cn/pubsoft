@@ -1,29 +1,36 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using PubSoft.Caching;
 
 namespace PubSoft.Scheduling;
 
+/// <summary>Runs due jobs each tick: distributed lock, overlap guard, timeout, retry, result processing.</summary>
 public sealed class SchedulerEngine
 {
     private readonly IExecutorRegistry _executors;
     private readonly IResultProcessorRegistry _processors;
     private readonly IStateStore _state;
+    private readonly IDistributedLock? _distributedLock;
     private readonly ILogger<SchedulerEngine>? _logger;
     private readonly System.Collections.Concurrent.ConcurrentDictionary<string, SemaphoreSlim> _jobLocks = new();
 
+    /// <summary>Creates the engine.</summary>
     public SchedulerEngine(
         IExecutorRegistry executors,
         IResultProcessorRegistry processors,
         IStateStore state,
-        ILogger<SchedulerEngine>? logger = null)
+        ILogger<SchedulerEngine>? logger = null,
+        IDistributedLock? distributedLock = null)
     {
         _executors = executors;
         _processors = processors;
         _state = state;
         _logger = logger;
+        _distributedLock = distributedLock;
     }
 
+    /// <summary>Runs every job due at <paramref name="timestamp"/>, bounded by <see cref="SchedulerOptions.MaxConcurrentJobs"/>.</summary>
     public async Task RunDueJobsAsync(
         SchedulerOptions options,
         DateTimeOffset timestamp,
@@ -42,7 +49,7 @@ public sealed class SchedulerEngine
             await concurrency.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                await ExecuteJobAsync(job, cancellationToken).ConfigureAwait(false);
+                await ExecuteJobAsync(job, options, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -51,7 +58,7 @@ public sealed class SchedulerEngine
         })).ConfigureAwait(false);
     }
 
-    private async Task ExecuteJobAsync(ScheduledJob job, CancellationToken cancellationToken)
+    private async Task ExecuteJobAsync(ScheduledJob job, SchedulerOptions options, CancellationToken cancellationToken)
     {
         var executor = _executors.Resolve(job.ExecutorType);
         if (executor is null)
@@ -71,6 +78,25 @@ public sealed class SchedulerEngine
             }
         }
 
+        // multi-instance guard: only the lock holder runs this tick
+        IAsyncDisposable? instanceLock = null;
+        if (options.DistributedLocking)
+        {
+            if (_distributedLock is null)
+            {
+                _logger?.LogWarning("Job {Name} skipped: DistributedLocking enabled but no IDistributedLock registered", job.Name);
+                return;
+            }
+            instanceLock = await _distributedLock.AcquireAsync(
+                $"pubsoft:sched:{job.Name}", options.DistributedLockLease, waitTimeout: TimeSpan.Zero, cancellationToken)
+                .ConfigureAwait(false);
+            if (instanceLock is null)
+            {
+                _logger?.LogDebug("Job {Name} skipped: another instance holds the lock", job.Name);
+                return;
+            }
+        }
+
         var stopwatch = Stopwatch.StartNew();
         JobResult result;
         try
@@ -83,6 +109,8 @@ public sealed class SchedulerEngine
         }
         finally
         {
+            if (instanceLock is not null)
+                await instanceLock.DisposeAsync().ConfigureAwait(false);
             overlapGuard?.Release();
         }
         stopwatch.Stop();

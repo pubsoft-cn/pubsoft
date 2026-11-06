@@ -28,6 +28,8 @@ services.AddPubSoftRedisCache(options =>
 ```csharp
 services.AddPubSoftRedisDistributedLock(options => options.KeyPrefix = "myapp:locks:");
 
+`AddPubSoftRedisCheck()` 为 `IHealthChecksBuilder` 加 `redis` 健康检查（PING + 延迟）——EF 健康检查的 Redis 对应件，用于 `/health` 端点。
+
 await using var lease = await distributedLock.AcquireAsync("order:42", TimeSpan.FromSeconds(30));
 if (lease is null) return;                          // 竞争失败
 var fencing = ((IFencedLockHandle)lease).FencingToken; // 传给受保护资源

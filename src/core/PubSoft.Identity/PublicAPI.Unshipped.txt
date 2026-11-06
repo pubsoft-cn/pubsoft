@@ -5,18 +5,35 @@ PubSoft.Identity.IIdentityUser.Name.get -> string!
 PubSoft.Identity.IIdentityUser.PhoneNumber.get -> string?
 PubSoft.Identity.IIdentityUser.UserName.get -> string!
 PubSoft.Identity.IdentityUser
+PubSoft.Identity.IdentityUser.AccessFailedCount.get -> int
+PubSoft.Identity.IdentityUser.ExtJson.get -> string?
+PubSoft.Identity.IdentityUser.ExtJson.set -> void
 PubSoft.Identity.IdentityUser.IdentityUser(long id, string! userName, long? tenantId = null, string? name = null) -> void
+PubSoft.Identity.IdentityUser.IsLockedOut(System.DateTimeOffset now) -> bool
+PubSoft.Identity.IdentityUser.Lockout(System.DateTimeOffset until) -> void
+PubSoft.Identity.IdentityUser.LockoutEnd.get -> System.DateTimeOffset?
 PubSoft.Identity.IdentityUser.Name.get -> string!
 PubSoft.Identity.IdentityUser.NormalizedUserName.get -> string!
 PubSoft.Identity.IdentityUser.PasswordHash.get -> string?
 PubSoft.Identity.IdentityUser.PhoneNumber.get -> string?
 PubSoft.Identity.IdentityUser.PhoneNumberConfirmed.get -> bool
+PubSoft.Identity.IdentityUser.RecordAccessFailure(int maxFailedAttempts, System.TimeSpan lockoutDuration, System.DateTimeOffset now) -> void
 PubSoft.Identity.IdentityUser.RemovePassword() -> void
+PubSoft.Identity.IdentityUser.ResetAccessFailures() -> void
 PubSoft.Identity.IdentityUser.SecurityStamp.get -> string!
 PubSoft.Identity.IdentityUser.SetPasswordHash(string! passwordHash) -> void
 PubSoft.Identity.IdentityUser.SetUserName(string! userName) -> void
 PubSoft.Identity.IdentityUser.UpdateProfile(string! name, string? phoneNumber, bool phoneNumberConfirmed) -> void
 PubSoft.Identity.IdentityUser.UserName.get -> string!
+PubSoft.Identity.IdentityUserLogin
+PubSoft.Identity.IdentityUserLogin.ExtJson.get -> string?
+PubSoft.Identity.IdentityUserLogin.ExtJson.set -> void
+PubSoft.Identity.IdentityUserLogin.IdentityUserLogin(long id, long userId, string! loginProvider, string! providerKey, string? providerDisplayName = null, long? tenantId = null) -> void
+PubSoft.Identity.IdentityUserLogin.LoginProvider.get -> string!
+PubSoft.Identity.IdentityUserLogin.ProviderDisplayName.get -> string?
+PubSoft.Identity.IdentityUserLogin.ProviderKey.get -> string!
+PubSoft.Identity.IdentityUserLogin.SetProviderDisplayName(string? displayName) -> void
+PubSoft.Identity.IdentityUserLogin.UserId.get -> long
 PubSoft.Identity.IdentityUserSnapshot
 PubSoft.Identity.IdentityUserSnapshot.Id.get -> long
 PubSoft.Identity.IdentityUserSnapshot.Name.get -> string!

@@ -7,6 +7,7 @@ using StackExchange.Redis;
 namespace PubSoft.Caching.Redis;
 
 
+/// <summary>Redis lock registration.</summary>
 public static class RedisDistributedLockServiceCollectionExtensions
 {
     /// <summary>

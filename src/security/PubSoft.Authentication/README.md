@@ -67,4 +67,4 @@ This registration also adds the principal snapshot accessor and a singleton reso
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
-- `PubSoft.Authentication`: `AuthenticatedSubject` `AuthenticatedSubjectResolver` `IAuthenticatedSubjectAccessor` `IPrincipalSnapshotAccessor` `PrincipalClaim` `PrincipalSnapshot`
+- `PubSoft.Authentication`: `AuthenticatedSubject` `AuthenticatedSubjectResolver` `IAuthenticatedSubjectAccessor` `IPrincipalSnapshotAccessor` `PrincipalClaim` `PrincipalSnapshot` `CurrentSubject` `CurrentSubjectResolver` `SubjectClaimDialect` `ICurrentSubjectAccessor`

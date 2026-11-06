@@ -7,6 +7,7 @@ using StackExchange.Redis;
 namespace PubSoft.Caching.Redis;
 
 
+/// <summary>Redis lock settings.</summary>
 public sealed class RedisDistributedLockOptions
 {
     /// <summary>Redis logical database index; -1 uses the multiplexer default.</summary>

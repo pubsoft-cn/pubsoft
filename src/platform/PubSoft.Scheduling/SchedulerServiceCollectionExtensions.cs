@@ -6,11 +6,14 @@ using Microsoft.Extensions.Hosting;
 
 namespace PubSoft.Scheduling;
 
+/// <summary>Scheduler registration.</summary>
 public static class SchedulerServiceCollectionExtensions
 {
+    /// <summary>Registers the scheduler with in-process state store.</summary>
     public static IServiceCollection AddPubSoftScheduler(this IServiceCollection services)
         => services.AddPubSoftScheduler(configure: null);
 
+    /// <summary>Registers the scheduler with configured options.</summary>
     public static IServiceCollection AddPubSoftScheduler(
         this IServiceCollection services,
         Action<SchedulerOptions>? configure)
@@ -51,6 +54,7 @@ public static class SchedulerServiceCollectionExtensions
         });
     }
 
+    /// <summary>Registers a job executor type.</summary>
     public static IServiceCollection AddExecutor<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TExecutor>(this IServiceCollection services)
         where TExecutor : class, IJobExecutor
     {
@@ -58,6 +62,7 @@ public static class SchedulerServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>Registers a result-processor type.</summary>
     public static IServiceCollection AddResultProcessor<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TProcessor>(this IServiceCollection services)
         where TProcessor : class, IResultProcessor
     {

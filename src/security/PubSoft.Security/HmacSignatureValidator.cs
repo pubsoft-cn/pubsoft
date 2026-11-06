@@ -12,6 +12,7 @@ public sealed class HmacSignatureValidator
     private readonly HmacSignatureOptions _options;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
+    /// <summary>Creates a validator; <paramref name="nonceStore"/> must be shared across replicas for replay protection to hold.</summary>
     public HmacSignatureValidator(
         INonceStore nonceStore,
         HmacSignatureOptions? options = null,
@@ -24,11 +25,14 @@ public sealed class HmacSignatureValidator
         {
             MaxTimestampSkewSeconds = options.MaxTimestampSkewSeconds,
             MaxAppIdLength = options.MaxAppIdLength,
-            MaxNonceLength = options.MaxNonceLength
+            MaxNonceLength = options.MaxNonceLength,
+            SignatureEncoding = options.SignatureEncoding,
+            TimestampUnit = options.TimestampUnit
         };
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
+    /// <summary>Validates a signed request: timestamp skew, signature (fixed-time compare), then atomic nonce reservation.</summary>
     public async ValueTask<HmacSignatureResult> ValidateAsync(
         string? appId,
         string? signature,
@@ -55,12 +59,16 @@ public sealed class HmacSignatureValidator
         if (string.IsNullOrEmpty(secret))
             return Invalid("missing_secret");
 
-        var now = _timeProvider.GetUtcNow().ToUnixTimeSeconds();
-        if (timestampSeconds <= now - _options.MaxTimestampSkewSeconds ||
-            timestampSeconds > now + _options.MaxTimestampSkewSeconds)
+        var now = _options.TimestampUnit == HmacTimestampUnit.Milliseconds
+            ? _timeProvider.GetUtcNow().ToUnixTimeMilliseconds()
+            : _timeProvider.GetUtcNow().ToUnixTimeSeconds();
+        var skew = _options.TimestampUnit == HmacTimestampUnit.Milliseconds
+            ? _options.MaxTimestampSkewSeconds * 1000L
+            : (long)_options.MaxTimestampSkewSeconds;
+        if (timestampSeconds <= now - skew || timestampSeconds > now + skew)
             return Invalid("timestamp_expired");
 
-        if (!TryParseSignature(signature, out var suppliedSignature))
+        if (!TryParseSignature(signature, _options.SignatureEncoding, out var suppliedSignature))
             return Invalid("invalid_signature");
 
         var stringToSign = BuildStringToSign(method, path, queryString, timestamp, nonce, bodyHash);
@@ -71,7 +79,9 @@ public sealed class HmacSignatureValidator
         if (!signatureMatches)
             return Invalid("signature_mismatch");
 
-        var expiresAt = DateTimeOffset.FromUnixTimeSeconds(timestampSeconds)
+        var expiresAt = (_options.TimestampUnit == HmacTimestampUnit.Milliseconds
+                ? DateTimeOffset.FromUnixTimeMilliseconds(timestampSeconds)
+                : DateTimeOffset.FromUnixTimeSeconds(timestampSeconds))
             .AddSeconds(_options.MaxTimestampSkewSeconds);
         var nonceAccepted = await _nonceStore.TryUseAsync(appId, nonce, expiresAt, cancellationToken).ConfigureAwait(false);
         return nonceAccepted
@@ -79,9 +89,11 @@ public sealed class HmacSignatureValidator
             : Invalid("nonce_replayed");
     }
 
+    /// <summary>Lowercase-hex HMAC-SHA256 of <paramref name="data"/> under <paramref name="key"/>.</summary>
     public static string ComputeHmacSha256(string key, string data)
         => Convert.ToHexString(ComputeHmacSha256Bytes(key, data)).ToLowerInvariant();
 
+    /// <summary>Lowercase-hex SHA-256 of a seekable body stream; position is preserved.</summary>
     public static string ComputeBodyHash(Stream body)
     {
         ArgumentNullException.ThrowIfNull(body);
@@ -100,12 +112,14 @@ public sealed class HmacSignatureValidator
         }
     }
 
+    /// <summary>Lowercase-hex SHA-256 of a body buffer.</summary>
     public static string ComputeBodyHash(byte[] body)
     {
         ArgumentNullException.ThrowIfNull(body);
         return Convert.ToHexString(SHA256.HashData(body)).ToLowerInvariant();
     }
 
+    /// <summary>Client-side helper: builds the canonical string and returns the HMAC-SHA256 signature for it.</summary>
     public static string BuildSignature(
         string secret,
         string method,
@@ -117,8 +131,8 @@ public sealed class HmacSignatureValidator
         => ComputeHmacSha256(secret, BuildStringToSign(method, path, queryString, timestamp, nonce, bodyHash));
 
     /// <summary>
-    /// 规范化签名串：query 以 "?" 开头的原始串（含 '?'）按原样入签 — 签名约束 query 参数，
-    /// 防止已签名请求的查询参数被篡改。空 query 统一写 ""（不占行位）。
+    /// Canonical string-to-sign: the raw query string including its leading "?" is signed verbatim -- the signature pins the query parameters,
+    /// so a signed request's query cannot be tampered with. An empty query normalizes to "" (no line slot).
     /// </summary>
     private static string BuildStringToSign(string method, string path, string? queryString, string timestamp, string nonce, string? bodyHash)
         => $"{method}\n{path}{queryString ?? ""}\n{timestamp}\n{nonce}\n{bodyHash ?? ""}";
@@ -140,14 +154,14 @@ public sealed class HmacSignatureValidator
         }
     }
 
-    private static bool TryParseSignature(string signature, out byte[] bytes)
+    private static bool TryParseSignature(string signature, HmacSignatureEncoding encoding, out byte[] bytes)
     {
         bytes = [];
-        if (signature.Length != 64)
-            return false;
         try
         {
-            bytes = Convert.FromHexString(signature);
+            bytes = encoding == HmacSignatureEncoding.Base64
+                ? Convert.FromBase64String(signature)
+                : Convert.FromHexString(signature);
             return bytes.Length == 32;
         }
         catch (FormatException)

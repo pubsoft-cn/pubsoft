@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace PubSoft.Scheduling;
 
+/// <summary>Background loop that ticks <see cref="SchedulerEngine"/>.</summary>
 public sealed class SchedulerHostedService : BackgroundService
 {
     private readonly SchedulerEngine _engine;
@@ -11,6 +12,7 @@ public sealed class SchedulerHostedService : BackgroundService
     private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly ILogger<SchedulerHostedService>? _logger;
 
+    /// <summary>Creates the hosted service.</summary>
     public SchedulerHostedService(
         SchedulerEngine engine,
         IOptionsMonitor<SchedulerOptions> options,

@@ -6,8 +6,12 @@ namespace PubSoft.Identity;
 /// </summary>
 public interface IIdentityUser
 {
+    /// <summary>The user identifier.</summary>
     long Id { get; }
+    /// <summary>The login name.</summary>
     string UserName { get; }
+    /// <summary>Display name.</summary>
     string Name { get; }
+    /// <summary>Phone number when set.</summary>
     string? PhoneNumber { get; }
 }

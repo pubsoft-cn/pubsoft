@@ -35,7 +35,7 @@ services.AddExecutor<ReportExecutor>();
 services.AddResultProcessor<LoggingResultProcessor>();
 ```
 
-`AddPubSoftScheduler` 注册 hosted worker 与 `MemoryStateStore`（宿主已注册其他 `IStateStore` 时除外）。job 名大小写不敏感唯一；每个配置的 executor/processor 名运行时须可解析。executor 与 processor 为单例——保持线程安全，需要 DbContext 等 scoped 工作时用 `IServiceScopeFactory`。
+`AddPubSoftScheduler` 注册 hosted worker 与 `MemoryStateStore`（宿主已注册其他 `IStateStore` 时除外）。多副本部署设 `SchedulerOptions.DistributedLocking = true`——每个到期 job 经宿主 `IDistributedLock`（Redis 实现在 `PubSoft.Caching.Redis`）抢 `pubsoft:sched:{jobName}` 锁；开启但无锁注册时全部跳过（fail-closed 而非静默并发）。`DistributedLockLease`（默认 5min）应超过最长 job 运行时长。job 名大小写不敏感唯一；每个配置的 executor/processor 名运行时须可解析。executor 与 processor 为单例——保持线程安全，需要 DbContext 等 scoped 工作时用 `IServiceScopeFactory`。
 
 ## 排程位掩码
 

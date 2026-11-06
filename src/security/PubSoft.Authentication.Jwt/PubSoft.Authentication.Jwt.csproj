@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Authentication.Jwt</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Explicit-key RS256 JWT signing, validation, JWKS export, and refresh-token primitives.</Description>

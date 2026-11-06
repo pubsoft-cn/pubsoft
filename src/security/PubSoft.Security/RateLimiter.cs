@@ -12,6 +12,7 @@ public sealed class RateLimiter
     private readonly RateLimiterOptions _options;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
+    /// <summary>Creates a limiter; <paramref name="timeProvider"/> is injectable for tests.</summary>
     public RateLimiter(RateLimiterOptions? options = null, TimeProvider? timeProvider = null)
     {
         options ??= new RateLimiterOptions();
@@ -28,9 +29,11 @@ public sealed class RateLimiter
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
+    /// <summary>Counts one request against <paramref name="identifier"/> and reports the limit outcome.</summary>
     public RateLimitResult CheckRateLimit(string? identifier)
         => CheckRateLimit(identifier, countRequest: true);
 
+    /// <summary>Checks the limit; pass <paramref name="countRequest"/> = false to probe without consuming a slot.</summary>
     public RateLimitResult CheckRateLimit(string? identifier, bool countRequest)
     {
         var now = _timeProvider.GetUtcNow();
@@ -83,21 +86,26 @@ public sealed class RateLimiter
         }
     }
 
+    /// <summary>Checks the IP bucket when <c>LimitByIpAddress</c> is enabled; always allowed otherwise.</summary>
     public RateLimitResult CheckByIpAddress(string? ipAddress)
         => _options.LimitByIpAddress ? CheckRateLimit(ipAddress) : Allowed(int.MaxValue, _timeProvider.GetUtcNow() + _options.WindowSize);
 
+    /// <summary>Checks the user bucket when <c>LimitByUserId</c> is enabled; always allowed otherwise.</summary>
     public RateLimitResult CheckByUserId(long userId)
         => _options.LimitByUserId ? CheckRateLimit(userId.ToString(System.Globalization.CultureInfo.InvariantCulture)) : Allowed(int.MaxValue, _timeProvider.GetUtcNow() + _options.WindowSize);
 
+    /// <summary>Drops the bucket for <paramref name="identifier"/>, clearing its current-window count.</summary>
     public void ResetRateLimit(string? identifier)
     {
         if (!string.IsNullOrWhiteSpace(identifier))
             _windows.TryRemove(identifier.Trim(), out _);
     }
 
+    /// <summary>Removes windows that have fully expired.</summary>
     public void CleanupExpiredEntries()
         => CleanupExpiredEntries(_timeProvider.GetUtcNow());
 
+    /// <summary>Snapshot of tracked identifiers and request counts.</summary>
     public RateLimitStats GetStats()
     {
         var now = _timeProvider.GetUtcNow();
@@ -156,10 +164,14 @@ public sealed class RateLimiter
         public int Count { get; set; }
     }
 
+    /// <summary>Point-in-time limiter counters.</summary>
     public sealed class RateLimitStats
     {
+        /// <summary>Identifiers ever seen.</summary>
         public int TotalIdentifiers { get; init; }
+        /// <summary>Identifiers inside an active window.</summary>
         public int ActiveIdentifiers { get; init; }
+        /// <summary>Requests counted across active windows.</summary>
         public int TotalRequests { get; init; }
     }
 }

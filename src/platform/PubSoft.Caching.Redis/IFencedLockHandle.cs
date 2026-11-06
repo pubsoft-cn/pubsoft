@@ -9,13 +9,15 @@ namespace PubSoft.Caching.Redis;
 /// <summary>A lock handle carrying the fencing token assigned at acquisition.</summary>
 /// <remarks>
 /// The fencing token is a strictly increasing counter per lock key. A lease alone is not a
-/// correctness guarantee — a paused or partitioned holder may lose its lease while believing
+/// correctness guarantee -- a paused or partitioned holder may lose its lease while believing
 /// it still owns the lock. The protected resource must persist and compare the token
 /// (reject writes whose token is not greater than the last seen value).
 /// </remarks>
 public interface IFencedLockHandle : IAsyncDisposable
 {
+    /// <summary>The locked key.</summary>
     string Key { get; }
+    /// <summary>Monotonic fencing token assigned at acquisition.</summary>
     long FencingToken { get; }
 
     /// <summary>Extends the lease while still owned; returns false when ownership was already lost.</summary>
@@ -31,7 +33,7 @@ public interface IFencedLockHandle : IAsyncDisposable
 /// owner token still matches. There is no automatic renewal: choose an expiry
 /// longer than the protected operation, or use <see cref="IFencedLockHandle.ExtendAsync"/>;
 /// expiry during a hold is a real possibility the fencing token exists to defend against.
-/// Lock and fence keys share a Redis Cluster hash tag. Redis failures propagate — there is no
+/// Lock and fence keys share a Redis Cluster hash tag. Redis failures propagate -- there is no
 /// in-memory fallback. Mutual exclusion still assumes the protected resource honors fencing.
 /// </remarks>
 public sealed class RedisDistributedLock : IDistributedLock
@@ -59,6 +61,7 @@ public sealed class RedisDistributedLock : IDistributedLock
     private readonly RedisDistributedLockOptions _options;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
+    /// <summary>Creates the lock over a shared multiplexer.</summary>
     public RedisDistributedLock(
         IConnectionMultiplexer connection,
         RedisDistributedLockOptions? options = null,

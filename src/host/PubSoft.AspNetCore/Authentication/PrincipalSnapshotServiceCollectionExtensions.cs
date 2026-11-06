@@ -27,4 +27,22 @@ public static class PrincipalSnapshotServiceCollectionExtensions
         services.TryAddScoped<IAuthenticatedSubjectAccessor, HttpContextAuthenticatedSubjectAccessor>();
         return services;
     }
+
+    /// <summary>
+    /// Registers <see cref="ICurrentSubjectAccessor"/> resolved through a
+    /// <see cref="SubjectClaimDialect"/> -- the configurable-claim-names path for hosts whose
+    /// token dialect names more than subject id and tenant.
+    /// </summary>
+    public static IServiceCollection AddCurrentSubjectAccessor(
+        this IServiceCollection services,
+        SubjectClaimDialect dialect,
+        string trustedIssuer)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        var resolver = new CurrentSubjectResolver(dialect, trustedIssuer);
+        services.AddPrincipalSnapshotAccessor();
+        services.TryAddSingleton(resolver);
+        services.TryAddScoped<ICurrentSubjectAccessor, HttpContextCurrentSubjectAccessor>();
+        return services;
+    }
 }

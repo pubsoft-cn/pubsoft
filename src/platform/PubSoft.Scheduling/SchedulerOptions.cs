@@ -1,11 +1,24 @@
 namespace PubSoft.Scheduling;
 
+/// <summary>Scheduler runtime options.</summary>
 public sealed class SchedulerOptions
 {
+    /// <summary>Configured jobs.</summary>
     public List<ScheduledJob> Jobs { get; set; } = [];
+    /// <summary>Tick interval between due-job checks.</summary>
     public TimeSpan LoopInterval { get; set; } = TimeSpan.FromSeconds(1);
+    /// <summary>Delay after a tick-level failure.</summary>
     public TimeSpan ErrorDelay { get; set; } = TimeSpan.FromSeconds(5);
+    /// <summary>Concurrent job cap per tick.</summary>
     public int MaxConcurrentJobs { get; set; } = 16;
+
+    /// <summary>
+    /// Guard every job with a shared <see cref="PubSoft.Caching.IDistributedLock"/> so only one
+    /// instance runs a given job per tick. Fail-closed: enabled without a registered lock skips jobs.
+    /// </summary>
+    public bool DistributedLocking { get; set; }
+    /// <summary>Lease held per job tick; should exceed the longest expected job run.</summary>
+    public TimeSpan DistributedLockLease { get; set; } = TimeSpan.FromMinutes(5);
 
     internal bool IsValid(out string error)
     {

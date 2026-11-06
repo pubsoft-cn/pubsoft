@@ -9,6 +9,8 @@ using PubSoft.AspNetCore.Authentication;
 using PubSoft.Domain;
 using Xunit;
 
+// PubSoft.AspNetCore.Authentication tests — signature-delegate path
+
 namespace PubSoft.Core.Tests;
 
 public sealed class ClientCredentialAuthorizationTests
@@ -101,6 +103,75 @@ public sealed class ClientCredentialAuthorizationTests
 
         await new ClientCredentialMvcAuthorizationFilter().OnActionExecutionAsync(context, Next(context));
         Assert.Equal(401, ((StatusCodeResult)context.Result!).StatusCode);
+    }
+
+    [Fact]
+    public async Task SignedRequestDelegatesToClientSignatureVerifier()
+    {
+        var verifier = new RecordingSignatureVerifier(accept: true);
+        var services = new ServiceCollection()
+            .AddSingleton<IClientSignatureVerifier>(verifier)
+            .BuildServiceProvider(); // no plaintext verifier — signature-only host
+        var context = CreateContext(services, new RequireClientCredentialAttribute());
+        context.HttpContext.Request.Method = "POST";
+        context.HttpContext.Request.Path = "/api/x";
+        context.HttpContext.Request.Headers["X-Client-Id"] = "svc";
+        context.HttpContext.Request.Headers["X-Signature"] = "sig-abc";
+        context.HttpContext.Request.Headers["X-Timestamp"] = "1700000000000";
+        context.HttpContext.Request.Headers["X-Nonce"] = "n1";
+
+        var executed = false;
+        await new ClientCredentialMvcAuthorizationFilter().OnActionExecutionAsync(context, Next(context, () => executed = true));
+
+        Assert.True(executed);
+        Assert.Equal("svc", context.HttpContext.User.FindFirst("client_id")?.Value);
+        Assert.NotNull(verifier.Seen);
+        Assert.Equal("sig-abc", verifier.Seen!.Signature);
+        Assert.Equal("POST", verifier.Seen.Method);
+        Assert.Equal("1700000000000", verifier.Seen.Timestamp);
+        Assert.Equal("n1", verifier.Seen.Nonce);
+    }
+
+    [Fact]
+    public async Task SignedRequestWithoutSignatureVerifierFailsClosed()
+    {
+        var services = new ServiceCollection().BuildServiceProvider();
+        var context = CreateContext(services, new RequireClientCredentialAttribute());
+        context.HttpContext.Request.Headers["X-Client-Id"] = "svc";
+        context.HttpContext.Request.Headers["X-Signature"] = "sig-abc";
+        context.HttpContext.Request.Headers["X-Timestamp"] = "1700000000000";
+        context.HttpContext.Request.Headers["X-Nonce"] = "n1";
+
+        await new ClientCredentialMvcAuthorizationFilter().OnActionExecutionAsync(context, Next(context));
+        Assert.Equal(401, ((StatusCodeResult)context.Result!).StatusCode);
+    }
+
+    [Fact]
+    public async Task RejectedSignatureReturns401()
+    {
+        var services = new ServiceCollection()
+            .AddSingleton<IClientSignatureVerifier>(new RecordingSignatureVerifier(accept: false))
+            .BuildServiceProvider();
+        var context = CreateContext(services, new RequireClientCredentialAttribute());
+        context.HttpContext.Request.Headers["X-Client-Id"] = "svc";
+        context.HttpContext.Request.Headers["X-Signature"] = "bad";
+        context.HttpContext.Request.Headers["X-Timestamp"] = "1700000000000";
+        context.HttpContext.Request.Headers["X-Nonce"] = "n1";
+
+        await new ClientCredentialMvcAuthorizationFilter().OnActionExecutionAsync(context, Next(context));
+        Assert.Equal(401, ((StatusCodeResult)context.Result!).StatusCode);
+    }
+
+    private sealed class RecordingSignatureVerifier(bool accept) : IClientSignatureVerifier
+    {
+        public ClientSignatureRequest? Seen { get; private set; }
+        public ValueTask<ClientCredentialVerificationResult> VerifyAsync(ClientSignatureRequest request, CancellationToken ct = default)
+        {
+            Seen = request;
+            return new(accept
+                ? ClientCredentialVerificationResult.Ok(request.ClientId)
+                : ClientCredentialVerificationResult.Fail());
+        }
     }
 
     private static ActionExecutionDelegate Next(ActionExecutingContext context, Action? inside = null)

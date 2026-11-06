@@ -28,6 +28,8 @@ services.AddPubSoftRedisCache(options =>
 ```csharp
 services.AddPubSoftRedisDistributedLock(options => options.KeyPrefix = "myapp:locks:");
 
+`AddPubSoftRedisCheck()` adds a `redis` health check (PING + latency) via `IHealthChecksBuilder` — the Redis counterpart of the EF health check, for `/health` endpoints.
+
 await using var lease = await distributedLock.AcquireAsync("order:42", TimeSpan.FromSeconds(30));
 if (lease is null) return;                          // contended
 var fencing = ((IFencedLockHandle)lease).FencingToken; // pass to the protected resource

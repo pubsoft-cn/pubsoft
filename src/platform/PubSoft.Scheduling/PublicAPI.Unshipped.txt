@@ -99,10 +99,14 @@ PubSoft.Scheduling.ScheduledJob.Timeout.get -> System.TimeSpan?
 PubSoft.Scheduling.ScheduledJob.Timeout.set -> void
 PubSoft.Scheduling.SchedulerEngine
 PubSoft.Scheduling.SchedulerEngine.RunDueJobsAsync(PubSoft.Scheduling.SchedulerOptions! options, System.DateTimeOffset timestamp, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-PubSoft.Scheduling.SchedulerEngine.SchedulerEngine(PubSoft.Scheduling.IExecutorRegistry! executors, PubSoft.Scheduling.IResultProcessorRegistry! processors, PubSoft.Scheduling.IStateStore! state, Microsoft.Extensions.Logging.ILogger<PubSoft.Scheduling.SchedulerEngine!>? logger = null) -> void
+PubSoft.Scheduling.SchedulerEngine.SchedulerEngine(PubSoft.Scheduling.IExecutorRegistry! executors, PubSoft.Scheduling.IResultProcessorRegistry! processors, PubSoft.Scheduling.IStateStore! state, Microsoft.Extensions.Logging.ILogger<PubSoft.Scheduling.SchedulerEngine!>? logger = null, PubSoft.Caching.IDistributedLock? distributedLock = null) -> void
 PubSoft.Scheduling.SchedulerHostedService
 PubSoft.Scheduling.SchedulerHostedService.SchedulerHostedService(PubSoft.Scheduling.SchedulerEngine! engine, Microsoft.Extensions.Options.IOptionsMonitor<PubSoft.Scheduling.SchedulerOptions!>! options, System.TimeProvider! timeProvider, Microsoft.Extensions.Logging.ILogger<PubSoft.Scheduling.SchedulerHostedService!>? logger = null) -> void
 PubSoft.Scheduling.SchedulerOptions
+PubSoft.Scheduling.SchedulerOptions.DistributedLockLease.get -> System.TimeSpan
+PubSoft.Scheduling.SchedulerOptions.DistributedLockLease.set -> void
+PubSoft.Scheduling.SchedulerOptions.DistributedLocking.get -> bool
+PubSoft.Scheduling.SchedulerOptions.DistributedLocking.set -> void
 PubSoft.Scheduling.SchedulerOptions.ErrorDelay.get -> System.TimeSpan
 PubSoft.Scheduling.SchedulerOptions.ErrorDelay.set -> void
 PubSoft.Scheduling.SchedulerOptions.Jobs.get -> System.Collections.Generic.List<PubSoft.Scheduling.ScheduledJob!>!

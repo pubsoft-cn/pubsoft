@@ -25,7 +25,7 @@ var plaintext = encryptor.Decrypt(ciphertext, context);
 - AES-256-GCM，随机 96-bit nonce、128-bit tag；AAD 绑定格式版本 + key id + 调用方 context
 - key id 支持轮换：用当前 ring key 加密，解密按 envelope `keyId` 解析
 - context 不匹配、密文/tag 被篡改、包封格式错误、密钥非 32 字节——全部 fail closed
-- `IEncryptionKeyRing` 是集成契约——用你的 KMS/secret manager 实现；无内置默认密钥
+- 内置 `ConfigEncryptionKeyRing` 解析 `EncryptionKeyRingOptions`（`ActiveKeyId` + `Keys:{id}=base64`）兜底；`IEncryptionKeyRing` 仍是集成契约——用你的 KMS/secret manager 实现；无内置默认密钥
 
 ## 旧凭据迁移
 

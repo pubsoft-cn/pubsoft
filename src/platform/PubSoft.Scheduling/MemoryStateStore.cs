@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.Scheduling;
 
 
+/// <summary>In-process state store - last results + custom keys. Per-process; not shared across replicas.</summary>
 public sealed class MemoryStateStore : IStateStore
 {
     private static readonly TimeSpan s_lastResultLifetime = TimeSpan.FromDays(7);
@@ -11,18 +12,21 @@ public sealed class MemoryStateStore : IStateStore
     private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly ILogger<MemoryStateStore>? _logger;
 
+    /// <summary>Creates the store.</summary>
     public MemoryStateStore(TimeProvider? timeProvider = null, ILogger<MemoryStateStore>? logger = null)
     {
         _timeProvider = timeProvider ?? TimeProvider.System;
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public Task<JobResult?> GetLastResultAsync(string jobName, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(jobName);
         return GetAsync<JobResult>($"last:{jobName}", cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task UpdateStateAsync(string jobName, JobResult result, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(jobName);
@@ -30,12 +34,14 @@ public sealed class MemoryStateStore : IStateStore
         return SetAsync($"last:{jobName}", result, s_lastResultLifetime, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task<T?> GetCustomStateAsync<T>(string key, CancellationToken cancellationToken) where T : class
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
         return GetAsync<T>($"custom:{key}", cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task SetCustomStateAsync<T>(string key, T value, TimeSpan? expiry, CancellationToken cancellationToken)
         where T : class
     {
@@ -46,6 +52,7 @@ public sealed class MemoryStateStore : IStateStore
         return SetAsync($"custom:{key}", value, expiry, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task RemoveCustomStateAsync(string key, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);

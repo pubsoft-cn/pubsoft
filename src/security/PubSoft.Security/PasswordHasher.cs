@@ -153,4 +153,7 @@ public static class PasswordHasher
     }
 }
 
+/// <summary>Outcome of a password verify; <paramref name="ReplacementHash"/> carries an upgraded hash when the stored one is legacy or low-cost.</summary>
+/// <param name="Succeeded">Whether the password matched.</param>
+/// <param name="ReplacementHash">Upgraded hash to persist when the stored one is legacy or low-cost.</param>
 public readonly record struct PasswordVerificationResult(bool Succeeded, string? ReplacementHash);

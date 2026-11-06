@@ -14,7 +14,7 @@ Versioned AEAD encryption with key rotation support — no package dependencies.
 ## Envelope encryption
 
 ```csharp
-var ring = new MyKeyRing();                      // host implements IEncryptionKeyRing
+var ring = new ConfigEncryptionKeyRing(options);  // built-in config-driven keyring — or implement IEncryptionKeyRing over a KMS
 var encryptor = new AesGcmEncryptor(ring, timeProvider);
 
 var context = Encoding.UTF8.GetBytes($"{tenantId}:credential:{id}");
@@ -25,7 +25,7 @@ var plaintext = encryptor.Decrypt(ciphertext, context);
 - AES-256-GCM, random 96-bit nonce, 128-bit tag; AAD binds format version + key id + caller context
 - Key ids enable rotation: encrypt with the current ring key, decrypt resolves by envelope `keyId`
 - Mismatched context, tampered ciphertext/tag, malformed envelope, or non-32-byte key all fail closed
-- `IEncryptionKeyRing` is an integration contract — implement it over your KMS/secret manager; there are no default keys
+- `IEncryptionKeyRing` is an integration contract — the built-in `ConfigEncryptionKeyRing` resolves `EncryptionKeyRingOptions` (`ActiveKeyId` + `Keys:{id}=base64`); production hosts should still implement the contract over a KMS/secret manager
 
 ## Legacy credential migration
 

@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Identity</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
       <Description>Framework-independent identity user model and profile contracts for PubSoft.</Description>

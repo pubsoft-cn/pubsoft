@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Security</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Dependency-free security primitives for PubSoft libraries.</Description>

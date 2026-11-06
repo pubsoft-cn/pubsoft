@@ -17,6 +17,7 @@ public sealed class CredentialEncryptionService : IDisposable
     private readonly byte[] _legacyKey;
     private bool _disposed;
 
+    /// <summary>Creates the service; <paramref name="legacyKeyMaterial"/> decrypts pre-ring ciphertexts so they can be flagged for re-encryption.</summary>
     public CredentialEncryptionService(AesGcmEncryptor encryptor, string legacyKeyMaterial)
     {
         _encryptor = encryptor ?? throw new ArgumentNullException(nameof(encryptor));
@@ -32,12 +33,14 @@ public sealed class CredentialEncryptionService : IDisposable
         }
     }
 
+    /// <summary>Encrypts with the active ring key, binding optional AAD (e.g. column context) into the ciphertext.</summary>
     public string Encrypt(string plaintext, ReadOnlySpan<byte> additionalAuthenticatedData = default)
     {
         ThrowIfDisposed();
         return _encryptor.Encrypt(plaintext, additionalAuthenticatedData);
     }
 
+    /// <summary>Decrypts via ring-or-legacy fallback; returns <see cref="DecryptedCredential.RequiresReEncryption"/> when the value used the legacy path.</summary>
     public DecryptedCredential Decrypt(string ciphertext, ReadOnlySpan<byte> additionalAuthenticatedData = default)
     {
         ThrowIfDisposed();
@@ -49,6 +52,7 @@ public sealed class CredentialEncryptionService : IDisposable
         return new DecryptedCredential(plaintext, true, _encryptor.Encrypt(plaintext, additionalAuthenticatedData));
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_disposed)

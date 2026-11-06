@@ -11,6 +11,7 @@ public readonly struct ScheduleMask
     private const ushort MonthMask = 0x1FFE;
     private const byte DayOfWeekMask = 0x7F;
 
+    /// <summary>Creates a mask; each field is a bit-per-value set (60/24/32/13/7 bits), empty bits = never.</summary>
     [JsonConstructor]
     public ScheduleMask(ulong seconds, ulong minutes, uint hours, uint daysOfMonth, ushort months, byte daysOfWeek)
     {
@@ -29,28 +30,40 @@ public readonly struct ScheduleMask
         DaysOfWeek = daysOfWeek;
     }
 
+    /// <summary>Seconds-of-minute bits.</summary>
     public ulong Seconds { get; }
+    /// <summary>Minutes-of-hour bits.</summary>
     public ulong Minutes { get; }
+    /// <summary>Hours-of-day bits.</summary>
     public uint Hours { get; }
+    /// <summary>Days-of-month bits (1–31).</summary>
     public uint DaysOfMonth { get; }
+    /// <summary>Months-of-year bits (1–12).</summary>
     public ushort Months { get; }
+    /// <summary>Days-of-week bits (0–6, Sunday = 0).</summary>
     public byte DaysOfWeek { get; }
 
+    /// <summary>Whether every field has at least one bit set (a job that can ever run).</summary>
     public bool IsValid => Seconds != 0 && Minutes != 0 && Hours != 0
         && DaysOfMonth != 0 && Months != 0 && DaysOfWeek != 0;
 
+    /// <summary>Every second.</summary>
     public static ScheduleMask EverySecond { get; } = new(
         FieldMask60, FieldMask60, FieldMask24, DayOfMonthMask, MonthMask, DayOfWeekMask);
 
+    /// <summary>Every minute.</summary>
     public static ScheduleMask EveryMinute { get; } = new(
         1UL, FieldMask60, FieldMask24, DayOfMonthMask, MonthMask, DayOfWeekMask);
 
+    /// <summary>Every hour.</summary>
     public static ScheduleMask EveryHour { get; } = new(
         1UL, 1UL, FieldMask24, DayOfMonthMask, MonthMask, DayOfWeekMask);
 
+    /// <summary>Every day.</summary>
     public static ScheduleMask EveryDay { get; } = new(
         1UL, 1UL, 1U, DayOfMonthMask, MonthMask, DayOfWeekMask);
 
+    /// <summary>Whether the timestamp matches every field.</summary>
     public bool Matches(DateTimeOffset timestamp)
     {
         if (!IsValid)
@@ -162,23 +175,29 @@ public readonly struct ScheduleMask
     }
 }
 
+/// <summary>Convenience factories for common schedules.</summary>
 public static class ScheduleMasks
 {
+    /// <summary>Every N seconds.</summary>
     public static ScheduleMask EverySeconds(int interval)
         => new(BuildInterval(60, interval), (1UL << 60) - 1, (1U << 24) - 1, 0xFFFFFFFE, 0x1FFE, 0x7F);
 
+    /// <summary>Every N minutes.</summary>
     public static ScheduleMask EveryMinutes(int interval)
         => new(1UL, BuildInterval(60, interval), (1U << 24) - 1, 0xFFFFFFFE, 0x1FFE, 0x7F);
 
+    /// <summary>Every N hours.</summary>
     public static ScheduleMask EveryHours(int interval)
         => new(1UL, 1UL, BuildIntervalUInt(24, interval), 0xFFFFFFFE, 0x1FFE, 0x7F);
 
+    /// <summary>Daily at a fixed time.</summary>
     public static ScheduleMask DailyAt(int hour, int minute = 0, int second = 0)
     {
         ValidateTime(hour, minute, second);
         return new ScheduleMask(1UL << second, 1UL << minute, 1U << hour, 0xFFFFFFFE, 0x1FFE, 0x7F);
     }
 
+    /// <summary>Weekly on a day at a fixed time.</summary>
     public static ScheduleMask WeeklyAt(DayOfWeek day, int hour, int minute = 0, int second = 0)
     {
         ValidateTime(hour, minute, second);

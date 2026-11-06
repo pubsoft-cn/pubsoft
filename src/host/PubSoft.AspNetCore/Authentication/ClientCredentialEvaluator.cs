@@ -23,25 +23,49 @@ internal static class ClientCredentialEvaluator
         if (requirement is null)
             return new Evaluation(null, null, null);
 
-        // Fail-closed: without a registered verifier no endpoint marked with the attribute is reachable.
-        var verifier = httpContext.RequestServices.GetService<IClientCredentialVerifier>();
-        if (verifier is null)
-            return new Evaluation(StatusCodes.Status403Forbidden, null, null);
-
         var options = httpContext.RequestServices.GetService<ClientCredentialOptions>() ?? new ClientCredentialOptions();
 
         if (requirement.AllowAuthenticatedUser && httpContext.User.Identity?.IsAuthenticated == true)
             return new Evaluation(null, null, null);
 
         var clientId = httpContext.Request.Headers[options.ClientIdHeader].FirstOrDefault();
-        var clientSecret = httpContext.Request.Headers[options.ClientSecretHeader].FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
-            return new Evaluation(StatusCodes.Status401Unauthorized, null, null);
+        var signature = httpContext.Request.Headers[options.SignatureHeader].FirstOrDefault();
 
-        // Identical 401 for unknown/invalid credentials — no client-existence oracle.
-        var result = await verifier
-            .VerifyAsync(clientId, clientSecret, httpContext.RequestAborted)
-            .ConfigureAwait(false);
+        ClientCredentialVerificationResult result;
+        if (!string.IsNullOrWhiteSpace(signature))
+        {
+            // Signed-credential mode: the verifier owns the wire protocol; we only hand over material.
+            var signatureVerifier = httpContext.RequestServices.GetService<IClientSignatureVerifier>();
+            if (signatureVerifier is null || string.IsNullOrWhiteSpace(clientId))
+                return new Evaluation(StatusCodes.Status401Unauthorized, null, null);
+
+            var timestamp = httpContext.Request.Headers[options.TimestampHeader].FirstOrDefault();
+            var nonce = httpContext.Request.Headers[options.NonceHeader].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(timestamp) || string.IsNullOrWhiteSpace(nonce))
+                return new Evaluation(StatusCodes.Status401Unauthorized, null, null);
+
+            var request = new ClientSignatureRequest(
+                clientId, signature, timestamp, nonce,
+                httpContext.Request.Method,
+                httpContext.Request.Path.Value ?? string.Empty,
+                httpContext.Request.QueryString.Value,
+                ReadBody: ct => ReadBodyAsync(httpContext.Request, ct));
+            result = await signatureVerifier.VerifyAsync(request, httpContext.RequestAborted)
+                .ConfigureAwait(false);
+        }
+        else
+        {
+            // Fail-closed: plaintext pair mode requires a registered verifier.
+            var verifier = httpContext.RequestServices.GetService<IClientCredentialVerifier>();
+            if (verifier is null)
+                return new Evaluation(StatusCodes.Status403Forbidden, null, null);
+            var clientSecret = httpContext.Request.Headers[options.ClientSecretHeader].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
+                return new Evaluation(StatusCodes.Status401Unauthorized, null, null);
+            result = await verifier
+                .VerifyAsync(clientId, clientSecret, httpContext.RequestAborted)
+                .ConfigureAwait(false);
+        }
         if (!result.Success || string.IsNullOrWhiteSpace(result.ClientId))
             return new Evaluation(StatusCodes.Status401Unauthorized, null, null);
 
@@ -65,6 +89,23 @@ internal static class ClientCredentialEvaluator
             ? httpContext.RequestServices.GetService<AmbientTenantContext>()
             : null;
         return new Evaluation(null, tenantContext, result.TenantId);
+    }
+
+    private static async ValueTask<byte[]> ReadBodyAsync(HttpRequest request, CancellationToken cancellationToken)
+    {
+        request.EnableBuffering();
+        var originalPosition = request.Body.Position;
+        request.Body.Position = 0;
+        try
+        {
+            using var buffer = new MemoryStream();
+            await request.Body.CopyToAsync(buffer, cancellationToken).ConfigureAwait(false);
+            return buffer.ToArray();
+        }
+        finally
+        {
+            request.Body.Position = originalPosition;
+        }
     }
 
     public readonly record struct Evaluation(

@@ -127,7 +127,7 @@ internal static class SchedulerConfigurationBinding
 
     // ── strict scalar parsing ──
     // Present-but-unparsable values throw instead of silently falling back to
-    // defaults — for knobs like Timeout a silent fallback inverts the intent
+    // defaults - for knobs like Timeout a silent fallback inverts the intent
     // (a misspelled "5m" would leave the job unbounded).
 
     private static TimeSpan ParseDuration(IConfiguration section, string raw, string key)

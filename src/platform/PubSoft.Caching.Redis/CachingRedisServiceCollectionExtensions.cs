@@ -5,8 +5,10 @@ using StackExchange.Redis;
 
 namespace PubSoft.Caching.Redis;
 
+/// <summary>Redis cache registration.</summary>
 public static class CachingRedisServiceCollectionExtensions
 {
+    /// <summary>Registers the Redis <see cref="ICache"/>.</summary>
     public static IServiceCollection AddPubSoftRedisCache(
         this IServiceCollection services,
         IConnectionMultiplexer connection,

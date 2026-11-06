@@ -35,10 +35,12 @@ The profile is credential-free: it has no password, token, or secret fields. It 
 
 `SetPasswordHash` accepts an opaque encoded hash, not a plaintext password; create or verify hashes with `PubSoft.Security.PasswordHasher`. Setting or removing the hash rotates `SecurityStamp`. This is only a model update: a host must persist it and validate the stamp in its token/session policy for it to invalidate existing sessions. The model deliberately has no login-failure counter, lockout duration, external OAuth token storage, or login transaction behavior.
 
+The EF mapping is opt-in`IdentityUserLogin` stores external-login bindings (provider + provider key → user), matching the standard identity pattern; `PubSoft.EntityFrameworkCore.ConfigurePubSoftIdentityUserLogins()` maps it with a unique `(TenantId, LoginProvider, ProviderKey)` index plus a `UserId` lookup index and an `ExtJson` column for provider extras.
+
 The EF mapping is opt-in and does not create or migrate tables by itself; add `IdentityUser` to the host DbContext and apply `ConfigurePubSoftIdentityUsers()` before generating/applying a provider-specific migration. The mapping stores the opaque password hash but does not implement password verification, lockout, security-stamp token validation, external login bindings, OAuth token storage, or login transactions. Hosts must choose unique-index behavior for host-level users and test that policy on their database provider.
 
 ## Public API surface
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
-- `PubSoft.Identity`: `IIdentityUser` `IdentityUser` `IdentityUserSnapshot`
+- `PubSoft.Identity`: `IIdentityUser` `IdentityUser` `IdentityUserSnapshot` `IdentityUserLogin`

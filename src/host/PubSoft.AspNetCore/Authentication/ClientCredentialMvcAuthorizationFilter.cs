@@ -24,9 +24,9 @@ public sealed class ClientCredentialMvcAuthorizationFilter : IAsyncActionFilter
             return;
         }
 
-        // The tenant scope must wrap next() — ambient (AsyncLocal) changes made before
+        // The tenant scope must wrap next() - ambient (AsyncLocal) changes made before
         // a callee returns never flow back to the caller frame.
-        // The tenant scope must be opened in THIS frame and wrap next() — ambient
+        // The tenant scope must be opened in THIS frame and wrap next() - ambient
         // (AsyncLocal) changes made inside an async callee never flow back to the caller.
         using (evaluation.TenantContext?.Change(evaluation.TenantId) ?? NoopDisposable.Instance)
             await next().ConfigureAwait(false);

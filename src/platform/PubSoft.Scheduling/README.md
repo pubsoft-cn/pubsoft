@@ -36,7 +36,7 @@ services.AddExecutor<ReportExecutor>();
 services.AddResultProcessor<LoggingResultProcessor>();
 ```
 
-`AddPubSoftScheduler` registers a hosted worker and `MemoryStateStore` unless the host has already registered another `IStateStore`. Job names must be unique case-insensitively, and every configured executor/processor name must resolve at runtime. Executors and processors are singletons; keep them thread-safe and use `IServiceScopeFactory` when scoped work such as a DbContext is required.
+`AddPubSoftScheduler` registers a hosted worker and `MemoryStateStore` unless the host has already registered another `IStateStore`. For multi-replica deployments set `SchedulerOptions.DistributedLocking = true` — every due job then acquires `pubsoft:sched:{jobName}` via the host's `IDistributedLock` (Redis impl in `PubSoft.Caching.Redis`); when locking is enabled but no lock is registered every job is skipped (fail-closed, not silently concurrent). `DistributedLockLease` (default 5 min) should exceed the longest expected job run. Job names must be unique case-insensitively, and every configured executor/processor name must resolve at runtime. Executors and processors are singletons; keep them thread-safe and use `IServiceScopeFactory` when scoped work such as a DbContext is required.
 
 ## Schedule Masks
 

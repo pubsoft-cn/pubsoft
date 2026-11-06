@@ -7,8 +7,10 @@ using Microsoft.IdentityModel.Tokens;
 namespace PubSoft.Authentication.Jwt;
 
 
+/// <summary>JWT signing/validation helpers (RSA + symmetric profiles).</summary>
 public static class JwtSigning
 {
+    /// <summary>Generates an RSA signing key.</summary>
     public static RsaSigningKeyMaterial CreateRsaKey(string keyId, int keySize = 2048)
     {
         ValidateKeyId(keyId);
@@ -18,6 +20,7 @@ public static class JwtSigning
         return new RsaSigningKeyMaterial(keyId, RSA.Create(keySize));
     }
 
+    /// <summary>Imports an RSA private key from PEM.</summary>
     public static RsaSigningKeyMaterial ImportFromPem(string keyId, string privateKeyPem)
     {
         ValidateKeyId(keyId);
@@ -37,6 +40,7 @@ public static class JwtSigning
         }
     }
 
+    /// <summary>Issues an RSA-signed access token.</summary>
     public static string CreateAccessToken(
         RsaSigningKeyMaterial keyMaterial,
         string issuer,
@@ -72,6 +76,7 @@ public static class JwtSigning
     }
 
     /// <summary>Generates a fresh symmetric (HS256) signing key of at least 256 bits.</summary>
+    /// <summary>Generates a symmetric signing key.</summary>
     public static SymmetricSigningKeyMaterial CreateSymmetricKey(string keyId, int keySizeBits = 256)
     {
         ValidateKeyId(keyId);
@@ -82,6 +87,7 @@ public static class JwtSigning
     }
 
     /// <summary>Imports an existing symmetric (HS256) key. Keys below 256 bits are rejected.</summary>
+    /// <summary>Imports raw symmetric key bytes.</summary>
     public static SymmetricSigningKeyMaterial ImportSymmetricKey(string keyId, ReadOnlySpan<byte> keyBytes)
     {
         ValidateKeyId(keyId);
@@ -92,13 +98,15 @@ public static class JwtSigning
     }
 
     /// <summary>Imports an existing symmetric (HS256) key from text. Keys below 256 bits are rejected.</summary>
+    /// <summary>Imports a base64 symmetric key.</summary>
     public static SymmetricSigningKeyMaterial ImportSymmetricKey(string keyId, string key)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
         return ImportSymmetricKey(keyId, Encoding.UTF8.GetBytes(key));
     }
 
-    /// <summary>Issues an HS256 access token — an explicit algorithm choice, never a fallback.</summary>
+    /// <summary>Issues an HS256 access token -- an explicit algorithm choice, never a fallback.</summary>
+    /// <summary>Issues a symmetric-signed access token.</summary>
     public static string CreateAccessToken(
         SymmetricSigningKeyMaterial keyMaterial,
         string issuer,
@@ -133,6 +141,7 @@ public static class JwtSigning
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    /// <summary>Validates a token against key material, returning claims.</summary>
     public static IReadOnlyDictionary<string, string> ValidateAccessToken(
         string token,
         string issuer,
@@ -149,6 +158,7 @@ public static class JwtSigning
         return ToClaimsDictionary(principal);
     }
 
+    /// <summary>Validates a token against key material, returning claims.</summary>
     public static IReadOnlyDictionary<string, string> ValidateAccessToken(
         string token,
         string issuer,
@@ -171,6 +181,7 @@ public static class JwtSigning
     }
 
     /// <summary>Validates an HS256 token against a single explicit symmetric key.</summary>
+    /// <summary>Validates a token against key material, returning claims.</summary>
     public static IReadOnlyDictionary<string, string> ValidateAccessToken(
         string token,
         string issuer,
@@ -188,6 +199,7 @@ public static class JwtSigning
     }
 
     /// <summary>Validates an HS256 token against a set of symmetric keys selected by kid.</summary>
+    /// <summary>Validates a token against key material, returning claims.</summary>
     public static IReadOnlyDictionary<string, string> ValidateAccessToken(
         string token,
         string issuer,
@@ -209,12 +221,14 @@ public static class JwtSigning
         return ToClaimsDictionary(principal);
     }
 
+    /// <summary>Exports a single-key JWKS document.</summary>
     public static JwtJwksDocument ExportJwks(RsaSigningKeyMaterial keyMaterial)
     {
         ArgumentNullException.ThrowIfNull(keyMaterial);
         return ExportJwks([keyMaterial]);
     }
 
+    /// <summary>Exports a multi-key JWKS document.</summary>
     public static JwtJwksDocument ExportJwks(IReadOnlyCollection<RsaSigningKeyMaterial> keyMaterials)
     {
         ArgumentNullException.ThrowIfNull(keyMaterials);

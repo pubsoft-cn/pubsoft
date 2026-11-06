@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.AspNetCore</PackageId>
     <Description>Optional ASP.NET Core adapters for PubSoft security and auditing.</Description>
   </PropertyGroup>

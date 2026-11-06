@@ -4,14 +4,14 @@ using System.Text;
 namespace PubSoft.Cryptography;
 
 /// <summary>
-/// AES-256-GCM 加密器 · 用于敏感数据加密存储（如 AuthClient JWT 密钥）。
-/// <para>主密钥（MasterKey）从环境变量/ secrets manager 注入，不出离服务进程。</para>
-/// <para>格式：base64(iv) + ":" + base64(ciphertext+tag)</para>
+/// AES-256-GCM encryptor for at-rest sensitive data (e.g. client JWT signing keys).
+/// <para>The master key is injected from environment variables / a secrets manager and never leaves the service process.</para>
+/// <para>Format: base64(iv) + ":" + base64(ciphertext+tag)</para>
 /// </summary>
 public static class AesEncryptor
 {
 
-    /// <summary>加密明文，返回 base64(iv):base64(ciphertext+tag)。</summary>
+    /// <summary>Encrypts plaintext, returns base64(iv):base64(ciphertext+tag).</summary>
     public static string Encrypt(string plaintext, string masterKey)
     {
         if (string.IsNullOrEmpty(plaintext)) return "";
@@ -36,7 +36,7 @@ public static class AesEncryptor
         return Convert.ToBase64String(combined);
     }
 
-    /// <summary>解密 base64(iv):base64(ciphertext+tag)，返回明文。</summary>
+    /// <summary>Decrypts base64(iv):base64(ciphertext+tag), returns plaintext.</summary>
     public static string Decrypt(string encrypted, string masterKey)
     {
         if (string.IsNullOrEmpty(encrypted)) return "";
@@ -61,7 +61,7 @@ public static class AesEncryptor
         return Encoding.UTF8.GetString(plaintext);
     }
 
-    /// <summary>生成 256 位随机密钥（base64 编码，44 字符）。</summary>
+    /// <summary>Generates a 256-bit random key (base64, 44 chars).</summary>
     public static string GenerateSecretKey()
     {
         var bytes = RandomNumberGenerator.GetBytes(32);

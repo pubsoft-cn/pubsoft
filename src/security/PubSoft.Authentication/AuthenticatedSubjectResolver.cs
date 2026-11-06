@@ -3,12 +3,14 @@ using System.Globalization;
 namespace PubSoft.Authentication;
 
 
+/// <summary>Derives <see cref="AuthenticatedSubject"/> from a claims snapshot.</summary>
 public sealed class AuthenticatedSubjectResolver
 {
     private readonly string _subjectClaimType;
     private readonly string? _tenantClaimType;
     private readonly string _trustedIssuer;
 
+    /// <summary>Creates the resolver.</summary>
     public AuthenticatedSubjectResolver(
         string subjectClaimType,
         string trustedIssuer,
@@ -26,6 +28,7 @@ public sealed class AuthenticatedSubjectResolver
         _tenantClaimType = tenantClaimType;
     }
 
+    /// <summary>Resolves the subject; null when claims are insufficient.</summary>
     public AuthenticatedSubject? Resolve(PrincipalSnapshot snapshot)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
