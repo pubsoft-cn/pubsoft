@@ -43,7 +43,7 @@ public sealed class MqttOutboxDispatcher : IOutboxDispatcher, IAsyncDisposable
             .WithPayload(payload)
             .WithQualityOfServiceLevel((MqttQualityOfServiceLevel)_options.QualityOfService)
             .Build();
-        // dedup identity rides as MQTT5 user property — consumers key InboxReceipt on it
+        // dedup identity rides as MQTT5 user property - consumers key InboxReceipt on it
         mqtt.UserProperties = [new MqttUserProperty(MqttInboxHeaders.OutboxMessageId, message.Id.ToString("N"))];
         if (message.AggregateKey is { } agg)
             mqtt.UserProperties.Add(new MqttUserProperty(MqttInboxHeaders.OutboxAggregateKey, agg));

@@ -25,6 +25,16 @@ A class picks its lifetime by implementing a marker:
 public sealed class PricingService : ITransientDependency { }
 ```
 
+## `AddPubSoftIdGenerator`
+
+```csharp
+services.AddPubSoftIdGenerator(workerId);          // explicit 0-31 shard
+services.AddPubSoftIdGenerator(o => o.WorkerId = w); // options delegate
+services.AddPubSoftIdGenerator(configuration);      // binds PubSoft:IdGenerator:WorkerId
+```
+
+Registers one shared `SnowflakeIdGenerator` as `IIdGenerator` — required by EF audit persistence and the messaging outbox (both fail closed when it is absent). `workerId` must be unique per live replica; the config overload throws when the key is missing rather than guessing a shard. `TryAdd` yields when the host registers its own `IIdGenerator` first.
+
 ## Scanning
 
 ```csharp

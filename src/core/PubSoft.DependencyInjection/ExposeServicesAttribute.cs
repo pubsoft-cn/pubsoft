@@ -6,7 +6,7 @@ namespace PubSoft.DependencyInjection;
 
 /// <summary>
 /// Overrides the service types a convention-scanned class is registered under.
-/// When present, only the listed types (plus the concrete type itself) are registered —
+/// When present, only the listed types (plus the concrete type itself) are registered --
 /// use when a class implements interfaces that should not become DI entry points.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]

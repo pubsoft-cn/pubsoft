@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Messaging.Outbox</PackageId>
     <Description>EF Core outbox publication, leased delivery, and transactional inbox deduplication.</Description>
   </PropertyGroup>

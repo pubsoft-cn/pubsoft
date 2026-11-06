@@ -68,7 +68,7 @@ public sealed class EfCoreOutboxStore<TDbContext> : IOutboxStore
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        var claimedIds = new List<Guid>(candidateIds.Count);
+        var claimedIds = new List<long>(candidateIds.Count);
         foreach (var messageId in candidateIds)
         {
             var leaseToken = Guid.NewGuid();
@@ -107,7 +107,7 @@ public sealed class EfCoreOutboxStore<TDbContext> : IOutboxStore
     }
 
     public async Task<bool> MarkDeliveredAsync(
-        Guid messageId,
+        long messageId,
         Guid leaseToken,
         CancellationToken cancellationToken = default)
     {
@@ -129,7 +129,7 @@ public sealed class EfCoreOutboxStore<TDbContext> : IOutboxStore
     }
 
     public async Task<bool> MarkFailedAsync(
-        Guid messageId,
+        long messageId,
         Guid leaseToken,
         string errorCode,
         CancellationToken cancellationToken = default)

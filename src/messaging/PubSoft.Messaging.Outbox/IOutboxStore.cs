@@ -10,9 +10,9 @@ namespace PubSoft.Messaging.Outbox;
 public interface IOutboxStore
 {
     Task<IReadOnlyList<OutboxMessage>> ClaimBatchAsync(CancellationToken cancellationToken = default);
-    Task<bool> MarkDeliveredAsync(Guid messageId, Guid leaseToken, CancellationToken cancellationToken = default);
+    Task<bool> MarkDeliveredAsync(long messageId, Guid leaseToken, CancellationToken cancellationToken = default);
     Task<bool> MarkFailedAsync(
-        Guid messageId,
+        long messageId,
         Guid leaseToken,
         string errorCode,
         CancellationToken cancellationToken = default);

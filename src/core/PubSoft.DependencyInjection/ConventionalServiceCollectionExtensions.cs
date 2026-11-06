@@ -5,7 +5,7 @@ namespace PubSoft.DependencyInjection;
 
 
 /// <summary>
-/// Convention-based service registration — concrete classes carrying a
+/// Convention-based service registration -- concrete classes carrying a
 /// dependency marker are registered for every non-marker public interface they
 /// implement plus their own type. Explicit lifetime per marker; no ABP coupling.
 /// <para>Fails closed: a class with multiple markers, or abstract/interface types,
@@ -52,7 +52,7 @@ public static class ConventionalServiceCollectionExtensions
                     ? exposed.Prepend(type).Distinct()
                     : type.GetInterfaces()
                         .Where(i => !IsMarkerInterface(i))
-                        .Prepend(type) // self-registration too — handlers/services resolved concretely
+                        .Prepend(type) // self-registration too - handlers/services resolved concretely
                         .Distinct();
 
                 foreach (var serviceType in serviceTypes)
@@ -80,7 +80,7 @@ public static class ConventionalServiceCollectionExtensions
             (true, false, false) => ServiceLifetime.Transient,
             (false, true, false) => ServiceLifetime.Scoped,
             (false, false, true) => ServiceLifetime.Singleton,
-            _ => null, // unmarked or multiply-marked — skip
+            _ => null, // unmarked or multiply-marked - skip
         };
     }
 }

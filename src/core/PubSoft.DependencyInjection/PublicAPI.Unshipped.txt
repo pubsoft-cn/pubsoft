@@ -8,3 +8,12 @@ PubSoft.DependencyInjection.ISingletonDependency
 PubSoft.DependencyInjection.ITransientDependency
 static PubSoft.DependencyInjection.ConventionalServiceCollectionExtensions.AddConventionalServices(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Func<System.Type!, bool>? predicate, params System.Reflection.Assembly![]! assemblies) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.DependencyInjection.ConventionalServiceCollectionExtensions.AddConventionalServices(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, params System.Reflection.Assembly![]! assemblies) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+PubSoft.DependencyInjection.IdGeneratorServiceCollectionExtensions
+static PubSoft.DependencyInjection.IdGeneratorServiceCollectionExtensions.AddPubSoftIdGenerator(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, long workerId) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+PubSoft.DependencyInjection.IdGeneratorOptions
+PubSoft.DependencyInjection.IdGeneratorOptions.IdGeneratorOptions() -> void
+PubSoft.DependencyInjection.IdGeneratorOptions.WorkerId.get -> long
+PubSoft.DependencyInjection.IdGeneratorOptions.WorkerId.set -> void
+const PubSoft.DependencyInjection.IdGeneratorOptions.SectionName = "PubSoft:IdGenerator" -> string!
+static PubSoft.DependencyInjection.IdGeneratorServiceCollectionExtensions.AddPubSoftIdGenerator(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.DependencyInjection.IdGeneratorOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.DependencyInjection.IdGeneratorServiceCollectionExtensions.AddPubSoftIdGenerator(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! configuration) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

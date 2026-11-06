@@ -9,7 +9,7 @@ using PubSoft.Domain;
 namespace PubSoft.EntityFrameworkCore.Auditing;
 
 
-public sealed class EfCoreAuditSnapshotSink<TDbContext>(TDbContext dbContext) : IAuditSnapshotSink
+public sealed class EfCoreAuditSnapshotSink<TDbContext>(TDbContext dbContext, PubSoft.Core.IIdGenerator idGenerator) : IAuditSnapshotSink
     where TDbContext : DbContext
 {
     public async ValueTask WriteAsync(AuditRequestSnapshot snapshot, CancellationToken cancellationToken = default)
@@ -18,6 +18,7 @@ public sealed class EfCoreAuditSnapshotSink<TDbContext>(TDbContext dbContext) : 
 
         var record = new AuditLogRecord
         {
+            Id = idGenerator.NextId(),
             StartedAt = snapshot.Request.StartedAt,
             HttpMethod = Truncate(snapshot.Request.HttpMethod, 16),
             RequestPath = Truncate(snapshot.Request.RequestPath, 2_048),
@@ -42,6 +43,7 @@ public sealed class EfCoreAuditSnapshotSink<TDbContext>(TDbContext dbContext) : 
         {
             record.EntityChanges.Add(new AuditEntityChangeRecord
             {
+                Id = idGenerator.NextId(),
                 EntityType = Truncate(change.EntityType, 256)!,
                 EntityId = Truncate(change.EntityId, 512)!,
                 Kind = change.Kind,
@@ -54,7 +56,7 @@ public sealed class EfCoreAuditSnapshotSink<TDbContext>(TDbContext dbContext) : 
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    /// <summary>超长字段按列上限截断——宁可截断留痕，不可因超长丢整条审计记录。</summary>
+    /// <summary>Truncates overlong fields to the column cap -- better a truncated trail than dropping the whole audit record.</summary>
     private static string? Truncate(string? value, int maxLength)
         => value is null || value.Length <= maxLength ? value : value[..maxLength];
 }

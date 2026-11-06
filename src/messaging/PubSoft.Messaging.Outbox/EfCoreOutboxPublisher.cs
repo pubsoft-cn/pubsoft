@@ -13,17 +13,19 @@ public sealed class EfCoreOutboxPublisher<TDbContext> : IOutboxPublisher
     where TDbContext : PubSoftDbContext
 {
     private readonly TDbContext _dbContext;
+    private readonly PubSoft.Core.IIdGenerator _idGenerator;
     private readonly OutboxOptions _options;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
-    public EfCoreOutboxPublisher(TDbContext dbContext, OutboxOptions? options = null, TimeProvider? timeProvider = null)
+    public EfCoreOutboxPublisher(TDbContext dbContext, PubSoft.Core.IIdGenerator idGenerator, OutboxOptions? options = null, TimeProvider? timeProvider = null)
     {
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        _idGenerator = idGenerator ?? throw new ArgumentNullException(nameof(idGenerator));
         _options = (options ?? new OutboxOptions()).CloneAndValidate();
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
-    public Task<Guid> PublishAsync<TEvent>(
+    public Task<long> PublishAsync<TEvent>(
         TEvent @event,
         string? targetModule = null,
         string? aggregateKey = null,
@@ -40,7 +42,7 @@ public sealed class EfCoreOutboxPublisher<TDbContext> : IOutboxPublisher
             throw new ArgumentOutOfRangeException(nameof(@event), "The serialized event payload exceeds the configured limit.");
 
         var message = new OutboxMessage(
-            Guid.NewGuid(),
+            _idGenerator.NextId(),
             eventType.FullName ?? eventType.Name,
             payload,
             targetModule,

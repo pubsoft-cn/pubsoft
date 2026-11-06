@@ -11,8 +11,8 @@ var options = new DbContextOptionsBuilder<SmokeDbContext>().UseSqlite(connection
 await using var dbContext = new SmokeDbContext(options);
 await dbContext.Database.EnsureCreatedAsync();
 
-var publisher = new EfCoreOutboxPublisher<SmokeDbContext>(dbContext);
-Guid rolledBackId;
+var publisher = new EfCoreOutboxPublisher<SmokeDbContext>(dbContext, new PubSoft.Core.SnowflakeIdGenerator(1));
+long rolledBackId;
 await using (var transaction = await dbContext.Database.BeginTransactionAsync())
 {
     rolledBackId = await publisher.PublishAsync(new SmokeEvent("rolled-back", "created"));
@@ -40,7 +40,7 @@ if (persisted.TenantId != 17
     throw new InvalidOperationException("Outbox message persistence smoke check failed.");
 
 var inbox = new EfCoreInboxMessageProcessor<SmokeDbContext>(dbContext);
-var inboxMessageId = Guid.NewGuid();
+var inboxMessageId = new PubSoft.Core.SnowflakeIdGenerator(1).NextId();
 var failedHandlerCalls = 0;
 try
 {

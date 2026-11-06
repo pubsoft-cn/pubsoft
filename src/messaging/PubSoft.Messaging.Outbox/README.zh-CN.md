@@ -33,6 +33,10 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
 using Microsoft.Extensions.DependencyInjection;
 using PubSoft.Messaging.Outbox;
 
+// 硬前置：outbox 行使用客户端赋值的 Snowflake `long` id——
+// 每副本注册一个共享生成器（workerId 必须唯一 0-31）。
+services.AddPubSoftIdGenerator(workerId);
+
 services.AddPubSoftOutbox<AppDbContext>(options =>
 {
     options.BatchSize = 50;

@@ -25,6 +25,16 @@ public interface ISingletonDependency;
 public sealed class PricingService : ITransientDependency { }
 ```
 
+## `AddPubSoftIdGenerator`
+
+```csharp
+services.AddPubSoftIdGenerator(workerId);            // 显式 0-31 分片
+services.AddPubSoftIdGenerator(o => o.WorkerId = w); // options 委托
+services.AddPubSoftIdGenerator(configuration);        // 绑定 PubSoft:IdGenerator:WorkerId
+```
+
+注册共享 `SnowflakeIdGenerator` 为 `IIdGenerator`——EF 审计持久化与消息 Outbox 的硬前置（缺失即 fail-closed）。`workerId` 必须每副本唯一；config 重载在键缺失时抛错而非猜测分片。宿主先注册自有 `IIdGenerator` 时 `TryAdd` 让位。
+
 ## 扫描注册
 
 ```csharp

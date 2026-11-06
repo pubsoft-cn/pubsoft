@@ -26,7 +26,7 @@ public sealed class AuditRetentionWaveTests
     }
 
     private static AuditLogRecord Rec(DateTimeOffset started, string path = "/x")
-        => new() { StartedAt = started, HttpMethod = "GET", RequestPath = path, Success = true, StatusCode = 200 };
+        => new() { Id = PubSoft.Testing.TestIds.Next(), StartedAt = started, HttpMethod = "GET", RequestPath = path, Success = true, StatusCode = 200 };
 
     [Fact]
     public async Task DeleteRemovesOnlyExpired()

@@ -12,8 +12,9 @@ namespace PubSoft.Core;
 /// fails closed (blocking wait for catch-up, or <see cref="InvalidOperationException"/>
 /// for rollback past the bound).
 /// </remarks>
-public sealed class SnowflakeIdGenerator
+public sealed class SnowflakeIdGenerator : IIdGenerator
 {
+    /// <summary>Largest valid worker id (31).</summary>
     public const long MaxWorkerId = (1L << WorkerIdBits) - 1;
 
     /// <summary>
@@ -35,10 +36,12 @@ public sealed class SnowflakeIdGenerator
     private long _sequence;
     private readonly object _lock = new();
 
+    /// <summary>Creates a generator for the given worker (0–31) on the system clock.</summary>
     public SnowflakeIdGenerator(long workerId) : this(workerId, TimeProvider.System)
     {
     }
 
+    /// <summary>Creates a generator for the given worker and clock (tests inject a fake).</summary>
     public SnowflakeIdGenerator(long workerId, TimeProvider timeProvider)
     {
         if (workerId < 0 || workerId > MaxWorkerId)
@@ -48,6 +51,7 @@ public sealed class SnowflakeIdGenerator
         _timeProvider = timeProvider;
     }
 
+    /// <summary>Issues the next unique id; borrows up to <see cref="MaxBorrowMilliseconds"/> of future time on sequence overflow, fails closed on larger clock rollback.</summary>
     public long NextId()
     {
         lock (_lock)
@@ -95,6 +99,6 @@ public sealed class SnowflakeIdGenerator
         if (borrowedTimestamp - wallClock <= MaxBorrowMilliseconds)
             return;
         while ((wallClock = ReadTimestamp()) <= borrowedTimestamp - MaxBorrowMilliseconds)
-            System.Threading.Thread.Yield(); // borrowed too far ahead — wait for the clock to catch up
+            System.Threading.Thread.Yield(); // borrowed too far ahead - wait for the clock to catch up
     }
 }

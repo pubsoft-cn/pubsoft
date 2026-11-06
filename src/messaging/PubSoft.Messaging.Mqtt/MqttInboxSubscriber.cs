@@ -10,7 +10,7 @@ namespace PubSoft.Messaging.Mqtt;
 
 /// <summary>
 /// Background subscriber that consumes MQTT-published outbox messages and feeds
-/// them through <see cref="IInboxMessageProcessor"/> — dedup via InboxReceipt
+/// them through <see cref="IInboxMessageProcessor"/> -- dedup via InboxReceipt
 /// keyed on the message's x-outbox-id user property, then invokes the handler.
 /// </summary>
 public sealed class MqttInboxSubscriber : BackgroundService
@@ -20,8 +20,8 @@ public sealed class MqttInboxSubscriber : BackgroundService
     private readonly Func<string, string, CancellationToken, Task> _handler;
 
     /// <param name="options">Inbox subscriber configuration (broker, topic filter, session).</param>
-    /// <param name="inbox">Inbox dedup pipeline — receipts are recorded through IInboxMessageProcessor.</param>
-    /// <param name="handler">(eventType, payloadJson, ct) — invoked once per unique message id.</param>
+    /// <param name="inbox">Inbox dedup pipeline -- receipts are recorded through IInboxMessageProcessor.</param>
+    /// <param name="handler">(eventType, payloadJson, ct) -- invoked once per unique message id.</param>
     public MqttInboxSubscriber(
         MqttInboxOptions options,
         IInboxMessageProcessor inbox,
@@ -32,10 +32,10 @@ public sealed class MqttInboxSubscriber : BackgroundService
         _handler = handler ?? throw new ArgumentNullException(nameof(handler));
     }
 
-    internal static Guid? ExtractMessageId(MqttApplicationMessage message)
+    internal static long? ExtractMessageId(MqttApplicationMessage message)
     {
         var prop = message.UserProperties?.FirstOrDefault(p => string.Equals(p.Name, MqttInboxHeaders.OutboxMessageId, System.StringComparison.Ordinal));
-        return prop is not null && Guid.TryParseExact(prop.Value, "N", out var id) ? id : null;
+        return prop is not null && long.TryParse(prop.Value, out var id) && id > 0 ? id : null;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -85,7 +85,7 @@ public sealed class MqttInboxSubscriber : BackgroundService
     {
         var messageId = ExtractMessageId(e.ApplicationMessage);
         if (messageId is null)
-            return; // not an outbox message — ack and drop
+            return; // not an outbox message - ack and drop
         var eventType = e.ApplicationMessage.Topic.StartsWith(_options.EventTypePrefix, StringComparison.Ordinal)
             ? e.ApplicationMessage.Topic[_options.EventTypePrefix.Length..]
             : e.ApplicationMessage.Topic;

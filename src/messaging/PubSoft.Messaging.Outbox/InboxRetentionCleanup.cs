@@ -10,7 +10,7 @@ namespace PubSoft.Messaging.Outbox;
 /// </summary>
 /// <remarks>
 /// Deletes run in bounded batches through EF tracking. <see cref="InboxReceipt"/> carries no query
-/// filters — scope is encoded in <see cref="InboxReceipt.TenantKey"/> — so cleanup spans all rows
+/// filters -- scope is encoded in <see cref="InboxReceipt.TenantKey"/> -- so cleanup spans all rows
 /// unless a tenant-key restriction is passed. Invoke from a host-scoped maintenance context.
 /// Very large tables may prefer host-managed bulk SQL instead.
 /// </remarks>
@@ -54,7 +54,7 @@ public sealed class InboxRetentionCleanup<TDbContext>
         {
             var batch = await set
                 .Where(receipt => receipt.ProcessedAt < cutoff)
-                .Where(receipt => tenantKey == null || receipt.TenantKey == tenantKey) // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
+                .Where(receipt => tenantKey == null || receipt.TenantKey == tenantKey) // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison - == is the translatable form"
                 .OrderBy(receipt => receipt.ProcessedAt)
                 .Take(batchSize)
                 .ToListAsync(cancellationToken)

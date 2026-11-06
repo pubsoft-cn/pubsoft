@@ -74,6 +74,7 @@ public sealed class AuditLogWriterTests
         var services = new ServiceCollection();
         services.AddDbContext<TestDbContext>(options => options.UseSqlite(connection));
         services.AddSingleton<ITenantContext>(new FixedTenantContext(9));
+        services.AddSingleton<PubSoft.Core.IIdGenerator>(PubSoft.Testing.TestIds.Shared);
         services.AddPubSoftEfCoreAuditPersistence<TestDbContext>();
         await using var provider = services.BuildServiceProvider();
 

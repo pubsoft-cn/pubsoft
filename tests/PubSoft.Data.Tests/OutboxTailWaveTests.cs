@@ -32,7 +32,7 @@ public sealed class OutboxTailWaveTests
     public async Task PublisherPersistsPendingMessage()
     {
         using var ctx = Db();
-        var pub = new EfCoreOutboxPublisher<Ctx>(ctx);
+        var pub = new EfCoreOutboxPublisher<Ctx>(ctx, PubSoft.Testing.TestIds.Shared);
         var id = await pub.PublishAsync(new { orderId = 1 });
         await ctx.SaveChangesAsync();
         var saved = await ctx.Messages.FindAsync(id);
@@ -49,7 +49,7 @@ public sealed class OutboxTailWaveTests
     public async Task PublisherPersistsExplicitCorrelationId()
     {
         using var ctx = Db();
-        var pub = new EfCoreOutboxPublisher<Ctx>(ctx);
+        var pub = new EfCoreOutboxPublisher<Ctx>(ctx, PubSoft.Testing.TestIds.Shared);
         var id = await pub.PublishAsync(new { orderId = 1 }, correlationId: "corr-42");
         await ctx.SaveChangesAsync();
         var saved = await ctx.Messages.FindAsync(id);
@@ -60,7 +60,7 @@ public sealed class OutboxTailWaveTests
     public async Task PublisherFallsBackToAmbientActivityTraceId()
     {
         using var ctx = Db();
-        var pub = new EfCoreOutboxPublisher<Ctx>(ctx);
+        var pub = new EfCoreOutboxPublisher<Ctx>(ctx, PubSoft.Testing.TestIds.Shared);
         using var listener = new System.Diagnostics.ActivityListener
         {
             ShouldListenTo = _ => true,
@@ -83,7 +83,7 @@ public sealed class OutboxTailWaveTests
     public async Task PublisherSerializesEventType()
     {
         using var ctx = Db();
-        var pub = new EfCoreOutboxPublisher<Ctx>(ctx);
+        var pub = new EfCoreOutboxPublisher<Ctx>(ctx, PubSoft.Testing.TestIds.Shared);
         var id = await pub.PublishAsync(new OrderEvent { OrderId = 9 });
         await ctx.SaveChangesAsync();
         var saved = await ctx.Messages.FindAsync(id);

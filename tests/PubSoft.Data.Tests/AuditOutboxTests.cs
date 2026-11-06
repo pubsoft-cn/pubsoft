@@ -22,6 +22,7 @@ public sealed class AuditOutboxTests
         services.AddDbContext<TestAuditDbContext>(options => options.UseSqlite(connection));
         services.AddSingleton<ITenantContext>(new TestTenantContext(42));
         services.AddPubSoftOutbox<TestAuditDbContext>();
+        services.AddSingleton<PubSoft.Core.IIdGenerator>(PubSoft.Testing.TestIds.Shared);
         services.AddPubSoftEfCoreAuditPersistence<TestAuditDbContext>();
         services.AddPubSoftAuditOutbox<TestAuditDbContext>();
         await using var provider = services.BuildServiceProvider();

@@ -34,6 +34,10 @@ Register the scoped publisher/store and processor, then explicitly add the hoste
 using Microsoft.Extensions.DependencyInjection;
 using PubSoft.Messaging.Outbox;
 
+// Required: outbox rows use Snowflake `long` ids assigned client-side —
+// register one shared generator per replica (workerId must be unique 0-31).
+services.AddPubSoftIdGenerator(workerId);
+
 services.AddPubSoftOutbox<AppDbContext>(options =>
 {
     options.BatchSize = 50;

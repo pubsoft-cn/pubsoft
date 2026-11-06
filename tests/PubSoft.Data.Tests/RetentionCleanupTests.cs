@@ -25,10 +25,10 @@ public sealed class InboxRetentionCleanupTests
 
         var time = new TestTimeProvider(epoch);
         var processor = new EfCoreInboxMessageProcessor<ReceiptDbContext>(context, time);
-        Assert.True(await processor.ProcessOnceAsync("consumer", Guid.NewGuid(), _ => Task.CompletedTask));
-        Assert.True(await processor.ProcessOnceAsync("consumer", Guid.NewGuid(), _ => Task.CompletedTask));
+        Assert.True(await processor.ProcessOnceAsync("consumer", PubSoft.Testing.TestIds.Next(), _ => Task.CompletedTask));
+        Assert.True(await processor.ProcessOnceAsync("consumer", PubSoft.Testing.TestIds.Next(), _ => Task.CompletedTask));
         time.SetUtcNow(epoch + TimeSpan.FromDays(2));
-        Assert.True(await processor.ProcessOnceAsync("consumer", Guid.NewGuid(), _ => Task.CompletedTask));
+        Assert.True(await processor.ProcessOnceAsync("consumer", PubSoft.Testing.TestIds.Next(), _ => Task.CompletedTask));
 
         var cleanup = new InboxRetentionCleanup<ReceiptDbContext>(context, time);
         var deleted = await cleanup.DeleteProcessedBeforeAsync(TimeSpan.FromDays(1), batchSize: 1);
@@ -57,7 +57,7 @@ public sealed class InboxRetentionCleanupTests
             await using var context = new ReceiptDbContext(options, new FixedTenantContext(tenantId));
             await context.Database.EnsureCreatedAsync();
             var processor = new EfCoreInboxMessageProcessor<ReceiptDbContext>(context, time);
-            Assert.True(await processor.ProcessOnceAsync("consumer", Guid.NewGuid(), _ => Task.CompletedTask));
+            Assert.True(await processor.ProcessOnceAsync("consumer", PubSoft.Testing.TestIds.Next(), _ => Task.CompletedTask));
         }
 
         await SeedAsync(1);
@@ -106,9 +106,9 @@ public sealed class AuditRetentionCleanupTests
         await using var context = new AuditDbContext(options, new FixedTenantContext(1));
         await context.Database.EnsureCreatedAsync();
         context.Set<AuditLogRecord>().AddRange(
-            new AuditLogRecord { StartedAt = epoch, Success = true },
-            new AuditLogRecord { StartedAt = epoch, Success = true },
-            new AuditLogRecord { StartedAt = epoch + TimeSpan.FromDays(2), Success = true });
+            new AuditLogRecord { Id = PubSoft.Testing.TestIds.Next(), StartedAt = epoch, Success = true },
+            new AuditLogRecord { Id = PubSoft.Testing.TestIds.Next(), StartedAt = epoch, Success = true },
+            new AuditLogRecord { Id = PubSoft.Testing.TestIds.Next(), StartedAt = epoch + TimeSpan.FromDays(2), Success = true });
         await context.SaveChangesAsync();
 
         var time = new TestTimeProvider(epoch + TimeSpan.FromDays(2));
@@ -142,9 +142,10 @@ public sealed class AuditArchiveTests
 
         await using var context = new AuditDbContext(options, new FixedTenantContext(1));
         await context.Database.EnsureCreatedAsync();
-        var expired = new AuditLogRecord { StartedAt = epoch, Success = true };
+        var expired = new AuditLogRecord { Id = PubSoft.Testing.TestIds.Next(), StartedAt = epoch, Success = true };
         expired.EntityChanges.Add(new AuditEntityChangeRecord
         {
+            Id = PubSoft.Testing.TestIds.Next(),
             EntityType = "User",
             EntityId = "7",
             Kind = AuditChangeKind.Created,
@@ -153,8 +154,8 @@ public sealed class AuditArchiveTests
         });
         context.Set<AuditLogRecord>().AddRange(
             expired,
-            new AuditLogRecord { StartedAt = epoch + TimeSpan.FromHours(1), Success = true },
-            new AuditLogRecord { StartedAt = epoch + TimeSpan.FromDays(2), Success = true });
+            new AuditLogRecord { Id = PubSoft.Testing.TestIds.Next(), StartedAt = epoch + TimeSpan.FromHours(1), Success = true },
+            new AuditLogRecord { Id = PubSoft.Testing.TestIds.Next(), StartedAt = epoch + TimeSpan.FromDays(2), Success = true });
         await context.SaveChangesAsync();
 
         var exported = new List<IReadOnlyList<AuditLogRecord>>();
@@ -184,8 +185,8 @@ public sealed class AuditArchiveTests
         await using var context = new AuditDbContext(options, new FixedTenantContext(1));
         await context.Database.EnsureCreatedAsync();
         context.Set<AuditLogRecord>().AddRange(
-            new AuditLogRecord { StartedAt = epoch, Success = true },
-            new AuditLogRecord { StartedAt = epoch + TimeSpan.FromHours(1), Success = true });
+            new AuditLogRecord { Id = PubSoft.Testing.TestIds.Next(), StartedAt = epoch, Success = true },
+            new AuditLogRecord { Id = PubSoft.Testing.TestIds.Next(), StartedAt = epoch + TimeSpan.FromHours(1), Success = true });
         await context.SaveChangesAsync();
 
         var calls = 0;
@@ -211,8 +212,8 @@ public sealed class AuditArchiveTests
         await using var context = new AuditDbContext(options, new FixedTenantContext(null));
         await context.Database.EnsureCreatedAsync();
         context.Set<AuditLogRecord>().AddRange(
-            new AuditLogRecord { StartedAt = epoch, Success = true, TenantId = 1 },
-            new AuditLogRecord { StartedAt = epoch, Success = true, TenantId = 2 });
+            new AuditLogRecord { Id = PubSoft.Testing.TestIds.Next(), StartedAt = epoch, Success = true, TenantId = 1 },
+            new AuditLogRecord { Id = PubSoft.Testing.TestIds.Next(), StartedAt = epoch, Success = true, TenantId = 2 });
         await context.SaveChangesAsync();
 
         var exported = new List<AuditLogRecord>();

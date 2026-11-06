@@ -22,14 +22,14 @@ public sealed class EfCoreInboxMessageProcessor<TDbContext> : IInboxMessageProce
 
     public async Task<bool> ProcessOnceAsync(
         string consumerName,
-        Guid messageId,
+        long messageId,
         Func<CancellationToken, Task> handler,
         CancellationToken cancellationToken = default)
     {
         ValidateConsumerName(consumerName);
         ArgumentNullException.ThrowIfNull(handler);
-        if (messageId == Guid.Empty)
-            throw new ArgumentException("Message ids must not be empty.", nameof(messageId));
+        if (messageId <= 0)
+            throw new ArgumentException("Message ids must be positive Snowflake ids.", nameof(messageId));
         cancellationToken.ThrowIfCancellationRequested();
         if (_dbContext.ChangeTracker.HasChanges())
             throw new InvalidOperationException("Inbox processing requires a DbContext with no pending changes.");
@@ -37,8 +37,8 @@ public sealed class EfCoreInboxMessageProcessor<TDbContext> : IInboxMessageProce
         var tenantId = _dbContext.CurrentTenantId;
         var tenantKey = tenantId?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "host";
         var receipts = _dbContext.Set<InboxReceipt>();
-        if (await receipts.AnyAsync(receipt => receipt.TenantKey == tenantKey // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
-                && receipt.ConsumerName == consumerName // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
+        if (await receipts.AnyAsync(receipt => receipt.TenantKey == tenantKey // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison - == is the translatable form"
+                && receipt.ConsumerName == consumerName // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison - == is the translatable form"
                 && receipt.MessageId == messageId, cancellationToken).ConfigureAwait(false)
             )
             return false;
@@ -58,8 +58,8 @@ public sealed class EfCoreInboxMessageProcessor<TDbContext> : IInboxMessageProce
             _dbContext.ChangeTracker.Clear();
             await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
             await transaction.DisposeAsync().ConfigureAwait(false);
-            if (await receipts.AnyAsync(existing => existing.TenantKey == tenantKey // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
-                    && existing.ConsumerName == consumerName // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
+            if (await receipts.AnyAsync(existing => existing.TenantKey == tenantKey // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison - == is the translatable form"
+                    && existing.ConsumerName == consumerName // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison - == is the translatable form"
                     && existing.MessageId == messageId, cancellationToken).ConfigureAwait(false)
                 )
                 return false;

@@ -185,6 +185,7 @@ public sealed class AuditChangeCaptureTests
         await connection.OpenAsync();
         var options = new DbContextOptionsBuilder<AuditDbContext>().UseSqlite(connection).Options;
         var services = CreateServices(options, captureValues: true, tenantId: 42);
+        services.AddSingleton<PubSoft.Core.IIdGenerator>(PubSoft.Testing.TestIds.Shared);
         services.AddPubSoftEfCoreAuditPersistence<AuditDbContext>();
         await using var provider = services.BuildServiceProvider();
         await using var scope = provider.CreateAsyncScope();

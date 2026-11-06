@@ -32,7 +32,7 @@ public sealed class InboxProcessorWaveTests
     {
         using var ctx = Db();
         var p = new EfCoreInboxMessageProcessor<Ctx>(ctx);
-        var id = Guid.NewGuid();
+        var id = PubSoft.Testing.TestIds.Next();
         var ran = 0;
         Assert.True(await p.ProcessOnceAsync("c1", id, _ => { ran++; return Task.CompletedTask; }));
         Assert.Equal(1, ran);
@@ -44,7 +44,7 @@ public sealed class InboxProcessorWaveTests
     {
         using var ctx = Db();
         var p = new EfCoreInboxMessageProcessor<Ctx>(ctx);
-        var id = Guid.NewGuid();
+        var id = PubSoft.Testing.TestIds.Next();
         var ran = 0;
         await p.ProcessOnceAsync("c1", id, _ => { ran++; return Task.CompletedTask; });
         Assert.False(await p.ProcessOnceAsync("c1", id, _ => { ran++; return Task.CompletedTask; })); // dedup
@@ -56,7 +56,7 @@ public sealed class InboxProcessorWaveTests
     {
         using var ctx = Db();
         var p = new EfCoreInboxMessageProcessor<Ctx>(ctx);
-        var id = Guid.NewGuid();
+        var id = PubSoft.Testing.TestIds.Next();
         Assert.True(await p.ProcessOnceAsync("c1", id, _ => Task.CompletedTask));
         Assert.True(await p.ProcessOnceAsync("c2", id, _ => Task.CompletedTask)); // different consumer → new receipt
         Assert.Equal(2, await ctx.Receipts.CountAsync());
@@ -67,8 +67,8 @@ public sealed class InboxProcessorWaveTests
     {
         using var ctx = Db();
         var p = new EfCoreInboxMessageProcessor<Ctx>(ctx);
-        await Assert.ThrowsAsync<ArgumentException>(() => p.ProcessOnceAsync("c", Guid.Empty, _ => Task.CompletedTask));
-        await Assert.ThrowsAsync<ArgumentNullException>(() => p.ProcessOnceAsync("c", Guid.NewGuid(), null!));
-        await Assert.ThrowsAsync<ArgumentException>(() => p.ProcessOnceAsync(" ", Guid.NewGuid(), _ => Task.CompletedTask));
+        await Assert.ThrowsAsync<ArgumentException>(() => p.ProcessOnceAsync("c", 0L, _ => Task.CompletedTask));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => p.ProcessOnceAsync("c", PubSoft.Testing.TestIds.Next(), null!));
+        await Assert.ThrowsAsync<ArgumentException>(() => p.ProcessOnceAsync(" ", PubSoft.Testing.TestIds.Next(), _ => Task.CompletedTask));
     }
 }

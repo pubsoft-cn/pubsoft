@@ -16,7 +16,7 @@ public sealed class MqttOutboxOptions
     public string ClientId { get; set; } = "pubsoft-outbox";
     public string? Username { get; set; }
     public string? Password { get; set; }
-    /// <summary>Topic prefix — events publish to {TopicPrefix}{EventType}.</summary>
+    /// <summary>Topic prefix -- events publish to {TopicPrefix}{EventType}.</summary>
     public string TopicPrefix { get; set; } = "outbox/";
     /// <summary>Publish QoS level. Default AtLeastOnce matches outbox at-least-once + inbox dedup semantics.</summary>
     public int QualityOfService { get; set; } = 1;

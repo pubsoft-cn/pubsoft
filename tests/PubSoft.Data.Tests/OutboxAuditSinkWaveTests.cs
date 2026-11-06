@@ -26,7 +26,7 @@ public sealed class OutboxAuditSinkWaveTests
     {
         var c = new Ctx(new DbContextOptionsBuilder<Ctx>().UseSqlite("Data Source=:memory:").Options);
         c.Database.OpenConnection(); c.Database.EnsureCreated();
-        var sink = new OutboxAuditSnapshotSink<Ctx>(c, new EfCoreOutboxPublisher<Ctx>(c));
+        var sink = new OutboxAuditSnapshotSink<Ctx>(c, new EfCoreOutboxPublisher<Ctx>(c, PubSoft.Testing.TestIds.Shared));
         var snap = new AuditRequestSnapshot(
             new AuditRequestContext(DateTimeOffset.UtcNow, "POST", "/api/orders"),
             new AuditBusinessContext("order", "created", "order-1", null),
@@ -45,7 +45,7 @@ public sealed class OutboxAuditSinkWaveTests
     {
         var c = new Ctx(new DbContextOptionsBuilder<Ctx>().UseSqlite("Data Source=:memory:").Options);
         c.Database.OpenConnection(); c.Database.EnsureCreated();
-        var sink = new OutboxAuditSnapshotSink<Ctx>(c, new EfCoreOutboxPublisher<Ctx>(c));
+        var sink = new OutboxAuditSnapshotSink<Ctx>(c, new EfCoreOutboxPublisher<Ctx>(c, PubSoft.Testing.TestIds.Shared));
         await Assert.ThrowsAsync<ArgumentNullException>(() => sink.WriteAsync(null!).AsTask());
     }
 }

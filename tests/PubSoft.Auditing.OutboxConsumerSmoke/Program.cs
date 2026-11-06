@@ -14,6 +14,7 @@ var services = new ServiceCollection();
 services.AddDbContext<SmokeDbContext>(options => options.UseSqlite(connection));
 services.AddSingleton<ITenantContext, SmokeTenantContext>();
 services.AddPubSoftOutbox<SmokeDbContext>();
+services.AddSingleton<PubSoft.Core.IIdGenerator>(new PubSoft.Core.SnowflakeIdGenerator(1));
 services.AddPubSoftEfCoreAuditPersistence<SmokeDbContext>();
 services.AddPubSoftAuditOutbox<SmokeDbContext>();
 

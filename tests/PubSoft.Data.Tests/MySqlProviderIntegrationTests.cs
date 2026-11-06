@@ -58,7 +58,7 @@ public sealed class MySqlProviderIntegrationTests
         await using (var setup = new IntegrationDbContext(options, new TestTenantContext(73)))
         {
             await setup.Database.EnsureCreatedAsync();
-            await new EfCoreOutboxPublisher<IntegrationDbContext>(setup)
+            await new EfCoreOutboxPublisher<IntegrationDbContext>(setup, PubSoft.Testing.TestIds.Shared)
                 .PublishAsync(new TestEvent(1));
             await setup.SaveChangesAsync();
         }
@@ -85,7 +85,7 @@ public sealed class MySqlProviderIntegrationTests
         var outboxOptions = new OutboxOptions { LeaseDuration = TimeSpan.FromMinutes(1) };
         await using var context = new IntegrationDbContext(options, new TestTenantContext(73));
         await context.Database.EnsureCreatedAsync();
-        await new EfCoreOutboxPublisher<IntegrationDbContext>(context, outboxOptions, clock)
+        await new EfCoreOutboxPublisher<IntegrationDbContext>(context, PubSoft.Testing.TestIds.Shared, outboxOptions, clock)
             .PublishAsync(new TestEvent(7));
         await context.SaveChangesAsync();
         var store = new EfCoreOutboxStore<IntegrationDbContext>(context, outboxOptions, clock);
@@ -119,7 +119,7 @@ public sealed class MySqlProviderIntegrationTests
         await using (var setup = new IntegrationDbContext(options, new TestTenantContext(73)))
             await setup.Database.EnsureCreatedAsync();
 
-        var messageId = Guid.NewGuid();
+        var messageId = PubSoft.Testing.TestIds.Next();
         var handlerCalls = 0;
         var start = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         async Task<bool> ProcessAsync(int orderId)
@@ -156,7 +156,7 @@ public sealed class MySqlProviderIntegrationTests
         await using var context = new IntegrationDbContext(options, new TestTenantContext(73));
         await context.Database.EnsureCreatedAsync();
         var processor = new EfCoreInboxMessageProcessor<IntegrationDbContext>(context);
-        var messageId = Guid.NewGuid();
+        var messageId = PubSoft.Testing.TestIds.Next();
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => processor.ProcessOnceAsync(
             "mysql-orders",

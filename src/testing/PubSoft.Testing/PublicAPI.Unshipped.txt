@@ -33,3 +33,6 @@ static PubSoft.Testing.FixedMemberScopeContext.operator !=(PubSoft.Testing.Fixed
 static PubSoft.Testing.FixedMemberScopeContext.operator ==(PubSoft.Testing.FixedMemberScopeContext? left, PubSoft.Testing.FixedMemberScopeContext? right) -> bool
 static PubSoft.Testing.FixedTenantContext.operator !=(PubSoft.Testing.FixedTenantContext? left, PubSoft.Testing.FixedTenantContext? right) -> bool
 static PubSoft.Testing.FixedTenantContext.operator ==(PubSoft.Testing.FixedTenantContext? left, PubSoft.Testing.FixedTenantContext? right) -> bool
+PubSoft.Testing.TestIds
+static PubSoft.Testing.TestIds.Next() -> long
+static PubSoft.Testing.TestIds.Shared.get -> PubSoft.Core.IIdGenerator!

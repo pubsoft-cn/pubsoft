@@ -30,6 +30,7 @@ public sealed class AuditQueryServiceWaveTests
     private static AuditLogRecord Rec(string path, bool ok = true, string? cat = null, string? act = null, long? tenant = null)
         => new()
         {
+            Id = PubSoft.Testing.TestIds.Next(),
             HttpMethod = "GET",
             RequestPath = path,
             Success = ok,

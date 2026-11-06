@@ -27,6 +27,7 @@ public static class OutboxModelBuilderExtensions
     {
         builder.ToTable("PubSoftOutboxMessages");
         builder.HasKey(message => message.Id);
+        builder.Property(message => message.Id).ValueGeneratedNever();
         builder.HasIndex(message => new { message.TenantId, message.Status, message.OccurredAt });
         builder.HasIndex(message => new { message.TenantId, message.AggregateKey, message.OccurredAt });
         builder.Property(message => message.OccurredAt).HasConversion(UtcTicksConverter);

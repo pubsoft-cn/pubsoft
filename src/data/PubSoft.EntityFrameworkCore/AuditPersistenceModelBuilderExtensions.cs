@@ -28,6 +28,7 @@ public static class AuditPersistenceModelBuilderExtensions
     {
         builder.ToTable("PubSoftAuditLogs");
         builder.HasKey(record => record.Id);
+        builder.Property(record => record.Id).ValueGeneratedNever();
         builder.HasIndex(record => new { record.TenantId, record.StartedAt });
         builder.HasIndex(record => new { record.TenantId, record.Category, record.Action });
         builder.HasIndex(record => new { record.TenantId, record.SubjectId, record.StartedAt });
@@ -44,7 +45,7 @@ public static class AuditPersistenceModelBuilderExtensions
         builder.Property(record => record.TargetType).HasMaxLength(256);
         builder.Property(record => record.TargetId).HasMaxLength(256);
         builder.Property(record => record.TargetName).HasMaxLength(512);
-        builder.Property(record => record.Detail).HasMaxLength(16_384);
+        builder.Property(record => record.Detail).HasColumnType("text"); // utf8mb4 varchar cap is 16383 chars - text removes the ceiling; upstream truncation already bounds content
         builder.HasMany(record => record.EntityChanges)
             .WithOne(change => change.AuditLog)
             .HasForeignKey(change => change.AuditLogId)
@@ -55,6 +56,7 @@ public static class AuditPersistenceModelBuilderExtensions
     {
         builder.ToTable("PubSoftAuditEntityChanges");
         builder.HasKey(change => change.Id);
+        builder.Property(change => change.Id).ValueGeneratedNever();
         builder.HasIndex(change => new { change.TenantId, change.AuditLogId });
         builder.Property(change => change.ChangedAt).HasConversion(UtcTicksConverter);
         builder.Property(change => change.EntityType).HasMaxLength(256).IsRequired();

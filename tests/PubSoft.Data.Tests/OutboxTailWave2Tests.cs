@@ -43,8 +43,8 @@ public sealed class OutboxTailWave2Tests
     {
         var m = (OutboxMessage)typeof(OutboxMessage)
             .GetConstructor(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null,
-                new[] { typeof(Guid), typeof(string), typeof(string), typeof(string), typeof(string), typeof(DateTimeOffset), typeof(int), typeof(string) }, null)!
-            .Invoke(new object?[] { Guid.NewGuid(), "type", "{}", "mod", "agg", DateTimeOffset.UtcNow, 5, "corr-1" });
+                new[] { typeof(long), typeof(string), typeof(string), typeof(string), typeof(string), typeof(DateTimeOffset), typeof(int), typeof(string) }, null)!
+            .Invoke(new object?[] { PubSoft.Testing.TestIds.Next(), "type", "{}", "mod", "agg", DateTimeOffset.UtcNow, 5, "corr-1" });
         Assert.Equal("mod", m.TargetModule);
         Assert.Equal("agg", m.AggregateKey);
         Assert.Equal("corr-1", m.CorrelationId);
@@ -52,7 +52,7 @@ public sealed class OutboxTailWave2Tests
         Assert.Null(m.NextAttemptAt);
         Assert.Null(m.LeaseExpiresAt);
         Assert.Null(m.LastErrorCode);
-        Assert.NotEqual(Guid.Empty, m.Id);
+        Assert.NotEqual(0L, m.Id);
     }
 
     [Fact]
@@ -60,11 +60,11 @@ public sealed class OutboxTailWave2Tests
     {
         var r = (InboxReceipt)typeof(InboxReceipt)
             .GetConstructor(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null,
-                new[] { typeof(long?), typeof(string), typeof(Guid), typeof(DateTimeOffset) }, null)!
-            .Invoke(new object?[] { 7L, "consumer", Guid.NewGuid(), DateTimeOffset.UtcNow });
+                new[] { typeof(long?), typeof(string), typeof(long), typeof(DateTimeOffset) }, null)!
+            .Invoke(new object?[] { 7L, "consumer", PubSoft.Testing.TestIds.Next(), DateTimeOffset.UtcNow });
         Assert.Equal("consumer", r.ConsumerName);
         Assert.Equal(7L, r.TenantId);
         Assert.NotEqual(default, r.ProcessedAt);
-        Assert.NotEqual(Guid.Empty, r.MessageId);
+        Assert.NotEqual(0L, r.MessageId);
     }
 }

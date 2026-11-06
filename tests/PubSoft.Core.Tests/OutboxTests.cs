@@ -18,7 +18,7 @@ public sealed class OutboxTests
     {
         var connectionString = new SqliteConnectionStringBuilder
         {
-            DataSource = $"tenant-outbox-{Guid.NewGuid():N}",
+            DataSource = $"tenant-outbox-{PubSoft.Testing.TestIds.Next():N}",
             Mode = SqliteOpenMode.Memory,
             Cache = SqliteCacheMode.Shared
         }.ToString();
@@ -49,7 +49,7 @@ public sealed class OutboxTests
             await using var seedScope = provider.CreateAsyncScope();
             seedScope.ServiceProvider.GetRequiredService<MutableTenantContext>().TenantId = tenantId;
             var context = seedScope.ServiceProvider.GetRequiredService<OutboxDbContext>();
-            await new EfCoreOutboxPublisher<OutboxDbContext>(context)
+            await new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared)
                 .PublishAsync(new OrderPlaced((int)tenantId));
             await context.SaveChangesAsync();
         }
@@ -105,7 +105,7 @@ public sealed class OutboxTests
         var options = new DbContextOptionsBuilder<OutboxDbContext>().UseSqlite(connection).Options;
         await using var context = new OutboxDbContext(options, new TenantContext(73));
         await context.Database.EnsureCreatedAsync();
-        var publisher = new EfCoreOutboxPublisher<OutboxDbContext>(context);
+        var publisher = new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared);
         var order = new OrderRecord { Id = 5, Name = "created" };
         context.Orders.Add(order);
 
@@ -132,18 +132,18 @@ public sealed class OutboxTests
         await using var connection = new SqliteConnection("Data Source=:memory:");
         await connection.OpenAsync();
         var options = new DbContextOptionsBuilder<OutboxDbContext>().UseSqlite(connection).Options;
-        Guid otherTenantMessageId;
+        long otherTenantMessageId;
         await using (var otherTenant = new OutboxDbContext(options, new TenantContext(41)))
         {
             await otherTenant.Database.EnsureCreatedAsync();
-            otherTenantMessageId = await new EfCoreOutboxPublisher<OutboxDbContext>(otherTenant)
+            otherTenantMessageId = await new EfCoreOutboxPublisher<OutboxDbContext>(otherTenant, PubSoft.Testing.TestIds.Shared)
                 .PublishAsync(new OrderPlaced(41));
             await otherTenant.SaveChangesAsync();
         }
 
         await using (var currentTenant = new OutboxDbContext(options, new TenantContext(73)))
         {
-            var currentTenantMessageId = await new EfCoreOutboxPublisher<OutboxDbContext>(currentTenant)
+            var currentTenantMessageId = await new EfCoreOutboxPublisher<OutboxDbContext>(currentTenant, PubSoft.Testing.TestIds.Shared)
                 .PublishAsync(new OrderPlaced(73));
             await currentTenant.SaveChangesAsync();
 
@@ -167,7 +167,7 @@ public sealed class OutboxTests
         var options = new DbContextOptionsBuilder<OutboxDbContext>().UseSqlite(connection).Options;
         await using var context = new OutboxDbContext(options, new TenantContext(73));
         await context.Database.EnsureCreatedAsync();
-        await new EfCoreOutboxPublisher<OutboxDbContext>(context).PublishAsync(new OrderPlaced(75));
+        await new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared).PublishAsync(new OrderPlaced(75));
         await context.SaveChangesAsync();
         var message = await context.OutboxMessages.SingleAsync();
         var dispatcher = new TestInboxOutboxDispatcher(
@@ -190,7 +190,7 @@ public sealed class OutboxTests
         await using var context = new OutboxDbContext(options, new TenantContext(73));
         await context.Database.EnsureCreatedAsync();
         var processor = new EfCoreInboxMessageProcessor<OutboxDbContext>(context);
-        var messageId = Guid.NewGuid();
+        var messageId = PubSoft.Testing.TestIds.Next();
         var handlerCalls = 0;
 
         var first = await processor.ProcessOnceAsync("orders-projection", messageId, _ =>
@@ -218,7 +218,7 @@ public sealed class OutboxTests
         await using var connection = new SqliteConnection("Data Source=:memory:");
         await connection.OpenAsync();
         var options = new DbContextOptionsBuilder<OutboxDbContext>().UseSqlite(connection).Options;
-        var messageId = Guid.Parse("5e211cb4-d252-4af2-b186-21bfa81d7cc5");
+        var messageId = 1234567890123456L;
         await using var context = new OutboxDbContext(options, new TenantContext(73));
         await context.Database.EnsureCreatedAsync();
         var processor = new EfCoreInboxMessageProcessor<OutboxDbContext>(context);
@@ -248,7 +248,7 @@ public sealed class OutboxTests
         await using var connection = new SqliteConnection("Data Source=:memory:");
         await connection.OpenAsync();
         var options = new DbContextOptionsBuilder<OutboxDbContext>().UseSqlite(connection).Options;
-        var messageId = Guid.NewGuid();
+        var messageId = PubSoft.Testing.TestIds.Next();
         foreach (var tenantId in new long?[] { null, 41, 73 })
         {
             await using var context = new OutboxDbContext(options, new TenantContext(tenantId));
@@ -267,7 +267,7 @@ public sealed class OutboxTests
     {
         var connectionString = new SqliteConnectionStringBuilder
         {
-            DataSource = $"inbox-{Guid.NewGuid():N}",
+            DataSource = $"inbox-{PubSoft.Testing.TestIds.Next():N}",
             Mode = SqliteOpenMode.Memory,
             Cache = SqliteCacheMode.Shared
         }.ToString();
@@ -277,7 +277,7 @@ public sealed class OutboxTests
         await using (var setup = new OutboxDbContext(options, new TenantContext(73)))
             await setup.Database.EnsureCreatedAsync();
 
-        var messageId = Guid.NewGuid();
+        var messageId = PubSoft.Testing.TestIds.Next();
         var handlerCalls = 0;
         async Task<bool> ProcessInOwnContextAsync(int orderId)
         {
@@ -312,7 +312,7 @@ public sealed class OutboxTests
         await using (var transaction = await context.Database.BeginTransactionAsync())
         {
             context.Orders.Add(new OrderRecord { Id = 6, Name = "rolled back" });
-            await new EfCoreOutboxPublisher<OutboxDbContext>(context).PublishAsync(new OrderPlaced(6));
+            await new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared).PublishAsync(new OrderPlaced(6));
             await context.SaveChangesAsync();
             await transaction.RollbackAsync();
         }
@@ -332,7 +332,7 @@ public sealed class OutboxTests
         var outboxOptions = new OutboxOptions { LeaseDuration = TimeSpan.FromMinutes(1) };
         await using var context = new OutboxDbContext(options, new TenantContext(73));
         await context.Database.EnsureCreatedAsync();
-        await new EfCoreOutboxPublisher<OutboxDbContext>(context, outboxOptions, clock)
+        await new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared, outboxOptions, clock)
             .PublishAsync(new OrderPlaced(7));
         await context.SaveChangesAsync();
         var store = new EfCoreOutboxStore<OutboxDbContext>(context, outboxOptions, clock);
@@ -367,7 +367,7 @@ public sealed class OutboxTests
         var outboxOptions = new OutboxOptions { LeaseDuration = TimeSpan.FromMinutes(1) };
         await using var context = new OutboxDbContext(options, new TenantContext(73));
         await context.Database.EnsureCreatedAsync();
-        await new EfCoreOutboxPublisher<OutboxDbContext>(context, outboxOptions, clock)
+        await new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared, outboxOptions, clock)
             .PublishAsync(new OrderPlaced(70));
         await context.SaveChangesAsync();
         var store = new EfCoreOutboxStore<OutboxDbContext>(context, outboxOptions, clock);
@@ -408,7 +408,7 @@ public sealed class OutboxTests
         };
         await using var context = new OutboxDbContext(options, new TenantContext(73));
         await context.Database.EnsureCreatedAsync();
-        await new EfCoreOutboxPublisher<OutboxDbContext>(context, outboxOptions, clock)
+        await new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared, outboxOptions, clock)
             .PublishAsync(new OrderPlaced(8));
         await context.SaveChangesAsync();
         var store = new EfCoreOutboxStore<OutboxDbContext>(context, outboxOptions, clock);
@@ -444,7 +444,7 @@ public sealed class OutboxTests
         };
         await using var context = new OutboxDbContext(options, new TenantContext(73));
         await context.Database.EnsureCreatedAsync();
-        await new EfCoreOutboxPublisher<OutboxDbContext>(context, outboxOptions, clock)
+        await new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared, outboxOptions, clock)
             .PublishAsync(new OrderPlaced(9));
         await context.SaveChangesAsync();
         var store = new EfCoreOutboxStore<OutboxDbContext>(context, outboxOptions, clock);

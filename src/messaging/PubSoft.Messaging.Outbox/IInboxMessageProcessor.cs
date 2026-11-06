@@ -13,7 +13,7 @@ public interface IInboxMessageProcessor
 {
     Task<bool> ProcessOnceAsync(
         string consumerName,
-        Guid messageId,
+        long messageId,
         Func<CancellationToken, Task> handler,
         CancellationToken cancellationToken = default);
 }

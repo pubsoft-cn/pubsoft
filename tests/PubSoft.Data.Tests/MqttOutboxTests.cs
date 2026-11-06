@@ -14,7 +14,7 @@ public sealed class MqttOutboxTests
             .Invoke(null);
         foreach (var (n, v) in new (string, object?)[]
         {
-            ("Id", Guid.NewGuid()), ("EventType", eventType), ("PayloadJson", payloadJson),
+            ("Id", PubSoft.Testing.TestIds.Next()), ("EventType", eventType), ("PayloadJson", payloadJson),
             ("OccurredAt", DateTimeOffset.UtcNow), ("Status", OutboxMessageStatus.Pending),
             ("AttemptCount", 0), ("MaxAttempts", 3),
         })
@@ -120,7 +120,7 @@ public sealed class MqttFailurePathTests
             .Invoke(null);
         foreach (var (n, v) in new (string, object?)[]
         {
-            ("Id", Guid.NewGuid()), ("EventType", type), ("PayloadJson", "{}"),
+            ("Id", PubSoft.Testing.TestIds.Next()), ("EventType", type), ("PayloadJson", "{}"),
             ("OccurredAt", DateTimeOffset.UtcNow), ("Status", OutboxMessageStatus.Pending),
             ("AttemptCount", 0), ("MaxAttempts", 3),
         })

@@ -11,7 +11,7 @@ namespace PubSoft.Messaging.Outbox;
 
 public interface IOutboxPublisher
 {
-    Task<Guid> PublishAsync<TEvent>(
+    Task<long> PublishAsync<TEvent>(
         TEvent @event,
         string? targetModule = null,
         string? aggregateKey = null,

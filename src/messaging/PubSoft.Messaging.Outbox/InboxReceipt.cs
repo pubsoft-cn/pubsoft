@@ -12,7 +12,7 @@ namespace PubSoft.Messaging.Outbox;
 public sealed class InboxReceipt : IMultiTenant
 {
 
-    internal InboxReceipt(long? tenantId, string consumerName, Guid messageId, DateTimeOffset processedAt)
+    internal InboxReceipt(long? tenantId, string consumerName, long messageId, DateTimeOffset processedAt)
     {
         TenantId = tenantId;
         TenantKey = tenantId?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "host";
@@ -25,6 +25,6 @@ public sealed class InboxReceipt : IMultiTenant
     public long? TenantId { get; set; }
     public string TenantKey { get; private set; } = string.Empty;
     public string ConsumerName { get; private set; } = string.Empty;
-    public Guid MessageId { get; private set; }
+    public long MessageId { get; private set; }
     public DateTimeOffset ProcessedAt { get; private set; }
 }
