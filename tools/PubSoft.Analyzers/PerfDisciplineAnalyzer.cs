@@ -69,7 +69,7 @@ public sealed class PerfDisciplineAnalyzer : DiagnosticAnalyzer
         var left = context.SemanticModel.GetTypeInfo(binary.Left).Type;
         var right = context.SemanticModel.GetTypeInfo(binary.Right).Type;
         if (left?.SpecialType == SpecialType.System_String && right?.SpecialType == SpecialType.System_String)
-            context.ReportDiagnostic(Diagnostic.Create(StringEquality, binary.GetLocation(), AnalyzerHelpers.Label(binary)));
+            if (!AnalyzerHelpers.IsExempt(binary, "PUBSOFT004")) context.ReportDiagnostic(Diagnostic.Create(StringEquality, binary.GetLocation(), AnalyzerHelpers.Label(binary)));
     }
 
     private static void CheckThrow(SyntaxNodeAnalysisContext context)
@@ -85,7 +85,7 @@ public sealed class PerfDisciplineAnalyzer : DiagnosticAnalyzer
         if (!(typeName.Contains("ArgumentException") || typeName.Contains("ArgumentNullException")
             || typeName.Contains("ArgumentOutOfRangeException") || typeName.Contains("ArgumentNullOrWhiteSpace"))) return;
         if (creation.ArgumentList?.Arguments.Count > 0) return; // unnamed form only
-        context.ReportDiagnostic(Diagnostic.Create(ParamName, creation.GetLocation(), AnalyzerHelpers.Label(creation)));
+        if (!AnalyzerHelpers.IsExempt(creation, "PUBSOFT005")) context.ReportDiagnostic(Diagnostic.Create(ParamName, creation.GetLocation(), AnalyzerHelpers.Label(creation)));
     }
 
     private static void CheckAwait(SyntaxNodeAnalysisContext context)
@@ -96,7 +96,7 @@ public sealed class PerfDisciplineAnalyzer : DiagnosticAnalyzer
             .Any(i => i.Expression is MemberAccessExpressionSyntax ma && ma.Name.Identifier.Text == "ConfigureAwait"))
             return;
         // Task.Yield-like awaits and foreach-await are exempt patterns the rule cannot model — skip them via suppression comment.
-        context.ReportDiagnostic(Diagnostic.Create(ConfigureAwait, awaitExpr.GetLocation(), AnalyzerHelpers.Label(awaitExpr)));
+        if (!AnalyzerHelpers.IsExempt(awaitExpr, "PUBSOFT006")) context.ReportDiagnostic(Diagnostic.Create(ConfigureAwait, awaitExpr.GetLocation(), AnalyzerHelpers.Label(awaitExpr)));
     }
 
     private static void CheckInvocation(SyntaxNodeAnalysisContext context)
@@ -109,7 +109,7 @@ public sealed class PerfDisciplineAnalyzer : DiagnosticAnalyzer
         if (name == "GetHashCode" && invocation.ArgumentList.Arguments.Count == 0
             && context.SemanticModel.GetTypeInfo(ma.Expression).Type?.SpecialType == SpecialType.System_String)
         {
-            context.ReportDiagnostic(Diagnostic.Create(HashCode, invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
+            if (!AnalyzerHelpers.IsExempt(invocation, "PUBSOFT010")) context.ReportDiagnostic(Diagnostic.Create(HashCode, invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
             return;
         }
 
@@ -117,17 +117,24 @@ public sealed class PerfDisciplineAnalyzer : DiagnosticAnalyzer
         var receiver = ma.Expression.ToString();
         if (receiver == "System.Convert" || receiver == "Convert")
         {
-            if (invocation.ArgumentList.Arguments.Count == 1)
-                context.ReportDiagnostic(Diagnostic.Create(FormatProvider, invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
+            // only conversions that actually take IFormatProvider — Base64/Hex are byte ops
+            if (name is "ToBoolean" or "ToByte" or "ToSByte" or "ToInt16" or "ToUInt16"
+                or "ToInt32" or "ToUInt32" or "ToInt64" or "ToUInt64" or "ToSingle"
+                or "ToDouble" or "ToDecimal" or "ToDateTime" or "ToString" or "ToChar"
+                && invocation.ArgumentList.Arguments.Count == 1)
+                if (!AnalyzerHelpers.IsExempt(invocation, "PUBSOFT007")) context.ReportDiagnostic(Diagnostic.Create(FormatProvider, invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
             return;
         }
         if ((name == "Parse" || name == "TryParse" || name == "ToString")
-            && invocation.ArgumentList.Arguments.Count <= 1)
+            && invocation.ArgumentList.Arguments.Count <= 1
+            && !invocation.ArgumentList.Arguments.Any(a =>
+                a.Expression.ToString().Contains("CultureInfo")
+                || (a.NameColon?.Name.Identifier.Text.Contains("ulture") == true)))
         {
             var targetType = context.SemanticModel.GetTypeInfo(ma.Expression).Type;
             if (targetType?.SpecialType is SpecialType.System_Int32 or SpecialType.System_Int64
                 or SpecialType.System_Double or SpecialType.System_Decimal or SpecialType.System_DateTime)
-                context.ReportDiagnostic(Diagnostic.Create(FormatProvider, invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
+                if (!AnalyzerHelpers.IsExempt(invocation, "PUBSOFT007")) context.ReportDiagnostic(Diagnostic.Create(FormatProvider, invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
         }
     }
 
@@ -145,14 +152,14 @@ public sealed class PerfDisciplineAnalyzer : DiagnosticAnalyzer
             var hasComparer = creation.ArgumentList?.Arguments
                 .Any(a => a.Expression.ToString().Contains("StringComparer")) == true;
             if (!hasComparer)
-                context.ReportDiagnostic(Diagnostic.Create(Comparer, creation.GetLocation(), AnalyzerHelpers.Label(creation)));
+                if (!AnalyzerHelpers.IsExempt(creation, "PUBSOFT008")) context.ReportDiagnostic(Diagnostic.Create(Comparer, creation.GetLocation(), AnalyzerHelpers.Label(creation)));
             return;
         }
 
         // new Regex(pattern) / new Regex(pattern, options) — only the 3-arg ctor with timeout is safe
         if (typeName.EndsWith("Regex", System.StringComparison.Ordinal)
             && (creation.ArgumentList?.Arguments.Count ?? 0) < 3)
-            context.ReportDiagnostic(Diagnostic.Create(RegexTimeout, creation.GetLocation(), AnalyzerHelpers.Label(creation)));
+            if (!AnalyzerHelpers.IsExempt(creation, "PUBSOFT009")) context.ReportDiagnostic(Diagnostic.Create(RegexTimeout, creation.GetLocation(), AnalyzerHelpers.Label(creation)));
     }
 
     private static void CheckGeneratedRegex(SyntaxNodeAnalysisContext context)
@@ -164,15 +171,15 @@ public sealed class PerfDisciplineAnalyzer : DiagnosticAnalyzer
                 if (attribute.Name.ToString().Contains("GeneratedRegex")
                     && (attribute.ArgumentList?.Arguments
                         .Any(a => a.NameEquals?.Name.Identifier.Text == "matchTimeoutMilliseconds") != true))
-                    context.ReportDiagnostic(Diagnostic.Create(RegexTimeout, attribute.GetLocation(), AnalyzerHelpers.Label(method)));
+                    if (!AnalyzerHelpers.IsExempt(attribute, "PUBSOFT009")) context.ReportDiagnostic(Diagnostic.Create(RegexTimeout, attribute.GetLocation(), AnalyzerHelpers.Label(method)));
     }
 
     private static void CheckConcreteReturn(SyntaxNodeAnalysisContext context)
     {
+        // methods only — collection-typed properties on Options/DTOs are the idiomatic mutable contract
         TypeSyntax? returnType = context.Node switch
         {
             MethodDeclarationSyntax m when m.Modifiers.Any(SyntaxKind.PublicKeyword) => m.ReturnType,
-            PropertyDeclarationSyntax p when p.Modifiers.Any(SyntaxKind.PublicKeyword) => p.Type,
             _ => null,
         };
         if (returnType is null || AnalyzerHelpers.IsCold(context.Node)) return;
@@ -180,6 +187,6 @@ public sealed class PerfDisciplineAnalyzer : DiagnosticAnalyzer
         if (type is null) return;
         var name = type.Name;
         if (name is "List" or "Dictionary" or "HashSet" or "SortedDictionary" or "LinkedList" or "Queue" or "Stack")
-            context.ReportDiagnostic(Diagnostic.Create(ConcreteReturn, returnType.GetLocation(), AnalyzerHelpers.Label(context.Node)));
+            if (!AnalyzerHelpers.IsExempt(returnType, "PUBSOFT011")) context.ReportDiagnostic(Diagnostic.Create(ConcreteReturn, returnType.GetLocation(), AnalyzerHelpers.Label(context.Node)));
     }
 }

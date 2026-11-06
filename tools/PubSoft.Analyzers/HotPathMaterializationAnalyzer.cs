@@ -71,7 +71,7 @@ public sealed class HotPathMaterializationAnalyzer : DiagnosticAnalyzer
                     .Any(i => i.Expression is MemberAccessExpressionSyntax inner
                         && (inner.Name.Identifier.Text == "Where" || inner.Name.Identifier.Text == "Select")))
             {
-                context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation(),
+                if (!AnalyzerHelpers.IsExempt(invocation, "PUBSOFT003")) context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation(),
                     declaring.Identifier.Text, MethodLabel(context.Node)));
                 continue;
             }
@@ -83,7 +83,7 @@ public sealed class HotPathMaterializationAnalyzer : DiagnosticAnalyzer
                     .Any(i => i.Expression is MemberAccessExpressionSyntax filter
                         && (filter.Name.Identifier.Text == "Where" || filter.Name.Identifier.Text == "Select")))
             {
-                context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation(),
+                if (!AnalyzerHelpers.IsExempt(invocation, "PUBSOFT003")) context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation(),
                     declaring.Identifier.Text, MethodLabel(context.Node)));
             }
         }

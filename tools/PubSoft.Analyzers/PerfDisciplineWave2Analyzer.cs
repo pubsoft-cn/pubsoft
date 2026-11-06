@@ -93,7 +93,7 @@ public sealed class PerfDisciplineWave2Analyzer : DiagnosticAnalyzer
         // async void non-event
         if (method.Modifiers.Any(SyntaxKind.AsyncKeyword) && method.ReturnType.ToString() == "void"
             && !method.ParameterList.Parameters.Any(p => p.Type.ToString().Contains("EventArgs")))
-            context.ReportDiagnostic(Diagnostic.Create(Rules[4], method.GetLocation(), AnalyzerHelpers.Label(method)));
+            if (!AnalyzerHelpers.IsExempt(method, "PUBSOFT016")) context.ReportDiagnostic(Diagnostic.Create(Rules[4], method.GetLocation(), AnalyzerHelpers.Label(method)));
 
         // ContainsKey + indexer on the same receiver inside the method
         var receivers = new System.Collections.Generic.HashSet<string>();
@@ -106,7 +106,7 @@ public sealed class PerfDisciplineWave2Analyzer : DiagnosticAnalyzer
                 foreach (var indexer in method.DescendantNodes().OfType<ElementAccessExpressionSyntax>())
                     if (indexer.Expression.ToString() == receiver)
                     {
-                        context.ReportDiagnostic(Diagnostic.Create(Rules[0], inv.GetLocation(), AnalyzerHelpers.Label(inv)));
+                        if (!AnalyzerHelpers.IsExempt(inv, "PUBSOFT012")) context.ReportDiagnostic(Diagnostic.Create(Rules[0], inv.GetLocation(), AnalyzerHelpers.Label(inv)));
                         goto next;
                     }
             }
@@ -121,12 +121,12 @@ public sealed class PerfDisciplineWave2Analyzer : DiagnosticAnalyzer
         var typeName = creation.Type.ToString();
 
         if (typeName is "Random" or "System.Random" && (creation.ArgumentList?.Arguments.Count ?? 0) == 0)
-            context.ReportDiagnostic(Diagnostic.Create(Rules[7], creation.GetLocation(), AnalyzerHelpers.Label(creation)));
+            if (!AnalyzerHelpers.IsExempt(creation, "PUBSOFT019")) context.ReportDiagnostic(Diagnostic.Create(Rules[7], creation.GetLocation(), AnalyzerHelpers.Label(creation)));
 
         if (typeName.StartsWith("TaskCompletionSource", System.StringComparison.Ordinal)
             && (creation.ArgumentList?.Arguments
                 .Any(a => a.Expression.ToString().Contains("RunContinuationsAsynchronously")) != true))
-            context.ReportDiagnostic(Diagnostic.Create(Rules[12], creation.GetLocation(), AnalyzerHelpers.Label(creation)));
+            if (!AnalyzerHelpers.IsExempt(creation, "PUBSOFT024")) context.ReportDiagnostic(Diagnostic.Create(Rules[12], creation.GetLocation(), AnalyzerHelpers.Label(creation)));
     }
 
     private static void CheckInvocation(SyntaxNodeAnalysisContext context)
@@ -137,17 +137,17 @@ public sealed class PerfDisciplineWave2Analyzer : DiagnosticAnalyzer
 
         // sync-over-async: .Wait()/.Result/.GetAwaiter().GetResult() on Task
         if (name is "Wait" or "get_Result" && context.SemanticModel.GetTypeInfo(ma.Expression).Type is { } t && IsTaskType(t))
-            context.ReportDiagnostic(Diagnostic.Create(Rules[5], invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
+            if (!AnalyzerHelpers.IsExempt(invocation, "PUBSOFT017")) context.ReportDiagnostic(Diagnostic.Create(Rules[5], invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
         if (name == "GetAwaiter" && context.SemanticModel.GetTypeInfo(ma.Expression).Type is { } tt && IsTaskType(tt)
             && invocation.Parent is MemberAccessExpressionSyntax { Name.Identifier.Text: "GetResult" })
-            context.ReportDiagnostic(Diagnostic.Create(Rules[5], invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
+            if (!AnalyzerHelpers.IsExempt(invocation, "PUBSOFT017")) context.ReportDiagnostic(Diagnostic.Create(Rules[5], invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
 
         // .Where(...).Any()/Count()/First()/Last()/Single() — collapsible
         if (name is "Any" or "Count" or "First" or "Last" or "Single"
             && invocation.ArgumentList.Arguments.Count == 0
             && ma.Expression is InvocationExpressionSyntax inner
             && inner.Expression is MemberAccessExpressionSyntax innerMa && innerMa.Name.Identifier.Text == "Where")
-            context.ReportDiagnostic(Diagnostic.Create(Rules[1], invocation.GetLocation(),
+            if (!AnalyzerHelpers.IsExempt(invocation, "PUBSOFT013")) context.ReportDiagnostic(Diagnostic.Create(Rules[1], invocation.GetLocation(),
                 AnalyzerHelpers.Label(invocation), name));
 
         // char-overload single-char string literal
@@ -155,22 +155,22 @@ public sealed class PerfDisciplineWave2Analyzer : DiagnosticAnalyzer
             && invocation.ArgumentList.Arguments.Count > 0
             && invocation.ArgumentList.Arguments[0].Expression is LiteralExpressionSyntax lit
             && lit.Token.Value is string s && s.Length == 1)
-            context.ReportDiagnostic(Diagnostic.Create(Rules[10], invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
+            if (!AnalyzerHelpers.IsExempt(invocation, "PUBSOFT022")) context.ReportDiagnostic(Diagnostic.Create(Rules[10], invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
 
         // ToLower()/ToUpper()
         if (name is "ToLower" or "ToUpper" && invocation.ArgumentList.Arguments.Count == 0)
-            context.ReportDiagnostic(Diagnostic.Create(Rules[11], invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
+            if (!AnalyzerHelpers.IsExempt(invocation, "PUBSOFT023")) context.ReportDiagnostic(Diagnostic.Create(Rules[11], invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
 
         // enum.ToString()
         if (name == "ToString" && invocation.ArgumentList.Arguments.Count == 0
             && context.SemanticModel.GetTypeInfo(ma.Expression).Type?.TypeKind == TypeKind.Enum)
-            context.ReportDiagnostic(Diagnostic.Create(Rules[15], invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
+            if (!AnalyzerHelpers.IsExempt(invocation, "PUBSOFT027")) context.ReportDiagnostic(Diagnostic.Create(Rules[15], invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
 
         // .Keys.Contains()/.Values.Contains()
         if (name == "Contains" && invocation.ArgumentList.Arguments.Count == 1
             && ma.Expression is MemberAccessExpressionSyntax parent
             && parent.Name.Identifier.Text is "Keys" or "Values")
-            context.ReportDiagnostic(Diagnostic.Create(Rules[17], invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
+            if (!AnalyzerHelpers.IsExempt(invocation, "PUBSOFT029")) context.ReportDiagnostic(Diagnostic.Create(Rules[17], invocation.GetLocation(), AnalyzerHelpers.Label(invocation)));
     }
 
     private static void CheckBinary(SyntaxNodeAnalysisContext context)
@@ -185,7 +185,7 @@ public sealed class PerfDisciplineWave2Analyzer : DiagnosticAnalyzer
                 && inv.Expression is MemberAccessExpressionSyntax ma
                 && ma.Name.Identifier.Text is "Count" or "LongCount")
             {
-                context.ReportDiagnostic(Diagnostic.Create(Rules[2], binary.GetLocation(), AnalyzerHelpers.Label(binary)));
+                if (!AnalyzerHelpers.IsExempt(binary, "PUBSOFT014")) context.ReportDiagnostic(Diagnostic.Create(Rules[2], binary.GetLocation(), AnalyzerHelpers.Label(binary)));
                 return;
             }
 
@@ -194,7 +194,7 @@ public sealed class PerfDisciplineWave2Analyzer : DiagnosticAnalyzer
             if (side is InvocationExpressionSyntax inv
                 && inv.Expression is MemberAccessExpressionSyntax ma && ma.Name.Identifier.Text == "Substring")
             {
-                context.ReportDiagnostic(Diagnostic.Create(Rules[9], binary.GetLocation(), AnalyzerHelpers.Label(binary)));
+                if (!AnalyzerHelpers.IsExempt(binary, "PUBSOFT021")) context.ReportDiagnostic(Diagnostic.Create(Rules[9], binary.GetLocation(), AnalyzerHelpers.Label(binary)));
                 return;
             }
     }
@@ -209,7 +209,7 @@ public sealed class PerfDisciplineWave2Analyzer : DiagnosticAnalyzer
             || operand is TypeOfExpressionSyntax
             || operand is MemberAccessExpressionSyntax { Name.Identifier.Text: "GetType" }
             || operand is InvocationExpressionSyntax inv && inv.Expression is MemberAccessExpressionSyntax m && m.Name.Identifier.Text == "GetType")
-            context.ReportDiagnostic(Diagnostic.Create(Rules[3], lockStmt.GetLocation(), AnalyzerHelpers.Label(lockStmt)));
+            if (!AnalyzerHelpers.IsExempt(lockStmt, "PUBSOFT015")) context.ReportDiagnostic(Diagnostic.Create(Rules[3], lockStmt.GetLocation(), AnalyzerHelpers.Label(lockStmt)));
     }
 
     private static void CheckMemberAccess(SyntaxNodeAnalysisContext context)
@@ -222,19 +222,28 @@ public sealed class PerfDisciplineWave2Analyzer : DiagnosticAnalyzer
         // DateTime.Now/UtcNow/Today, DateTimeOffset.Now/UtcNow
         if ((target == "System.DateTime" || target == "DateTime") && name is "Now" or "UtcNow" or "Today"
             || (target == "System.DateTimeOffset" || target == "DateTimeOffset") && name is "Now" or "UtcNow")
-            context.ReportDiagnostic(Diagnostic.Create(Rules[6], ma.GetLocation(), AnalyzerHelpers.Label(ma)));
+            if (!AnalyzerHelpers.IsExempt(ma, "PUBSOFT018")) context.ReportDiagnostic(Diagnostic.Create(Rules[6], ma.GetLocation(), AnalyzerHelpers.Label(ma)));
 
         // Task.Result property access
         if (name == "Result" && context.SemanticModel.GetTypeInfo(ma.Expression).Type is { } t && IsTaskType(t))
-            context.ReportDiagnostic(Diagnostic.Create(Rules[5], ma.GetLocation(), AnalyzerHelpers.Label(ma)));
+            if (!AnalyzerHelpers.IsExempt(ma, "PUBSOFT017")) context.ReportDiagnostic(Diagnostic.Create(Rules[5], ma.GetLocation(), AnalyzerHelpers.Label(ma)));
     }
 
     private static void CheckArgument(SyntaxNodeAnalysisContext context)
     {
         var argument = (ArgumentSyntax)context.Node;
         if (AnalyzerHelpers.IsCold(argument)) return;
-        if (argument.Expression is ArrayCreationExpressionSyntax or ImplicitArrayCreationExpressionSyntax or CollectionExpressionSyntax)
-            context.ReportDiagnostic(Diagnostic.Create(Rules[13], argument.GetLocation(), AnalyzerHelpers.Label(argument)));
+        // only constant arrays are hoistable to static fields — runtime-value wrappers can't be
+        static bool AllLiteral(ExpressionSyntax e) => e switch
+        {
+            ImplicitArrayCreationExpressionSyntax i => i.Initializer.Expressions.All(x => x is LiteralExpressionSyntax),
+            CollectionExpressionSyntax c => c.Elements.All(x => x is ExpressionElementSyntax ee && ee.Expression is LiteralExpressionSyntax),
+            ArrayCreationExpressionSyntax a => a.Initializer is not null && a.Initializer.Expressions.All(x => x is LiteralExpressionSyntax),
+            _ => false,
+        };
+        if (argument.Expression is ArrayCreationExpressionSyntax or ImplicitArrayCreationExpressionSyntax or CollectionExpressionSyntax
+            && AllLiteral(argument.Expression))
+            if (!AnalyzerHelpers.IsExempt(argument, "PUBSOFT025")) context.ReportDiagnostic(Diagnostic.Create(Rules[13], argument.GetLocation(), AnalyzerHelpers.Label(argument)));
     }
 
     private static void CheckLoopAssign(SyntaxNodeAnalysisContext context)
@@ -245,7 +254,7 @@ public sealed class PerfDisciplineWave2Analyzer : DiagnosticAnalyzer
                 && context.SemanticModel.GetTypeInfo(ae.Left).Type?.SpecialType == SpecialType.System_String
                 && !AnalyzerHelpers.IsCold(context.Node))
             {
-                context.ReportDiagnostic(Diagnostic.Create(Rules[14], ae.GetLocation(), AnalyzerHelpers.Label(ae)));
+                if (!AnalyzerHelpers.IsExempt(ae, "PUBSOFT026")) context.ReportDiagnostic(Diagnostic.Create(Rules[14], ae.GetLocation(), AnalyzerHelpers.Label(ae)));
                 return;
             }
     }
@@ -258,7 +267,7 @@ public sealed class PerfDisciplineWave2Analyzer : DiagnosticAnalyzer
         if (!isStaticReadonly) return;
         var typeName = field.Declaration.Type.ToString();
         if (typeName.StartsWith("Dictionary<") || typeName.StartsWith("HashSet<") || typeName.StartsWith("SortedDictionary<"))
-            context.ReportDiagnostic(Diagnostic.Create(Rules[8], field.GetLocation(), typeName));
+            if (!AnalyzerHelpers.IsExempt(field, "PUBSOFT020")) context.ReportDiagnostic(Diagnostic.Create(Rules[8], field.GetLocation(), typeName));
     }
 
     private static void CheckParameter(SyntaxNodeAnalysisContext context)
@@ -269,6 +278,6 @@ public sealed class PerfDisciplineWave2Analyzer : DiagnosticAnalyzer
         if (method is null || !method.Modifiers.Any(SyntaxKind.PublicKeyword)) return;
         var typeName = parameter.Type?.ToString() ?? "";
         if (typeName.StartsWith("List<") || typeName.StartsWith("Dictionary<") || typeName.StartsWith("HashSet<"))
-            context.ReportDiagnostic(Diagnostic.Create(Rules[16], parameter.GetLocation(), AnalyzerHelpers.Label(parameter)));
+            if (!AnalyzerHelpers.IsExempt(parameter, "PUBSOFT028")) context.ReportDiagnostic(Diagnostic.Create(Rules[16], parameter.GetLocation(), AnalyzerHelpers.Label(parameter)));
     }
 }
