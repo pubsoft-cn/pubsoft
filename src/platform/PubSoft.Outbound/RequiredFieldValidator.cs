@@ -5,11 +5,13 @@ using PubSoft.Contracts;
 
 namespace PubSoft.Outbound;
 
+/// <summary>Validates required contract fields.</summary>
 [RequiresUnreferencedCode("Required-field validation uses reflection over request members; preserve contract types under trimming.")]
 public static class RequiredFieldValidator
 {
     private static readonly ConcurrentDictionary<Type, RequiredEntry[]> Cache = new();
 
+    /// <summary>Returns the first missing-field error, or null when valid.</summary>
     public static string? Validate(object request)
     {
         ArgumentNullException.ThrowIfNull(request);

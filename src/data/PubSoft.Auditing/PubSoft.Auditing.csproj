@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Auditing</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Framework-independent audit scope, request snapshot, and bounded change collection.</Description>

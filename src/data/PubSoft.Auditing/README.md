@@ -31,7 +31,7 @@ await writer.WriteAsync(new AuditLogEntry(
 
 ## Actor attribution
 
-`IAuditActorAccessor` is opt-in — the host maps claims to actor identity; nothing is inferred by default.
+`IAuditActorAccessor` is opt-in — the host maps claims to actor identity; nothing is inferred by default. `PubSoft.AspNetCore` ships `AddCurrentSubjectAuditActor()`, which bridges `ICurrentSubjectAccessor` into `AuditActorContext` so hosts that already resolve a subject need no mapping code.
 
 ## Sensitive fields
 

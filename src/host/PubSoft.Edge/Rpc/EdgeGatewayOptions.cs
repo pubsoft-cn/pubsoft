@@ -14,6 +14,7 @@ namespace PubSoft.Edge;
 /// </summary>
 public sealed class EdgeGatewayOptions
 {
+    /// <summary>Configuration section.</summary>
     public const string SectionName = "Edge:Gateway";
 
     /// <summary>
@@ -23,7 +24,7 @@ public sealed class EdgeGatewayOptions
     public int TimestampToleranceSeconds { get; set; } = 300;
 
     /// <summary>
-    /// Accept <c>POST {gatewayPath}/{method}</c> pseudo-paths — the path tail overrides
+    /// Accept <c>POST {gatewayPath}/{method}</c> pseudo-paths -- the path tail overrides
     /// <c>envelope.method</c> before dispatch. Off by default (wire-protocol extension);
     /// enable to let OpenAPI/Swagger Try-it-out and Postman call methods directly.
     /// When enabled, <see cref="EdgeRateLimitMiddleware"/> matches pseudo-paths too.

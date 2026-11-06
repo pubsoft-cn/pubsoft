@@ -10,7 +10,7 @@ namespace PubSoft.Scheduling.Http;
 /// DNS answers cannot be swapped between validation and connect (rebinding);
 /// <c>TryReadConfig</c> does a cheaper literal/allowlist check for early rejection.
 /// </summary>
-[PubSoft.Core.BoundedCost("static CIDR table built once at type init — not per-call")]
+[PubSoft.Core.BoundedCost("static CIDR table built once at type init - not per-call")]
 internal static class HttpEgressGuard
 {
 
@@ -35,7 +35,7 @@ internal static class HttpEgressGuard
     ];
     /// <summary>
     /// Host allowlist match. Entries: exact host (<c>api.example.com</c>) or suffix
-    /// wildcard (<c>.example.com</c> / <c>*.example.com</c> — matches subdomains AND
+    /// wildcard (<c>.example.com</c> / <c>*.example.com</c> -- matches subdomains AND
     /// the bare domain). An empty list means no allowlist.
     /// </summary>
     public static bool IsHostAllowed(string host, IList<string> allowedHosts)
@@ -59,7 +59,7 @@ internal static class HttpEgressGuard
 
     /// <summary>
     /// Literal-IP check for early rejection inside <see cref="HttpExecutionSupport.TryReadConfig"/>.
-    /// DNS names pass — they are enforced at connect time.
+    /// DNS names pass -- they are enforced at connect time.
     /// </summary>
     public static bool IsBlockedHostLiteral(Uri uri)
         => IPAddress.TryParse(uri.Host, out var address) && IsBlockedAddress(address);
@@ -113,13 +113,13 @@ internal static class HttpEgressGuard
     /// <see cref="SocketsHttpHandler.ConnectCallback"/> enforcing
     /// <see cref="IsBlockedAddress"/> at connect time: resolves the host itself,
     /// skips non-public addresses, and connects the socket directly. TLS/SNI still
-    /// uses the request host — only the transport target is pinned.
+    /// uses the request host -- only the transport target is pinned.
     /// </summary>
     public static ValueTask<Stream> ConnectBlockingAsync(
         SocketsHttpConnectionContext context, CancellationToken cancellationToken)
         => ConnectBlockingAsync(context.DnsEndPoint.Host, context.DnsEndPoint.Port, cancellationToken);
 
-    /// <summary>Connect-time enforcement extracted for testability — see the callback overload.</summary>
+    /// <summary>Connect-time enforcement extracted for testability -- see the callback overload.</summary>
     public static async ValueTask<Stream> ConnectBlockingAsync(
         string host, int port, CancellationToken cancellationToken)
     {

@@ -10,7 +10,7 @@ namespace PubSoft.AspNetCore;
 /// public client address that was never consumed.
 /// <para>
 /// In that state every consumer of <c>Connection.RemoteIpAddress</c> sees the same proxy
-/// IP — rate-limit buckets collapse across all clients, audit IPs are all identical, and
+/// IP -- rate-limit buckets collapse across all clients, audit IPs are all identical, and
 /// IP-based bans hit everyone at once. Fix by inserting
 /// <see cref="PubSoftForwardedHeadersExtensions.UsePubSoftForwardedHeaders"/> early in
 /// the pipeline.

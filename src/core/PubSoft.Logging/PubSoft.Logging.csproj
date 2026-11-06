@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Logging</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Bounded asynchronous application logging with console/JSON sinks and Microsoft.Extensions.Logging integration.</Description>

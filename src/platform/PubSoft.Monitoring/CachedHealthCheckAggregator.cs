@@ -1,5 +1,6 @@
 namespace PubSoft.Monitoring;
 
+/// <summary>Health aggregation with separate healthy/unhealthy cache TTLs, single-flight refresh.</summary>
 public sealed class CachedHealthCheckAggregator
 {
     private readonly HealthCheckAggregator _inner;
@@ -11,6 +12,7 @@ public sealed class CachedHealthCheckAggregator
     private CacheSnapshot? _cached;
     private long _generation;
 
+    /// <summary>Creates the aggregator.</summary>
     public CachedHealthCheckAggregator(
         IEnumerable<IAppHealthCheck> checks,
         TimeSpan? healthyCacheDuration = null,
@@ -28,6 +30,7 @@ public sealed class CachedHealthCheckAggregator
             throw new ArgumentOutOfRangeException(nameof(unhealthyCacheDuration));
     }
 
+    /// <summary>Runs all checks, serving cache within TTL.</summary>
     public async Task<IReadOnlyList<(string Name, AppHealthCheckResult Result)>> CheckAllAsync(
         CancellationToken cancellationToken = default)
     {
@@ -65,12 +68,14 @@ public sealed class CachedHealthCheckAggregator
         }
     }
 
+    /// <summary>Aggregated worst-case status.</summary>
     public async Task<AppHealthStatus> GetOverallStatusAsync(CancellationToken cancellationToken = default)
     {
         var results = await CheckAllAsync(cancellationToken).ConfigureAwait(false);
         return GetOverallStatus(results);
     }
 
+    /// <summary>Drops the cached snapshot so the next call refreshes.</summary>
     public void InvalidateCache()
     {
         lock (_cacheLock)

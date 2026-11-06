@@ -4,7 +4,7 @@ namespace PubSoft.AspNetCore.Docs;
 
 /// <summary>
 /// Options for the PubSoft API docs catalog. The catalog exposes the service's full
-/// route map — an internal/dev surface: mapped only in Development unless
+/// route map -- an internal/dev surface: mapped only in Development unless
 /// <see cref="DevelopmentOnly"/> is disabled, and can be additionally gated with
 /// <see cref="RequireAuthorization"/>.
 /// </summary>
@@ -50,7 +50,7 @@ public sealed class ApiDocsOptions
 
     /// <summary>
     /// When true (default), <see cref="ApiDocsExtensions.MapPubSoftApiDocs"/> maps nothing
-    /// outside the Development environment — the catalog exposes the full route map, so
+    /// outside the Development environment -- the catalog exposes the full route map, so
     /// production exposure must be an explicit opt-in.
     /// </summary>
     public bool DevelopmentOnly { get; set; } = true;
@@ -62,7 +62,7 @@ public sealed class ApiDocsOptions
     public bool DetectAuthMetadata { get; set; } = true;
 
     /// <summary>
-    /// When false (default), only controller actions are catalogued — catch-all
+    /// When false (default), only controller actions are catalogued -- catch-all
     /// fallbacks, health checks, and bare Map endpoints are treated as
     /// infrastructure noise. Set true for hosts built on minimal APIs.
     /// </summary>
@@ -72,11 +72,18 @@ public sealed class ApiDocsOptions
 /// <summary>Manual catalog entry for non-controller surfaces (WS protocols, raw maps).</summary>
 public sealed class ApiDocExtraEndpoint
 {
+    /// <summary>HTTP verb or channel tag for the documented operation.</summary>
     public string Method { get; set; } = "WS";
+    /// <summary>Route path of the documented operation.</summary>
     public string Path { get; set; } = "";
+    /// <summary>One-line description shown in the catalog.</summary>
     public string? Summary { get; set; }
+    /// <summary>Documentation group the entry belongs to.</summary>
     public string? Group { get; set; }
+    /// <summary>Additional notes for the entry.</summary>
     public string? Note { get; set; }
+    /// <summary>Auth requirement label (e.g. "open", "token").</summary>
     public string Auth { get; set; } = "open";
+    /// <summary>Example request/response payload.</summary>
     public JsonElement? Example { get; set; }
 }

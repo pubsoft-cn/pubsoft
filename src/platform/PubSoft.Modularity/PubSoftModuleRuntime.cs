@@ -17,11 +17,12 @@ public sealed class PubSoftModuleRuntime
         Services = services;
     }
 
+    /// <summary>The running orchestrator.</summary>
     public ModuleOrchestrator Orchestrator { get; }
 
     /// <summary>The registration-time service collection, reused on init/shutdown contexts.</summary>
     public IServiceCollection Services { get; }
 
-    /// <summary>Built provider — set by the initialization glue before lifecycle hooks run.</summary>
+    /// <summary>Built provider -- set by the initialization glue before lifecycle hooks run.</summary>
     public IServiceProvider? ServiceProvider { get; set; }
 }

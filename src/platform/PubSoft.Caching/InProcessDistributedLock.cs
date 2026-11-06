@@ -5,7 +5,7 @@ namespace PubSoft.Caching;
 /// <summary>
 /// Single-process <see cref="IDistributedLock"/> backed by keyed semaphores. Suitable for
 /// development, tests, and hosts that run exactly one instance; it provides no cross-process
-/// mutual exclusion and no fencing tokens — hosts needing either must supply a distributed
+/// mutual exclusion and no fencing tokens -- hosts needing either must supply a distributed
 /// implementation.
 /// </summary>
 /// <remarks>
@@ -14,18 +14,20 @@ namespace PubSoft.Caching;
 /// notified, matching lease-expiry semantics of distributed locks. The entry table is bounded;
 /// when capacity is exhausted acquisition fails closed (returns <c>null</c>).
 /// </remarks>
+/// <summary>Single-process lock - dev/single-instance only, no cross-process exclusion or fencing.</summary>
 public sealed class InProcessDistributedLock : IDistributedLock, IDisposable
 {
     private static readonly TimeSpan PollSlice = TimeSpan.FromMilliseconds(50);
 
     private readonly ConcurrentDictionary<string, LockEntry> _entries = new(StringComparer.Ordinal);
-    /// <summary>新条目插入门闩——容量检查 + TryAdd 必须原子化，否则满载时可并发越过上限。</summary>
+    /// <summary>Insertion gate for new entries -- capacity check and TryAdd must be atomic or a full table can be overrun concurrently.</summary>
     private readonly object _entryGate = new();
     private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly int _maxEntries;
     private long _nextToken;
     private int _disposed;
 
+    /// <summary>Creates the lock table.</summary>
     public InProcessDistributedLock(TimeProvider? timeProvider = null, int maxEntries = 4096)
     {
         if (maxEntries < 1)
@@ -35,6 +37,7 @@ public sealed class InProcessDistributedLock : IDistributedLock, IDisposable
         _maxEntries = maxEntries;
     }
 
+    /// <inheritdoc />
     public async Task<IAsyncDisposable?> AcquireAsync(
         string key,
         TimeSpan expiry,
@@ -104,6 +107,7 @@ public sealed class InProcessDistributedLock : IDistributedLock, IDisposable
         }
     }
 
+    /// <inheritdoc />
     public void Dispose() => Interlocked.Exchange(ref _disposed, 1);
 
     private LockEntry? GetOrCreateEntry(string key)
@@ -111,7 +115,7 @@ public sealed class InProcessDistributedLock : IDistributedLock, IDisposable
         if (_entries.TryGetValue(key, out var existing))
             return existing;
 
-        // 命中未中才进 gate——容量检查 + TryAdd 原子化
+        // 命中未中才进 gate--容量检查 + TryAdd 原子化
         lock (_entryGate)
         {
             if (_entries.TryGetValue(key, out existing))

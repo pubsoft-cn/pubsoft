@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.OAuth;
 
 /// <summary>
-/// Alipay OAuth provider — direct gateway calls (alipay.system.oauth.token + alipay.user.info.share)
+/// Alipay OAuth provider -- direct gateway calls (alipay.system.oauth.token + alipay.user.info.share)
 /// with inline RSA2 signing and response verification.
 /// Credentials: AppId = Alipay application id. AppSecret is unused (RSA2 signs instead).
 /// ExtraJson keys: PrivateKeyPem (app private key PEM), PlatformPublicKeyPem (Alipay platform public key PEM),
@@ -16,6 +16,7 @@ namespace PubSoft.OAuth;
 public sealed partial class AlipayOAuthProvider : OAuthProviderBase
 {
     private readonly TimeProvider _timeProvider = TimeProvider.System;
+    /// <summary>Creates the provider.</summary>
     public AlipayOAuthProvider(
         IOAuthChannelConfigProvider configProvider,
         HttpClient httpClient,
@@ -350,8 +351,11 @@ public sealed partial class AlipayOAuthProvider : OAuthProviderBase
 }
 
 /// <summary>Alipay OAuth failure carrying a vendor/internal error code.</summary>
+/// <summary>Alipay API error.</summary>
 public sealed class AlipayOAuthException : Exception
 {
+    /// <summary>Creates the exception with the provider error code.</summary>
     public AlipayOAuthException(string code, string message) : base(message) => Code = code;
+    /// <summary>The provider error code.</summary>
     public string Code { get; }
 }

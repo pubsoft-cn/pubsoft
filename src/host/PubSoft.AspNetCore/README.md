@@ -12,6 +12,10 @@ last-reviewed: 2026-10-13
 
 `PubSoft.AspNetCore` contains opt-in middleware and endpoint helpers that adapt the framework-neutral PubSoft packages to ASP.NET Core. Nothing is enabled automatically. The host remains responsible for authentication/authorization policy, trusted proxy configuration, secret storage, and middleware order.
 
+## ## Signed client credentials
+
+When `ClientCredentialOptions.SignatureHeader` (default `X-Signature`) is present, evaluation moves to the host-registered `IClientSignatureVerifier` — the verifier receives a `ClientSignatureRequest` (client id, signature, timestamp, nonce, method, path, query, body-stream) and owns the signing protocol end to end. Without a registered verifier signed requests fail closed with 401; unsigned requests keep the plaintext `IClientCredentialVerifier` path (403 when missing).
+
 ## Exception Handling and Security Headers
 
 Register exception handling early so it wraps downstream middleware and endpoints:
@@ -71,7 +75,7 @@ services.AddPubSoftHmacValidation(
 app.UsePubSoftHmacValidation();
 ```
 
-The request uses one each of `X-Fend-App-Id`, `X-Fend-Signature`, `X-Fend-Timestamp`, and `X-Fend-Nonce`. The HMAC-SHA256 signature covers the HTTP method, `Request.Path` concatenated with the raw `Request.QueryString` (leading `?` included; empty when absent), timestamp, nonce, and optionally the lowercase SHA-256 body hash, separated by newlines. Clients must sign the query exactly as sent — proxies or clients that reorder, re-encode, or re-separate parameters change the signed string and fail validation. The middleware rejects missing/ambiguous headers, invalid signatures, expired timestamps, and nonce replays. Body hashing buffers the request and enforces `MaximumBodyBytes` (default 1 MiB, maximum 16 MiB), then rewinds it for downstream code.
+The request uses one each of `X-App-Id`, `X-Signature`, `X-Timestamp`, and `X-Nonce`. The HMAC-SHA256 signature covers the HTTP method, `Request.Path` concatenated with the raw `Request.QueryString` (leading `?` included; empty when absent), timestamp, nonce, and optionally the lowercase SHA-256 body hash, separated by newlines. Clients must sign the query exactly as sent — proxies or clients that reorder, re-encode, or re-separate parameters change the signed string and fail validation. The middleware rejects missing/ambiguous headers, invalid signatures, expired timestamps, and nonce replays. Body hashing buffers the request and enforces `MaximumBodyBytes` (default 1 MiB, maximum 16 MiB), then rewinds it for downstream code.
 
 `AddPubSoftHmacValidation` defaults to `MemoryNonceStore`, which only prevents replay within one process. Multi-instance production deployments need a reviewed atomic shared `INonceStore`; secret resolution must use an approved secret manager. Excluded paths bypass signature validation, so keep the list narrow and explicit. The middleware returns 503 when secret resolution is unavailable and does not expose the secret.
 

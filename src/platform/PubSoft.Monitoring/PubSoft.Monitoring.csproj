@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>PubSoft.Monitoring</RootNamespace>
     <PackageId>PubSoft.Monitoring</PackageId>

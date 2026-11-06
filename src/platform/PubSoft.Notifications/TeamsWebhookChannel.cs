@@ -12,6 +12,7 @@ public sealed class TeamsWebhookChannel : INotificationChannel
     private readonly TeamsWebhookOptions _options;
     private readonly ILogger<TeamsWebhookChannel>? _logger;
 
+    /// <summary>Creates the channel.</summary>
     public TeamsWebhookChannel(
         IHttpClientFactory httpClientFactory,
         IOptions<TeamsWebhookOptions> options,
@@ -22,8 +23,10 @@ public sealed class TeamsWebhookChannel : INotificationChannel
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public string Name => "teams";
 
+    /// <inheritdoc />
     public async Task<NotificationResult> SendAsync(NotificationMessage message, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_options.WebhookUrl))
@@ -75,6 +78,7 @@ public sealed class TeamsWebhookChannel : INotificationChannel
 /// <summary>Teams incoming-webhook channel options.</summary>
 public sealed class TeamsWebhookOptions
 {
+    /// <summary>Incoming-webhook URL.</summary>
     public string WebhookUrl { get; set; } = "";
 
     /// <summary>

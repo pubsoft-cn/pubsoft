@@ -1,18 +1,24 @@
 namespace PubSoft.Resilience;
 
+/// <summary>Host selection strategy.</summary>
 public enum LoadBalanceStrategy : byte
 {
+    /// <summary>Rotate hosts in order.</summary>
     RoundRobin,
+    /// <summary>Pick a host uniformly at random.</summary>
     Random,
+    /// <summary>Pick the less-loaded of two random hosts.</summary>
     PowerOfTwoChoices,
 }
 
+/// <summary>Selects a host from a candidate list, tracking in-flight counts for least-loaded choices.</summary>
 public sealed class LoadBalancer
 {
     private int _roundRobinIndex;
     private readonly Dictionary<string, int> _concurrentRequests = new(StringComparer.OrdinalIgnoreCase);
     private readonly object _lock = new();
 
+    /// <summary>Chooses a host; call <see cref="DecrementRequest"/> when the request finishes.</summary>
     public string SelectHost(IReadOnlyList<string> hosts, LoadBalanceStrategy strategy = LoadBalanceStrategy.RoundRobin)
     {
         ArgumentNullException.ThrowIfNull(hosts);
@@ -27,6 +33,7 @@ public sealed class LoadBalancer
         };
     }
 
+    /// <summary>Counts an in-flight request against a host.</summary>
     public void IncrementRequest(string host)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(host);
@@ -37,6 +44,7 @@ public sealed class LoadBalancer
         }
     }
 
+    /// <summary>Releases an in-flight request slot.</summary>
     public void DecrementRequest(string host)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(host);

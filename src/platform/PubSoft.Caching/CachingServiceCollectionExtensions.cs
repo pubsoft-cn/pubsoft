@@ -3,8 +3,10 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace PubSoft.Caching;
 
+/// <summary>Caching registration.</summary>
 public static class CachingServiceCollectionExtensions
 {
+    /// <summary>Registers the in-memory <see cref="ICache"/>.</summary>
     public static IServiceCollection AddPubSoftMemoryCache(
         this IServiceCollection services,
         TimeSpan? cleanupInterval = null,
@@ -17,7 +19,7 @@ public static class CachingServiceCollectionExtensions
 
     /// <summary>
     /// Registers a single-process <see cref="IDistributedLock"/>. Development and single-instance
-    /// deployments only — provides no cross-process mutual exclusion or fencing.
+    /// deployments only -- provides no cross-process mutual exclusion or fencing.
     /// </summary>
     public static IServiceCollection AddPubSoftInProcessDistributedLock(
         this IServiceCollection services,

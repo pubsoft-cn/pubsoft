@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Security.Redis</PackageId>
     <Description>Optional Redis-backed replay protection for PubSoft security primitives.</Description>
   </PropertyGroup>

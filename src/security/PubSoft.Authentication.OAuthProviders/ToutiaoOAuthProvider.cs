@@ -5,10 +5,13 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.OAuth;
 
 
-/// <summary>Toutiao OAuth — website-app QR login.</summary>
+/// <summary>Toutiao OAuth -- website-app QR login.</summary>
+/// <summary>Toutiao OAuth provider.</summary>
 public sealed class ToutiaoOAuthProvider : GenericOAuthProvider
 {
-    public ToutiaoOAuthProvider(IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<ToutiaoOAuthProvider>? l = null) : base(cp, hc, l) { }
+    /// <summary>Creates the provider.</summary>
+    public ToutiaoOAuthProvider(
+IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<ToutiaoOAuthProvider>? l = null) : base(cp, hc, l) { }
     public override string Provider => OAuthProviderNames.Toutiao;
     protected override string AuthorizeEndpoint => "https://open.snssdk.com/auth/authorize";
     protected override string TokenEndpoint => "https://open.snssdk.com/auth/access_token";

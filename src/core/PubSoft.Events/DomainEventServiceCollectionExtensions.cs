@@ -5,8 +5,10 @@ using Microsoft.Extensions.Hosting;
 
 namespace PubSoft.Events;
 
+/// <summary>Event infrastructure registration.</summary>
 public static class DomainEventServiceCollectionExtensions
 {
+    /// <summary>Registers the dispatcher, options, and the background drain service.</summary>
     public static IServiceCollection AddPubSoftEvents(
         this IServiceCollection services,
         Action<DomainEventOptions>? configure = null)

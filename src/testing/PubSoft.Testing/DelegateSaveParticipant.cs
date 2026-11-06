@@ -9,6 +9,7 @@ public sealed class DelegateSaveParticipant(Func<CancellationToken, Task<int>> s
     private readonly Func<CancellationToken, Task<int>> _save =
         save ?? throw new ArgumentNullException(nameof(save));
 
+    /// <inheritdoc />
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         => _save(cancellationToken);
 }

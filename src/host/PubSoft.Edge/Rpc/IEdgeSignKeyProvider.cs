@@ -10,7 +10,7 @@ namespace PubSoft.Edge;
 
 
 /// <summary>
-/// Signing-key provider — implemented by the host; returns the secret key for a clientId.
+/// Signing-key provider -- implemented by the host; returns the secret key for a clientId.
 /// </summary>
 public interface IEdgeSignKeyProvider
 {

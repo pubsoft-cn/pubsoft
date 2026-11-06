@@ -6,9 +6,12 @@ namespace PubSoft.OAuth;
 
 
 /// <summary>GitLab.com / self-hosted GitLab OAuth.</summary>
+/// <summary>GitLab OAuth provider.</summary>
 public sealed class GitLabOAuthProvider : GenericOAuthProvider
 {
-    public GitLabOAuthProvider(IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<GitLabOAuthProvider>? l = null) : base(cp, hc, l) { }
+    /// <summary>Creates the provider.</summary>
+    public GitLabOAuthProvider(
+IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<GitLabOAuthProvider>? l = null) : base(cp, hc, l) { }
     public override string Provider => OAuthProviderNames.GitLab;
     protected override string AuthorizeEndpoint => "https://gitlab.com/oauth/authorize";
     protected override string TokenEndpoint => "https://gitlab.com/oauth/token";

@@ -20,7 +20,7 @@ public sealed class AlertRuleProcessor : IResultProcessor
     private readonly AlertProcessorOptions _options;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly ILogger<AlertRuleProcessor>? _logger;
-    /// <summary>job 级互斥锁表——按 jobKey 哈希键控；上限封顶 + 空闲项惰性清理，防止按 jobName 无界增长。</summary>
+    /// <summary>Per-job mutex table keyed by jobKey -- capped with lazy eviction of idle entries so job names cannot grow it unboundedly.</summary>
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _jobLocks = new(StringComparer.Ordinal);
 
     public AlertRuleProcessor(
@@ -39,7 +39,7 @@ public sealed class AlertRuleProcessor : IResultProcessor
             throw new OptionsValidationException(
                 nameof(AlertProcessorOptions),
                 typeof(AlertProcessorOptions),
-                ["FailureThreshold must be positive."]); // pubsoft:exempt PUBSOFT025 "single-use validation failure message — cold path"
+                ["FailureThreshold must be positive."]); // pubsoft:exempt PUBSOFT025 "single-use validation failure message - cold path"
         _timeProvider = timeProvider ?? TimeProvider.System;
         _logger = logger;
     }
@@ -246,7 +246,7 @@ public sealed class AlertRuleProcessor : IResultProcessor
     private Task SetStateAsync<T>(string key, T value, CancellationToken cancellationToken) where T : struct
         => _stateStore.SetCustomStateAsync(key, new StateValue<T>(value), null, cancellationToken);
 
-    /// <summary>获取/新建 job 锁——满载时先清理未持有的空闲信号量，仍满载则临时锁（不阻塞流程，仅并发隔离失效）。</summary>
+    /// <summary>Gets or creates the per-job lock -- on capacity, evicts unheld idle semaphores first; a still-full table falls back to a temporary lock (flow unblocked, overlap isolation only weakened).</summary>
     private SemaphoreSlim GetJobLock(string jobKey)
     {
         if (_jobLocks.TryGetValue(jobKey, out var existing))
@@ -256,7 +256,7 @@ public sealed class AlertRuleProcessor : IResultProcessor
         return _jobLocks.GetOrAdd(jobKey, static _ => new SemaphoreSlim(1, 1));
     }
 
-    /// <summary>清理未占用（CurrentCount==1）的 idle 锁条目——持锁中的条目跳过。</summary>
+    /// <summary>Evicts idle lock entries (CurrentCount==1); entries currently held are skipped.</summary>
     private void EvictIdleJobLocks()
     {
         foreach (var pair in _jobLocks)

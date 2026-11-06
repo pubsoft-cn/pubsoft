@@ -7,12 +7,14 @@ using PubSoft.Tokens;
 
 namespace PubSoft.Scheduling.Http;
 
+/// <summary>HTTP executor with retry + circuit-breaker per host.</summary>
 public sealed class ResilientExecutor : IJobExecutor
 {
     private readonly HttpExecutionSupport _http;
     private readonly CircuitBreaker _circuitBreaker;
     private readonly ILogger<ResilientExecutor>? _logger;
 
+    /// <summary>Creates the executor.</summary>
     public ResilientExecutor(
         IHttpClientFactory httpClientFactory,
         IOptions<HttpExecutorOptions> options,
@@ -25,8 +27,10 @@ public sealed class ResilientExecutor : IJobExecutor
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public string Type => "Http.Resilient";
 
+    /// <inheritdoc />
     public async Task<JobResult> ExecuteAsync(ScheduledJob job, CancellationToken cancellationToken)
     {
         if (!_http.TryReadConfig(job, out var config, out var uri, out var method))

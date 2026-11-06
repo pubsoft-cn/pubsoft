@@ -6,8 +6,10 @@ using PubSoft.Scheduling;
 
 namespace PubSoft.Scheduling.Http;
 
+/// <summary>HTTP executor registration.</summary>
 public static class HttpExecutorServiceCollectionExtensions
 {
+    /// <summary>Registers the HTTP job executors.</summary>
     public static IServiceCollection AddPubSoftHttpExecutors(
         this IServiceCollection services,
         Action<HttpExecutorOptions>? configure = null)
@@ -26,7 +28,7 @@ public static class HttpExecutorServiceCollectionExtensions
                 var handler = new SocketsHttpHandler
                 {
                     // Redirects are followed manually in SendAsync so every hop is
-                    // re-validated — handler-level auto-redirect would bypass it.
+                    // re-validated - handler-level auto-redirect would bypass it.
                     AllowAutoRedirect = false,
                     UseProxy = options.UseSystemProxy,
                 };

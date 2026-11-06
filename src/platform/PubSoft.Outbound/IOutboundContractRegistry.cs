@@ -4,17 +4,23 @@ using PubSoft.Contracts;
 
 namespace PubSoft.Outbound;
 
+/// <summary>Contract metadata store: operation-id and request-type lookups.</summary>
 public interface IOutboundContractRegistry
 {
+    /// <summary>All registered contracts.</summary>
     IReadOnlyList<ApiContractMetadata> Contracts { get; }
+    /// <summary>Finds a contract by operation id, or null.</summary>
     ApiContractMetadata? FindByOperationId(string operationId);
+    /// <summary>Resolves contract metadata for a request type (throws when unregistered).</summary>
     ApiContractMetadata GetMetadata(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type requestType);
 
+    /// <summary>Discovers contract types in an assembly.</summary>
     [RequiresUnreferencedCode("Assembly scanning discovers contract types that may be trimmed.")]
     void ScanAssembly(Assembly assembly);
 }
 
+/// <summary>Thread-safe contract registry.</summary>
 public sealed class OutboundContractRegistry : IOutboundContractRegistry
 {
     private readonly object _gate = new();
@@ -24,11 +30,14 @@ public sealed class OutboundContractRegistry : IOutboundContractRegistry
     private readonly INamingPolicy _namingPolicy;
     private IReadOnlyList<ApiContractMetadata> _contracts = Array.AsReadOnly(Array.Empty<ApiContractMetadata>());
 
+    /// <summary>Creates a registry with camelCase naming.</summary>
     public OutboundContractRegistry() : this(CamelCaseNamingPolicy.Instance) { }
 
+    /// <summary>Creates a registry with a naming policy.</summary>
     public OutboundContractRegistry(INamingPolicy namingPolicy)
         => _namingPolicy = namingPolicy ?? throw new ArgumentNullException(nameof(namingPolicy));
 
+    /// <inheritdoc />
     public IReadOnlyList<ApiContractMetadata> Contracts
     {
         get
@@ -38,6 +47,7 @@ public sealed class OutboundContractRegistry : IOutboundContractRegistry
         }
     }
 
+    /// <inheritdoc />
     public ApiContractMetadata? FindByOperationId(string operationId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(operationId);
@@ -45,6 +55,7 @@ public sealed class OutboundContractRegistry : IOutboundContractRegistry
             return _byOperationId.GetValueOrDefault(operationId);
     }
 
+    /// <inheritdoc />
     public ApiContractMetadata GetMetadata(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type requestType)
     {
@@ -60,6 +71,7 @@ public sealed class OutboundContractRegistry : IOutboundContractRegistry
         }
     }
 
+    /// <inheritdoc />
     [RequiresUnreferencedCode("Assembly scanning discovers contract types that may be trimmed.")]
     [PubSoft.Core.BoundedCost("assembly scan is opt-in and runs at registration, not per request")]
     public void ScanAssembly(Assembly assembly)

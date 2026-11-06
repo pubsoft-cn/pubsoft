@@ -6,15 +6,17 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.OAuth;
 
 /// <summary>
-/// WeCom (Enterprise WeChat) OAuth provider — web-auth code → userid/openid.
-/// Flow: code → access_token (corpid+corpsecret) → getuserinfo (code).
+/// WeCom (Enterprise WeChat) OAuth provider -- web-auth code -> userid/openid.
+/// Flow: code -> access_token (corpid+corpsecret) -> getuserinfo (code).
 /// AppId=corpid, AppSecret=corpsecret.
 /// </summary>
+/// <summary>WeCom OAuth provider.</summary>
 public sealed class WeComOAuthProvider : OAuthProviderBase
 {
     private static readonly ConcurrentDictionary<string, (string token, DateTime expiresAt)> _tokenCache = new(StringComparer.Ordinal);
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
+    /// <summary>Creates the provider.</summary>
     public WeComOAuthProvider(
         IOAuthChannelConfigProvider configProvider,
         HttpClient httpClient,

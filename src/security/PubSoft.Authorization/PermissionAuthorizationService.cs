@@ -1,11 +1,13 @@
 namespace PubSoft.Authorization;
 
 
+/// <summary>Evaluates whether a subject holds required permissions via grants.</summary>
 public sealed class PermissionAuthorizationService
 {
     private readonly PermissionDefinitionRegistry _definitions;
     private readonly IPermissionGrantProvider _grants;
 
+    /// <summary>Creates the service over the definition registry and grant provider.</summary>
     public PermissionAuthorizationService(
         PermissionDefinitionRegistry definitions,
         IPermissionGrantProvider grants)
@@ -14,6 +16,7 @@ public sealed class PermissionAuthorizationService
         _grants = grants ?? throw new ArgumentNullException(nameof(grants));
     }
 
+    /// <summary>Whether the subject holds the required flag bits on a module.</summary>
     public async Task<bool> IsGrantedAsync(
         long subjectId,
         long? tenantId,
@@ -23,6 +26,7 @@ public sealed class PermissionAuthorizationService
         => await IsGrantedAsync(subjectId, tenantId, string.Empty, moduleKey, requiredFlags, cancellationToken)
             .ConfigureAwait(false);
 
+    /// <summary>Whether the subject holds the required flag bits on a module.</summary>
     public async Task<bool> IsGrantedAsync(
         long subjectId,
         long? tenantId,
@@ -56,6 +60,7 @@ public sealed class PermissionAuthorizationService
         return (grantedFlags & requiredFlags) == requiredFlags;
     }
 
+    /// <summary>Whether the subject holds a named permission.</summary>
     public async Task<bool> IsCustomPermissionGrantedAsync(
         long subjectId,
         long? tenantId,
@@ -65,6 +70,7 @@ public sealed class PermissionAuthorizationService
         => await IsCustomPermissionGrantedAsync(
             subjectId, tenantId, string.Empty, moduleKey, permissionName, cancellationToken).ConfigureAwait(false);
 
+    /// <summary>Whether the subject holds a named permission.</summary>
     public async Task<bool> IsCustomPermissionGrantedAsync(
         long subjectId,
         long? tenantId,
@@ -90,6 +96,7 @@ public sealed class PermissionAuthorizationService
         return subjectGrants.Any(grant => grant.CustomPermissions.Contains(permissionName, StringComparer.Ordinal));
     }
 
+    /// <summary>Whether the subject holds an extension flag bit.</summary>
     public async Task<bool> IsExtensionPermissionGrantedAsync(
         long subjectId,
         long? tenantId,
@@ -99,6 +106,7 @@ public sealed class PermissionAuthorizationService
         => await IsExtensionPermissionGrantedAsync(
             subjectId, tenantId, string.Empty, moduleKey, requiredExtensionFlags, cancellationToken).ConfigureAwait(false);
 
+    /// <summary>Whether the subject holds an extension flag bit.</summary>
     public async Task<bool> IsExtensionPermissionGrantedAsync(
         long subjectId,
         long? tenantId,

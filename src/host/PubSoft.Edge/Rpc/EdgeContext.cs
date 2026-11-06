@@ -4,7 +4,7 @@ namespace PubSoft.Edge;
 
 
 /// <summary>
-/// Edge call context — authenticated session data plus the HttpContext.
+/// Edge call context -- authenticated session data plus the HttpContext.
 /// </summary>
 public sealed record EdgeContext
 {

@@ -25,6 +25,8 @@ PubSoft.Core.Gender.Female = 2 -> PubSoft.Core.Gender
 PubSoft.Core.Gender.Male = 1 -> PubSoft.Core.Gender
 PubSoft.Core.Gender.Unknown = 0 -> PubSoft.Core.Gender
 PubSoft.Core.Guard
+PubSoft.Core.IIdGenerator
+PubSoft.Core.IIdGenerator.NextId() -> long
 PubSoft.Core.ISpecification<T>
 PubSoft.Core.ISpecification<T>.Criteria.get -> System.Linq.Expressions.Expression<System.Func<T, bool>!>?
 PubSoft.Core.ISpecification<T>.GroupBy.get -> System.Linq.Expressions.Expression<System.Func<T, object!>!>?

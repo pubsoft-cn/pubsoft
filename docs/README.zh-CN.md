@@ -12,6 +12,8 @@
 - [安全模型](security-cryptography.zh-CN.md) — Security/Cryptography/AspNetCore 包边界、AEAD 包封格式、nonce/HMAC 语义
 - [安全与信任边界分析](security-boundary-analysis.zh-CN.md) — 外部审计：控制/责任矩阵、API 清单、优先级发现 R1-R6、宿主部署清单
 - [Permission Client Scope](permission-client-scope.zh-CN.md) — `ClientCode` 权限命名空间语义（跨 Authorization/EF/ASP.NET 层）
+- [宿主集成清单](host-integration-checklist.zh-CN.md) — 上线前各宿主须自测的安全边界不变量
+- [文档治理](documentation-governance.zh-CN.md) — 双语文档策略：源码英文、zh-CN 经 IntelliSense 卫星管线、PUBSOFT037/038 规则
 
 ## 包文档索引
 

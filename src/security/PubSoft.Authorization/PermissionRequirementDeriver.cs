@@ -3,6 +3,7 @@ using System.Text;
 namespace PubSoft.Authorization;
 
 
+/// <summary>Derives required flags from HTTP verb and action name conventions.</summary>
 public static class PermissionRequirementDeriver
 {
     private static readonly string[] ModifyActionWords =
@@ -13,9 +14,10 @@ public static class PermissionRequirementDeriver
         "notify", "send", "publish", "reset", "unlock", "lock"
     ];
 
+    /// <summary>Maps a verb+action to required flags; unknown verbs fail closed to Custom.</summary>
     public static PermissionFlags DeriveFlags(string? httpMethod, string? actionName)
     {
-        // 缺失/未知 method 一律按最强权限（Custom）处理——缺省归并到最弱 Query 会放行本该受管控的写操作。
+        // 缺失/未知 method 一律按最强权限（Custom）处理--缺省归并到最弱 Query 会放行本该受管控的写操作。
         switch (httpMethod?.ToUpperInvariant())
         {
             case "GET":
@@ -40,6 +42,7 @@ public static class PermissionRequirementDeriver
         }
     }
 
+    /// <summary>Resolves a module key from controller/route conventions.</summary>
     public static string? ResolveModuleKey(
         string? controllerName,
         string? routeTemplate,
@@ -75,6 +78,7 @@ public static class PermissionRequirementDeriver
         return matches.Length == 1 ? matches[0] : null;
     }
 
+    /// <summary>Converts a name to snake_case.</summary>
     public static string ToSnakeCase(string name)
     {
         if (string.IsNullOrEmpty(name))

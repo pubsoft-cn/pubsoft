@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.Events;
 
 
+/// <summary>Bounded-channel event dispatcher: inline <see cref="DispatchAsync{TEvent}"/> dispatch and queued <see cref="PublishAsync{TEvent}"/> fan-out.</summary>
 public sealed class DomainEventDispatcher : IDomainEventDispatcher, IDisposable
 {
     private readonly IServiceScopeFactory _scopeFactory;
@@ -18,6 +19,7 @@ public sealed class DomainEventDispatcher : IDomainEventDispatcher, IDisposable
     private readonly Dictionary<Type, List<Func<IDomainEvent, CancellationToken, Task>>> _manualHandlers = [];
     private readonly ConcurrentDictionary<Type, MethodInfo> _handlerMethods = new();
 
+    /// <summary>Creates a dispatcher; <paramref name="options"/> bounds the publish channel.</summary>
     public DomainEventDispatcher(
         IServiceScopeFactory scopeFactory,
         DomainEventOptions? options = null,
@@ -37,6 +39,7 @@ public sealed class DomainEventDispatcher : IDomainEventDispatcher, IDisposable
 
     internal ChannelReader<IDomainEvent> Reader => _channel.Reader;
 
+    /// <inheritdoc />
     public async Task DispatchAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default)
         where TEvent : IDomainEvent
     {
@@ -45,6 +48,7 @@ public sealed class DomainEventDispatcher : IDomainEventDispatcher, IDisposable
             .ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public async Task PublishAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default)
         where TEvent : IDomainEvent
     {
@@ -52,6 +56,7 @@ public sealed class DomainEventDispatcher : IDomainEventDispatcher, IDisposable
         await _channel.Writer.WriteAsync(@event, cancellationToken).ConfigureAwait(false);
     }
 
+    /// <summary>Registers a delegate handler for <typeparamref name="TEvent"/> - the AOT-safe alternative to DI handler discovery.</summary>
     public void RegisterHandler<TEvent>(Func<TEvent, CancellationToken, Task> handler)
         where TEvent : IDomainEvent
     {
@@ -68,6 +73,7 @@ public sealed class DomainEventDispatcher : IDomainEventDispatcher, IDisposable
         }
     }
 
+    /// <inheritdoc />
     public void Dispose() => CompleteWriter();
 
     internal void CompleteWriter() => _channel.Writer.TryComplete();

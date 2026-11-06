@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace PubSoft.Monitoring;
 
 
+/// <summary>Startup diagnostics registration.</summary>
 public static class StartupDiagnosticsServiceCollectionExtensions
 {
     /// <summary>Registers the <see cref="StartupDiagnosticsCollector"/> and one provider instance.</summary>

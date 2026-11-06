@@ -15,7 +15,7 @@ public interface IWeChatAccessTokenProvider
 }
 
 /// <summary>
-/// Default implementation — process-wide per-AppId cache (typed clients are transient, so the
+/// Default implementation -- process-wide per-AppId cache (typed clients are transient, so the
 /// cache intentionally lives in static state shared across resolutions).
 /// </summary>
 public sealed class WeChatAccessTokenProvider : IWeChatAccessTokenProvider
@@ -27,6 +27,7 @@ public sealed class WeChatAccessTokenProvider : IWeChatAccessTokenProvider
     private readonly HttpClient _httpClient;
     private readonly ILogger? _logger;
 
+    /// <summary>Creates the provider over the host channel store.</summary>
     public WeChatAccessTokenProvider(
         IOAuthChannelConfigProvider configProvider,
         HttpClient httpClient,
@@ -37,6 +38,7 @@ public sealed class WeChatAccessTokenProvider : IWeChatAccessTokenProvider
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public async Task<WeChatAccessTokenResult> GetAsync(string appId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(appId))

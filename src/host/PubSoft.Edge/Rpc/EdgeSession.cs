@@ -5,7 +5,7 @@ using PubSoft.Core;
 namespace PubSoft.Edge;
 
 /// <summary>
-/// Edge session — user data associated with a sessionKey.
+/// Edge session -- user data associated with a sessionKey.
 /// </summary>
 public sealed record EdgeSession
 {
@@ -39,7 +39,7 @@ public sealed record EdgeSession
 }
 
 /// <summary>
-/// sessionKey store — in-memory default; replaceable by a distributed implementation.
+/// sessionKey store -- in-memory default; replaceable by a distributed implementation.
 /// </summary>
 public interface IEdgeSessionStore
 {
@@ -57,7 +57,7 @@ public interface IEdgeSessionStore
 }
 
 /// <summary>
-/// In-memory sessionKey store — default, for single-instance deployments.
+/// In-memory sessionKey store -- default, for single-instance deployments.
 /// Multi-instance deployments should plug in a distributed store.
 /// </summary>
 public sealed class InMemoryEdgeSessionStore : IEdgeSessionStore, IDisposable
@@ -66,17 +66,20 @@ public sealed class InMemoryEdgeSessionStore : IEdgeSessionStore, IDisposable
     private readonly ConcurrentDictionary<string, EdgeSession> _sessions = new();
     private readonly Timer _cleanupTimer;
 
+    /// <summary>Creates the store.</summary>
     public InMemoryEdgeSessionStore()
     {
         _cleanupTimer = new Timer(CleanupExpired, null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
     }
 
+    /// <inheritdoc />
     public Task SaveAsync(EdgeSession session, CancellationToken ct = default)
     {
         _sessions[session.SessionKey] = session;
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public Task<EdgeSession?> GetAsync(string sessionKey, CancellationToken ct = default)
     {
         if (_sessions.TryGetValue(sessionKey, out var session) && session.IsExpired)
@@ -87,12 +90,14 @@ public sealed class InMemoryEdgeSessionStore : IEdgeSessionStore, IDisposable
         return Task.FromResult(session);
     }
 
+    /// <inheritdoc />
     public Task RemoveAsync(string sessionKey, CancellationToken ct = default)
     {
         _sessions.TryRemove(sessionKey, out _);
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public Task RenewAsync(string sessionKey, TimeSpan extendBy, CancellationToken ct = default)
     {
         if (_sessions.TryGetValue(sessionKey, out var session) && !session.IsExpired)
@@ -105,9 +110,10 @@ public sealed class InMemoryEdgeSessionStore : IEdgeSessionStore, IDisposable
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public void Dispose() => _cleanupTimer.Dispose();
 
-    [PubSoft.Core.BoundedCost("timer purge — bounded periodic scan")]
+    [PubSoft.Core.BoundedCost("timer purge - bounded periodic scan")]
     private void CleanupExpired(object? state)
     {
         var now = _timeProvider.GetUtcNow().ToUnixTimeMilliseconds();
@@ -117,7 +123,7 @@ public sealed class InMemoryEdgeSessionStore : IEdgeSessionStore, IDisposable
 }
 
 /// <summary>
-/// Edge session manager — sessionKey issue, validate, revoke.
+/// Edge session manager -- sessionKey issue, validate, revoke.
 ///
 /// sessionKey format: {clientId}:{appId}:{guid}
 /// - Far shorter than a backend token (~50 chars vs several hundred)
@@ -130,6 +136,7 @@ public sealed class EdgeSessionManager
     private readonly IEdgeSessionStore _store;
     private readonly TimeSpan _defaultExpiry;
 
+    /// <summary>Creates the manager over a session store.</summary>
     public EdgeSessionManager(IEdgeSessionStore store, TimeSpan? defaultExpiry = null)
     {
         _store = store;

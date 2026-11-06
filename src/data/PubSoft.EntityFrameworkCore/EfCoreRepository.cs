@@ -146,7 +146,7 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
 
     // autoSave=false stages only when a host-level save point is armed in this scope
     // (request-end middleware or an explicitly activated unit-of-work boundary).
-    // Without one there is no later flush — persist immediately or the write is lost.
+    // Without one there is no later flush - persist immediately or the write is lost.
     private bool ShouldSaveNow(bool autoSave) => autoSave || _saveBoundary is not { IsActive: true };
 
     private Microsoft.EntityFrameworkCore.Metadata.IProperty GetSingleKeyProperty()

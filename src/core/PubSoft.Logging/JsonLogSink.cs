@@ -3,12 +3,14 @@ using System.Text.Json;
 
 namespace PubSoft.Logging;
 
+/// <summary>JSON-lines file sink.</summary>
 public sealed class JsonLogSink(
     Func<ReadOnlyMemory<byte>, CancellationToken, ValueTask> output) : ILogSink
 {
     private readonly Func<ReadOnlyMemory<byte>, CancellationToken, ValueTask> _output =
         output ?? throw new ArgumentNullException(nameof(output));
 
+    /// <inheritdoc />
     public async ValueTask WriteBatchAsync(ReadOnlyMemory<LogEntry> entries, CancellationToken cancellationToken)
     {
         if (entries.IsEmpty)

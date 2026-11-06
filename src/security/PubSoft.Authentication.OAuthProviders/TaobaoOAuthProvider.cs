@@ -5,10 +5,13 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.OAuth;
 
 
-/// <summary>Taobao OAuth — user info requires the TOP API (top.taobao.userinfo.get).</summary>
+/// <summary>Taobao OAuth -- user info requires the TOP API (top.taobao.userinfo.get).</summary>
+/// <summary>Taobao OAuth provider.</summary>
 public sealed class TaobaoOAuthProvider : GenericOAuthProvider
 {
-    public TaobaoOAuthProvider(IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<TaobaoOAuthProvider>? l = null) : base(cp, hc, l) { }
+    /// <summary>Creates the provider.</summary>
+    public TaobaoOAuthProvider(
+IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<TaobaoOAuthProvider>? l = null) : base(cp, hc, l) { }
     public override string Provider => OAuthProviderNames.Taobao;
     protected override string AuthorizeEndpoint => "https://oauth.taobao.com/authorize";
     protected override string TokenEndpoint => "https://oauth.taobao.com/token";

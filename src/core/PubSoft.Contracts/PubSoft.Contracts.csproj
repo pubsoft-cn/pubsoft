@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Contracts</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Framework-independent API contract metadata, naming policies, validation primitives, and outbound contracts.</Description>

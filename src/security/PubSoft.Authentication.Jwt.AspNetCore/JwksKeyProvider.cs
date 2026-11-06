@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace PubSoft.Authentication.Jwt.AspNetCore;
 
 
+/// <summary>Resolves signing keys from a cached JWKS document.</summary>
 public sealed class JwksKeyProvider
 {
     private readonly JwksOptions _options;
@@ -15,6 +16,7 @@ public sealed class JwksKeyProvider
     private readonly ILogger<JwksKeyProvider> _logger;
     private readonly HttpClient _httpClient;
 
+    /// <summary>Creates the provider.</summary>
     public JwksKeyProvider(IOptions<JwksOptions> options, IMemoryCache cache,
         ILogger<JwksKeyProvider> logger, HttpClient httpClient)
     {
@@ -24,9 +26,10 @@ public sealed class JwksKeyProvider
         _httpClient = httpClient;
     }
 
+    /// <summary>Finds a key by id inside the cached JWKS; null when absent.</summary>
     public async Task<SecurityKey?> ResolveSigningKeyAsync(string keyId, CancellationToken ct = default)
     {
-        // Resolved keys share the JWKS set's CacheMinutes lifetime — a per-key
+        // Resolved keys share the JWKS set's CacheMinutes lifetime - a per-key
         // cache that outlived the set would keep accepting revoked key IDs.
         var keys = await GetJwksAsync(ct).ConfigureAwait(false);
         if (keys is null) return null;
@@ -45,7 +48,7 @@ public sealed class JwksKeyProvider
         {
             var set = await _httpClient.GetFromJsonAsync<JsonWebKeySet>(NormalizeUri(_options.JwksUri), ct).ConfigureAwait(false);
             var keys = set?.GetSigningKeys()?.ToArray() ?? Array.Empty<SecurityKey>();
-            // Empty sets are cached too — a key-removal response must hold for the
+            // Empty sets are cached too - a key-removal response must hold for the
             // TTL, and caching avoids refetching once per token while JWKS is empty.
             _cache.Set(cacheKey, keys, TimeSpan.FromMinutes(_options.CacheMinutes));
             return keys;

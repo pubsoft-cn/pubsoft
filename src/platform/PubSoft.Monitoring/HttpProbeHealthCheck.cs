@@ -13,6 +13,7 @@ public sealed class HttpProbeHealthCheck : IProbeHealthCheck
     private readonly TimeSpan _probeTimeout;
     private readonly ILogger<HttpProbeHealthCheck>? _logger;
 
+    /// <summary>Creates the probe from monitoring options; invalid options fail closed.</summary>
     public HttpProbeHealthCheck(
         IHttpClientFactory httpClientFactory,
         IOptions<MonitoringOptions> options,
@@ -32,6 +33,7 @@ public sealed class HttpProbeHealthCheck : IProbeHealthCheck
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public async Task<ProbeHealth> CheckAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

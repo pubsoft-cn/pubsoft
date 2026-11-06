@@ -5,4 +5,13 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace PubSoft.Monitoring;
 
-public enum StartupDiagnosticsStatus { Ok, Warning, Error }
+/// <summary>Posture verdict for one diagnostics entry.</summary>
+public enum StartupDiagnosticsStatus
+{
+    /// <summary>Healthy posture.</summary>
+    Ok,
+    /// <summary>Warning posture.</summary>
+    Warning,
+    /// <summary>Failing posture.</summary>
+    Error
+}

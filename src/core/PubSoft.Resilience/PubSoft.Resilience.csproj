@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Resilience</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Dependency-light resilience primitives for .NET services.</Description>

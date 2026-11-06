@@ -4,7 +4,7 @@ namespace PubSoft.Edge;
 
 
 /// <summary>
-/// Edge RPC handler base — strongly-typed params deserialization + uniform error mapping.
+/// Edge RPC handler base -- strongly-typed params deserialization + uniform error mapping.
 /// Implement <see cref="ExecuteAsync(TParams, EdgeContext, CancellationToken)"/>.
 ///
 /// Accepted schemes can be declared two ways (attribute wins):
@@ -14,14 +14,16 @@ namespace PubSoft.Edge;
 public abstract class EdgeHandlerBase<TParams> : IEdgeHandler
     where TParams : class, new()
 {
+    /// <summary>The RPC method name this handler serves.</summary>
     public abstract string Method { get; }
 
     /// <summary>
-    /// Schemes this handler accepts — property form.
+    /// Schemes this handler accepts -- property form.
     /// Defaults to Hmac/Session; None is gateway-controlled.
     /// </summary>
     public virtual EdgeAuthScheme[] Schemes => [EdgeAuthScheme.Hmac, EdgeAuthScheme.Session];
 
+    /// <summary>Runs the handler.</summary>
     public async Task<EdgeRpcResponse> ExecuteAsync(EdgeRpcRequest request, EdgeContext context, CancellationToken ct)
     {
         TParams? parameters;
@@ -51,7 +53,7 @@ public abstract class EdgeHandlerBase<TParams> : IEdgeHandler
         }
         catch (HttpRequestException ex)
         {
-            // Unhandled downstream HTTP failure — honest 10503, not a generic 10500.
+            // Unhandled downstream HTTP failure - honest 10503, not a generic 10500.
             // Raw transport detail goes to subMessage so the top-level message stays clean.
             return EdgeError.ServiceUnavailable("Upstream service unavailable") with { SubMessage = ex.Message };
         }
@@ -69,6 +71,8 @@ public abstract class EdgeHandlerBase<TParams> : IEdgeHandler
     /// <summary>Business logic implemented by subclasses.</summary>
     protected abstract Task<EdgeRpcResponse> ExecuteAsync(TParams parameters, EdgeContext context, CancellationToken ct);
 
+    /// <summary>Success helper.</summary>
     protected static EdgeRpcResponse Success(object? data = null) => EdgeRpcResponse.Success(data);
+    /// <summary>Error helper.</summary>
     protected static EdgeRpcResponse Error(string code, string message) => EdgeRpcResponse.Error(code, message);
 }

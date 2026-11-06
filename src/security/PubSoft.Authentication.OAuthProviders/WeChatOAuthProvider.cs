@@ -6,13 +6,15 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.OAuth;
 
 /// <summary>
-/// WeChat OAuth provider — mini program (jscode2session), Official Account H5 (sns/oauth2),
+/// WeChat OAuth provider -- mini program (jscode2session), Official Account H5 (sns/oauth2),
 /// Open Platform QR connect. All calls go through HttpClient with the host-configured resilience.
 /// </summary>
+/// <summary>WeChat OAuth provider.</summary>
 public sealed class WeChatOAuthProvider : OAuthProviderBase
 {
     private readonly IWeChatAccessTokenProvider _accessTokenProvider;
 
+    /// <summary>Creates the provider.</summary>
     public WeChatOAuthProvider(
         IOAuthChannelConfigProvider configProvider,
         IWeChatAccessTokenProvider accessTokenProvider,
@@ -111,7 +113,7 @@ public sealed class WeChatOAuthProvider : OAuthProviderBase
 
         var accessToken = tokenResult.AccessToken;
 
-        // StringContent keeps a Content-Length — the WeChat WAF rejects chunked POSTs (HTTP 412).
+        // StringContent keeps a Content-Length - the WeChat WAF rejects chunked POSTs (HTTP 412).
         var phoneUrl = $"https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token={accessToken}";
         string json;
         using (var stream = new MemoryStream())

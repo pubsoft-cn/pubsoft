@@ -13,8 +13,10 @@ public sealed class AmbientMemberScopeContext : IMemberScopeContext
 {
     private static readonly AsyncLocal<State?> Current = new();
 
+    /// <inheritdoc />
     public long? MemberId => Current.Value?.MemberId;
 
+    /// <inheritdoc />
     public bool IsMemberScoped => Current.Value?.IsMemberScoped == true;
 
     /// <summary>

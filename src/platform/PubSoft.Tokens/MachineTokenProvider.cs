@@ -5,6 +5,7 @@ using PubSoft.Authentication.Jwt;
 namespace PubSoft.Tokens;
 
 
+/// <summary>Issues machine JWTs locally with per-credential-key claims and caching.</summary>
 public sealed class MachineTokenProvider : ITokenProvider, IDisposable
 {
     /// <summary>Keyed-DI service key for resolving this provider when multiple <see cref="ITokenProvider"/> implementations coexist.</summary>
@@ -15,12 +16,14 @@ public sealed class MachineTokenProvider : ITokenProvider, IDisposable
     private readonly SymmetricSigningKeyMaterial _keyMaterial;
     private readonly ConcurrentDictionary<string, (string Token, DateTimeOffset ExpiresAt)> _cache = new(StringComparer.Ordinal);
 
+    /// <summary>Creates the provider.</summary>
     public MachineTokenProvider(IOptions<MachineTokenOptions> options)
     {
         _options = options.Value;
         _keyMaterial = JwtSigning.ImportSymmetricKey(_options.KeyId, _options.SigningKey);
     }
 
+    /// <inheritdoc />
     public Task<string?> GetTokenAsync(string credentialKey, CancellationToken cancellationToken = default)
     {
         var now = _timeProvider.GetUtcNow();
@@ -38,11 +41,13 @@ public sealed class MachineTokenProvider : ITokenProvider, IDisposable
         return Task.FromResult<string?>(token);
     }
 
+    /// <inheritdoc />
     public Task InvalidateAsync(string credentialKey, CancellationToken cancellationToken = default)
     {
         _cache.TryRemove(credentialKey, out _);
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public void Dispose() => _keyMaterial.Dispose();
 }

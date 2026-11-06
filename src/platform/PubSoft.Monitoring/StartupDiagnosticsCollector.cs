@@ -8,16 +8,18 @@ namespace PubSoft.Monitoring;
 
 /// <summary>
 /// Aggregates every registered <see cref="IStartupDiagnostics"/> into a startup
-/// snapshot. Emit via <see cref="ToJson"/> — a machine-readable posture report the
+/// snapshot. Emit via <see cref="ToJson"/> -- a machine-readable posture report the
 /// host can log once at boot or expose on an ops endpoint.
 /// </summary>
 public sealed class StartupDiagnosticsCollector
 {
     private readonly IEnumerable<IStartupDiagnostics> _providers;
 
+    /// <summary>Creates the collector.</summary>
     public StartupDiagnosticsCollector(IEnumerable<IStartupDiagnostics> providers)
         => _providers = providers ?? throw new System.ArgumentNullException(nameof(providers));
 
+    /// <summary>Returns every provider's entries.</summary>
     public IReadOnlyList<StartupDiagnosticsEntry> Collect()
     {
         var entries = new List<StartupDiagnosticsEntry>();

@@ -6,8 +6,10 @@ using PubSoft.Contracts;
 namespace PubSoft.Outbound;
 
 
+/// <summary>Outbound registration.</summary>
 public static class OutboundServiceCollectionExtensions
 {
+    /// <summary>Scans assemblies for contracts and registers the registry + engine.</summary>
     [RequiresUnreferencedCode("Contract registration scans assemblies for contract types that may be trimmed.")]
     public static IServiceCollection AddOutboundContracts(
         this IServiceCollection services,
@@ -31,6 +33,7 @@ public static class OutboundServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>Registers the external-facing outbound SDK facade.</summary>
     public static IServiceCollection AddExternalOutboundSdk(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);

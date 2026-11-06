@@ -6,9 +6,12 @@ namespace PubSoft.OAuth;
 
 
 /// <summary>Google Sign-In OAuth.</summary>
+/// <summary>Google OAuth provider.</summary>
 public sealed class GoogleOAuthProvider : GenericOAuthProvider
 {
-    public GoogleOAuthProvider(IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<GoogleOAuthProvider>? l = null) : base(cp, hc, l) { }
+    /// <summary>Creates the provider.</summary>
+    public GoogleOAuthProvider(
+IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<GoogleOAuthProvider>? l = null) : base(cp, hc, l) { }
     public override string Provider => OAuthProviderNames.Google;
     protected override string AuthorizeEndpoint => "https://accounts.google.com/o/oauth2/auth";
     protected override string TokenEndpoint => "https://oauth2.googleapis.com/token";

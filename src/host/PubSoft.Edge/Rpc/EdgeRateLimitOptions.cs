@@ -10,17 +10,18 @@ using Microsoft.Extensions.Options;
 namespace PubSoft.Edge;
 
 /// <summary>
-/// Edge rate-limit options — partitioned by clientId + scheme + method.
+/// Edge rate-limit options -- partitioned by clientId + scheme + method.
 ///
 /// Three layers:
-/// 1. Total limit — all requests counted, guards overall load
-/// 2. Per-clientId limit — guards a single third-party client
-/// 3. Failure limit — only failed requests counted (auth failures/handler errors), blocks signature probing
+/// 1. Total limit -- all requests counted, guards overall load
+/// 2. Per-clientId limit -- guards a single third-party client
+/// 3. Failure limit -- only failed requests counted (auth failures/handler errors), blocks signature probing
 ///
 /// The path is not hard-coded; it follows the UseEdgeGateway path.
 /// </summary>
 public sealed class EdgeRateLimitOptions
 {
+    /// <summary>Configuration section.</summary>
     public const string SectionName = "Edge:RateLimit";
 
     /// <summary>Whether rate limiting is enabled.</summary>
@@ -43,7 +44,7 @@ public sealed class EdgeRateLimitOptions
     /// <summary>Session-scheme limit (C-end, per sessionKey).</summary>
     public int SessionPermitLimit { get; set; } = 2000;
 
-    /// <summary>None-scheme limit (anonymous/login endpoints, per IP — strict anti-brute-force).</summary>
+    /// <summary>None-scheme limit (anonymous/login endpoints, per IP -- strict anti-brute-force).</summary>
     public int NonePermitLimit { get; set; } = 20;
 
     /// <summary>Md5-scheme limit (legacy clients, per clientId).</summary>

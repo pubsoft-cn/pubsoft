@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 namespace PubSoft.Auditing;
 
 
+/// <summary>Default <see cref="IAuditScope"/>; thread-safe, one-shot finalization.</summary>
 public sealed class AuditScope : IAuditScope
 {
     private const int MaximumFailureCodeLength = 128;
@@ -17,6 +18,7 @@ public sealed class AuditScope : IAuditScope
     private bool _initialized;
     private bool _finalizing;
 
+    /// <summary>Creates a scope; <paramref name="options"/> toggles auditing and GET capture.</summary>
     public AuditScope(
         IAuditChangeCollector collector,
         AuditScopeOptions? options = null,
@@ -31,6 +33,7 @@ public sealed class AuditScope : IAuditScope
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
+    /// <inheritdoc />
     public bool IsEnabled
     {
         get
@@ -40,6 +43,7 @@ public sealed class AuditScope : IAuditScope
         }
     }
 
+    /// <inheritdoc />
     public bool IsFinalizing
     {
         get
@@ -49,6 +53,7 @@ public sealed class AuditScope : IAuditScope
         }
     }
 
+    /// <inheritdoc />
     public void Initialize(AuditRequestContext request)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -62,6 +67,7 @@ public sealed class AuditScope : IAuditScope
         }
     }
 
+    /// <inheritdoc />
     public void SetBusiness(
         string? category = null,
         string? action = null,
@@ -83,6 +89,7 @@ public sealed class AuditScope : IAuditScope
         }
     }
 
+    /// <inheritdoc />
     public void MarkFailure(string? failureCode = null)
     {
         if (failureCode is { Length: > MaximumFailureCodeLength }
@@ -96,6 +103,7 @@ public sealed class AuditScope : IAuditScope
         }
     }
 
+    /// <inheritdoc />
     public AuditRequestSnapshot? Finalize(bool success, int statusCode)
     {
         lock (_gate)

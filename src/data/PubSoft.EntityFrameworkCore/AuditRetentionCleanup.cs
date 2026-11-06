@@ -43,8 +43,8 @@ public sealed class AuditRetentionCleanup<TDbContext>
         => DeleteAsync(retention, batchSize, tenantId, restrictToTenant: true, cancellationToken);
 
     /// <summary>
-    /// Archives audit logs older than <paramref name="retention"/> by handing each expired batch —
-    /// including its <see cref="AuditLogRecord.EntityChanges"/> — to <paramref name="exportAsync"/>
+    /// Archives audit logs older than <paramref name="retention"/> by handing each expired batch --
+    /// including its <see cref="AuditLogRecord.EntityChanges"/> -- to <paramref name="exportAsync"/>
     /// before deleting it. Across all tenants.
     /// </summary>
     /// <remarks>

@@ -3,8 +3,10 @@ using System.Text.Json;
 
 namespace PubSoft.Messaging;
 
+/// <summary>Transport-neutral message wrapper: id, type, payload, provenance.</summary>
 public sealed class MessageEnvelope
 {
+    /// <summary>Creates an envelope; <paramref name="messageId"/> and <paramref name="messageType"/> are required.</summary>
     public MessageEnvelope(
         string messageId,
         string messageType,
@@ -24,13 +26,20 @@ public sealed class MessageEnvelope
         Target = ValidateOptionalLabel(target, nameof(target));
     }
 
+    /// <summary>Unique message id (dedupe key).</summary>
     public string MessageId { get; }
+    /// <summary>Type discriminator used by the dispatcher.</summary>
     public string MessageType { get; }
+    /// <summary>The serialized payload.</summary>
     public JsonElement Payload { get; }
+    /// <summary>When the event occurred.</summary>
     public DateTimeOffset OccurredAt { get; }
+    /// <summary>Publishing service tag.</summary>
     public string? Source { get; }
+    /// <summary>Intended consumer tag.</summary>
     public string? Target { get; }
 
+    /// <summary>Deserializes the payload into <typeparamref name="T"/> using the dispatcher's serializer options.</summary>
     [UnconditionalSuppressMessage("Trimming", "IL2026",
         Justification = "Payloads are serialized with host-provided JsonSerializerOptions; trimmed/AOT hosts must supply a TypeInfoResolver covering payload types.")]
     [UnconditionalSuppressMessage("AOT", "IL3050",
@@ -49,6 +58,7 @@ public sealed class MessageEnvelope
         return new MessageEnvelope(messageId, messageType, jsonPayload, occurredAt, source, target);
     }
 
+    /// <summary>Deserializes the payload into <typeparamref name="TPayload"/> using the dispatcher's serializer options.</summary>
     [UnconditionalSuppressMessage("Trimming", "IL2026",
         Justification = "Payloads are deserialized with host-provided JsonSerializerOptions; trimmed/AOT hosts must supply a TypeInfoResolver covering payload types.")]
     [UnconditionalSuppressMessage("AOT", "IL3050",

@@ -7,7 +7,7 @@ namespace PubSoft.AspNetCore;
 
 public static class CorrelationIdMiddlewareExtensions
 {
-    /// <summary>Register correlation-id adoption + echo — place before any
+    /// <summary>Register correlation-id adoption + echo -- place before any
     /// middleware/logging that should share the id.</summary>
     public static IApplicationBuilder UsePubSoftCorrelationId(
         this IApplicationBuilder app, CorrelationIdOptions? options = null)

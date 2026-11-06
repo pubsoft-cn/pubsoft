@@ -45,10 +45,10 @@ public sealed class HmacValidationMiddleware
             return;
         }
 
-        if (!TryReadSingleHeader(context, HmacSignatureHeaders.AppId, out var appId) ||
-            !TryReadSingleHeader(context, HmacSignatureHeaders.Signature, out var signature) ||
-            !TryReadSingleHeader(context, HmacSignatureHeaders.Timestamp, out var timestamp) ||
-            !TryReadSingleHeader(context, HmacSignatureHeaders.Nonce, out var nonce))
+        if (!TryReadSingleHeader(context, _options.AppIdHeader, out var appId) ||
+            !TryReadSingleHeader(context, _options.SignatureHeader, out var signature) ||
+            !TryReadSingleHeader(context, _options.TimestampHeader, out var timestamp) ||
+            !TryReadSingleHeader(context, _options.NonceHeader, out var nonce))
         {
             await Reject(context, StatusCodes.Status401Unauthorized, "missing_or_ambiguous_signature_headers").ConfigureAwait(false);
             return;
@@ -71,7 +71,7 @@ public sealed class HmacValidationMiddleware
 
         if (string.IsNullOrEmpty(secret))
         {
-            // 与签名不匹配返回同一错误码——避免 appId 存在性枚举 oracle
+            // 与签名不匹配返回同一错误码--避免 appId 存在性枚举 oracle
             await Reject(context, StatusCodes.Status401Unauthorized, "signature_mismatch").ConfigureAwait(false);
             return;
         }
@@ -118,7 +118,7 @@ public sealed class HmacValidationMiddleware
         await _next(context).ConfigureAwait(false);
     }
 
-    /// <summary>路径段边界感知的前缀匹配——"/api" 豁免 "/api" 与 "/api/..."，不放行 "/apixyz"。</summary>
+    /// <summary>Segment-boundary-aware prefix match -- "/api" exempts "/api" and "/api/..." but not "/apixyz".</summary>
     private static bool IsExcludedPath(string path, string prefix)
     {
         if (string.IsNullOrEmpty(prefix)) return false;

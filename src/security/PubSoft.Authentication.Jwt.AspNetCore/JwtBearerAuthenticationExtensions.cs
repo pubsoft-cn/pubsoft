@@ -8,8 +8,10 @@ using Microsoft.IdentityModel.Tokens;
 namespace PubSoft.Authentication.Jwt.AspNetCore;
 
 
+/// <summary>JWT bearer registration.</summary>
 public static class JwtBearerAuthenticationExtensions
 {
+    /// <summary>Registers bearer validation (JWKS or symmetric) per the options.</summary>
     public static AuthenticationBuilder AddPubSoftJwtBearer(
         this AuthenticationBuilder builder,
         Action<PubSoftJwtBearerOptions> configure,

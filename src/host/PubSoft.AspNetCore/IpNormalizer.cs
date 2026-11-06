@@ -19,7 +19,7 @@ public static class IpNormalizer
     /// <summary>
     /// Resolves the caller's IP honoring X-Forwarded-For (first hop) then X-Real-IP,
     /// falling back to the connection remote address. Headers are only trusted when the
-    /// deployment front proxy is configured to set them — untrusted deployments should
+    /// deployment front proxy is configured to set them -- untrusted deployments should
     /// strip inbound XFF/Real-IP at the edge.
     /// </summary>
     public static string GetRemoteIp(HttpContext? context)

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace PubSoft.Tokens;
 
+/// <summary>Injects a fetched token as a header on outbound requests.</summary>
 public sealed class TokenDelegatingHandler : DelegatingHandler
 {
     private readonly ITokenProvider _tokenProvider;
@@ -11,11 +12,14 @@ public sealed class TokenDelegatingHandler : DelegatingHandler
     private readonly string? _clientHeaderName;
     private readonly string? _clientHeaderPrefix;
 
+    /// <summary>Creates the handler using configured defaults.</summary>
+    /// <summary>Creates the handler with client-level overrides.</summary>
     public TokenDelegatingHandler(ITokenProvider tokenProvider, IOptions<TokenHandlerOptions> options)
         : this(tokenProvider, options, null, null, null)
     {
     }
 
+    /// <summary>Creates the handler with client-level overrides.</summary>
     public TokenDelegatingHandler(
         ITokenProvider tokenProvider,
         IOptions<TokenHandlerOptions> options,
@@ -114,6 +118,7 @@ public sealed class TokenDelegatingHandler : DelegatingHandler
     }
 }
 
+/// <summary>Per-request token overrides via HttpRequestMessage.Options.</summary>
 public static class TokenRequestOptions
 {
     internal static readonly HttpRequestOptionsKey<string?> CredentialKey = new("PubSoft.Tokens.CredentialKey");
@@ -121,6 +126,7 @@ public static class TokenRequestOptions
     internal static readonly HttpRequestOptionsKey<string?> HeaderPrefix = new("PubSoft.Tokens.HeaderPrefix");
     internal static readonly HttpRequestOptionsKey<bool> RetryOnUnauthorized = new("PubSoft.Tokens.RetryOnUnauthorized");
 
+    /// <summary>Allows one retry with a fresh token on 401.</summary>
     public static HttpRequestMessage EnableTokenUnauthorizedRetry(this HttpRequestMessage request)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -128,6 +134,7 @@ public static class TokenRequestOptions
         return request;
     }
 
+    /// <summary>Picks the credential key for this request.</summary>
     public static HttpRequestMessage SetTokenCredentialKey(this HttpRequestMessage request, string credentialKey)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -136,6 +143,7 @@ public static class TokenRequestOptions
         return request;
     }
 
+    /// <summary>Overrides the header name.</summary>
     public static HttpRequestMessage SetTokenHeaderName(this HttpRequestMessage request, string headerName)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -144,6 +152,7 @@ public static class TokenRequestOptions
         return request;
     }
 
+    /// <summary>Overrides the value prefix.</summary>
     public static HttpRequestMessage SetTokenHeaderPrefix(this HttpRequestMessage request, string prefix)
     {
         ArgumentNullException.ThrowIfNull(request);

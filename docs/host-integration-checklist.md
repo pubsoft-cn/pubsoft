@@ -58,6 +58,12 @@ host should run before deploying to production. Where an item is marked
 - [ ] `SlowQueryInterceptor` logs SQL truncated to 500 characters — no full
       statement bodies or parameter values are written to logs.
 
+## Identity generation
+
+- [ ] `services.AddPubSoftIdGenerator(workerId)` is registered exactly once — EF audit persistence and the messaging outbox fail closed at DI when it is missing.
+- [ ] `workerId` is unique per live replica (0–31) and sourced from config (`PubSoft:IdGenerator:WorkerId`), never hard-coded per instance. Two replicas sharing an id collide silently under load.
+- [ ] Persisted ids are `long` Snowflake (`ValueGenerated.Never`) — no Guid or database auto-increment keys. Migrating legacy Guid keys goes through `LegacyIdMap` (`ConfigurePubSoftLegacyIdMaps()`) rather than a second PK column.
+
 ## Outbox / messaging
 
 - [ ] Outbox consumer handlers are idempotent — at-least-once delivery means

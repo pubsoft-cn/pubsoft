@@ -1,12 +1,12 @@
 namespace PubSoft.Edge;
 
 /// <summary>
-/// Edge error codes — single vocabulary shared by the gateway and clients.
+/// Edge error codes -- single vocabulary shared by the gateway and clients.
 ///
 /// Encoding:
-/// 10XXX — gateway-level errors
-///   104XX — client errors (4xx semantics)
-///   105XX — server errors (5xx semantics)
+/// 10XXX -- gateway-level errors
+///   104XX -- client errors (4xx semantics)
+///   105XX -- server errors (5xx semantics)
 ///
 /// The gateway always returns HTTP 200; the code lives in the response body.
 /// </summary>
@@ -92,13 +92,22 @@ public static class EdgeErrorCodes
 /// </summary>
 public static class EdgeError
 {
+    /// <summary>400 - malformed request.</summary>
     public static EdgeRpcResponse BadRequest(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.BadRequest, message) with { SubCode = subCode };
+    /// <summary>401 - missing or invalid credentials.</summary>
     public static EdgeRpcResponse Unauthorized(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.Unauthorized, message) with { SubCode = subCode };
+    /// <summary>403 - authenticated but not permitted.</summary>
     public static EdgeRpcResponse Forbidden(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.Forbidden, message) with { SubCode = subCode };
+    /// <summary>404 - resource not found.</summary>
     public static EdgeRpcResponse NotFound(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.NotFound, message) with { SubCode = subCode };
+    /// <summary>409 - state conflict.</summary>
     public static EdgeRpcResponse Conflict(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.Conflict, message) with { SubCode = subCode };
+    /// <summary>429 - rate limit exceeded.</summary>
     public static EdgeRpcResponse RateLimited(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.RateLimited, message) with { SubCode = subCode };
+    /// <summary>500 - internal failure.</summary>
     public static EdgeRpcResponse InternalError(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.InternalError, message) with { SubCode = subCode };
+    /// <summary>503 - downstream unavailable.</summary>
     public static EdgeRpcResponse ServiceUnavailable(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.ServiceUnavailable, message) with { SubCode = subCode };
+    /// <summary>504 - downstream timeout.</summary>
     public static EdgeRpcResponse GatewayTimeout(string message, string? subCode = null) => EdgeRpcResponse.Error(EdgeErrorCodes.GatewayTimeout, message) with { SubCode = subCode };
 }

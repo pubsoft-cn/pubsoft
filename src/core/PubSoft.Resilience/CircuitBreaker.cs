@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace PubSoft.Resilience;
 
+/// <summary>Per-host circuit breaker: opens after a failure streak, half-opens for a probe after the cool-down.</summary>
 public sealed class CircuitBreaker
 {
 
@@ -11,14 +12,17 @@ public sealed class CircuitBreaker
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
 
+    /// <summary>Creates a breaker; <paramref name="timeProvider"/> is injectable for tests.</summary>
     public CircuitBreaker(ILogger<CircuitBreaker>? logger = null, TimeProvider? timeProvider = null)
     {
         _logger = logger;
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
+    /// <summary>Trip thresholds and cool-down.</summary>
     public CircuitBreakerOptions Options { get; set; } = new();
 
+    /// <summary>Whether a call to <paramref name="host"/> may proceed - false while open (except one half-open probe).</summary>
     public bool TryAcquire(string host)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(host);
@@ -41,6 +45,7 @@ public sealed class CircuitBreaker
         }
     }
 
+    /// <summary>Marks a call as successful, resetting the streak and closing a half-open circuit.</summary>
     public void RecordSuccess(string host)
     {
         if (!_states.TryGetValue(host, out var state)) return;
@@ -56,6 +61,7 @@ public sealed class CircuitBreaker
         }
     }
 
+    /// <summary>Marks a call as failed; opens the circuit at the threshold.</summary>
     public void RecordFailure(string host)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(host);
@@ -74,6 +80,7 @@ public sealed class CircuitBreaker
         }
     }
 
+    /// <summary>Drops all state for <paramref name="host"/> (e.g. after a config reload).</summary>
     public void Abandon(string host)
     {
         if (!_states.TryGetValue(host, out var state)) return;
@@ -84,12 +91,22 @@ public sealed class CircuitBreaker
         }
     }
 
+    /// <summary>Current circuit state for a host.</summary>
     public State GetState(string host)
     {
         if (!_states.TryGetValue(host, out var state)) return State.Closed;
         lock (state.Sync) return state.Status;
     }
-    public enum State { Closed, Open, HalfOpen }
+    /// <summary>Circuit state.</summary>
+    public enum State
+    {
+        /// <summary>Calls flow normally.</summary>
+        Closed,
+        /// <summary>Calls are rejected fast.</summary>
+        Open,
+        /// <summary>One probe call is allowed.</summary>
+        HalfOpen
+    }
 
     private sealed class CircuitState
     {
@@ -101,8 +118,11 @@ public sealed class CircuitBreaker
     }
 }
 
+/// <summary>Circuit-breaker thresholds.</summary>
 public sealed class CircuitBreakerOptions
 {
+    /// <summary>Consecutive failures that open the circuit.</summary>
     public int FailureThreshold { get; set; } = 5;
+    /// <summary>How long the circuit stays open before allowing a probe.</summary>
     public TimeSpan OpenTimeout { get; set; } = TimeSpan.FromSeconds(30);
 }

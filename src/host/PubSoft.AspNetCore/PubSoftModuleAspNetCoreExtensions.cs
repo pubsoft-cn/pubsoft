@@ -34,7 +34,7 @@ public static class PubSoftModuleAspNetCoreExtensions
         };
         await runtime.Orchestrator.OnInitializationAllAsync(context).ConfigureAwait(false);
         lifetime?.ApplicationStopping.Register(
-            () => runtime.Orchestrator.OnShutdownAllAsync(context).AsTask().GetAwaiter().GetResult()); // pubsoft:exempt PUBSOFT017 "intentional sync bridge — callback is sync by contract"
+            () => runtime.Orchestrator.OnShutdownAllAsync(context).AsTask().GetAwaiter().GetResult()); // pubsoft:exempt PUBSOFT017 "intentional sync bridge - callback is sync by contract"
         return app;
     }
 }

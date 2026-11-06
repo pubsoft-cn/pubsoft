@@ -5,7 +5,7 @@ using Microsoft.Extensions.Primitives;
 namespace PubSoft.AspNetCore;
 
 /// <summary>
-/// Cross-service correlation — accepts W3C <c>traceparent</c> or a custom
+/// Cross-service correlation -- accepts W3C <c>traceparent</c> or a custom
 /// correlation header; assigns <see cref="HttpContext.TraceIdentifier"/>,
 /// echoes the id on the response, and exposes it for outbound propagation.
 /// <para>
@@ -26,6 +26,6 @@ public sealed class CorrelationIdOptions
     /// <summary>Echo the id on the response header. Default true.</summary>
     public bool EchoResponseHeader { get; set; } = true;
 
-    /// <summary>Enabled switch — default true.</summary>
+    /// <summary>Enabled switch -- default true.</summary>
     public bool Enabled { get; set; } = true;
 }

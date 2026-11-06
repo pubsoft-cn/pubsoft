@@ -61,7 +61,7 @@ public sealed class PubSoftRateLimitingMiddleware
             return;
         context.RequestServices?.GetService<ILogger<PubSoftRateLimitingMiddleware>>()?
             .LogWarning(
-                "Request carries X-Forwarded-For/X-Real-IP but RemoteIpAddress is the proxy address ({RemoteIp}) — forwarded headers were never processed. " +
+                "Request carries X-Forwarded-For/X-Real-IP but RemoteIpAddress is the proxy address ({RemoteIp}) - forwarded headers were never processed. " +
                 "All clients share one rate-limit bucket. Insert app.UsePubSoftForwardedHeaders() early in the pipeline " +
                 "(X-Real-IP-only proxies also need options.RealIp = true).",
                 context.Connection.RemoteIpAddress);

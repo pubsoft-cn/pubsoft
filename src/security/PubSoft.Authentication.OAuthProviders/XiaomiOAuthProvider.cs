@@ -6,9 +6,12 @@ namespace PubSoft.OAuth;
 
 
 /// <summary>Xiaomi account OAuth.</summary>
+/// <summary>Xiaomi OAuth provider.</summary>
 public sealed class XiaomiOAuthProvider : GenericOAuthProvider
 {
-    public XiaomiOAuthProvider(IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<XiaomiOAuthProvider>? l = null) : base(cp, hc, l) { }
+    /// <summary>Creates the provider.</summary>
+    public XiaomiOAuthProvider(
+IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<XiaomiOAuthProvider>? l = null) : base(cp, hc, l) { }
     public override string Provider => OAuthProviderNames.Xiaomi;
     protected override string AuthorizeEndpoint => "https://account.xiaomi.com/oauth2/authorize";
     protected override string TokenEndpoint => "https://account.xiaomi.com/oauth2/token";

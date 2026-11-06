@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Authentication.Jwt.AspNetCore</PackageId>
     <Description>Optional ASP.NET Core bearer authentication adapter for PubSoft JWT validation.</Description>
   </PropertyGroup>

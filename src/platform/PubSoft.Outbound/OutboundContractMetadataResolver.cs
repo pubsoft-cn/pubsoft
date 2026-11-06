@@ -5,13 +5,16 @@ using PubSoft.Core;
 
 namespace PubSoft.Outbound;
 
+/// <summary>Derives contract metadata from a request type's attributes and interfaces.</summary>
 public static class OutboundContractMetadataResolver
 {
+    /// <summary>Resolves metadata with default naming.</summary>
     [PubSoft.Core.BoundedCost("assembly scan runs once at registration")]
     public static ApiContractMetadata Resolve(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type requestType)
         => Resolve(requestType, null);
 
+    /// <summary>Resolves metadata with an explicit naming policy.</summary>
     public static ApiContractMetadata Resolve(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type requestType,
         INamingPolicy? namingPolicy)
@@ -56,6 +59,7 @@ public static class OutboundContractMetadataResolver
         };
     }
 
+    /// <summary>Builds the dispatch route path for a contract.</summary>
     public static string RoutePath(ApiContractMetadata metadata, string profileId = "default")
     {
         ArgumentNullException.ThrowIfNull(metadata);
@@ -64,6 +68,7 @@ public static class OutboundContractMetadataResolver
         return $"/outbound/v1/{prefix}/{Uri.EscapeDataString(profileId)}/{Uri.EscapeDataString(metadata.RouteAction)}";
     }
 
+    /// <summary>Builds the route path for a request type.</summary>
     public static string RoutePath<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] TRequest>(string profileId = "default")
         where TRequest : IApiRequest

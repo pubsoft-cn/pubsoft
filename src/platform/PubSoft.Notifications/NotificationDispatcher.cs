@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace PubSoft.Notifications;
 
+/// <summary>Sends messages via named channels; unknown channels fail closed.</summary>
 public sealed class NotificationDispatcher
 {
     private readonly IReadOnlyDictionary<string, INotificationChannel> _channels;
@@ -14,6 +15,7 @@ public sealed class NotificationDispatcher
     private readonly object _deduplicationLock = new();
     private readonly Dictionary<DeduplicationKey, DateTimeOffset?> _recent = [];
 
+    /// <summary>Creates the dispatcher.</summary>
     public NotificationDispatcher(
         IEnumerable<INotificationChannel> channels,
         IOptions<NotificationOptions>? options = null,
@@ -38,6 +40,7 @@ public sealed class NotificationDispatcher
         _channels = new ReadOnlyDictionary<string, INotificationChannel>(channelMap);
     }
 
+    /// <summary>Sends via one channel.</summary>
     public async Task<NotificationResult> DispatchAsync(
         string channelName,
         NotificationMessage message,
@@ -99,6 +102,7 @@ public sealed class NotificationDispatcher
         return result;
     }
 
+    /// <summary>Sends via every channel, reporting per-channel outcomes.</summary>
     public async Task<NotificationDispatchReport> DispatchToAllAsync(
         NotificationMessage message,
         CancellationToken cancellationToken = default)
@@ -146,7 +150,7 @@ public sealed class NotificationDispatcher
     {
         lock (_deduplicationLock)
         {
-            if (_recent.ContainsKey(key)) // pubsoft:exempt PUBSOFT012 "write-only-if-present — TryGetValue reads a value this path ignores"
+            if (_recent.ContainsKey(key)) // pubsoft:exempt PUBSOFT012 "write-only-if-present - TryGetValue reads a value this path ignores"
                 _recent[key] = expiresAt;
         }
     }
@@ -163,8 +167,10 @@ public sealed class NotificationDispatcher
     private readonly record struct DeduplicationKey(string Channel, string CorrelationId);
 }
 
+/// <summary>Notification registration.</summary>
 public static class NotificationServiceCollectionExtensions
 {
+    /// <summary>Registers the dispatcher.</summary>
     public static IServiceCollection AddPubSoftNotifications(
         this IServiceCollection services,
         Action<NotificationOptions>? configure = null)

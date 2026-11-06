@@ -9,13 +9,17 @@ namespace PubSoft.OAuth;
 /// </summary>
 public abstract class OAuthProviderBase : IOAuthProvider
 {
+    /// <summary>Host channel-config store.</summary>
     protected readonly IOAuthChannelConfigProvider ConfigProvider;
+    /// <summary>HTTP client for provider calls.</summary>
     protected readonly HttpClient HttpClient;
+    /// <summary>Optional logger.</summary>
     protected readonly ILogger? Logger;
 
-    /// <summary>上游响应体大小上限 — 异常/恶意提供方不得向内存灌入无限数据（1 MiB 足够任何 OAuth JSON 载荷）。</summary>
+    /// <summary>Upstream response body cap -- a hostile or broken provider must not stream unbounded data into memory (1 MiB covers any OAuth JSON payload).</summary>
     private const int MaxResponseBytes = 1_048_576;
 
+    /// <summary>Creates the provider base.</summary>
     protected OAuthProviderBase(
         IOAuthChannelConfigProvider configProvider,
         HttpClient httpClient,
@@ -26,15 +30,21 @@ public abstract class OAuthProviderBase : IOAuthProvider
         Logger = logger;
     }
 
+    /// <summary>Provider name (OAuthProviderNames).</summary>
     public abstract string Provider { get; }
 
+    /// <summary>Whether the provider handles the channel type; true = all.</summary>
     public virtual bool SupportsChannelType(string channelType) => true;
 
+    /// <summary>Builds the authorize redirect URL.</summary>
     public abstract Task<OAuthAuthorizeUrlResult> GetAuthorizeUrlAsync(OAuthAuthorizeUrlRequest request, CancellationToken ct = default);
+    /// <summary>Exchanges an authorization code for identity.</summary>
     public abstract Task<OAuthCodeExchangeResult> ExchangeCodeAsync(string appId, string code, string? channelType = null, CancellationToken ct = default);
+    /// <summary>Fetches user info with an access token.</summary>
     public abstract Task<OAuthUserInfoResult> GetUserInfoAsync(string appId, string accessToken, CancellationToken ct = default);
 
     /// <summary>Phone numbers are opt-in; providers that support it override this.</summary>
+    /// <summary>Fetches a phone number (providers that support it; default = unsupported).</summary>
     public virtual Task<OAuthPhoneResult> GetPhoneNumberAsync(string appId, string code, CancellationToken ct = default)
         => Task.FromResult(OAuthPhoneResult.Fail("This provider does not support phone-number retrieval"));
 
@@ -48,6 +58,7 @@ public abstract class OAuthProviderBase : IOAuthProvider
             _ => null,
         };
 
+    /// <summary>Reads an integer field with a default.</summary>
     protected static int GetInt(JsonElement elem, string name, int defaultValue = 0) =>
         elem.TryGetProperty(name, out var p) && p.ValueKind == JsonValueKind.Number ? p.GetInt32() : defaultValue;
 
@@ -92,7 +103,7 @@ public abstract class OAuthProviderBase : IOAuthProvider
         return doc.RootElement.Clone();
     }
 
-    /// <summary>响应体限长读取——超限抛 InvalidDataException，拒绝把整条上游负载读进内存。</summary>
+    /// <summary>Bounded response-body read -- throws InvalidDataException past the cap instead of buffering the entire upstream payload.</summary>
     private static async Task<string> ReadBoundedStringAsync(HttpResponseMessage response, CancellationToken ct)
     {
         using (response)

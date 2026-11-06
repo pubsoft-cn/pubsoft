@@ -2,12 +2,14 @@ using System.Text.Json;
 
 namespace PubSoft.Domain;
 
-[PubSoft.Core.BoundedCost("data object — timestamp assigned by infrastructure interceptors, not injected TimeProvider")]
+/// <summary>A permission module exposed for granting - declares which flag bits and named permissions exist.</summary>
+[PubSoft.Core.BoundedCost("data object - timestamp assigned by infrastructure interceptors, not injected TimeProvider")]
 public sealed class PermissionModule : Entity<long>, IMultiTenant
 {
     private const byte DefinedPermissionFlags = 0x3F;
     private const int MaxCustomPermissionsJsonLength = 4000;
 
+    /// <summary>Creates a module; keys/names must be non-empty and trimmed.</summary>
     public PermissionModule(
         long id,
         string clientCode,
@@ -42,22 +44,35 @@ public sealed class PermissionModule : Entity<long>, IMultiTenant
         CreationTime = DateTime.UtcNow;
     }
 
+    /// <summary>Parameterless constructor for ORM materialization.</summary>
     private PermissionModule()
     {
     }
 
+    /// <summary>Owning tenant; null for host-level rows.</summary>
     public long? TenantId { get; set; }
+    /// <summary>Client/application code the module belongs to.</summary>
     public string ClientCode { get; private set; } = string.Empty;
+    /// <summary>The stable module key used by grant rows and attributes.</summary>
     public string ModuleKey { get; private set; } = string.Empty;
+    /// <summary>Human-readable module name for admin UI.</summary>
     public string DisplayName { get; private set; } = string.Empty;
+    /// <summary>Optional module description.</summary>
     public string? Description { get; private set; }
+    /// <summary>Bitmask of the standard operations this module supports.</summary>
     public byte AvailableFlags { get; private set; }
+    /// <summary>JSON list of named permissions outside the bitmask space.</summary>
     public string? CustomPermissionsJson { get; private set; }
+    /// <summary>Display ordering in the permission-assignment UI.</summary>
     public int SortOrder { get; private set; }
+    /// <summary>Whether the module is visible/grantable.</summary>
     public bool IsEnabled { get; set; } = true;
+    /// <summary>When the module was registered (UTC).</summary>
     public DateTime CreationTime { get; private set; }
+    /// <summary>When the module last changed (UTC).</summary>
     public DateTime? UpdatedAt { get; private set; }
 
+    /// <summary>Updates display metadata; null arguments keep current values.</summary>
     public void Update(
         string displayName,
         string? description,

@@ -215,3 +215,10 @@ override PubSoft.Domain.Entity<TKey>.Equals(object? obj) -> bool
 override PubSoft.Domain.Entity<TKey>.GetHashCode() -> int
 static PubSoft.Domain.Entity<TKey>.operator !=(PubSoft.Domain.Entity<TKey>? a, PubSoft.Domain.Entity<TKey>? b) -> bool
 static PubSoft.Domain.Entity<TKey>.operator ==(PubSoft.Domain.Entity<TKey>? a, PubSoft.Domain.Entity<TKey>? b) -> bool
+PubSoft.Domain.LegacyIdMap
+PubSoft.Domain.LegacyIdMap.LegacyIdMap(long id, string! entityType, System.Guid legacyId, long newId, long? tenantId = null) -> void
+PubSoft.Domain.LegacyIdMap.EntityType.get -> string!
+PubSoft.Domain.LegacyIdMap.LegacyId.get -> System.Guid
+PubSoft.Domain.LegacyIdMap.NewId.get -> long
+PubSoft.Domain.LegacyIdMap.TenantId.get -> long?
+PubSoft.Domain.LegacyIdMap.TenantId.set -> void

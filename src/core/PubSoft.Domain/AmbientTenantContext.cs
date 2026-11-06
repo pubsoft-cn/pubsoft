@@ -14,6 +14,7 @@ public sealed class AmbientTenantContext : ITenantContext
 {
     private static readonly AsyncLocal<State?> Current = new();
 
+    /// <inheritdoc />
     public long? TenantId => Current.Value?.TenantId;
 
     /// <summary>

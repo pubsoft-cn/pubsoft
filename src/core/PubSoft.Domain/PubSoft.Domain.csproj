@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Domain</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Framework-independent domain building blocks for PubSoft libraries.</Description>

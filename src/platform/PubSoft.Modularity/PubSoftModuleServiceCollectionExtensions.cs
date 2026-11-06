@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.Modularity;
 
 
+/// <summary>Module registration.</summary>
 public static class PubSoftModuleServiceCollectionExtensions
 {
     /// <summary>Registers modules and runs their <c>ConfigureServices</c> in dependency order.</summary>
@@ -64,7 +65,7 @@ public static class PubSoftModuleServiceCollectionExtensions
         };
         await runtime.Orchestrator.OnInitializationAllAsync(context).ConfigureAwait(false);
         lifetime?.ApplicationStopping.Register(
-            () => runtime.Orchestrator.OnShutdownAllAsync(context).AsTask().GetAwaiter().GetResult()); // pubsoft:exempt PUBSOFT017 "intentional sync bridge — callback is sync by contract"
+            () => runtime.Orchestrator.OnShutdownAllAsync(context).AsTask().GetAwaiter().GetResult()); // pubsoft:exempt PUBSOFT017 "intentional sync bridge - callback is sync by contract"
         return host;
     }
 }

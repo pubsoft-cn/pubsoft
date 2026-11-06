@@ -12,7 +12,7 @@ namespace PubSoft.AspNetCore;
 public static class PubSoftRateLimitRejectionExtensions
 {
     /// <summary>
-    /// Registers a host-specific 429 body writer — e.g. an API error envelope
+    /// Registers a host-specific 429 body writer -- e.g. an API error envelope
     /// (<c>{"code":429,"message":"..."}</c>) matching the host's response conventions.
     /// </summary>
     public static IServiceCollection AddPubSoftRateLimitRejection(

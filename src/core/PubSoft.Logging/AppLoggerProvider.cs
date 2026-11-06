@@ -3,13 +3,16 @@ using Microsoft.Extensions.Logging;
 
 namespace PubSoft.Logging;
 
+/// <summary>Microsoft.Extensions.Logging provider bridging ILogger into <see cref="AppLogger"/>.</summary>
 public sealed class AppLoggerProvider(AppLogger appLogger) : ILoggerProvider
 {
     private readonly AppLogger _appLogger = appLogger ?? throw new ArgumentNullException(nameof(appLogger));
 
+    /// <inheritdoc />
     public ILogger CreateLogger(string categoryName)
         => new AppLoggerAdapter(categoryName, _appLogger);
 
+    /// <inheritdoc />
     public void Dispose()
     {
     }
@@ -69,8 +72,10 @@ internal sealed class AppLoggerAdapter(string categoryName, AppLogger appLogger)
     };
 }
 
+/// <summary>Logging registration.</summary>
 public static class LoggingServiceCollectionExtensions
 {
+    /// <summary>Registers AppLogger + the MEL provider bridge.</summary>
     public static IServiceCollection AddPubSoftLogging(
         this IServiceCollection services,
         AppLogLevel minLevel = AppLogLevel.Info,
@@ -84,6 +89,7 @@ public static class LoggingServiceCollectionExtensions
         return services.AddPubSoftLogging(new AppLogger(sinks, minLevel));
     }
 
+    /// <summary>Registers a pre-built AppLogger instance.</summary>
     public static IServiceCollection AddPubSoftLogging(this IServiceCollection services, AppLogger appLogger)
     {
         ArgumentNullException.ThrowIfNull(services);

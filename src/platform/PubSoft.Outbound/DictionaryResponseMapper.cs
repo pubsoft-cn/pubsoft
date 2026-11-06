@@ -6,13 +6,16 @@ using PubSoft.Contracts;
 
 namespace PubSoft.Outbound;
 
+/// <summary>Maps flat field dictionaries to contract types.</summary>
 [RequiresUnreferencedCode("Response mapping uses reflection over response members; preserve contract types under trimming.")]
 [RequiresDynamicCode("Response mapping deserializes nested values at runtime.")]
 public static class DictionaryResponseMapper
 {
+    /// <summary>Maps fields to <typeparamref name="T"/>.</summary>
     public static T Map<T>(IReadOnlyDictionary<string, string> fields, INamingPolicy namingPolicy) where T : new()
         => (T)Map(typeof(T), fields, namingPolicy);
 
+    /// <summary>Maps fields to the given type.</summary>
     public static object Map(Type responseType, IReadOnlyDictionary<string, string> fields, INamingPolicy namingPolicy)
     {
         ArgumentNullException.ThrowIfNull(responseType);

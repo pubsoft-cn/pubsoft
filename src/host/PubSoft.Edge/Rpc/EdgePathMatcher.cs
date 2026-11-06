@@ -10,7 +10,7 @@ namespace PubSoft.Edge;
 
 
 /// <summary>
-/// Shared gateway-path matcher — exact <c>{gatewayPath}</c> match, or the single-segment
+/// Shared gateway-path matcher -- exact <c>{gatewayPath}</c> match, or the single-segment
 /// pseudo-path <c>{gatewayPath}/{method}</c> when pseudo paths are enabled.
 /// Used by both the gateway and the rate-limit middleware so pseudo-path traffic
 /// cannot slip past the limiter.

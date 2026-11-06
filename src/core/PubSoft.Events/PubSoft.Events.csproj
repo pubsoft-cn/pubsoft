@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Events</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>In-process domain event contracts and bounded asynchronous dispatch.</Description>

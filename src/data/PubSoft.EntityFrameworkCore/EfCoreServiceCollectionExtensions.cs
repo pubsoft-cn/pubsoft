@@ -59,7 +59,7 @@ public static class EfCoreServiceCollectionExtensions
     /// </summary>
     /// <remarks>
     /// Resolving participants may construct the context at save time even when the request never used it;
-    /// a save on an unchanged context is a no-op. Register each context once — either here or via
+    /// a save on an unchanged context is a no-op. Register each context once -- either here or via
     /// <see cref="AddPubSoftRequestUnitOfWork{TDbContext}"/>, not both.
     /// </remarks>
     public static IServiceCollection AddPubSoftSaveParticipant<TDbContext>(this IServiceCollection services)

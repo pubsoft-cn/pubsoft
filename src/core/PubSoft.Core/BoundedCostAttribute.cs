@@ -1,14 +1,15 @@
 namespace PubSoft.Core;
 
 /// <summary>
-/// Declares that a member's per-call cost is bounded — once-per-lifetime (startup/registration),
-/// periodic (timer), input-bounded, or capacity-triggered — so PUBSOFT003 and future
+/// Declares that a member's per-call cost is bounded -- once-per-lifetime (startup/registration),
+/// periodic (timer), input-bounded, or capacity-triggered -- so PUBSOFT003 and future
 /// hot-path analyzers skip it. Follows the BCL "Requires" family shape: the
 /// <see cref="Reason"/> is a mandatory constructor argument so the exemption documents itself.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class BoundedCostAttribute : Attribute
 {
+    /// <summary>Declares the bound; <paramref name="reason"/> is mandatory so the exemption documents itself.</summary>
     public BoundedCostAttribute(string reason)
     {
         if (string.IsNullOrWhiteSpace(reason))
@@ -16,5 +17,6 @@ public sealed class BoundedCostAttribute : Attribute
         Reason = reason;
     }
 
+    /// <summary>What bounds the work (e.g. "runs once at startup", "bounded by input length").</summary>
     public string Reason { get; }
 }

@@ -16,8 +16,14 @@
         Include="$(MSBuildThisFileDirectory)../docs/**/*.md;$(MSBuildThisFileDirectory)../README*.md;$(MSBuildThisFileDirectory)**/README*.md" />
     <CompilerVisibleProperty Include="PUBSOFT_FORBIDDEN_PATTERNS" />
     <CompilerVisibleProperty Include="PUBSOFT_FORBIDDEN_PATTERNS_EXCLUDING_TESTS" />
+    <CompilerVisibleProperty Include="PubSoftDocDiscipline" />
     <!-- Ship the per-package README inside the nupkg (NuGet.org renders it on the package page). -->
     <None Include="README.md" Pack="true" PackagePath="\" Condition="Exists('README.md')" />
+    <!-- zh-CN satellite IntelliSense: author translated doc xml at docs/intellisense/zh-CN/{Assembly}.xml;
+         NuGet picks it automatically when the IDE display language is zh-CN. -->
+    <None Include="$(MSBuildThisFileDirectory)../docs/intellisense/zh-CN/$(MSBuildProjectName).xml"
+          Pack="true" PackagePath="lib\$(TargetFramework)\zh-CN\"
+          Condition="Exists('$(MSBuildThisFileDirectory)../docs/intellisense/zh-CN/$(MSBuildProjectName).xml')" />
   </ItemGroup>
   <PropertyGroup>
     <PackageReadmeFile Condition="Exists('README.md')">README.md</PackageReadmeFile>

@@ -2,20 +2,24 @@ using System.Runtime.CompilerServices;
 
 namespace PubSoft.Core;
 
+/// <summary>Argument guards for domain invariants; all violations surface as <see cref="DomainException"/>.</summary>
 public static class Guard
 {
+    /// <summary>Throws when <paramref name="value"/> is null; returns the value otherwise.</summary>
     public static string NotNull(string? value, [CallerArgumentExpression(nameof(value))] string? name = null)
     {
         if (value is null) throw new DomainException($"{name} must not be null");
         return value;
     }
 
+    /// <summary>Throws when <paramref name="value"/> is null, empty, or whitespace; returns the value otherwise.</summary>
     public static string NotEmpty(string? value, [CallerArgumentExpression(nameof(value))] string? name = null)
     {
         if (string.IsNullOrWhiteSpace(value)) throw new DomainException($"{name} must not be empty");
         return value!;
     }
 
+    /// <summary>Throws when <paramref name="value"/> exceeds <paramref name="maxLength"/> characters; returns the value otherwise.</summary>
     public static string MaxLength(string value, int maxLength, [CallerArgumentExpression(nameof(value))] string? name = null)
     {
         NotNull(value, name);
@@ -23,6 +27,7 @@ public static class Guard
         return value;
     }
 
+    /// <summary>Throws unless <paramref name="value"/> is a digit-only phone number of at most 16 characters.</summary>
     public static string Phone(string value)
     {
         NotNull(value, nameof(Phone));
@@ -31,12 +36,14 @@ public static class Guard
         return value;
     }
 
+    /// <summary>Throws when <paramref name="value"/> is not a named member of <typeparamref name="T"/>.</summary>
     public static T EnumDefined<T>(T value, [CallerArgumentExpression(nameof(value))] string? name = null) where T : struct, Enum
     {
         if (!Enum.IsDefined(value)) throw new DomainException($"{name} invalid enum: {value}");
         return value;
     }
 
+    /// <summary>Throws when <paramref name="value"/> sets bits outside the declared flags of <typeparamref name="T"/>.</summary>
     public static T FlagsDefined<T>(T value, [CallerArgumentExpression(nameof(value))] string? name = null) where T : struct, Enum
     {
         var mask = Enum.GetValues<T>().Select(ToUInt64Bits).Aggregate(0UL, (current, flag) => current | flag);
@@ -61,15 +68,18 @@ public static class Guard
     }
 }
 
+/// <summary>A domain rule violation; maps to a 4xx response through the exception middleware.</summary>
 public sealed class DomainException : Exception
 {
+    /// <summary>Creates the exception with a violation message.</summary>
     public DomainException(string message) : base(message) { }
+    /// <summary>Creates the exception with a violation message and inner cause.</summary>
     public DomainException(string message, Exception innerException) : base(message, innerException) { }
 
     /// <summary>
     /// HTTP status the exception middleware surfaces for this domain violation.
     /// Default 400; use 409 for conflicts (e.g. "already registered"). Values
-    /// outside the 4xx range are clamped to 400 — domain errors never map to 5xx.
+    /// outside the 4xx range are clamped to 400 -- domain errors never map to 5xx.
     /// </summary>
     public int StatusCode { get; init; } = 400;
 }

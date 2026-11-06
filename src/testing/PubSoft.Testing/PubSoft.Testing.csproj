@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Testing</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Test doubles for PubSoft contracts: fixed scope contexts and a controllable TimeProvider.</Description>

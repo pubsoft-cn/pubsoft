@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.MultiTenancy</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Framework-independent tenant model and management contracts for PubSoft.</Description>

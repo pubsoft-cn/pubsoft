@@ -15,13 +15,13 @@ namespace PubSoft.Edge;
 
 
 /// <summary>
-/// Edge OpenAPI document builder — OpenAPI 3.0.3 generated from the registered
+/// Edge OpenAPI document builder -- OpenAPI 3.0.3 generated from the registered
 /// <see cref="IEdgeHandler"/> set:
 /// <list type="bullet">
-/// <item><c>POST {gatewayPath}</c> — the real endpoint (<see cref="EdgeRpcRequest"/> envelope schema)</item>
-/// <item><c>POST {gatewayPath}/{method}</c> — one pseudo-path per method, emitted only when
+/// <item><c>POST {gatewayPath}</c> -- the real endpoint (<see cref="EdgeRpcRequest"/> envelope schema)</item>
+/// <item><c>POST {gatewayPath}/{method}</c> -- one pseudo-path per method, emitted only when
 /// <see cref="EdgeGatewayOptions.EnablePseudoPaths"/> is on (Try-it-out compatible)</item>
-/// <item><c>x-edge-methods</c> — machine-readable method catalog (method, schemes, params $ref)</item>
+/// <item><c>x-edge-methods</c> -- machine-readable method catalog (method, schemes, params $ref)</item>
 /// </list>
 /// XML doc comments (<c>&lt;summary&gt;</c>) on handler classes and params properties become
 /// descriptions when the consuming project emits .xml documentation files
@@ -105,7 +105,7 @@ public static class EdgeOpenApiDocument
                     ["title"] = opts.Title,
                     ["version"] = opts.Version,
                     ["description"] = opts.Description
-                        ?? $"Edge RPC gateway — every method is POST {gatewayPath} with envelope.method dispatch.",
+                        ?? $"Edge RPC gateway - every method is POST {gatewayPath} with envelope.method dispatch.",
                 },
                 ["paths"] = paths,
                 ["components"] = new JsonObject
@@ -118,14 +118,14 @@ public static class EdgeOpenApiDocument
                             ["type"] = "apiKey",
                             ["in"] = "body",
                             ["name"] = "credential",
-                            ["description"] = "scheme=session — credential carries the sessionKey issued by a login method",
+                            ["description"] = "scheme=session - credential carries the sessionKey issued by a login method",
                         },
                         ["edgeSignature"] = new JsonObject
                         {
                             ["type"] = "apiKey",
                             ["in"] = "body",
                             ["name"] = "credential",
-                            ["description"] = "scheme=hmac/md5 — credential carries the canonical-string signature over method/timestamp/nonce/params",
+                            ["description"] = "scheme=hmac/md5 - credential carries the canonical-string signature over method/timestamp/nonce/params",
                         },
                     },
                 },
@@ -158,7 +158,7 @@ public static class EdgeOpenApiDocument
                     {
                         ["200"] = new JsonObject
                         {
-                            ["description"] = "Uniform envelope response — the code lives in the body (HTTP is always 200).",
+                            ["description"] = "Uniform envelope response - the code lives in the body (HTTP is always 200).",
                             ["content"] = new JsonObject
                             {
                                 ["application/json"] = new JsonObject { ["schema"] = response },
@@ -174,7 +174,7 @@ public static class EdgeOpenApiDocument
             var schemeNames = string.Join("|", schemes.Select(s => Camel.ConvertName(s.ToString()))); // pubsoft:exempt PUBSOFT027 "enum name render on non-hot path (doc-gen/startup/log line)"
             var media = new JsonObject { ["schema"] = PseudoRequestSchema(paramSchema, schemes) };
 
-            // One ready-to-send example per accepted scheme — Swagger UI shows them as a
+            // One ready-to-send example per accepted scheme - Swagger UI shows them as a
             // dropdown in Try-it-out; `none` bodies execute unmodified.
             var examples = new JsonObject();
             foreach (var scheme in schemes.OrderBy(TryOrder))
@@ -208,7 +208,7 @@ public static class EdgeOpenApiDocument
                     {
                         ["200"] = new JsonObject
                         {
-                            ["description"] = "EdgeRpcResponse — data holds the method result",
+                            ["description"] = "EdgeRpcResponse - data holds the method result",
                             ["content"] = new JsonObject
                             {
                                 ["application/json"] = new JsonObject
@@ -228,7 +228,7 @@ public static class EdgeOpenApiDocument
             var envelopeProps = (JsonObject)((JsonObject)_schemas["EdgeRpcRequest"]!["properties"]!).DeepClone();
             envelopeProps.Remove("method");
             envelopeProps["params"] = paramSchema;
-            // Property-level examples — shown in the Schema tab and merged into generated samples.
+            // Property-level examples - shown in the Schema tab and merged into generated samples.
             ((JsonObject)envelopeProps["clientId"]!)["example"] = opts.ClientIdExample ?? "demo-app";
             ((JsonObject)envelopeProps["scheme"]!)["example"] = Camel.ConvertName(PreferredScheme(schemes).ToString()); // pubsoft:exempt PUBSOFT027 "enum name render during one-time OpenAPI document generation"
             ((JsonObject)envelopeProps["timestamp"]!)["example"] = TimeProvider.System.GetUtcNow().ToUnixTimeMilliseconds();
@@ -257,10 +257,10 @@ public static class EdgeOpenApiDocument
 
         private static string SchemeHint(EdgeAuthScheme s) => s switch
         {
-            EdgeAuthScheme.None => "scheme=none — send as-is",
-            EdgeAuthScheme.Session => "scheme=session — put a sessionKey (from a login method) into credential",
-            EdgeAuthScheme.Hmac => "scheme=hmac — credential = canonical HMAC-SHA256 signature",
-            EdgeAuthScheme.Md5 => "scheme=md5 — credential = canonical MD5 signature",
+            EdgeAuthScheme.None => "scheme=none - send as-is",
+            EdgeAuthScheme.Session => "scheme=session - put a sessionKey (from a login method) into credential",
+            EdgeAuthScheme.Hmac => "scheme=hmac - credential = canonical HMAC-SHA256 signature",
+            EdgeAuthScheme.Md5 => "scheme=md5 - credential = canonical MD5 signature",
             _ => s.ToString(), // pubsoft:exempt PUBSOFT027 "enum name render on non-hot path (doc-gen/startup/log line)"
         };
 
@@ -333,14 +333,14 @@ public static class EdgeOpenApiDocument
             cred["description"] = AppendNote((string?)cred["description"],
                 "session: sessionKey; hmac/md5: signature; none: empty");
             var paramsProp = (JsonObject)props["params"]!;
-            paramsProp["description"] = "Method params — shape per method (see x-edge-methods or the per-method pseudo-paths)";
+            paramsProp["description"] = "Method params - shape per method (see x-edge-methods or the per-method pseudo-paths)";
             if (opts.ClientIdExample is { } example)
                 ((JsonObject)props["clientId"]!)["example"] = example;
         }
 
         // ── schema generation ──
 
-        /// <summary>params schema — inline empty object for parameterless params types, else a $ref.</summary>
+        /// <summary>params schema -- inline empty object for parameterless params types, else a $ref.</summary>
         private JsonObject ParamsSchemaFor(Type paramsType)
         {
             var props = paramsType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -364,7 +364,7 @@ public static class EdgeOpenApiDocument
 
             var id = preferredId ?? SchemaId(type);
             _schemaIds[type] = id;
-            _schemas[id] = new JsonObject(); // placeholder — recursive references resolve to this id
+            _schemas[id] = new JsonObject(); // placeholder - recursive references resolve to this id
             _schemas[id] = BuildObjectSchema(type);
             return id;
         }
@@ -374,7 +374,7 @@ public static class EdgeOpenApiDocument
             var id = type.Name;
             if (_usedIds.Add(id))
                 return id;
-            // Name collision across namespaces — disambiguate with the full name.
+            // Name collision across namespaces - disambiguate with the full name.
             id = type.FullName!.Replace('+', '_').Replace('.', '_');
             _usedIds.Add(id);
             return id;
@@ -422,7 +422,7 @@ public static class EdgeOpenApiDocument
             if (Nullable.GetUnderlyingType(t) is { } underlying)
                 return TypeSchema(underlying);
             if (t == typeof(object) || t == typeof(JsonElement) || t == typeof(JsonElement?))
-                return new JsonObject(); // unconstrained — honest "any JSON"
+                return new JsonObject(); // unconstrained - honest "any JSON"
             if (t == typeof(string))
                 return new JsonObject { ["type"] = "string" };
             if (t == typeof(bool))
@@ -486,7 +486,7 @@ public static class EdgeOpenApiDocument
         private static EdgeAuthScheme[] SchemesOf(IEdgeHandler handler)
             => handler.GetType().GetCustomAttribute<EdgeSchemeAttribute>()?.Schemes ?? handler.Schemes;
 
-        /// <summary>TParams of EdgeHandlerBase&lt;TParams&gt; — walks the whole base chain.</summary>
+        /// <summary>TParams of EdgeHandlerBase&lt;TParams&gt; -- walks the whole base chain.</summary>
         private static Type? ParamsTypeOf(Type handlerType)
         {
             for (var t = handlerType; t is not null; t = t.BaseType)
@@ -514,7 +514,7 @@ public static class EdgeOpenApiDocument
             }
             catch
             {
-                // Missing/corrupt doc file — descriptions are optional.
+                // Missing/corrupt doc file - descriptions are optional.
             }
             _xmlCache[assembly] = docs;
             return docs;
@@ -531,6 +531,6 @@ public static class EdgeOpenApiDocument
         private static string? FirstLine(string? s) => s?.Split('\n')[0].Trim();
 
         private static string AppendNote(string? existing, string note)
-            => string.IsNullOrWhiteSpace(existing) ? note : existing + " — " + note;
+            => string.IsNullOrWhiteSpace(existing) ? note : existing + " - " + note;
     }
 }

@@ -12,7 +12,7 @@ namespace PubSoft.AspNetCore;
 /// and <see cref="PubSoftForwardedHeadersExtensions.AddPubSoftForwardedHeaders"/>.
 /// </summary>
 /// <remarks>
-/// Forwarded headers are client-supplied input — trusting them is a deployment decision.
+/// Forwarded headers are client-supplied input -- trusting them is a deployment decision.
 /// Only enable processing when the edge proxy is configured to overwrite
 /// <c>X-Forwarded-*</c> headers, and the backend is either bound to loopback/private
 /// network or its peer set is pinned via <see cref="KnownProxies"/>/<see cref="KnownNetworks"/>.
@@ -27,7 +27,7 @@ public sealed class PubSoftForwardedHeadersOptions
 
     /// <summary>
     /// Process X-Real-IP (RemoteIpAddress rewrite) when the request carries no
-    /// X-Forwarded-For and the socket peer is trusted. Default false — X-Real-IP is a
+    /// X-Forwarded-For and the socket peer is trusted. Default false -- X-Real-IP is a
     /// non-standard single header that the platform ForwardedHeadersOptions cannot
     /// express; enable only when the edge proxy is known to overwrite it (e.g. nginx
     /// <c>proxy_set_header X-Real-IP</c>). Requires
@@ -40,7 +40,7 @@ public sealed class PubSoftForwardedHeadersOptions
 
     /// <summary>
     /// Trust forwarded headers from any upstream peer (clears KnownProxies/KnownNetworks).
-    /// Only safe when the backend socket is reachable exclusively from the trusted proxy —
+    /// Only safe when the backend socket is reachable exclusively from the trusted proxy --
     /// loopback-bound port or private network segment. On directly reachable backends this
     /// lets any client spoof its source IP (rate-limit evasion, audit poisoning).
     /// Default false: only the platform defaults (loopback) are trusted unless

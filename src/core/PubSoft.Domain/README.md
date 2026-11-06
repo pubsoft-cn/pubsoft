@@ -14,6 +14,8 @@ last-reviewed: 2026-10-13
 
 ## Entities and Audit Bases
 
+Derive `Entity<TKey>` for an entity with an application-controlled key`LegacyIdMap` is the migration shim for retiring Guid keys: one row maps `(EntityType, LegacyId)` to a replacement Snowflake `long`, with `ConfigurePubSoftLegacyIdMaps()` providing the EF mapping — retire the table once migration completes.
+
 Derive `Entity<TKey>` for an entity with an application-controlled key, or `AggregateRoot<TKey>` for an aggregate boundary:
 
 ```csharp

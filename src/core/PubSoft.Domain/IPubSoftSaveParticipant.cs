@@ -7,5 +7,6 @@ namespace PubSoft.Domain;
 /// </summary>
 public interface IPubSoftSaveParticipant
 {
+    /// <summary>Persists buffered changes; returns the affected row count.</summary>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

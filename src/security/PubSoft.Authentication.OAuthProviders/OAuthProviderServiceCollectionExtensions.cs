@@ -73,7 +73,7 @@ public static class OAuthProviderServiceCollectionExtensions
     {
         services.AddHttpClient<T>()
             .AddPubSoftHttpResilience(opts => ConfigureDefault(opts, configureResilience));
-        // AddHttpClient<T> only registers the concrete type — the registry resolves via IEnumerable<IOAuthProvider>.
+        // AddHttpClient<T> only registers the concrete type - the registry resolves via IEnumerable<IOAuthProvider>.
         services.AddTransient<IOAuthProvider>(sp => sp.GetRequiredService<T>());
         return services;
     }

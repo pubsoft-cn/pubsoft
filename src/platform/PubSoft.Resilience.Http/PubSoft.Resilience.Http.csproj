@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <RootNamespace>PubSoft.Resilience.Http</RootNamespace>
     <PackageId>PubSoft.Resilience.Http</PackageId>
     <IsAotCompatible>true</IsAotCompatible>

@@ -9,9 +9,11 @@ using PubSoft.Caching;
 
 namespace PubSoft.Tokens;
 
+/// <summary>Fetches tokens over HTTP with caching + per-key single-flight refresh.</summary>
 public sealed class HttpTokenProvider : ITokenProvider
 {
 
+    /// <summary>Typed client name.</summary>
     public const string HttpClientName = "PubSoft.Tokens";
     private const long MaxTokenResponseBytes = 64 * 1024;
 
@@ -22,6 +24,7 @@ public sealed class HttpTokenProvider : ITokenProvider
     private readonly ILogger<HttpTokenProvider>? _logger;
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _refreshLocks = new(StringComparer.Ordinal);
 
+    /// <summary>Creates the provider.</summary>
     public HttpTokenProvider(
         IHttpClientFactory httpClientFactory,
         ICache cache,
@@ -36,6 +39,7 @@ public sealed class HttpTokenProvider : ITokenProvider
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public async Task<string?> GetTokenAsync(string credentialKey, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(credentialKey);
@@ -82,6 +86,7 @@ public sealed class HttpTokenProvider : ITokenProvider
         }
     }
 
+    /// <inheritdoc />
     public Task InvalidateAsync(string credentialKey, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(credentialKey);
@@ -102,7 +107,7 @@ public sealed class HttpTokenProvider : ITokenProvider
             || credential.RefreshBefore >= credential.Expiry || credential.Timeout <= TimeSpan.Zero)
             return false;
 
-        // Credentials are sent to this URL — plaintext http is rejected for
+        // Credentials are sent to this URL - plaintext http is rejected for
         // non-loopback endpoints unless explicitly opted in per credential.
         if (string.Equals(uri.Scheme, Uri.UriSchemeHttp, System.StringComparison.Ordinal) && !uri.IsLoopback && !credential.AllowInsecureUrl)
             return false;
@@ -162,7 +167,7 @@ public sealed class HttpTokenProvider : ITokenProvider
 
             try
             {
-                // Bound the endpoint response — token payloads are small JSON; an
+                // Bound the endpoint response - token payloads are small JSON; an
                 // oversized or chunked body must not exhaust memory mid-parse.
                 await response.Content.LoadIntoBufferAsync(MaxTokenResponseBytes, timeout.Token).ConfigureAwait(false);
             }

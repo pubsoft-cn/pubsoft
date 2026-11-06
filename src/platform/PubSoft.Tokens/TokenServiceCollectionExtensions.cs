@@ -5,8 +5,10 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace PubSoft.Tokens;
 
+/// <summary>Token registration.</summary>
 public static class TokenServiceCollectionExtensions
 {
+    /// <summary>Registers token providers + the delegating handler.</summary>
     public static IServiceCollection AddPubSoftTokens(
         this IServiceCollection services,
         Action<TokenManagerOptions>? configure = null,
@@ -27,7 +29,7 @@ public static class TokenServiceCollectionExtensions
     }
 
     /// <summary>Registers <see cref="MachineTokenProvider"/> as the <see cref="ITokenProvider"/> for HS256 machine credentials.</summary>
-    /// <remarks>Issuer/audience/signing key come from the configured options — never hardcode them; signers and validators must agree exactly (comparison is ordinal, case-sensitive).</remarks>
+    /// <remarks>Issuer/audience/signing key come from the configured options -- never hardcode them; signers and validators must agree exactly (comparison is ordinal, case-sensitive).</remarks>
     public static IServiceCollection AddPubSoftMachineTokens(
         this IServiceCollection services,
         Action<MachineTokenOptions> configure)
@@ -43,7 +45,7 @@ public static class TokenServiceCollectionExtensions
         services.TryAddSingleton<ITokenProvider>(provider => provider.GetRequiredService<MachineTokenProvider>());
         // Keyed registration removes ordering ambiguity: when a host registers both the HTTP
         // provider and machine tokens, the keyed "machine" name resolves the local issuer
-        // deterministically — [FromKeyedServices(MachineTokenProvider.ServiceKey)].
+        // deterministically - [FromKeyedServices(MachineTokenProvider.ServiceKey)].
         services.AddKeyedSingleton<ITokenProvider>(
             MachineTokenProvider.ServiceKey,
             (provider, _) => provider.GetRequiredService<MachineTokenProvider>());
@@ -62,6 +64,7 @@ public static class TokenServiceCollectionExtensions
         return services.AddPubSoftMachineTokens(options => BindMachineTokenOptions(section, options));
     }
 
+    /// <summary>Adds the token-injecting delegating handler to a typed client.</summary>
     public static IHttpClientBuilder AddTokenHandler(
         this IHttpClientBuilder builder,
         string credentialKey,

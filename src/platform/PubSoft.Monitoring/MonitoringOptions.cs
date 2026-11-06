@@ -3,6 +3,7 @@ namespace PubSoft.Monitoring;
 /// <summary>Configuration for the HTTP probe health check.</summary>
 public sealed class MonitoringOptions
 {
+    /// <summary>Typed HTTP client name used by probes.</summary>
     public const string HttpClientName = "PubSoft.Monitoring.Probe";
 
     /// <summary>Absolute HTTP(S) endpoints checked sequentially. Empty means no external dependency is configured.</summary>

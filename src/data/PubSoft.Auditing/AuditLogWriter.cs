@@ -2,7 +2,7 @@ namespace PubSoft.Auditing;
 
 
 /// <summary>
-/// Default <see cref="IAuditLogWriter"/> — adapts an <see cref="AuditLogEntry"/> into an
+/// Default <see cref="IAuditLogWriter"/> -- adapts an <see cref="AuditLogEntry"/> into an
 /// <see cref="AuditRequestSnapshot"/> (non-HTTP: method/path are null, status code is 0) and
 /// forwards it to the resolved <see cref="IAuditSnapshotSink"/>.
 /// </summary>
@@ -14,6 +14,7 @@ public sealed class AuditLogWriter(
 
     private readonly TimeProvider _timeProvider = timeProvider ?? TimeProvider.System;
 
+    /// <inheritdoc />
     public async Task WriteAsync(AuditLogEntry entry, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(entry);

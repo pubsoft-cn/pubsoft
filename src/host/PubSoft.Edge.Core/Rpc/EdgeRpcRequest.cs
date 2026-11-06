@@ -5,7 +5,7 @@ namespace PubSoft.Edge;
 
 
 /// <summary>
-/// Edge RPC request envelope — uniform format for all external clients.
+/// Edge RPC request envelope -- uniform format for all external clients.
 ///
 /// <see cref="Credential"/> is interpreted by <see cref="Scheme"/>:
 /// - Hmac:    signature value (Base64)
@@ -23,11 +23,11 @@ public sealed class EdgeRpcRequest
     [JsonPropertyName("method")]
     public string Method { get; set; } = string.Empty;
 
-    /// <summary>Credential scheme — default <see cref="EdgeAuthScheme.Hmac"/>.</summary>
+    /// <summary>Credential scheme -- default <see cref="EdgeAuthScheme.Hmac"/>.</summary>
     [JsonPropertyName("scheme")]
     public EdgeAuthScheme Scheme { get; set; } = EdgeAuthScheme.Hmac;
 
-    /// <summary>Credential — signature or sessionKey, per <see cref="Scheme"/>.</summary>
+    /// <summary>Credential -- signature or sessionKey, per <see cref="Scheme"/>.</summary>
     [JsonPropertyName("credential")]
     public string Credential { get; set; } = string.Empty;
 
@@ -39,7 +39,7 @@ public sealed class EdgeRpcRequest
     [JsonPropertyName("nonce")]
     public string Nonce { get; set; } = string.Empty;
 
-    /// <summary>Optional client-generated correlation id — signed, echoed in the response, propagated into server-side tracing.</summary>
+    /// <summary>Optional client-generated correlation id -- signed, echoed in the response, propagated into server-side tracing.</summary>
     [JsonPropertyName("requestId")]
     public string? RequestId { get; set; }
 

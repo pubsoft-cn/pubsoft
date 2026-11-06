@@ -20,8 +20,8 @@ public static class GatewayRateLimitingExtensions
                       ?? new GatewayRateLimitOptions();
         if (!options.Enabled) return services;
 
-        // 仅在启用时限流时重写转发头信任面——否则限流关闭也会信任任意 X-Forwarded-For。
-        // 未配置 TrustedProxies/TrustedNetworks 时信任任意上游 peer——适用前提：后端
+        // 仅在启用时限流时重写转发头信任面--否则限流关闭也会信任任意 X-Forwarded-For。
+        // 未配置 TrustedProxies/TrustedNetworks 时信任任意上游 peer--适用前提：后端
         // socket 只能经可信网关到达。配置了信任清单则只接受列出的代理对端。
         var trustedProxies = ParseAddresses(options.TrustedProxies, nameof(options.TrustedProxies));
         var trustedNetworks = ParseNetworks(options.TrustedNetworks, nameof(options.TrustedNetworks));
@@ -56,7 +56,7 @@ public static class GatewayRateLimitingExtensions
             ctx => MatchesPrefix(Path(ctx), loginPrefixes),
             ctx => $"login:{Ip(ctx)}");
 
-        // X-Client-Id / Basic 用户名都是未认证输入——旋转取值原本能为每个伪造 clientId
+        // X-Client-Id / Basic 用户名都是未认证输入--旋转取值原本能为每个伪造 clientId
         // 开出独立限流分区。两层防线：guard 限制单 IP 可声明的 distinct clientId，超额
         // 退回按 IP 桶；*-ip 聚合策略对所有匹配请求无条件按 IP 计数，封住总配额。
         var clientIdGuard = new ClientIdCardinalityGuard(

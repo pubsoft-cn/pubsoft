@@ -4,9 +4,10 @@ using System.Text.RegularExpressions;
 
 namespace PubSoft.Caching;
 
+/// <summary>In-process <see cref="ICache"/> with size cap and expiry sweep.</summary>
 public sealed class MemoryCache : ICache, IDisposable
 {
-    /// <summary>单值上限——字符串 4 Mi 字符 / 二进制 4 MiB，防止单条缓存耗尽内存。</summary>
+    /// <summary>Per-entry cap -- 4M chars for strings / 4 MiB for binaries, so a single entry cannot exhaust memory.</summary>
     private const int MaxValueChars = 4_194_304;
     private const int MaxValueBytes = 4_194_304;
     private readonly ConcurrentDictionary<string, CacheEntry> _cache = new(StringComparer.Ordinal);
@@ -18,6 +19,7 @@ public sealed class MemoryCache : ICache, IDisposable
     private readonly ConcurrentDictionary<string, Regex> _regexCache = new(StringComparer.Ordinal);
     private bool _disposed;
 
+    /// <summary>Creates the cache.</summary>
     public MemoryCache(TimeSpan? cleanupInterval = null, int maxSize = 10000, TimeProvider? timeProvider = null)
     {
         _timeProvider = timeProvider ?? TimeProvider.System;
@@ -31,6 +33,7 @@ public sealed class MemoryCache : ICache, IDisposable
         _cleanupTimer = new Timer(CleanupExpiredEntries, null, interval, interval);
     }
 
+    /// <inheritdoc />
     public Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default) where T : class
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -43,6 +46,7 @@ public sealed class MemoryCache : ICache, IDisposable
         return Task.FromResult<T?>(null);
     }
 
+    /// <inheritdoc />
     public Task SetAsync<T>(string key, T value, TimeSpan? expiry = null, CancellationToken cancellationToken = default) where T : class
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -54,13 +58,14 @@ public sealed class MemoryCache : ICache, IDisposable
         lock (_lock)
         {
             ThrowIfDisposed();
-            if (!_cache.ContainsKey(key) && _cache.Count >= _maxSize) // pubsoft:exempt PUBSOFT012 "ContainsKey guards eviction only — set always writes"
+            if (!_cache.ContainsKey(key) && _cache.Count >= _maxSize) // pubsoft:exempt PUBSOFT012 "ContainsKey guards eviction only - set always writes"
                 EvictLRUEntries();
             _cache[key] = new CacheEntry(value, now, expiry.HasValue ? now.Add(expiry.Value) : null, now);
         }
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public Task RemoveAsync(string key, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -69,6 +74,7 @@ public sealed class MemoryCache : ICache, IDisposable
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -76,6 +82,7 @@ public sealed class MemoryCache : ICache, IDisposable
         return Task.FromResult(_cache.TryGetValue(key, out var entry) && !entry.IsExpired(_timeProvider.GetUtcNow().UtcDateTime));
     }
 
+    /// <inheritdoc />
     public async Task<T> GetOrSetAsync<T>(string key, Func<Task<T>> factory, TimeSpan? expiry = null, CancellationToken cancellationToken = default) where T : class
     {
         ArgumentNullException.ThrowIfNull(factory);
@@ -102,6 +109,7 @@ public sealed class MemoryCache : ICache, IDisposable
         }
     }
 
+    /// <inheritdoc />
     public Task<Dictionary<string, T?>> GetManyAsync<T>(IEnumerable<string> keys, CancellationToken cancellationToken = default) where T : class
     {
         ArgumentNullException.ThrowIfNull(keys);
@@ -124,6 +132,7 @@ public sealed class MemoryCache : ICache, IDisposable
         return Task.FromResult(result);
     }
 
+    /// <inheritdoc />
     public Task SetManyAsync<T>(IEnumerable<KeyValuePair<string, T>> items, TimeSpan? expiry = null, CancellationToken cancellationToken = default) where T : class
     {
         ArgumentNullException.ThrowIfNull(items);
@@ -143,7 +152,7 @@ public sealed class MemoryCache : ICache, IDisposable
             ThrowIfDisposed();
             foreach (var item in materialized)
             {
-                if (!_cache.ContainsKey(item.Key) && _cache.Count >= _maxSize) // pubsoft:exempt PUBSOFT012 "ContainsKey guards eviction only — set always writes"
+                if (!_cache.ContainsKey(item.Key) && _cache.Count >= _maxSize) // pubsoft:exempt PUBSOFT012 "ContainsKey guards eviction only - set always writes"
                     EvictLRUEntries();
                 _cache[item.Key] = new CacheEntry(item.Value, now, expiryTime, now);
             }
@@ -151,6 +160,7 @@ public sealed class MemoryCache : ICache, IDisposable
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public Task RemoveManyAsync(IEnumerable<string> keys, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(keys);
@@ -163,6 +173,7 @@ public sealed class MemoryCache : ICache, IDisposable
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public Task RemoveByPatternAsync(string pattern, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -192,6 +203,7 @@ public sealed class MemoryCache : ICache, IDisposable
         return Task.CompletedTask;
     }
 
+    /// <summary>Returns entry/expiry counters.</summary>
     public CacheStatistics GetStatistics()
     {
         lock (_lock)
@@ -205,6 +217,7 @@ public sealed class MemoryCache : ICache, IDisposable
         }
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         lock (_lock)
@@ -266,7 +279,7 @@ public sealed class MemoryCache : ICache, IDisposable
     private static void ValidateValue<T>(T value) where T : class
     {
         if (value is null) throw new ArgumentNullException(nameof(value));
-        // 内存缓存同样限值上限——string/byte[] 可直接度量；其余托管对象由 _maxSize 条目数封顶兜底
+        // 内存缓存同样限值上限--string/byte[] 可直接度量；其余托管对象由 _maxSize 条目数封顶兜底
         switch (value)
         {
             case string s when s.Length > MaxValueChars:
@@ -293,10 +306,14 @@ public sealed class MemoryCache : ICache, IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
     }
 
+    /// <summary>Cache counters.</summary>
     public sealed class CacheStatistics
     {
+        /// <summary>Entries currently stored.</summary>
         public int TotalEntries { get; init; }
+        /// <summary>Stored-but-expired entries.</summary>
         public int ExpiredEntries { get; init; }
+        /// <summary>Configured size cap.</summary>
         public int SizeLimit { get; init; }
     }
 

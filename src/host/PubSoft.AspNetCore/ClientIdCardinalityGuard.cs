@@ -13,7 +13,7 @@ namespace PubSoft.AspNetCore;
 
 /// <summary>
 /// Bounds how many distinct client identities a single remote IP may claim within a
-/// window. Client-ID headers are unauthenticated input — without this bound a caller
+/// window. Client-ID headers are unauthenticated input -- without this bound a caller
 /// could mint a fresh rate-limit partition per forged value. Over-cap identities are
 /// refused so the request falls back to IP-only bucketing.
 /// </summary>

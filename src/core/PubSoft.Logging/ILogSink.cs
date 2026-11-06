@@ -1,12 +1,16 @@
 namespace PubSoft.Logging;
 
+/// <summary>Log output target fed batches by <see cref="AppLogger"/>.</summary>
 public interface ILogSink
 {
+    /// <summary>Writes one batch.</summary>
     ValueTask WriteBatchAsync(ReadOnlyMemory<LogEntry> entries, CancellationToken cancellationToken);
 }
 
+/// <summary>Console sink.</summary>
 public sealed class ConsoleLogSink : ILogSink
 {
+    /// <inheritdoc />
     public ValueTask WriteBatchAsync(ReadOnlyMemory<LogEntry> entries, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();

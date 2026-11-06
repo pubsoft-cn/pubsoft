@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Outbound</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Provider-neutral contract-driven outbound execution, metadata registry, and request/response mapping.</Description>

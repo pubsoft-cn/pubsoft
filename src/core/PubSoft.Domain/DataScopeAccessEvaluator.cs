@@ -1,14 +1,17 @@
 namespace PubSoft.Domain;
 
+/// <summary>Evaluates which ids a subject may access within a dimension, given its role scopes.</summary>
 public sealed class DataScopeAccessEvaluator
 {
     private readonly IDataScopeDimensionRegistry _dimensions;
 
+    /// <summary>Creates an evaluator over the registered dimension names.</summary>
     public DataScopeAccessEvaluator(IDataScopeDimensionRegistry dimensions)
     {
         _dimensions = dimensions ?? throw new ArgumentNullException(nameof(dimensions));
     }
 
+    /// <summary>Returns the allowed ids - null when unrestricted, empty when the dimension is unknown.</summary>
     public IReadOnlyList<long>? GetAllowedIds(
         string dimension,
         IEnumerable<DataScopeDimension>? roleScopes)
@@ -30,6 +33,7 @@ public sealed class DataScopeAccessEvaluator
             .ToArray());
     }
 
+    /// <summary>Whether <paramref name="scopeId"/> falls inside the subject's allowed set for the dimension.</summary>
     public bool CanAccess(
         string dimension,
         long scopeId,

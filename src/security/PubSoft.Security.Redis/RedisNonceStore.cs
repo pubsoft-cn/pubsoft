@@ -26,6 +26,7 @@ public sealed class RedisNonceStore : INonceStore
     private readonly RedisNonceStoreOptions _options;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
+    /// <summary>Creates the store over a shared multiplexer.</summary>
     public RedisNonceStore(
         IConnectionMultiplexer connection,
         RedisNonceStoreOptions? options = null,
@@ -37,6 +38,7 @@ public sealed class RedisNonceStore : INonceStore
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
+    /// <inheritdoc />
     public async ValueTask<bool> TryUseAsync(
         string scope,
         string nonce,

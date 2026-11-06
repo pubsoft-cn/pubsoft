@@ -7,14 +7,16 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.OAuth;
 
 /// <summary>
-/// DingTalk OAuth provider — QR login / H5 code → openid/unionid.
+/// DingTalk OAuth provider -- QR login / H5 code -> openid/unionid.
 /// API: POST https://oapi.dingtalk.com/sns/getuserinfo_bycode
-/// Signing: HmacSHA256(timestamp + "\n" + appSecret) → Base64 → UrlEncode
+/// Signing: HmacSHA256(timestamp + "\n" + appSecret) -> Base64 -> UrlEncode
 /// AppId=appKey, AppSecret=appSecret.
 /// </summary>
+/// <summary>DingTalk OAuth provider.</summary>
 public sealed class DingTalkOAuthProvider : OAuthProviderBase
 {
     private readonly TimeProvider _timeProvider = TimeProvider.System;
+    /// <summary>Creates the provider.</summary>
     public DingTalkOAuthProvider(
         IOAuthChannelConfigProvider configProvider,
         HttpClient httpClient,
@@ -52,7 +54,7 @@ public sealed class DingTalkOAuthProvider : OAuthProviderBase
         var signature = Convert.ToBase64String(new HMACSHA256(Encoding.UTF8.GetBytes(appSecret)).ComputeHash(Encoding.UTF8.GetBytes(signContent)));
 
         var url = $"https://oapi.dingtalk.com/sns/getuserinfo_bycode?accessKey={Uri.EscapeDataString(appKey)}&timestamp={timestamp}&signature={Uri.EscapeDataString(signature)}";
-        // StringContent keeps a Content-Length — same WAF consideration as WeChat.
+        // StringContent keeps a Content-Length - same WAF consideration as WeChat.
         string json;
         using (var stream = new MemoryStream())
         {

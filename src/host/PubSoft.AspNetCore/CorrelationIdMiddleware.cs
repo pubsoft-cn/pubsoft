@@ -16,7 +16,7 @@ public sealed class CorrelationIdMiddleware
         _options = options ?? new CorrelationIdOptions();
     }
 
-    /// <summary>Resolved correlation id for the current request — use this when
+    /// <summary>Resolved correlation id for the current request -- use this when
     /// propagating to outbound calls (same id, whichever inbound form arrived).</summary>
     public static string CurrentId(HttpContext context) => context.TraceIdentifier;
 
@@ -30,7 +30,7 @@ public sealed class CorrelationIdMiddleware
 
         var id = ResolveInbound(context) ?? context.TraceIdentifier;
         context.TraceIdentifier = id;
-        // ambient: (traceId, 本服务spanId) — 出栈 DelegatingHandler 读此续链
+        // ambient: (traceId, 本服务spanId) - 出栈 DelegatingHandler 读此续链
         CorrelationAmbient.Current = (id, CorrelationAmbient.NewSpanId());
 
         if (_options.EchoResponseHeader)
@@ -47,7 +47,7 @@ public sealed class CorrelationIdMiddleware
     }
 
     /// <summary>Inbound resolution order: valid <c>traceparent</c> (take trace-id
-    /// segment) → each configured header in order → null (caller keeps default).</summary>
+    /// segment) -> each configured header in order -> null (caller keeps default).</summary>
     private string? ResolveInbound(HttpContext context)
     {
         if (context.Request.Headers.TryGetValue("traceparent", out var tp)
@@ -70,7 +70,7 @@ public sealed class CorrelationIdMiddleware
         traceId = "";
         if (string.IsNullOrEmpty(value) || value.Length < 35)
             return false;
-        // 00-<32hex>-<16hex>-<2hex> — segment 1 must be 32 lowercase/uppercase hex
+        // 00-<32hex>-<16hex>-<2hex> - segment 1 must be 32 lowercase/uppercase hex
         var seg = value.AsSpan(3, 32);
         foreach (var c in seg)
             if (!Uri.IsHexDigit(c)) return false;

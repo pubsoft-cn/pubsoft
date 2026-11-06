@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Messaging</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Provider-neutral message envelopes and publisher/handler contracts.</Description>

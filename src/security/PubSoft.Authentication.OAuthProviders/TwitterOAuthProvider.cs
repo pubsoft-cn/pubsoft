@@ -9,9 +9,12 @@ namespace PubSoft.OAuth;
 /// Twitter/X OAuth 2.0 with PKCE (User Context). The caller must supply a PKCE
 /// <see cref="OAuthAuthorizeUrlRequest.CodeChallenge"/> (S256); this package does not retain the verifier.
 /// </summary>
+/// <summary>Twitter OAuth provider.</summary>
 public sealed class TwitterOAuthProvider : GenericOAuthProvider
 {
-    public TwitterOAuthProvider(IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<TwitterOAuthProvider>? l = null) : base(cp, hc, l) { }
+    /// <summary>Creates the provider.</summary>
+    public TwitterOAuthProvider(
+IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<TwitterOAuthProvider>? l = null) : base(cp, hc, l) { }
     public override string Provider => OAuthProviderNames.Twitter;
     protected override string AuthorizeEndpoint => "https://twitter.com/i/oauth2/authorize";
     protected override string TokenEndpoint => "https://api.twitter.com/2/oauth2/token";

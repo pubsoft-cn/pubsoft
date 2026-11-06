@@ -5,8 +5,10 @@ using StackExchange.Redis;
 
 namespace PubSoft.Security.Redis;
 
+/// <summary>Redis nonce-store registration.</summary>
 public static class RedisNonceStoreServiceCollectionExtensions
 {
+    /// <summary>Registers the Redis <see cref="INonceStore"/>.</summary>
     public static IServiceCollection AddPubSoftRedisNonceStore(
         this IServiceCollection services,
         IConnectionMultiplexer connection,

@@ -11,7 +11,7 @@ namespace PubSoft.Edge;
 
 
 /// <summary>
-/// Edge rate-limit middleware — install before <see cref="EdgeGatewayMiddleware"/>.
+/// Edge rate-limit middleware -- install before <see cref="EdgeGatewayMiddleware"/>.
 ///
 /// Partitions by clientId + scheme + method:
 /// - total limit: clientId + scheme, returns a rate-limit response when exceeded
@@ -31,6 +31,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
     private readonly ILogger<EdgeRateLimitMiddleware> _logger;
     private readonly Timer _cleanupTimer;
 
+    /// <summary>Creates the middleware.</summary>
     public EdgeRateLimitMiddleware(
         RequestDelegate next,
         string path,
@@ -47,6 +48,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
         _cleanupTimer = new Timer(CleanupExpired, null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
     }
 
+    /// <summary>Applies per-scheme rate limits.</summary>
     public async Task InvokeAsync(HttpContext context)
     {
         if (!HttpMethods.IsPost(context.Request.Method)
@@ -136,7 +138,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
         {
             await _next(context).ConfigureAwait(false);
 
-            // Failure counting — error codes live in the body (HTTP is always 200).
+            // Failure counting - error codes live in the body (HTTP is always 200).
             if (_options.FailureRateLimitEnabled)
             {
                 memoryStream.Position = 0;
@@ -146,7 +148,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
                     rpcResponse = await System.Text.Json.JsonSerializer.DeserializeAsync<EdgeRpcResponse>(
                         memoryStream, EdgeJsonOptions.Default, context.RequestAborted).ConfigureAwait(false);
                 }
-                catch { /* non-edge response — not counted */ }
+                catch { /* non-edge response - not counted */ }
 
                 if (rpcResponse is { Ok: false } && !string.Equals(rpcResponse.Code, EdgeErrorCodes.RateLimited, System.StringComparison.Ordinal) && !string.Equals(rpcResponse.Code, EdgeErrorCodes.FailureRateLimited, System.StringComparison.Ordinal))
                 {
@@ -170,6 +172,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
         }
     }
 
+    /// <inheritdoc />
     public void Dispose() => _cleanupTimer.Dispose();
 
     private static async Task WriteLimitedAsync(HttpContext context, EdgeRpcRequest? request, string code, string message, int retryAfter)

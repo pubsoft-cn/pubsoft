@@ -3,6 +3,7 @@ using System.Threading.Channels;
 
 namespace PubSoft.Logging;
 
+/// <summary>Bounded-channel producer/consumer backbone for async batch pipelines.</summary>
 public abstract class AsyncBackbone<T> : IAsyncDisposable
 {
     private readonly Channel<T> _channel;
@@ -12,6 +13,7 @@ public abstract class AsyncBackbone<T> : IAsyncDisposable
     private int _draining;
     private int _disposed;
 
+    /// <summary>Creates the backbone and starts the consumer loop.</summary>
     protected AsyncBackbone(string name, int capacity, int batchSize = 32)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -33,10 +35,13 @@ public abstract class AsyncBackbone<T> : IAsyncDisposable
             TaskScheduler.Default).Unwrap();
     }
 
+    /// <summary>Buffered items not yet consumed.</summary>
     public int PendingCount => _channel.Reader.Count;
 
+    /// <summary>Non-blocking enqueue; false while draining or full.</summary>
     public bool TryPublish(T item) => Volatile.Read(ref _draining) == 0 && _channel.Writer.TryWrite(item);
 
+    /// <summary>Enqueue, waiting for space; throws while draining.</summary>
     public ValueTask PublishAsync(T item, CancellationToken cancellationToken = default)
     {
         if (Volatile.Read(ref _draining) != 0)
@@ -46,6 +51,7 @@ public abstract class AsyncBackbone<T> : IAsyncDisposable
             : PublishWhenAvailableAsync(item, cancellationToken);
     }
 
+    /// <summary>Stops intake and waits for the buffer to flush.</summary>
     public async ValueTask DrainAsync(TimeSpan timeout)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(timeout, TimeSpan.Zero);
@@ -63,6 +69,7 @@ public abstract class AsyncBackbone<T> : IAsyncDisposable
         }
     }
 
+    /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref _disposed, 1) != 0)
@@ -73,8 +80,10 @@ public abstract class AsyncBackbone<T> : IAsyncDisposable
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>Consumes one batch.</summary>
     protected abstract ValueTask ProcessBatchAsync(ReadOnlyMemory<T> batch, CancellationToken cancellationToken);
 
+    /// <summary>Hook for batch-processing failures (default: drops the batch).</summary>
     protected virtual void OnProcessingError(Exception exception, int batchCount)
     {
     }

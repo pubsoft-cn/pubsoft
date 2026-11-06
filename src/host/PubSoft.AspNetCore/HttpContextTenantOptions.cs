@@ -6,7 +6,7 @@ namespace PubSoft.AspNetCore;
 
 public sealed class HttpContextTenantOptions
 {
-    /// <summary>是否接受请求头租户覆盖。默认 false——header 可被客户端伪造，仅可信网关剥离外部头后开启。</summary>
+    /// <summary>Whether a tenant-id request header overrides the ambient tenant. Default false -- the header is client-forgeable; enable only behind a trusted gateway that strips external headers.</summary>
     public bool ReadHeader { get; set; }
     public string HeaderName { get; set; } = "X-Tenant-Id";
     public string[] ClaimNames { get; set; } = { "tid", "tenant_id" };

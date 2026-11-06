@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <RootNamespace>PubSoft.OAuth</RootNamespace>
     <PackageId>PubSoft.Authentication.OAuthProviders</PackageId>
     <IsAotCompatible>true</IsAotCompatible>

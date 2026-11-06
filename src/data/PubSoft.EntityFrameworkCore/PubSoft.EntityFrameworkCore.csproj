@@ -1,11 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.EntityFrameworkCore</PackageId>
     <Description>Optional EF Core persistence for PubSoft scope, permissions, soft-delete, and auditing contracts.</Description>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../data/PubSoft.Auditing/PubSoft.Auditing.csproj" />
     <ProjectReference Include="../../core/PubSoft.Core/PubSoft.Core.csproj" />
+    <ProjectReference Include="../../core/PubSoft.Cryptography/PubSoft.Cryptography.csproj" />
     <ProjectReference Include="../../core/PubSoft.Domain/PubSoft.Domain.csproj" />
     <ProjectReference Include="../../core/PubSoft.MultiTenancy/PubSoft.MultiTenancy.csproj" />
     <ProjectReference Include="../../security/PubSoft.Authorization/PubSoft.Authorization.csproj" />

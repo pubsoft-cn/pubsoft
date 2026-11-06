@@ -2,11 +2,13 @@ using System.Runtime.CompilerServices;
 
 namespace PubSoft.Logging;
 
+/// <summary>Batched async logger; fans entries out to registered sinks.</summary>
 public sealed class AppLogger : AsyncBackbone<LogEntry>
 {
     private readonly ILogSink[] _sinks;
     private int _minLevel;
 
+    /// <summary>Creates the logger.</summary>
     public AppLogger(
         IEnumerable<ILogSink> sinks,
         AppLogLevel minLevel = AppLogLevel.Info,
@@ -23,6 +25,7 @@ public sealed class AppLogger : AsyncBackbone<LogEntry>
         Volatile.Write(ref _minLevel, (int)options.MinLevel);
     }
 
+    /// <summary>Minimum level; reads/writes are atomic for hot-tuning.</summary>
     public AppLogLevel MinLevel
     {
         get => (AppLogLevel)Volatile.Read(ref _minLevel);
@@ -34,6 +37,7 @@ public sealed class AppLogger : AsyncBackbone<LogEntry>
         }
     }
 
+    /// <summary>Enqueues an entry; returns false when below <see cref="MinLevel"/> or draining.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Log(
         AppLogLevel level,
@@ -62,12 +66,18 @@ public sealed class AppLogger : AsyncBackbone<LogEntry>
         }
     }
 
+    /// <summary>Logs at Trace level.</summary>
     public bool Trace(string source, string message) => Log(AppLogLevel.Trace, source, message);
+    /// <summary>Logs at Debug level.</summary>
     public bool Debug(string source, string message) => Log(AppLogLevel.Debug, source, message);
+    /// <summary>Logs at Info level.</summary>
     public bool Info(string source, string message) => Log(AppLogLevel.Info, source, message);
+    /// <summary>Logs at Warn level.</summary>
     public bool Warn(string source, string message) => Log(AppLogLevel.Warn, source, message);
+    /// <summary>Logs at Error level.</summary>
     public bool Error(string source, string message, Exception? exception = null)
         => Log(AppLogLevel.Error, source, message, exception?.ToString());
+    /// <summary>Logs at Fatal level.</summary>
     public bool Fatal(string source, string message, Exception? exception = null)
         => Log(AppLogLevel.Fatal, source, message, exception?.ToString());
 

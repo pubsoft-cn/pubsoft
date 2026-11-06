@@ -47,7 +47,7 @@ public static class ObjectMapper
     }
 
     /// <summary>Maps a sequence into a list, preserving null elements for reference destinations.</summary>
-    [PubSoft.Core.BoundedCost("mapper output contract — caller owns the returned list instance")]
+    [PubSoft.Core.BoundedCost("mapper output contract - caller owns the returned list instance")]
     public static List<TDestination> MapList<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TSource,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] TDestination>(

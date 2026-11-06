@@ -2,9 +2,11 @@ using Microsoft.Extensions.Hosting;
 
 namespace PubSoft.Events;
 
+/// <summary>Drains the dispatch channel and invokes handlers for published events.</summary>
 public sealed class DomainEventBackgroundService(DomainEventDispatcher dispatcher) : BackgroundService
 {
 
+    /// <inheritdoc />
     public override Task StopAsync(CancellationToken cancellationToken)
     {
         dispatcher.CompleteWriter();

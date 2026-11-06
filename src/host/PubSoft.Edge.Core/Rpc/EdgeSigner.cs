@@ -5,7 +5,7 @@ using System.Text.Json;
 namespace PubSoft.Edge;
 
 /// <summary>
-/// Edge RPC signing — canonical signing string over the envelope fields.
+/// Edge RPC signing -- canonical signing string over the envelope fields.
 ///
 /// Canonical payload (newline-separated):
 ///   method
@@ -15,7 +15,7 @@ namespace PubSoft.Edge;
 ///   canonical_json(params)
 ///
 /// Hmac:     Base64(HMAC-SHA256(payload, secretKey))
-/// Md5:      HexLower(MD5(payload + secretKey))        — legacy scheme for clients that cannot use HMAC.
+/// Md5:      HexLower(MD5(payload + secretKey))        -- legacy scheme for clients that cannot use HMAC.
 ///
 /// The canonicalizer addresses the failure modes of ad-hoc sorted-parameter signing:
 /// recursive ordinal key sorting, UTF-8, compact JSON, null/undefined excluded
@@ -110,7 +110,7 @@ public static class EdgeSigner
     #region Canonical JSON
 
     /// <summary>
-    /// Canonical JSON — recursive ordinal key sort, compact, null/undefined excluded.
+    /// Canonical JSON -- recursive ordinal key sort, compact, null/undefined excluded.
     /// 0/false/"" participate; only null/undefined are dropped.
     /// </summary>
     public static string CanonicalizeJson(object? value) // pubsoft:exempt PUBSOFT032 "#region grouping is the ordering mechanism here"
@@ -238,6 +238,10 @@ public static class EdgeSigner
 }
 
 /// <summary>
-/// Signature verification result — carries the canonical payload for debugging.
+/// Signature verification result -- carries the canonical payload for debugging.
 /// </summary>
+/// <summary>Signature verification outcome.</summary>
+/// <param name="Success">Whether the signature is valid.</param>
+/// <param name="ErrorMessage">Failure detail.</param>
+/// <param name="SignPayload">The canonical payload that was signed (diagnostics only).</param>
 public sealed record EdgeSignResult(bool Success, string? ErrorMessage, string? SignPayload);

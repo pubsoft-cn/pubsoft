@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace PubSoft.Edge;
 
 /// <summary>
-/// Edge RPC client — used by callers, supports all credential schemes.
+/// Edge RPC client -- used by callers, supports all credential schemes.
 ///
 /// Usage:
 /// <code>
@@ -169,11 +169,13 @@ public sealed class EdgeClient
 }
 
 /// <summary>
-/// Edge RPC exception — thrown client-side on error responses.
+/// Edge RPC exception -- thrown client-side on error responses.
 /// </summary>
 public class EdgeRpcException(string code, string message, string method) : Exception($"[{code}] {method}: {message}")
 {
+    /// <summary>The edge error code.</summary>
     public string Code { get; } = code;
+    /// <summary>The RPC method that failed.</summary>
     public string Method { get; } = method;
 }
 

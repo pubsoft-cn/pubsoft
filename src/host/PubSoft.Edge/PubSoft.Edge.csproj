@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Edge</PackageId>
     <Description>Edge RPC gateway — method-dispatch middleware, pluggable credential schemes, sessions, and rate limiting.</Description>
   </PropertyGroup>

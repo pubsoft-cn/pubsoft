@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 namespace PubSoft.Notifications;
 
 /// <summary>DingTalk robot webhook channel. When <see cref="DingTalkWebhookOptions.Secret"/> is set the request is signed per the DingTalk robot spec.</summary>
+/// <summary>DingTalk group-bot webhook channel.</summary>
 public sealed class DingTalkWebhookChannel : INotificationChannel
 {
     private readonly TimeProvider _timeProvider = TimeProvider.System;
@@ -14,6 +15,7 @@ public sealed class DingTalkWebhookChannel : INotificationChannel
     private readonly DingTalkWebhookOptions _options;
     private readonly ILogger<DingTalkWebhookChannel>? _logger;
 
+    /// <summary>Creates the channel.</summary>
     public DingTalkWebhookChannel(
         IHttpClientFactory httpClientFactory,
         IOptions<DingTalkWebhookOptions> options,
@@ -24,8 +26,10 @@ public sealed class DingTalkWebhookChannel : INotificationChannel
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public string Name => "dingtalk";
 
+    /// <inheritdoc />
     public async Task<NotificationResult> SendAsync(NotificationMessage message, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_options.WebhookUrl))
@@ -84,14 +88,17 @@ public sealed class DingTalkWebhookChannel : INotificationChannel
 }
 
 /// <summary>DingTalk robot webhook channel options.</summary>
+/// <summary>DingTalk webhook settings.</summary>
 public sealed class DingTalkWebhookOptions
 {
+    /// <summary>Webhook URL including the access token.</summary>
     public string WebhookUrl { get; set; } = "";
+    /// <summary>Optional HMAC secret for signed webhooks.</summary>
     public string Secret { get; set; } = "";
 
     /// <summary>
     /// Permits a plaintext <c>http</c> webhook URL. Signed DingTalk requests embed the
-    /// signature in the query — non-loopback <c>http</c> is rejected unless this is set.
+    /// signature in the query -- non-loopback <c>http</c> is rejected unless this is set.
     /// Loopback endpoints are exempt for local development.
     /// </summary>
     public bool AllowInsecureUrl { get; set; }

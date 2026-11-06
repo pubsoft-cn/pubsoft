@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Notifications</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Provider-neutral notification contracts and bounded, deduplicating channel dispatch.</Description>

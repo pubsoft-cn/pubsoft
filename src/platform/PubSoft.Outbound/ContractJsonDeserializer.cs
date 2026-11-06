@@ -7,10 +7,12 @@ using PubSoft.Contracts;
 
 namespace PubSoft.Outbound;
 
+/// <summary>Deserializes JSON into contract types honoring naming policy.</summary>
 [RequiresUnreferencedCode("Contract deserialization uses reflection over response members; preserve contract types under trimming.")]
 [RequiresDynamicCode("Contract deserialization materializes nested and collection types at runtime.")]
 public static class ContractJsonDeserializer
 {
+    /// <summary>Deserializes a document to the target type.</summary>
     public static object Deserialize(JsonDocument document, Type targetType, INamingPolicy namingPolicy)
     {
         ArgumentNullException.ThrowIfNull(document);

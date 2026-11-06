@@ -6,9 +6,12 @@ namespace PubSoft.OAuth;
 
 
 /// <summary>Huawei account OAuth (HMS).</summary>
+/// <summary>Huawei OAuth provider.</summary>
 public sealed class HuaweiOAuthProvider : GenericOAuthProvider
 {
-    public HuaweiOAuthProvider(IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<HuaweiOAuthProvider>? l = null) : base(cp, hc, l) { }
+    /// <summary>Creates the provider.</summary>
+    public HuaweiOAuthProvider(
+IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<HuaweiOAuthProvider>? l = null) : base(cp, hc, l) { }
     public override string Provider => OAuthProviderNames.Huawei;
     protected override string AuthorizeEndpoint => "https://oauth-login.cloud.huawei.com/oauth2/v2/authorize";
     protected override string TokenEndpoint => "https://oauth-login.cloud.huawei.com/oauth2/v2/token";

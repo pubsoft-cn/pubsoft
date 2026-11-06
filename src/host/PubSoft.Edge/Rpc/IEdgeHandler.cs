@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace PubSoft.Edge;
 
 /// <summary>
-/// Edge RPC handler — one method maps to one handler.
+/// Edge RPC handler -- one method maps to one handler.
 /// </summary>
 public interface IEdgeHandler
 {

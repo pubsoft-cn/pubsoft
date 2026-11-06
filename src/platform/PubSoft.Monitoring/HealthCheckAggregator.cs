@@ -1,10 +1,12 @@
 namespace PubSoft.Monitoring;
 
 
+/// <summary>Runs health checks sequentially; a throwing check reports Unhealthy, never crashes the aggregate.</summary>
 public sealed class HealthCheckAggregator
 {
     private readonly IReadOnlyList<IAppHealthCheck> _checks;
 
+    /// <summary>Creates the aggregator.</summary>
     public HealthCheckAggregator(IEnumerable<IAppHealthCheck> checks)
     {
         ArgumentNullException.ThrowIfNull(checks);
@@ -13,6 +15,7 @@ public sealed class HealthCheckAggregator
             throw new ArgumentException("Health checks cannot contain null entries.", nameof(checks));
     }
 
+    /// <summary>Runs all checks sequentially.</summary>
     public async Task<IReadOnlyList<(string Name, AppHealthCheckResult Result)>> CheckAllAsync(
         CancellationToken cancellationToken = default)
     {
@@ -37,6 +40,7 @@ public sealed class HealthCheckAggregator
         return results.AsReadOnly();
     }
 
+    /// <summary>Aggregated worst-case status.</summary>
     public async Task<AppHealthStatus> GetOverallStatusAsync(CancellationToken cancellationToken = default)
     {
         var results = await CheckAllAsync(cancellationToken).ConfigureAwait(false);

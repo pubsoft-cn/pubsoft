@@ -1,8 +1,10 @@
 namespace PubSoft.Authorization;
 
 
+/// <summary>A validated permission grant for one subject: flags + extension bits + named permissions.</summary>
 public sealed class PermissionGrant
 {
+    /// <summary>Creates a grant; at least one of flags/extension/custom must be present.</summary>
     public PermissionGrant(
         long? tenantId,
         string moduleKey,
@@ -34,11 +36,17 @@ public sealed class PermissionGrant
         CustomPermissions = Array.AsReadOnly(customPermissionSnapshot);
     }
 
+    /// <summary>Owning tenant; null for host-level grants.</summary>
     public long? TenantId { get; }
+    /// <summary>Client code the grant applies to.</summary>
     public string ClientCode { get; }
+    /// <summary>The granted module.</summary>
     public string ModuleKey { get; }
+    /// <summary>Standard flag bits granted.</summary>
     public PermissionFlags Flags { get; }
+    /// <summary>Extension flag bits granted.</summary>
     public uint ExtensionFlags { get; }
+    /// <summary>Named permissions granted outside the bit space.</summary>
     public IReadOnlyList<string> CustomPermissions { get; }
 
     private static void ValidateClientCode(string clientCode, string parameterName)

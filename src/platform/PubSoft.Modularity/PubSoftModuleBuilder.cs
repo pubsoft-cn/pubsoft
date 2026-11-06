@@ -36,7 +36,7 @@ public sealed class PubSoftModuleBuilder
                 ? ActivatorUtilities.CreateInstance(sp, typeof(T))
                 : Activator.CreateInstance(typeof(T))!));
 
-    /// <summary>Adds a module with an explicit factory — the AOT-explicit path.</summary>
+    /// <summary>Adds a module with an explicit factory -- the AOT-explicit path.</summary>
     public PubSoftModuleBuilder Add(ModuleDescriptor descriptor, Func<IServiceProvider?, IPubSoftModule> factory)
     {
         ArgumentNullException.ThrowIfNull(descriptor);

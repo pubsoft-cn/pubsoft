@@ -27,6 +27,7 @@ public sealed class ApiDocsCatalogService
     private readonly object _lock = new();
     private object? _catalog;
 
+    /// <summary>Creates the catalog service over discovered endpoints.</summary>
     public ApiDocsCatalogService(EndpointDataSource endpoints, IHostEnvironment env,
         IOptions<ApiDocsOptions> options)
     { _endpoints = endpoints; _env = env; _options = options.Value; }
@@ -160,7 +161,7 @@ public sealed class ApiDocsCatalogService
 
             overlay.TryGetValue($"{method} {path}", out var ov);
             // honest labeling: only overlay or detected authorization metadata decide;
-            // undetected auth must not be guessed — unauthenticated POSTs are not "jwt"
+            // undetected auth must not be guessed - unauthenticated POSTs are not "jwt"
             var auth = ov?.Auth
                 ?? (_options.DetectAuthMetadata && ep.Metadata.GetMetadata<IAuthorizeData>() != null
                     ? "jwt" : "unknown");
@@ -206,7 +207,7 @@ public sealed class ApiDocsCatalogService
     private bool IsOwnEndpoint(string raw)
     {
         var p = "/" + raw.TrimStart('/');
-        // hosts may configure paths without a leading slash — normalize both sides
+        // hosts may configure paths without a leading slash - normalize both sides
         return string.Equals(p, "/" + _options.CatalogPath.TrimStart('/'), System.StringComparison.Ordinal)
             || (_options.PagePath is { } pp && string.Equals(p, "/" + pp.TrimStart('/'), System.StringComparison.Ordinal));
     }

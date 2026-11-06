@@ -6,21 +6,26 @@ using PubSoft.Contracts;
 
 namespace PubSoft.Outbound;
 
+/// <summary>Builds request parameters from contract types (reflection-cached).</summary>
 [RequiresUnreferencedCode("Contract request building uses reflection over request members; preserve contract types under trimming.")]
-[PubSoft.Core.BoundedCost("builder output contract — callers populate the returned params dictionary before dispatch")]
+[PubSoft.Core.BoundedCost("builder output contract - callers populate the returned params dictionary before dispatch")]
 public static class ContractRequestBuilder
 {
     private static readonly ConcurrentDictionary<(Type Type, INamingPolicy Policy), FieldEntry[]> Cache = new();
 
+    /// <summary>Builds string params with default naming (headers excluded).</summary>
     public static Dictionary<string, string?> BuildParams(object request)
         => BuildParams(request, CamelCaseNamingPolicy.Instance, FieldSource.Header);
 
+    /// <summary>Builds string params with a naming policy.</summary>
     public static Dictionary<string, string?> BuildParams(object request, INamingPolicy namingPolicy)
         => BuildParams(request, namingPolicy, FieldSource.Header);
 
+    /// <summary>Builds string params excluding field sources.</summary>
     public static Dictionary<string, string?> BuildParams(object request, params FieldSource[] excludeSources)
         => BuildParams(request, CamelCaseNamingPolicy.Instance, excludeSources);
 
+    /// <summary>Builds string params with naming policy + exclusions.</summary>
     public static Dictionary<string, string?> BuildParams(
         object request,
         INamingPolicy namingPolicy,
@@ -30,15 +35,19 @@ public static class ContractRequestBuilder
         return values.ToDictionary(pair => pair.Key, pair => FormatValue(pair.Value), StringComparer.Ordinal);
     }
 
+    /// <summary>Builds typed params with default naming.</summary>
     public static Dictionary<string, object?> BuildParamsObject(object request)
         => BuildParamsObject(request, CamelCaseNamingPolicy.Instance, FieldSource.Header);
 
+    /// <summary>Builds typed params with a naming policy.</summary>
     public static Dictionary<string, object?> BuildParamsObject(object request, INamingPolicy namingPolicy)
         => BuildParamsObject(request, namingPolicy, FieldSource.Header);
 
+    /// <summary>Builds typed params excluding field sources.</summary>
     public static Dictionary<string, object?> BuildParamsObject(object request, params FieldSource[] excludeSources)
         => BuildParamsObject(request, CamelCaseNamingPolicy.Instance, excludeSources);
 
+    /// <summary>Builds typed params with naming policy + exclusions.</summary>
     public static Dictionary<string, object?> BuildParamsObject(
         object request,
         INamingPolicy namingPolicy,

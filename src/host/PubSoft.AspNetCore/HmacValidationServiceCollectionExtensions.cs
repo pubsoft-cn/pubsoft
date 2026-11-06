@@ -22,7 +22,7 @@ public static class HmacValidationServiceCollectionExtensions
             sp.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()
                 ?.CreateLogger("PubSoft.AspNetCore.HmacValidation")
                 .LogWarning(
-                    "INonceStore fell back to process-local MemoryNonceStore — replay " +
+                    "INonceStore fell back to process-local MemoryNonceStore - replay " +
                     "protection is per-instance; register a shared INonceStore " +
                     "(e.g. Redis) when running multiple replicas.");
             return new MemoryNonceStore();

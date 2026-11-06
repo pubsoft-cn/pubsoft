@@ -5,7 +5,7 @@ namespace PubSoft.Domain;
 /// (request-end middleware, or an explicit unit-of-work scope in a background
 /// worker), repositories may stage writes for the boundary to flush. When no
 /// activated boundary exists in the current scope, repositories must persist
-/// immediately — staged writes with no boundary are silently lost.
+/// immediately -- staged writes with no boundary are silently lost.
 /// </summary>
 public interface ISaveChangesBoundary
 {
@@ -17,7 +17,7 @@ public interface ISaveChangesBoundary
 
     /// <summary>
     /// Marks this scope's boundary as armed. Called by request-end middleware, or
-    /// explicitly by background workers that want deferred/batched saves —
+    /// explicitly by background workers that want deferred/batched saves --
     /// after <see cref="Activate"/> the caller is responsible for invoking
     /// <see cref="SaveAllAsync"/> or staged writes are lost.
     /// </summary>

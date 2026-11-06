@@ -3,7 +3,7 @@ namespace PubSoft.OAuth;
 /// <summary>
 /// Unified OAuth provider contract. All channel implementations (WeChat/Alipay/WeCom/DingTalk/QQ/GitHub/...)
 /// implement this interface. Two flows are supported:
-/// 1. direct code→openId exchange (mini programs): <see cref="ExchangeCodeAsync"/>
+/// 1. direct code->openId exchange (mini programs): <see cref="ExchangeCodeAsync"/>
 /// 2. standard OAuth 2.0 web flow (H5/QR login): <see cref="GetAuthorizeUrlAsync"/> + <see cref="ExchangeCodeAsync"/>
 /// </summary>
 public interface IOAuthProvider

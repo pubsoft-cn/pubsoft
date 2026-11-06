@@ -53,3 +53,5 @@ PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.SymmetricKeyId.get
 PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.SymmetricKeyId.set -> void
 static PubSoft.Authentication.Jwt.AspNetCore.DualJwtAuthenticationExtensions.AddPubSoftDualJwtAuthentication(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! configuration) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Authentication.Jwt.AspNetCore.JwtBearerAuthenticationExtensions.AddPubSoftJwtBearer(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! builder, System.Action<PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions!>! configure, string! scheme = "Bearer") -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!
+PubSoft.Authentication.Jwt.AspNetCore.DualJwtOptions.ClientIdClaimType.get -> string!
+PubSoft.Authentication.Jwt.AspNetCore.DualJwtOptions.ClientIdClaimType.set -> void

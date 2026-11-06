@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Caching</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Cache abstractions and a bounded in-memory cache for .NET applications.</Description>

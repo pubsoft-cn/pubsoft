@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Scheduling.EntityFrameworkCore</PackageId>
     <Description>Optional EF Core persistence for PubSoft.Scheduling state.</Description>
   </PropertyGroup>

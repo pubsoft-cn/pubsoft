@@ -2,10 +2,12 @@ using PubSoft.Domain;
 
 namespace PubSoft.MultiTenancy;
 
-[PubSoft.Core.BoundedCost("data object — timestamp assigned by infrastructure interceptors, not injected TimeProvider")]
+/// <summary>Tenant aggregate.</summary>
+[PubSoft.Core.BoundedCost("data object - timestamp assigned by infrastructure interceptors, not injected TimeProvider")]
 public sealed class Tenant : Entity<long>
 {
 
+    /// <summary>Creates a tenant; code/name are required and bounded.</summary>
     public Tenant(long id, string code, string name, string? displayName = null, string? description = null)
     {
         Id = id;
@@ -17,13 +19,20 @@ public sealed class Tenant : Entity<long>
     }
 
     private Tenant() { }
+    /// <summary>Display name.</summary>
     public string Name { get; private set; } = string.Empty;
+    /// <summary>Stable code used by the app.</summary>
     public string Code { get; private set; } = string.Empty;
+    /// <summary>UI-facing name (falls back to Name).</summary>
     public string DisplayName { get; private set; } = string.Empty;
+    /// <summary>Disabled tenants are treated as nonexistent.</summary>
     public bool IsEnabled { get; private set; } = true;
+    /// <summary>Optional description.</summary>
     public string? Description { get; private set; }
+    /// <summary>When the tenant was created.</summary>
     public DateTime CreationTime { get; private set; }
 
+    /// <summary>Updates mutable fields.</summary>
     public void Update(string name, string? displayName, string? description)
     {
         Name = NormalizeRequired(name, nameof(name), 100);
@@ -31,6 +40,7 @@ public sealed class Tenant : Entity<long>
         Description = NormalizeBounded(description, nameof(description), 200);
     }
 
+    /// <summary>Toggles the tenant.</summary>
     public void SetEnabled(bool isEnabled) => IsEnabled = isEnabled;
 
     private static string NormalizeRequired(string value, string parameterName, int maximumLength)

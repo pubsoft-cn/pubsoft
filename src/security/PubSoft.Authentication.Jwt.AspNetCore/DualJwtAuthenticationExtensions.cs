@@ -11,10 +11,13 @@ using Microsoft.IdentityModel.Tokens;
 namespace PubSoft.Authentication.Jwt.AspNetCore;
 
 
+/// <summary>Dual-scheme JWT auth registration (local issuer + AuthServer JWKS).</summary>
 public static class DualJwtAuthenticationExtensions
 {
+    /// <summary>Scheme name for the AuthServer JWKS validator.</summary>
     public const string AuthServerScheme = "AuthServerJwks";
 
+    /// <summary>Registers both schemes from config; AuthServer is skipped when unconfigured.</summary>
     public static IServiceCollection AddPubSoftDualJwtAuthentication(
         this IServiceCollection services, IConfiguration configuration)
     {
@@ -37,7 +40,7 @@ public static class DualJwtAuthenticationExtensions
                 {
                     if (string.IsNullOrWhiteSpace(options.Audience))
                         logger.LogWarning(
-                            "AuthServer:Audience is not configured — 'aud' is not validated on the " +
+                            "AuthServer:Audience is not configured - 'aud' is not validated on the " +
                             "AuthServerJwks scheme. Any token the issuer mints for other services is " +
                             "accepted here. Set AuthServer:Audience unless this is intentional.");
                 });
@@ -53,11 +56,12 @@ public static class DualJwtAuthenticationExtensions
             throw new ArgumentException(
                 "Jwt:SecretKey must contain at least 256 bits (32 bytes) of key material.", nameof(configuration));
 
+        var baseKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey));
+        var hasClientKeyProvider = services.Any(d => d.ServiceType == typeof(IClientSigningKeyProvider));
         var authBuilder = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
 
         authBuilder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
         {
-            var baseKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey));
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
@@ -67,7 +71,7 @@ public static class DualJwtAuthenticationExtensions
                 ValidIssuer = jwtOptions.Issuer,
                 ValidAudience = jwtOptions.Audience,
                 ValidAlgorithms = ["HS256"],
-                IssuerSigningKey = baseKey,
+                IssuerSigningKey = hasClientKeyProvider ? null : baseKey,
                 ClockSkew = TimeSpan.FromMinutes(1),
                 NameClaimType = "name",
                 RoleClaimType = "role",
@@ -97,10 +101,41 @@ public static class DualJwtAuthenticationExtensions
             }
         });
 
+        if (hasClientKeyProvider)
+        {
+            // Resolved through the host container - the provider lives in DI. Register it
+            // before AddPubSoftDualJwtAuthentication; cid-less tokens fall back to SecretKey.
+            services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+                .Configure<IClientSigningKeyProvider>((options, clientKeys) =>
+                {
+                    options.TokenValidationParameters ??= new TokenValidationParameters();
+                    options.TokenValidationParameters.IssuerSigningKeyResolver = (_, securityToken, _, _) =>
+                    {
+                        // Bearer handler hands JsonWebToken by default; JwtSecurityToken appears
+                        // only with UseSecurityTokenValidators = true - read the cid from either.
+                        var clientId = securityToken switch
+                        {
+                            JwtSecurityToken jwt => jwt.Claims
+                                .FirstOrDefault(c => string.Equals(c.Type, jwtOptions.ClientIdClaimType, System.StringComparison.Ordinal))
+                                ?.Value,
+                            Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jwt2
+                                when jwt2.TryGetClaim(jwtOptions.ClientIdClaimType, out var claim) => claim.Value,
+                            _ => null
+                        };
+                        if (!string.IsNullOrEmpty(clientId))
+                        {
+                            var key = clientKeys.GetSigningKeyAsync(clientId, CancellationToken.None).AsTask().GetAwaiter().GetResult(); // pubsoft:exempt PUBSOFT017 "intentional sync bridge - callback is sync by contract"
+                            return key is null ? Array.Empty<SecurityKey>() : new SecurityKey[] { key.SecurityKey };
+                        }
+                        return new SecurityKey[] { baseKey };
+                    };
+                });
+        }
+
         if (hasAuthServer && jwksOptions is not null)
         {
             authBuilder.AddJwtBearer(AuthServerScheme);
-            // Resolved through the host container when JwtBearerOptions are created —
+            // Resolved through the host container when JwtBearerOptions are created -
             // building a second provider here would split singleton/cache/disposal lifetimes.
             services.AddOptions<JwtBearerOptions>(AuthServerScheme)
                 .Configure<JwksKeyProvider>((options, keyProvider) =>
@@ -117,7 +152,7 @@ public static class DualJwtAuthenticationExtensions
                         ClockSkew = TimeSpan.FromMinutes(1),
                         IssuerSigningKeyResolver = (_, _, kid, _) =>
                         {
-                            var key = keyProvider.ResolveSigningKeyAsync(kid ?? "").GetAwaiter().GetResult(); // pubsoft:exempt PUBSOFT017 "intentional sync bridge — callback is sync by contract"
+                            var key = keyProvider.ResolveSigningKeyAsync(kid ?? "").GetAwaiter().GetResult(); // pubsoft:exempt PUBSOFT017 "intentional sync bridge - callback is sync by contract"
                             return key is null ? Array.Empty<SecurityKey>() : new[] { key };
                         },
                     };

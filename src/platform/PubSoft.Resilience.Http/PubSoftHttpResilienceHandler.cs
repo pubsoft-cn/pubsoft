@@ -6,12 +6,14 @@ using PubSoft.Resilience;
 
 namespace PubSoft.Resilience.Http;
 
+/// <summary>DelegatingHandler applying per-attempt timeout, retry, and circuit breaking per host.</summary>
 public sealed class PubSoftHttpResilienceHandler : DelegatingHandler
 {
     private readonly HttpResilienceOptions _options;
     private readonly CircuitBreaker? _circuitBreaker;
     private readonly ILogger<PubSoftHttpResilienceHandler>? _logger;
 
+    /// <summary>Creates a handler with its resilience policy.</summary>
     public PubSoftHttpResilienceHandler(
         HttpResilienceOptions options,
         CircuitBreaker? circuitBreaker = null,
@@ -107,7 +109,7 @@ public sealed class PubSoftHttpResilienceHandler : DelegatingHandler
                     || _options.Retry?.ShouldRetry(null, attempt, (int)response.StatusCode) != true)
                 {
                     // 熔断只统计服务端故障（5xx/408/429/超时/连接失败）。
-                    // 其余 4xx 是业务拒绝（参数错误/凭证失效/资源不存在）——远端仍在正常响应，
+                    // 其余 4xx 是业务拒绝（参数错误/凭证失效/资源不存在）--远端仍在正常响应，
                     // 重置连续失败计数，避免客户端错误烧穿熔断器连坐其它请求。
                     var status = (int)response.StatusCode;
                     if (status >= 500 || status == 408 || status == 429)
@@ -180,11 +182,14 @@ public sealed class PubSoftHttpResilienceHandler : DelegatingHandler
     }
 }
 
+/// <summary>HttpClient resilience registration.</summary>
 public static class HttpResilienceServiceCollectionExtensions
 {
+    /// <summary>Adds the resilience handler with default options.</summary>
     public static IHttpClientBuilder AddPubSoftHttpResilience(this IHttpClientBuilder builder)
         => builder.AddPubSoftHttpResilience(configure: null);
 
+    /// <summary>Adds the resilience handler with configured options.</summary>
     public static IHttpClientBuilder AddPubSoftHttpResilience(
         this IHttpClientBuilder builder,
         Action<HttpResilienceOptions>? configure)
@@ -227,8 +232,8 @@ public static class HttpResilienceServiceCollectionExtensions
     }
 
     /// <summary>
-    /// 从 <see cref="IConfigurationSection"/> 绑定 <see cref="HttpResilienceOptions"/> 并注册韧性 handler。
-    /// 兼容旧 <c>AddWireResilience(section)</c> 用法。
+    /// Binds <see cref="HttpResilienceOptions"/> from <see cref="IConfigurationSection"/> and registers the resilience handler.
+    /// Kept for compatibility with the older <c>AddWireResilience(section)</c> usage.
     /// </summary>
     public static IHttpClientBuilder AddPubSoftHttpResilience(
         this IHttpClientBuilder builder,

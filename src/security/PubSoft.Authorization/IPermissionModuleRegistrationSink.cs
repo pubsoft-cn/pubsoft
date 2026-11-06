@@ -9,17 +9,21 @@ using Microsoft.Extensions.Options;
 
 namespace PubSoft.Authorization;
 
+/// <summary>Receives discovered modules for persistence (implemented by the host).</summary>
 public interface IPermissionModuleRegistrationSink
 {
+    /// <summary>Persists the discovered module set.</summary>
     Task RegisterAsync(IReadOnlyList<DiscoveredPermissionModule> modules, CancellationToken cancellationToken = default);
 }
 
+/// <summary>Scans MVC action descriptors into discovered permission modules.</summary>
 public sealed class PermissionModuleDiscovery
 {
     private readonly IActionDescriptorCollectionProvider _actions;
     private readonly IEnumerable<IPermissionModuleProvider> _providers;
     private readonly PermissionModuleDiscoveryOptions _options;
 
+    /// <summary>Creates the scanner over action descriptors and providers.</summary>
     public PermissionModuleDiscovery(
         IActionDescriptorCollectionProvider actions,
         IEnumerable<IPermissionModuleProvider> providers,
@@ -30,6 +34,7 @@ public sealed class PermissionModuleDiscovery
         _options = options?.Value ?? new PermissionModuleDiscoveryOptions();
     }
 
+    /// <summary>Scans and returns the discovered module set.</summary>
     public IReadOnlyList<DiscoveredPermissionModule> Scan()
     {
         var modules = new Dictionary<string, ModuleAcc>(StringComparer.OrdinalIgnoreCase);

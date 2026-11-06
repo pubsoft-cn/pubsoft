@@ -2,6 +2,7 @@ using PubSoft.Core;
 namespace PubSoft.Authorization;
 
 
+/// <summary>Immutable registry of all declared permission definitions, indexed for lookup.</summary>
 public sealed class PermissionDefinitionRegistry
 {
     private static readonly IReadOnlyList<PermissionDefinition> Empty = Array.AsReadOnly(Array.Empty<PermissionDefinition>());
@@ -10,6 +11,7 @@ public sealed class PermissionDefinitionRegistry
     private readonly Dictionary<(string ModuleKey, string ClientCode), IReadOnlyList<PermissionDefinition>> _byModuleClient;
     private readonly (PermissionDefinition Definition, (string Method, string[] Segments)[] ApiPaths, string[][] Routes)[] _matchers;
 
+    /// <summary>Builds the registry from providers; duplicate (module, client, flags, ext) keys fail closed.</summary>
     public PermissionDefinitionRegistry(IEnumerable<IPermissionDefinitionProvider> providers)
     {
         ArgumentNullException.ThrowIfNull(providers);
@@ -43,14 +45,17 @@ public sealed class PermissionDefinitionRegistry
             definition.FrontendRoutes.Select(GetSegments).ToArray())).ToArray();
     }
 
+    /// <summary>Every registered definition.</summary>
     public IReadOnlyList<PermissionDefinition> AllDefinitions => _definitions;
 
+    /// <summary>Definitions for a module across clients.</summary>
     public IReadOnlyList<PermissionDefinition> GetByModule(string moduleKey)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(moduleKey);
         return _byModule.TryGetValue(moduleKey, out var hits) ? hits : Empty;
     }
 
+    /// <summary>Definitions for a module and client.</summary>
     public IReadOnlyList<PermissionDefinition> GetByModule(string moduleKey, string clientCode)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(moduleKey);
@@ -60,6 +65,7 @@ public sealed class PermissionDefinitionRegistry
         return _byModuleClient.TryGetValue((moduleKey, clientCode), out var hits) ? hits : Empty;
     }
 
+    /// <summary>Definitions covering a frontend route.</summary>
     public IReadOnlyList<PermissionDefinition> GetByFrontendRoute(string route)
     {
         var normalizedRoute = ValidatePath(route, nameof(route), allowTemplates: false);
@@ -71,6 +77,7 @@ public sealed class PermissionDefinitionRegistry
         return hits.Count == 0 ? Empty : Array.AsReadOnly(hits.ToArray());
     }
 
+    /// <summary>Definitions covering an API endpoint.</summary>
     public IReadOnlyList<PermissionDefinition> GetByApiPath(string httpMethod, string path)
     {
         ValidateHttpMethod(httpMethod, nameof(httpMethod));

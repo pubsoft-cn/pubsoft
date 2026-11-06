@@ -12,6 +12,7 @@ public sealed class TestTimeProvider : TimeProvider
     private readonly object _sync = new();
     private DateTimeOffset _utcNow;
 
+    /// <summary>Creates the provider at a fixed instant.</summary>
     public TestTimeProvider(DateTimeOffset utcNow) => _utcNow = utcNow;
 
     public override DateTimeOffset GetUtcNow()
@@ -20,12 +21,14 @@ public sealed class TestTimeProvider : TimeProvider
             return _utcNow;
     }
 
+    /// <summary>Moves the clock to a fixed instant.</summary>
     public void SetUtcNow(DateTimeOffset utcNow)
     {
         lock (_sync)
             _utcNow = utcNow;
     }
 
+    /// <summary>Advances the clock.</summary>
     public void Advance(TimeSpan delta)
     {
         lock (_sync)

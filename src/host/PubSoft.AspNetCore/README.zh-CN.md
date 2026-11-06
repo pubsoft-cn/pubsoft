@@ -52,6 +52,10 @@ app.UsePubSoftAudit(new AuditMiddlewareOptions
 
 IP/User-Agent/Actor 采集默认关闭——评审隐私、代理、身份与保留要求后再启用。actor 映射由宿主经 `IAuditActorAccessor` 提供；本适配器不解释 claims。审计 sink 失败记日志，不替换应用响应。
 
+## 签名客户端凭证
+
+`ClientCredentialOptions.SignatureHeader`（默认 `X-Signature`）存在时，评估交给宿主注册的 `IClientSignatureVerifier`——委托收到 `ClientSignatureRequest`（clientId、signature、timestamp、nonce、method、path、query、body 流），签名协议完全由宿主定义。未注册 verifier 时签名请求一律 401 fail-closed；无签名头仍走明文 `IClientCredentialVerifier`（未注册则 403）。
+
 ## HMAC 请求验证
 
 注册 secret resolver 与 HMAC 验证，中间件置于受保护端点前：
@@ -70,7 +74,7 @@ services.AddPubSoftHmacValidation(
 app.UsePubSoftHmacValidation();
 ```
 
-请求携带 `X-Fend-App-Id`、`X-Fend-Signature`、`X-Fend-Timestamp`、`X-Fend-Nonce` 各一。HMAC-SHA256 签名按换行覆盖 HTTP 方法、`Request.Path` 拼接原始 `Request.QueryString`（含前导 `?`，无 query 时为空）、时间戳、nonce 与可选的小写 SHA-256 body 哈希。客户端必须按实际发送的 query 原样入签——代理或客户端重排、重编码或改变分隔符都会改变签名串导致验签失败。中间件拒绝缺失/歧义 header、无效签名、过期时间戳与 nonce 重放。body 哈希会缓冲请求并强制 `MaximumBodyBytes`（默认 1 MiB、上限 16 MiB），随后为下游 rewind。
+请求携带 `X-App-Id`、`X-Signature`、`X-Timestamp`、`X-Nonce` 各一。HMAC-SHA256 签名按换行覆盖 HTTP 方法、`Request.Path` 拼接原始 `Request.QueryString`（含前导 `?`，无 query 时为空）、时间戳、nonce 与可选的小写 SHA-256 body 哈希。客户端必须按实际发送的 query 原样入签——代理或客户端重排、重编码或改变分隔符都会改变签名串导致验签失败。中间件拒绝缺失/歧义 header、无效签名、过期时间戳与 nonce 重放。body 哈希会缓冲请求并强制 `MaximumBodyBytes`（默认 1 MiB、上限 16 MiB），随后为下游 rewind。
 
 `AddPubSoftHmacValidation` 默认 `MemoryNonceStore`——只防单进程内重放；多实例生产部署需要经评审的原子共享 `INonceStore`；secret 解析须用批准的 secret manager。排除路径绕过签名验证——列表保持窄而显式。secret 解析不可用时中间件返回 503，不暴露密钥。
 

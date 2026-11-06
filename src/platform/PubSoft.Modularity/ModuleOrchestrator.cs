@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace PubSoft.Modularity;
 
+/// <summary>Topologically orders modules and runs their lifecycle.</summary>
 public sealed class ModuleOrchestrator
 {
     private readonly ModuleDescriptor[] _modules;
@@ -13,6 +14,7 @@ public sealed class ModuleOrchestrator
     private readonly HashSet<Type> _failedTypes = new();
     private readonly Func<Type, IPubSoftModule> _moduleFactory;
 
+    /// <summary>Creates the orchestrator over discovered modules.</summary>
     public ModuleOrchestrator(
         ModuleDescriptor[] modules,
         Func<Type, IPubSoftModule> moduleFactory,
@@ -31,14 +33,19 @@ public sealed class ModuleOrchestrator
         Array.Reverse(_shutdownOrder);
     }
 
+    /// <summary>Loaded module count.</summary>
     public int ModuleCount => _modules.Length;
 
+    /// <summary>Optional modules that degraded to failed.</summary>
     public IReadOnlyDictionary<string, string> FailedModules => _failedModules;
 
+    /// <summary>Dependency-sorted init order.</summary>
     public IReadOnlyList<Type> TopologicalOrder => _topologicalOrder;
 
+    /// <summary>Reverse shutdown order.</summary>
     public IReadOnlyList<Type> ShutdownOrder => _shutdownOrder;
 
+    /// <summary>Runs every module's service wiring.</summary>
     public void ConfigureServicesAll(ModuleContext ctx)
     {
         foreach (var moduleType in _topologicalOrder)
@@ -50,10 +57,12 @@ public sealed class ModuleOrchestrator
         }
     }
 
-    [PubSoft.Core.BoundedCost("sync lifecycle bridge for sync hosts — Orleans ISiloLifecycle pattern")]
+    /// <summary>Runs all init hooks in topological order.</summary>
+    [PubSoft.Core.BoundedCost("sync lifecycle bridge for sync hosts - Orleans ISiloLifecycle pattern")]
     public void OnInitializationAll(ModuleContext ctx)
         => OnInitializationAllAsync(ctx).AsTask().GetAwaiter().GetResult();
 
+    /// <summary>Async variant of <see cref="OnInitializationAll"/>.</summary>
     public async ValueTask OnInitializationAllAsync(ModuleContext ctx)
     {
         foreach (var moduleType in _topologicalOrder)
@@ -65,10 +74,12 @@ public sealed class ModuleOrchestrator
         }
     }
 
-    [PubSoft.Core.BoundedCost("sync lifecycle bridge for sync hosts — Orleans ISiloLifecycle pattern")]
+    /// <summary>Runs all shutdown hooks in reverse order.</summary>
+    [PubSoft.Core.BoundedCost("sync lifecycle bridge for sync hosts - Orleans ISiloLifecycle pattern")]
     public void OnShutdownAll(ModuleContext ctx)
         => OnShutdownAllAsync(ctx).AsTask().GetAwaiter().GetResult();
 
+    /// <summary>Async variant of <see cref="OnShutdownAll"/>.</summary>
     public async ValueTask OnShutdownAllAsync(ModuleContext ctx)
     {
         foreach (var moduleType in _shutdownOrder)
@@ -82,7 +93,8 @@ public sealed class ModuleOrchestrator
         }
     }
 
-    [PubSoft.Core.BoundedCost("sync lifecycle bridge for sync hosts — Orleans ISiloLifecycle pattern")]
+    /// <summary>Re-runs one module's init; reports failure instead of throwing.</summary>
+    [PubSoft.Core.BoundedCost("sync lifecycle bridge for sync hosts - Orleans ISiloLifecycle pattern")]
     public bool TryReinitModule(string name, ModuleContext ctx, out string? error)
     {
         var result = TryReinitModuleAsync(name, ctx).AsTask().GetAwaiter().GetResult();
@@ -90,12 +102,13 @@ public sealed class ModuleOrchestrator
         return result.Ok;
     }
 
+    /// <summary>Async variant of <see cref="TryReinitModule"/>.</summary>
     public async ValueTask<(bool Ok, string? Error)> TryReinitModuleAsync(string name, ModuleContext ctx)
     {
         var desc = _modules.FirstOrDefault(m => string.Equals(m.Name, name, System.StringComparison.Ordinal));
         if (desc is null)
             return (false, $"unknown module: {name}");
-        if (!desc.Optional) return (false, $"module {name} is critical — restart requires process recycle");
+        if (!desc.Optional) return (false, $"module {name} is critical - restart requires process recycle");
         if (!_failedTypes.Contains(desc.ModuleType)) return (false, $"module {name} is not in failed state");
         if (DepFailed(desc.ModuleType)) return (false, $"dependency still failed: {_failedModules[desc.Name]}");
 
@@ -126,9 +139,11 @@ public sealed class ModuleOrchestrator
         }
     }
 
+    /// <summary>Finds a loaded module by type.</summary>
     public IPubSoftModule? GetModule(Type moduleType)
         => _instances.TryGetValue(moduleType, out var m) ? m : null;
 
+    /// <summary>Finds a loaded module by type.</summary>
     public T? GetModule<T>() where T : class, IPubSoftModule
         => _instances.Values.OfType<T>().FirstOrDefault();
 
@@ -149,7 +164,7 @@ public sealed class ModuleOrchestrator
         var name = _byType.TryGetValue(t, out var d) ? d.Name : t.Name;
         _failedTypes.Add(t);
         _failedModules[name] = $"{phase}: {ex.GetType().Name}: {ex.Message}";
-        ctx.Logger?.LogWarning(ex, "module {Module} failed at {Phase} — degraded, service continues", name, phase);
+        ctx.Logger?.LogWarning(ex, "module {Module} failed at {Phase} - degraded, service continues", name, phase);
     }
 
     private IPubSoftModule GetOrCreateModule(Type moduleType)

@@ -3,14 +3,20 @@ using System.Reflection;
 
 namespace PubSoft.Logging;
 
+/// <summary>Assembly informational-version access.</summary>
 public static class AppVersion
 {
     private static readonly Lazy<(string Full, string Version, string? BuildTime)> Parsed = new(Parse, true);
 
+    /// <summary>Full informational version.</summary>
     public static string Full => Parsed.Value.Full;
+    /// <summary>Version without build metadata.</summary>
     public static string Version => Parsed.Value.Version;
+    /// <summary>Major.Minor form.</summary>
     public static string Short => ExtractShort(Version);
+    /// <summary>Build timestamp from `+metadata` when present.</summary>
     public static string? BuildTime => Parsed.Value.BuildTime;
+    /// <summary>Build date (yyyyMMdd) when present.</summary>
     public static string? BuildDate => BuildTime is { Length: >= 10 } value ? value[..10].Replace("-", string.Empty) : null; // pubsoft:exempt PUBSOFT022 "char overload cannot delete characters"
 
     private static (string Full, string Version, string? BuildTime) Parse()

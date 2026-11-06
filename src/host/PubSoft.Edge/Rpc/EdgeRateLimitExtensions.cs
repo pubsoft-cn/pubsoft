@@ -34,7 +34,7 @@ public static class EdgeRateLimitExtensions
     }
 
     /// <summary>
-    /// Installs the rate-limit middleware — path must match UseEdgeGateway.
+    /// Installs the rate-limit middleware -- path must match UseEdgeGateway.
     /// <code>
     /// app.UseEdgeRateLimiting("/rpc");
     /// app.UseEdgeGateway("/rpc");

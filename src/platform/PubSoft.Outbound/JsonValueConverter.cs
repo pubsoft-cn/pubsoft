@@ -4,8 +4,10 @@ using System.Text.Json;
 
 namespace PubSoft.Outbound;
 
+/// <summary>Converts JsonElement scalars to typed values.</summary>
 public static class JsonValueConverter
 {
+    /// <summary>Converts a JSON element to the target type.</summary>
     [RequiresUnreferencedCode("Runtime-typed JSON conversion uses reflection-based serialization metadata.")]
     [RequiresDynamicCode("Runtime-typed JSON conversion requires dynamic serialization code.")]
     public static object? Convert(JsonElement element, Type targetType)
@@ -66,6 +68,7 @@ public static class JsonValueConverter
         return JsonSerializer.Deserialize(element.GetRawText(), targetType);
     }
 
+    /// <summary>Reads the first matching string field.</summary>
     public static string? GetString(JsonElement root, params string[] names)
     {
         ArgumentNullException.ThrowIfNull(names);
@@ -76,6 +79,7 @@ public static class JsonValueConverter
         return null;
     }
 
+    /// <summary>Reads an amount in minor units.</summary>
     public static long? GetAmountFen(JsonElement root, params string[] names)
     {
         ArgumentNullException.ThrowIfNull(names);
@@ -92,6 +96,7 @@ public static class JsonValueConverter
         return null;
     }
 
+    /// <summary>Reads the raw JSON of the first matching field.</summary>
     public static string? GetRawJson(JsonElement root, params string[] names)
     {
         ArgumentNullException.ThrowIfNull(names);
@@ -102,6 +107,7 @@ public static class JsonValueConverter
         return null;
     }
 
+    /// <summary>Parses a JSON string to an element; null when absent.</summary>
     public static JsonElement? ParseRoot(string? resultJson)
     {
         if (string.IsNullOrWhiteSpace(resultJson))

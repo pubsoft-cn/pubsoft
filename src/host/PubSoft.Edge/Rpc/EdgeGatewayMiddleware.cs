@@ -10,7 +10,7 @@ namespace PubSoft.Edge;
 
 
 /// <summary>
-/// Edge RPC gateway middleware — single entry point dispatching <c>method</c> to <see cref="IEdgeHandler"/>.
+/// Edge RPC gateway middleware -- single entry point dispatching <c>method</c> to <see cref="IEdgeHandler"/>.
 ///
 /// Pipeline:
 /// 1. Parse the request envelope, read scheme (default Hmac)
@@ -27,6 +27,7 @@ public sealed class EdgeGatewayMiddleware
     private readonly string _path;
     private readonly EdgeGatewayOptions _options;
 
+    /// <summary>Creates the middleware.</summary>
     public EdgeGatewayMiddleware(RequestDelegate next, string path, IOptions<EdgeGatewayOptions>? options = null)
     {
         _next = next;
@@ -34,6 +35,7 @@ public sealed class EdgeGatewayMiddleware
         _options = options?.Value ?? new EdgeGatewayOptions();
     }
 
+    /// <summary>Routes the request through the edge pipeline.</summary>
     public async Task InvokeAsync(HttpContext context)
     {
         if (!HttpMethods.IsPost(context.Request.Method)
@@ -76,7 +78,7 @@ public sealed class EdgeGatewayMiddleware
             return;
         }
 
-        // Timestamp tolerance — signature schemes only, replay hardening.
+        // Timestamp tolerance - signature schemes only, replay hardening.
         if (_options.TimestampToleranceSeconds > 0
             && request.Scheme is EdgeAuthScheme.Hmac or EdgeAuthScheme.Md5)
         {
@@ -232,7 +234,7 @@ public sealed class EdgeGatewayMiddleware
         return baseContext with { IsVerified = true, Session = session };
     }
 
-    /// <summary>Handler-accepted schemes — attribute wins over the interface property.</summary>
+    /// <summary>Handler-accepted schemes -- attribute wins over the interface property.</summary>
     private static EdgeAuthScheme[] GetHandlerSchemes(IEdgeHandler handler)
     {
         return handler.GetType().GetCustomAttribute<EdgeSchemeAttribute>()?.Schemes ?? handler.Schemes;
@@ -251,8 +253,3 @@ public sealed class EdgeGatewayMiddleware
         await JsonSerializer.SerializeAsync(context.Response.Body, response, EdgeJsonOptions.Default, context.RequestAborted).ConfigureAwait(false);
     }
 }
-
-/// <summary>
-/// Optional per-clientId scheme pinning — when registered, a client may only use the declared
-/// scheme (downgrade protection). Null = unrestricted.
-/// </summary>

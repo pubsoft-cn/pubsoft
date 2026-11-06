@@ -38,6 +38,12 @@ PubSoft 各包默认 fail-closed，但有若干安全边界刻意交由宿主负
 - [ ] DB-first 配置提供方缓存不超过其 TTL 且遵守 `IsEnabled`；禁用一行配置无须重启即生效。
 - [ ] `SlowQueryInterceptor` 记录 SQL 截断到 500 字符——完整语句体与参数值绝不写入日志。
 
+## 标识生成
+
+- [ ] `services.AddPubSoftIdGenerator(workerId)` 仅注册一次——EF 审计持久化与消息 Outbox 缺失时 DI 期 fail-closed。
+- [ ] `workerId` 每副本唯一（0–31），经配置提供（`PubSoft:IdGenerator:WorkerId`）——同号双副本在负载下静默撞 id。
+- [ ] 持久化主键为 `long` Snowflake（`ValueGenerated.Never`）——无 Guid、无数据库自增。存量 Guid 迁移走 `LegacyIdMap`（`ConfigurePubSoftLegacyIdMaps()`），不加第二主键列。
+
 ## Outbox / 消息
 
 - [ ] Outbox 消费者处理器是幂等的——至少一次投递意味着同一消息可到达两次；不变量：重投递不产生重复副作用。

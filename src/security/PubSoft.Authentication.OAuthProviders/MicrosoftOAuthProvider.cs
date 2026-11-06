@@ -8,9 +8,12 @@ namespace PubSoft.OAuth;
 // ── International providers ──
 
 /// <summary>Microsoft Account / Microsoft Entra ID OAuth.</summary>
+/// <summary>Microsoft OAuth provider.</summary>
 public sealed class MicrosoftOAuthProvider : GenericOAuthProvider
 {
-    public MicrosoftOAuthProvider(IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<MicrosoftOAuthProvider>? l = null) : base(cp, hc, l) { }
+    /// <summary>Creates the provider.</summary>
+    public MicrosoftOAuthProvider(
+IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<MicrosoftOAuthProvider>? l = null) : base(cp, hc, l) { }
     public override string Provider => OAuthProviderNames.Microsoft;
     protected override string AuthorizeEndpoint => "https://login.microsoftonline.com/common/oauth2/v2.0/authorize";
     protected override string TokenEndpoint => "https://login.microsoftonline.com/common/oauth2/v2.0/token";

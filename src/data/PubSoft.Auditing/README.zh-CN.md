@@ -31,7 +31,7 @@ await writer.WriteAsync(new AuditLogEntry(
 
 ## Actor 归因
 
-`IAuditActorAccessor` 为 opt-in——宿主把 claims 映射为 actor 身份，默认不做任何推断。
+`IAuditActorAccessor` 为 opt-in——宿主把 claims 映射为 actor 身份，默认不做任何推断。`PubSoft.AspNetCore` 提供 `AddCurrentSubjectAuditActor()`——把 `ICurrentSubjectAccessor` 桥接为 `AuditActorContext`，已解析 subject 的宿主零映射代码。
 
 ## 敏感字段
 

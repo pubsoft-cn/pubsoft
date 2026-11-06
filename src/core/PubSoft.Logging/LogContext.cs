@@ -1,9 +1,11 @@
 namespace PubSoft.Logging;
 
+/// <summary>AsyncLocal ambient log-context properties.</summary>
 public static class LogContext
 {
     private static readonly AsyncLocal<Dictionary<string, object?>?> Current = new();
 
+    /// <summary>Pushes one property for the async scope.</summary>
     public static IDisposable PushProperty(string key, object? value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
@@ -16,13 +18,16 @@ public static class LogContext
         return new ContextScope(previous, updated);
     }
 
+    /// <summary>Current ambient properties.</summary>
     public static IReadOnlyDictionary<string, object?>? GetCurrentContext()
         => Current.Value is { } context
             ? new Dictionary<string, object?>(context, StringComparer.Ordinal)
             : null;
 
+    /// <summary>Drops the ambient context.</summary>
     public static void Clear() => Current.Value = null;
 
+    /// <summary>Pushes several properties as one scope.</summary>
     public static IDisposable PushProperties(IEnumerable<KeyValuePair<string, object?>> properties)
     {
         ArgumentNullException.ThrowIfNull(properties);

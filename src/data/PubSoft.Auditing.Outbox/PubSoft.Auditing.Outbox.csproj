@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Auditing.Outbox</PackageId>
     <Description>Optional Outbox forwarding for PubSoft.Auditing snapshots.</Description>
     <PackageTags>auditing;outbox;messaging;efcore</PackageTags>

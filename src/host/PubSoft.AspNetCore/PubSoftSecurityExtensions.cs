@@ -8,8 +8,8 @@ using PubSoft.Security;
 namespace PubSoft.AspNetCore;
 
 /// <summary>
-/// 安全基础设施注册 — 滑动窗口限流器 + PII 数据脱敏。
-/// 配置节：Security:RateLimiter / Security:DataMasking。
+/// Security infrastructure registration -- sliding-window rate limiter + PII data masking. 
+/// Configuration sections: Security:RateLimiter / Security:DataMasking. 
 /// </summary>
 public static class PubSoftSecurityExtensions
 {

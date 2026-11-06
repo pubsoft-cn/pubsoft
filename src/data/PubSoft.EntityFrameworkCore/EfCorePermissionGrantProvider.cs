@@ -23,18 +23,18 @@ public sealed class EfCorePermissionGrantProvider<TDbContext>(TDbContext dbConte
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(clientCode);
-        if (clientCode.Length > 64 || clientCode != clientCode.Trim()) // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
+        if (clientCode.Length > 64 || clientCode != clientCode.Trim()) // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison - == is the translatable form"
             throw new ArgumentException("Client codes must be trimmed and at most 64 characters.", nameof(clientCode));
         if (subjectId <= 0 || tenantId is <= 0 || _dbContext.CurrentTenantId != tenantId)
             return [];
 
         var roleIds = await _dbContext.Set<SubjectPermissionRole>()
             .Where(assignment => assignment.TenantId == tenantId
-                && assignment.ClientCode == clientCode // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
+                && assignment.ClientCode == clientCode // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison - == is the translatable form"
                 && assignment.SubjectId == subjectId)
             .Join(
                 _dbContext.Set<PermissionRole>().Where(role => role.TenantId == tenantId
-                    && role.ClientCode == clientCode && role.IsEnabled), // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
+                    && role.ClientCode == clientCode && role.IsEnabled), // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison - == is the translatable form"
                 assignment => assignment.RoleId,
                 role => role.Id,
                 (_, role) => role.Id)

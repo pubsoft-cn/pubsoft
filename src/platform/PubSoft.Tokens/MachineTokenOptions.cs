@@ -5,14 +5,22 @@ using PubSoft.Authentication.Jwt;
 namespace PubSoft.Tokens;
 
 
+/// <summary>Issuer/audience/keys for locally-issued machine tokens.</summary>
 public sealed class MachineTokenOptions
 {
+    /// <summary>Token issuer.</summary>
     public required string Issuer { get; set; }
+    /// <summary>Token audience.</summary>
     public required string Audience { get; set; }
+    /// <summary>Symmetric signing key (base64).</summary>
     public required string SigningKey { get; set; }
+    /// <summary>Default key id.</summary>
     public string KeyId { get; set; } = "machine";
+    /// <summary>Token lifetime (max 1 day).</summary>
     public TimeSpan Lifetime { get; set; } = TimeSpan.FromHours(1);
+    /// <summary>Refresh margin before expiry.</summary>
     public TimeSpan RefreshBefore { get; set; } = TimeSpan.FromMinutes(5);
+    /// <summary>Per-key claim/key overrides.</summary>
     public Dictionary<string, MachineTokenCredential> Credentials { get; set; } = new(StringComparer.Ordinal);
 
     internal bool IsValid(out string error)

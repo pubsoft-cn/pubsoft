@@ -13,6 +13,8 @@ last-reviewed: 2026-10-13
 
 ## 实体与审计基类
 
+`LegacyIdMap` 是 Guid 主键退役的迁移 shim：一行把 `(EntityType, LegacyId)` 映射为替换用 Snowflake `long`，EF 映射经 `ConfigurePubSoftLegacyIdMaps()`——迁移完成后整表可退役。
+
 `Entity<TKey>` 为应用控制主键的实体，`AggregateRoot<TKey>` 为聚合边界：
 
 ```csharp
@@ -61,4 +63,4 @@ var scope = new DataScopeDimension(
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
-- `PubSoft.Domain`: `AggregateRoot<TKey>` `AmbientMemberScopeContext` `AmbientTenantContext` `AuditedAggregateRoot` `AuditedEntity<TKey>` `CreationAuditedAggregateRoot` `CreationAuditedEntity<TKey>` `DataScopeAccessEvaluator` `DataScopeDimension` `DataScopeDimensionRegistry` `Entity<TKey>` `FullAuditedAggregateRoot` `FullAuditedEntity<TKey>` `IDataScopeDimensionRegistry` `IMemberScopeContext` `IMemberScoped` `IMultiTenant` `IPubSoftSaveParticipant` `IReadOnlyRepository<TEntity, TKey>` `IRepository<TEntity, TKey>` `IRoleDataScopeProvider` `ISoftDelete` `ITenantContext` `PermissionGrantRecord` `PermissionModule` `PermissionRole` `RoleDataScope` `SubjectPermissionRole`
+- `PubSoft.Domain`: `AggregateRoot<TKey>` `AmbientMemberScopeContext` `AmbientTenantContext` `AuditedAggregateRoot` `AuditedEntity<TKey>` `CreationAuditedAggregateRoot` `CreationAuditedEntity<TKey>` `DataScopeAccessEvaluator` `DataScopeDimension` `DataScopeDimensionRegistry` `Entity<TKey>` `FullAuditedAggregateRoot` `FullAuditedEntity<TKey>` `IDataScopeDimensionRegistry` `IMemberScopeContext` `IMemberScoped` `IMultiTenant` `IPubSoftSaveParticipant` `IReadOnlyRepository<TEntity, TKey>` `IRepository<TEntity, TKey>` `IRoleDataScopeProvider` `ISoftDelete` `ITenantContext` `PermissionGrantRecord` `PermissionModule` `PermissionRole` `RoleDataScope` `SubjectPermissionRole` `LegacyIdMap`

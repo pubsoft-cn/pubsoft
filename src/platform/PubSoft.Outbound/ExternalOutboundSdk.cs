@@ -6,8 +6,10 @@ using PubSoft.Contracts;
 namespace PubSoft.Outbound;
 
 
+/// <summary>External-facing facade over <see cref="IOutboundEngine"/>.</summary>
 public sealed class ExternalOutboundSdk(IOutboundEngine engine) : IOutboundSdk
 {
+    /// <inheritdoc />
     [RequiresUnreferencedCode("Contract mapping uses reflection over request members; preserve contract types under trimming.")]
     public Task<TResponse> ExecuteAsync<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] TRequest, TResponse>(

@@ -3,6 +3,7 @@ using System.Text.Json;
 
 namespace PubSoft.Messaging;
 
+/// <summary>Routes envelopes to their registered handlers by message type.</summary>
 public sealed class MessageDispatcher(JsonSerializerOptions? serializerOptions = null)
 {
     private readonly object _gate = new();
@@ -11,6 +12,7 @@ public sealed class MessageDispatcher(JsonSerializerOptions? serializerOptions =
         ? null
         : new JsonSerializerOptions(serializerOptions);
 
+    /// <summary>Registers a handler for a message type name.</summary>
     public void Register<TMessage>(string messageType, IMessageHandler<TMessage> handler)
         where TMessage : class
     {
@@ -36,6 +38,7 @@ public sealed class MessageDispatcher(JsonSerializerOptions? serializerOptions =
         }
     }
 
+    /// <summary>Deserializes the payload and invokes the matching handler; unknown types fail closed.</summary>
     public async Task DispatchAsync(MessageEnvelope envelope, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(envelope);

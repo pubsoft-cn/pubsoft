@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
     <PackageId>PubSoft.Edge.Core</PackageId>
     <Description>Edge RPC envelope, credential schemes (HMAC/MD5/session), canonical signing, and error codes.</Description>
   </PropertyGroup>

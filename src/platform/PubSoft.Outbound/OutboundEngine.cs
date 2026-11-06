@@ -3,6 +3,7 @@ using PubSoft.Contracts;
 
 namespace PubSoft.Outbound;
 
+/// <summary>Routes contract calls to the single matching outbound provider.</summary>
 public sealed class OutboundEngine(
     IEnumerable<IOutboundProvider> providers,
     IOutboundContractRegistry registry) : IOutboundEngine
@@ -12,6 +13,7 @@ public sealed class OutboundEngine(
     private readonly IOutboundContractRegistry _registry = registry
         ?? throw new ArgumentNullException(nameof(registry));
 
+    /// <inheritdoc />
     [RequiresUnreferencedCode("Contract mapping uses reflection over request members; preserve contract types under trimming.")]
     public async Task<TResponse> ExecuteAsync<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] TRequest, TResponse>(

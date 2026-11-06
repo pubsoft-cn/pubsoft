@@ -1,11 +1,13 @@
 namespace PubSoft.Monitoring;
 
+/// <summary>Runs health checks concurrently with a timeout and concurrency cap.</summary>
 public sealed class ParallelHealthCheckAggregator
 {
     private readonly IReadOnlyList<IAppHealthCheck> _checks;
     private readonly TimeSpan _timeout;
     private readonly SemaphoreSlim _concurrencyGate;
 
+    /// <summary>Creates the aggregator.</summary>
     public ParallelHealthCheckAggregator(
         IEnumerable<IAppHealthCheck> checks,
         TimeSpan? timeout = null,
@@ -25,6 +27,7 @@ public sealed class ParallelHealthCheckAggregator
         _concurrencyGate = new SemaphoreSlim(maxConcurrency, maxConcurrency);
     }
 
+    /// <summary>Runs all checks concurrently.</summary>
     public async Task<IReadOnlyList<(string Name, AppHealthCheckResult Result)>> CheckAllAsync(
         CancellationToken cancellationToken = default)
     {
@@ -32,6 +35,7 @@ public sealed class ParallelHealthCheckAggregator
         return await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 
+    /// <summary>Aggregated worst-case status.</summary>
     public async Task<AppHealthStatus> GetOverallStatusAsync(CancellationToken cancellationToken = default)
     {
         var results = await CheckAllAsync(cancellationToken).ConfigureAwait(false);

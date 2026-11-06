@@ -51,7 +51,7 @@ public static class PubSoftForwardedHeadersExtensions
     /// <summary>
     /// Service-side counterpart registering <see cref="ForwardedHeadersOptions"/> via
     /// <see cref="IOptions{TOptions}"/> for hosts that call <c>UseForwardedHeaders()</c>
-    /// themselves. Prefer <see cref="UsePubSoftForwardedHeaders"/> — one call, no drift.
+    /// themselves. Prefer <see cref="UsePubSoftForwardedHeaders"/> -- one call, no drift.
     /// Throws when <see cref="PubSoftForwardedHeadersOptions.RealIp"/> is set: the
     /// platform middleware cannot process X-Real-IP, so honoring it silently would
     /// leave the header unprocessed.
@@ -66,7 +66,7 @@ public static class PubSoftForwardedHeadersExtensions
         if (options.RealIp)
         {
             throw new ArgumentException(
-                "X-Real-IP processing requires UsePubSoftForwardedHeaders — ForwardedHeadersOptions cannot express it.",
+                "X-Real-IP processing requires UsePubSoftForwardedHeaders - ForwardedHeadersOptions cannot express it.",
                 nameof(configure));
         }
         _ = Apply(options); // validate eagerly: malformed trust entries fail at registration, not first resolve

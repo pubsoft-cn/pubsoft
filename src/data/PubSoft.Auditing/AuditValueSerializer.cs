@@ -5,8 +5,10 @@ using System.Text.Json;
 namespace PubSoft.Auditing;
 
 
+/// <summary>Serializes captured property values for audit storage; non-scalar values are dropped.</summary>
 public static class AuditValueSerializer
 {
+    /// <summary>Serializes a scalar value; returns null for complex types (captured as absent).</summary>
     [RequiresUnreferencedCode("Audit values are serialized by runtime type; the EF audit pipeline is not a trimming/AOT scenario.")]
     [RequiresDynamicCode("Audit values are serialized by runtime type; the EF audit pipeline is not a Native AOT scenario.")]
     public static JsonElement? Serialize(object? value, int maxStringLength)
