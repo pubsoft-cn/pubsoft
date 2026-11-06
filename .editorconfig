@@ -1,0 +1,39 @@
+root = true
+
+# ── PubSoft analyzer severity policy ───────────────────────────────
+# PUBSOFT001-003: repo discipline rules (docs/forbidden/hot-path).
+# PUBSOFT004-011: perf/usage discipline — patterns ported from
+# Meziantou.Analyzer MAxxxx conventions so no external analyzer package
+# enters the dependency graph. Pinned severities so upgrades can't
+# silently change the gate; opt-outs go through [BoundedCost("reason")]
+# or a pubsoft:exempt line comment — never bare suppression.
+
+[*.cs]
+dotnet_diagnostic.PUBSOFT004.severity = warning   # string ==/!= → string.Equals
+dotnet_diagnostic.PUBSOFT005.severity = warning   # ArgumentException missing nameof()
+dotnet_diagnostic.PUBSOFT006.severity = warning   # await missing ConfigureAwait(false)
+dotnet_diagnostic.PUBSOFT007.severity = warning   # missing IFormatProvider
+dotnet_diagnostic.PUBSOFT008.severity = warning   # string-keyed collection missing comparer
+dotnet_diagnostic.PUBSOFT009.severity = warning   # regex missing timeout
+dotnet_diagnostic.PUBSOFT010.severity = warning   # string.GetHashCode() → StringComparer
+dotnet_diagnostic.PUBSOFT011.severity = warning   # public API returning concrete collections
+
+# ── wave-2: general perf patterns (PUBSOFT012-029) ─────────────────
+dotnet_diagnostic.PUBSOFT012.severity = warning   # ContainsKey+indexer → TryGetValue
+dotnet_diagnostic.PUBSOFT013.severity = warning   # Where().Any() → Any(pred)
+dotnet_diagnostic.PUBSOFT014.severity = warning   # Count() comparison → Any()
+dotnet_diagnostic.PUBSOFT015.severity = warning   # lock on this/string/Type
+dotnet_diagnostic.PUBSOFT016.severity = warning   # async void non-event
+dotnet_diagnostic.PUBSOFT017.severity = warning   # sync-over-async
+dotnet_diagnostic.PUBSOFT018.severity = warning   # DateTime.Now/UtcNow → TimeProvider
+dotnet_diagnostic.PUBSOFT019.severity = warning   # new Random() → Random.Shared
+dotnet_diagnostic.PUBSOFT020.severity = warning   # static readonly Dictionary → Frozen
+dotnet_diagnostic.PUBSOFT021.severity = warning   # Substring compare → AsSpan
+dotnet_diagnostic.PUBSOFT022.severity = warning   # single-char string → char overload
+dotnet_diagnostic.PUBSOFT023.severity = warning   # ToLower/ToUpper → Invariant
+dotnet_diagnostic.PUBSOFT024.severity = warning   # TCS missing RunContinuationsAsynchronously
+dotnet_diagnostic.PUBSOFT025.severity = warning   # array literal arg → static field
+dotnet_diagnostic.PUBSOFT026.severity = warning   # string += in loop → StringBuilder
+dotnet_diagnostic.PUBSOFT027.severity = warning   # enum.ToString() allocates
+dotnet_diagnostic.PUBSOFT028.severity = warning   # public param concrete collections
+dotnet_diagnostic.PUBSOFT029.severity = warning   # .Keys.Contains → ContainsKey

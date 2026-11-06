@@ -9,3 +9,51 @@ override PubSoft.Analyzers.DocNumbersAnalyzer.Initialize(Microsoft.CodeAnalysis.
 override PubSoft.Analyzers.DocNumbersAnalyzer.SupportedDiagnostics.get -> System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.DiagnosticDescriptor!>
 override PubSoft.Analyzers.ForbiddenPatternsAnalyzer.Initialize(Microsoft.CodeAnalysis.Diagnostics.AnalysisContext! context) -> void
 override PubSoft.Analyzers.ForbiddenPatternsAnalyzer.SupportedDiagnostics.get -> System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.DiagnosticDescriptor!>
+PubSoft.Analyzers.HotPathMaterializationAnalyzer
+PubSoft.Analyzers.HotPathMaterializationAnalyzer.HotPathMaterializationAnalyzer() -> void
+const PubSoft.Analyzers.HotPathMaterializationAnalyzer.DiagnosticId = "PUBSOFT003" -> string!
+override PubSoft.Analyzers.HotPathMaterializationAnalyzer.Initialize(Microsoft.CodeAnalysis.Diagnostics.AnalysisContext! context) -> void
+override PubSoft.Analyzers.HotPathMaterializationAnalyzer.SupportedDiagnostics.get -> System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.DiagnosticDescriptor!>
+PubSoft.Analyzers.PerfDisciplineAnalyzer
+PubSoft.Analyzers.PerfDisciplineAnalyzer.ConcreteReturnId -> string
+PubSoft.Analyzers.PerfDisciplineAnalyzer.ComparerId -> string
+PubSoft.Analyzers.PerfDisciplineAnalyzer.ConfigureAwaitId -> string
+PubSoft.Analyzers.PerfDisciplineAnalyzer.FormatProviderId -> string
+PubSoft.Analyzers.PerfDisciplineAnalyzer.HashCodeId -> string
+PubSoft.Analyzers.PerfDisciplineAnalyzer.ParamNameId -> string
+PubSoft.Analyzers.PerfDisciplineAnalyzer.PerfDisciplineAnalyzer() -> void
+PubSoft.Analyzers.PerfDisciplineAnalyzer.RegexTimeoutId -> string
+PubSoft.Analyzers.PerfDisciplineAnalyzer.StringEqualityId -> string
+PubSoft.Analyzers.PerfDisciplineAnalyzer.ConcreteReturn -> Microsoft.CodeAnalysis.DiagnosticDescriptor
+PubSoft.Analyzers.PerfDisciplineAnalyzer.Comparer -> Microsoft.CodeAnalysis.DiagnosticDescriptor
+PubSoft.Analyzers.PerfDisciplineAnalyzer.ConfigureAwait -> Microsoft.CodeAnalysis.DiagnosticDescriptor
+PubSoft.Analyzers.PerfDisciplineAnalyzer.FormatProvider -> Microsoft.CodeAnalysis.DiagnosticDescriptor
+PubSoft.Analyzers.PerfDisciplineAnalyzer.HashCode -> Microsoft.CodeAnalysis.DiagnosticDescriptor
+PubSoft.Analyzers.PerfDisciplineAnalyzer.ParamName -> Microsoft.CodeAnalysis.DiagnosticDescriptor
+PubSoft.Analyzers.PerfDisciplineAnalyzer.RegexTimeout -> Microsoft.CodeAnalysis.DiagnosticDescriptor
+PubSoft.Analyzers.PerfDisciplineAnalyzer.StringEquality -> Microsoft.CodeAnalysis.DiagnosticDescriptor
+PubSoft.Analyzers.PerfDisciplineAnalyzer.Initialize(Microsoft.CodeAnalysis.Diagnostics.AnalysisContext context) -> void
+PubSoft.Analyzers.PerfDisciplineAnalyzer.SupportedDiagnostics.get -> System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.DiagnosticDescriptor>
+PubSoft.Analyzers.PerfDisciplineWave2Analyzer
+PubSoft.Analyzers.PerfDisciplineWave2Analyzer.PerfDisciplineWave2Analyzer() -> void
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.AnyVsCountId = "PUBSOFT014" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.AsyncVoidId = "PUBSOFT016" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.CharLiteralId = "PUBSOFT022" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.CombineLinqId = "PUBSOFT013" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.ConcreteParamId = "PUBSOFT028" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.EnumToStringId = "PUBSOFT027" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.FrozenCollectionsId = "PUBSOFT020" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.KeysContainsId = "PUBSOFT029" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.LockObjectId = "PUBSOFT015" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.RunContinuationsId = "PUBSOFT024" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.SharedRandomId = "PUBSOFT019" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.SpanOverSubstringId = "PUBSOFT021" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.StaticArrayArgsId = "PUBSOFT025" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.StringBuilderId = "PUBSOFT026" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.SyncOverAsyncId = "PUBSOFT017" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.TimeProviderId = "PUBSOFT018" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.ToLowerInvariantId = "PUBSOFT023" -> string!
+const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.TryGetValueId = "PUBSOFT012" -> string!
+PubSoft.Analyzers.PerfDisciplineWave2Analyzer.Rules -> Microsoft.CodeAnalysis.DiagnosticDescriptor[]!
+override PubSoft.Analyzers.PerfDisciplineWave2Analyzer.Initialize(Microsoft.CodeAnalysis.Diagnostics.AnalysisContext! context) -> void
+override PubSoft.Analyzers.PerfDisciplineWave2Analyzer.SupportedDiagnostics.get -> System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.DiagnosticDescriptor!>

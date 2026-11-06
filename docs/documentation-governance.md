@@ -63,3 +63,11 @@ Each change class maps to mandatory artifacts — all of them, in the same commi
 | `docs/packaging` | PubSoft maintainers | — |
 | `docs/documentation-governance` | PubSoft maintainers | 2026-11-05 |
 | `docs/templates/package-readme` | PubSoft maintainers | 2026-11-05 |
+
+## Analyzer provenance
+
+`tools/PubSoft.Analyzers` is the only analyzer in the dependency graph. The
+perf/usage rules (PUBSOFT004-011) port rule shapes from public open-source
+analyzers — Meziantou.Analyzer (MAxxxx) and dotnet/roslyn-analyzers (CA18xx) —
+so no external analyzer package is consumed. Provenance is declared here and in
+each rule's docstring; semantics stay ours.

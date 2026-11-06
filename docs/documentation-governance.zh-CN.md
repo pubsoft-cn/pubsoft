@@ -59,3 +59,10 @@ README 代码块是承诺不是装饰——必须与发布的公共 API 一致�
 | `docs/packaging` | PubSoft 维护组 | — |
 | `docs/documentation-governance` | PubSoft 维护组 | 2026-11-05 |
 | `docs/templates/package-readme` | PubSoft 维护组 | 2026-11-05 |
+
+## 分析器出处
+
+`tools/PubSoft.Analyzers` 是依赖图中唯一的分析器。性能/用法规则（PUBSOFT004-011）
+的规则形态移植自公开开源分析器——Meziantou.Analyzer（MAxxxx）与
+dotnet/roslyn-analyzers（CA18xx）——不消费任何外部分析器包。出处在本处与
+每条规则的 docstring 中声明；语义实现为自有。

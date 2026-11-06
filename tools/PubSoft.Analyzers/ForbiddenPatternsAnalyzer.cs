@@ -54,9 +54,6 @@ public sealed class ForbiddenPatternsAnalyzer : DiagnosticAnalyzer
         return new Regex(pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
     }
 
-    private static bool IsTestPath(string path)
-        => path.Contains("/tests/") || path.Contains("\\tests\\");
-
     private static void Scan(SyntaxTree tree, System.Action<Diagnostic> report,
         Regex? strict, Regex? lenient, System.Threading.CancellationToken ct)
         => ScanText(tree.FilePath, tree.GetText(ct), report, strict, lenient);
@@ -69,12 +66,13 @@ public sealed class ForbiddenPatternsAnalyzer : DiagnosticAnalyzer
         Regex? strict, Regex? lenient)
     {
         if (text is null) return;
-        var patterns = IsTestPath(path) ? strict : Merge(strict, lenient);
+        var patterns = Merge(strict, lenient);
         if (patterns is null) return;
         foreach (var line in text.Lines)
         {
-            var match = patterns.Match(line.ToString());
-            if (match.Success)
+            var s = line.ToString();
+            var match = patterns.Match(s);
+            if (match.Success && !Exemption.IsExempt(s, DiagnosticId))
             {
                 report(Diagnostic.Create(
                     Rule,

@@ -47,16 +47,10 @@ public sealed class DocNumbersAnalyzer : DiagnosticAnalyzer
         var text = context.AdditionalFile.GetText(context.CancellationToken);
         if (text is null) return;
 
-        var inFence = false;
         foreach (var line in text.Lines)
         {
             var s = line.ToString();
-            if (s.TrimStart().StartsWith("```", System.StringComparison.Ordinal))
-            {
-                inFence = !inFence;
-                continue;
-            }
-            if (inFence) continue;
+            if (Exemption.IsExempt(s, DiagnosticId)) continue;
 
             var match = VolatileCount.Match(s);
             if (match.Success)
