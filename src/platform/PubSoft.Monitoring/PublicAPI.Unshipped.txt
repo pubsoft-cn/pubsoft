@@ -1,4 +1,5 @@
 #nullable enable
+override PubSoft.Monitoring.StartupDiagnosticsEntry.GetHashCode() -> int
 PubSoft.Monitoring.AppHealthCheckResult
 PubSoft.Monitoring.AppHealthCheckResult.AppHealthCheckResult() -> void
 PubSoft.Monitoring.AppHealthCheckResult.AppHealthCheckResult(PubSoft.Monitoring.AppHealthStatus Status, string? Description = null) -> void
@@ -29,6 +30,8 @@ PubSoft.Monitoring.IAppHealthCheck.CheckAsync(System.Threading.CancellationToken
 PubSoft.Monitoring.IAppHealthCheck.Name.get -> string!
 PubSoft.Monitoring.IProbeHealthCheck
 PubSoft.Monitoring.IProbeHealthCheck.CheckAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Monitoring.ProbeHealth>!
+PubSoft.Monitoring.IStartupDiagnostics
+PubSoft.Monitoring.IStartupDiagnostics.Collect() -> System.Collections.Generic.IEnumerable<PubSoft.Monitoring.StartupDiagnosticsEntry>!
 PubSoft.Monitoring.MonitoringErrorCategory
 PubSoft.Monitoring.MonitoringErrorCategory.Network = 0 -> PubSoft.Monitoring.MonitoringErrorCategory
 PubSoft.Monitoring.MonitoringErrorCategory.Other = 3 -> PubSoft.Monitoring.MonitoringErrorCategory
@@ -61,6 +64,26 @@ PubSoft.Monitoring.ProbeHealth.Unreachable = 1 -> PubSoft.Monitoring.ProbeHealth
 const PubSoft.Monitoring.MonitoringMetrics.MeterName = "PubSoft.Monitoring" -> string!
 const PubSoft.Monitoring.MonitoringOptions.HttpClientName = "PubSoft.Monitoring.Probe" -> string!
 override PubSoft.Monitoring.AppHealthCheckResult.GetHashCode() -> int
+PubSoft.Monitoring.StartupDiagnosticsCollector
+PubSoft.Monitoring.StartupDiagnosticsCollector.Collect() -> System.Collections.Generic.IReadOnlyList<PubSoft.Monitoring.StartupDiagnosticsEntry>!
+PubSoft.Monitoring.StartupDiagnosticsCollector.StartupDiagnosticsCollector(System.Collections.Generic.IEnumerable<PubSoft.Monitoring.IStartupDiagnostics!>! providers) -> void
+PubSoft.Monitoring.StartupDiagnosticsCollector.ToJson() -> string!
+PubSoft.Monitoring.StartupDiagnosticsEntry
+PubSoft.Monitoring.StartupDiagnosticsEntry.Area.get -> string!
+PubSoft.Monitoring.StartupDiagnosticsEntry.Area.init -> void
+PubSoft.Monitoring.StartupDiagnosticsEntry.Deconstruct(out string! Area, out PubSoft.Monitoring.StartupDiagnosticsStatus Status, out string! Detail) -> void
+PubSoft.Monitoring.StartupDiagnosticsEntry.Detail.get -> string!
+PubSoft.Monitoring.StartupDiagnosticsEntry.Detail.init -> void
+PubSoft.Monitoring.StartupDiagnosticsEntry.Equals(PubSoft.Monitoring.StartupDiagnosticsEntry other) -> bool
+PubSoft.Monitoring.StartupDiagnosticsEntry.StartupDiagnosticsEntry() -> void
+PubSoft.Monitoring.StartupDiagnosticsEntry.StartupDiagnosticsEntry(string! Area, PubSoft.Monitoring.StartupDiagnosticsStatus Status, string! Detail) -> void
+PubSoft.Monitoring.StartupDiagnosticsEntry.Status.get -> PubSoft.Monitoring.StartupDiagnosticsStatus
+PubSoft.Monitoring.StartupDiagnosticsEntry.Status.init -> void
+PubSoft.Monitoring.StartupDiagnosticsServiceCollectionExtensions
+PubSoft.Monitoring.StartupDiagnosticsStatus
+PubSoft.Monitoring.StartupDiagnosticsStatus.Error = 2 -> PubSoft.Monitoring.StartupDiagnosticsStatus
+PubSoft.Monitoring.StartupDiagnosticsStatus.Ok = 0 -> PubSoft.Monitoring.StartupDiagnosticsStatus
+PubSoft.Monitoring.StartupDiagnosticsStatus.Warning = 1 -> PubSoft.Monitoring.StartupDiagnosticsStatus
 static PubSoft.Monitoring.AppHealthCheckResult.Degraded(string! description) -> PubSoft.Monitoring.AppHealthCheckResult
 static PubSoft.Monitoring.AppHealthCheckResult.Healthy(string? description = null) -> PubSoft.Monitoring.AppHealthCheckResult
 static PubSoft.Monitoring.AppHealthCheckResult.Unhealthy(string! description) -> PubSoft.Monitoring.AppHealthCheckResult
@@ -72,5 +95,10 @@ static PubSoft.Monitoring.MonitoringServiceCollectionExtensions.AddPubSoftHealth
 static PubSoft.Monitoring.MonitoringServiceCollectionExtensions.AddPubSoftMonitoring(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Monitoring.MonitoringOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Monitoring.MonitoringServiceCollectionExtensions.AddPubSoftMonitoringMetrics(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Monitoring.MonitoringServiceCollectionExtensions.AddPubSoftParallelHealthChecks(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.TimeSpan? timeout = null, int maxConcurrency = 8) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Monitoring.StartupDiagnosticsEntry.operator !=(PubSoft.Monitoring.StartupDiagnosticsEntry left, PubSoft.Monitoring.StartupDiagnosticsEntry right) -> bool
+static PubSoft.Monitoring.StartupDiagnosticsEntry.operator ==(PubSoft.Monitoring.StartupDiagnosticsEntry left, PubSoft.Monitoring.StartupDiagnosticsEntry right) -> bool
+static PubSoft.Monitoring.StartupDiagnosticsServiceCollectionExtensions.AddPubSoftStartupDiagnostics<T>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 ~override PubSoft.Monitoring.AppHealthCheckResult.Equals(object obj) -> bool
 ~override PubSoft.Monitoring.AppHealthCheckResult.ToString() -> string
+~override PubSoft.Monitoring.StartupDiagnosticsEntry.Equals(object obj) -> bool
+~override PubSoft.Monitoring.StartupDiagnosticsEntry.ToString() -> string
