@@ -1,0 +1,53 @@
+name: Release
+
+# Tag-driven publish: v0.1.0-alpha.N → pack → nuget.org (+ optional internal feed).
+# Auth: nuget.org Trusted Publishing (OIDC) — no API key secret needed.
+# Optional secrets for the internal feed: PUBSOFT_NUGET_URL + NUGET_API_KEY.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  id-token: write  # OIDC — nuget.org Trusted Publishing
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # Approval gate — the GitHub "release" environment's required reviewers
+    # must approve before any package leaves. Also matched by the nuget.org
+    # trusted-publishing policy's Environment field.
+    environment: release
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Pack
+        run: dotnet pack PubSoft.sln -c Release -o feed
+
+      - name: Verify package consumer smoke
+        run: bash scripts/verify-package-consumer.sh feed
+
+      - name: NuGet trusted publishing login
+        id: login
+        uses: nuget/login@ebc737b6fc418a6ca0073cf116ec8dc156d8b81e # v1
+        with:
+          user: pubsoft
+
+      - name: Push to nuget.org
+        # nuget/login outputs a short-lived API key — pass it explicitly.
+        run: dotnet nuget push feed/PubSoft.*.nupkg --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+      - name: Push to internal feed (optional)
+        env:
+          PUBSOFT_NUGET_URL: ${{ secrets.PUBSOFT_NUGET_URL }}
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        # secrets are not allowed in job `if:` — check inside the step instead.
+        run: |
+          if [ -z "$PUBSOFT_NUGET_URL" ]; then echo "PUBSOFT_NUGET_URL not configured — skipping"; exit 0; fi
+          bash scripts/push-internal-feed.sh feed
