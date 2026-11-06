@@ -20,7 +20,7 @@ internal static class AnalyzerHelpers
         return false;
     }
 
-    /// <summary>pubsoft:exempt <id> "reason" line comment — checks the node's source line.</summary>
+    /// <summary>pubsoft:exempt &lt;id&gt; "reason" line comment — checks the node's source line.</summary>
     public static bool IsExempt(SyntaxNode node, string diagnosticId)
     {
         var line = node.SyntaxTree.GetText().Lines[node.GetLocation().GetLineSpan().StartLinePosition.Line].ToString();

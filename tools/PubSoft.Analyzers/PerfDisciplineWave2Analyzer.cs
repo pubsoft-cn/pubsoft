@@ -92,7 +92,7 @@ public sealed class PerfDisciplineWave2Analyzer : DiagnosticAnalyzer
 
         // async void non-event
         if (method.Modifiers.Any(SyntaxKind.AsyncKeyword) && method.ReturnType.ToString() == "void"
-            && !method.ParameterList.Parameters.Any(p => p.Type.ToString().Contains("EventArgs")))
+            && !method.ParameterList.Parameters.Any(p => p.Type?.ToString()?.Contains("EventArgs") == true))
             if (!AnalyzerHelpers.IsExempt(method, "PUBSOFT016")) context.ReportDiagnostic(Diagnostic.Create(Rules[4], method.GetLocation(), AnalyzerHelpers.Label(method)));
 
         // ContainsKey + indexer on the same receiver inside the method

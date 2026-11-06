@@ -166,7 +166,6 @@ public sealed class LayoutDisciplineAnalyzer : DiagnosticAnalyzer
                         and not SyntaxKind.ProtectedKeyword and not SyntaxKind.PrivateKeyword)
                     && !AnalyzerHelpers.IsExempt(m, ExplicitAccessId))
                     context.ReportDiagnostic(Diagnostic.Create(Rules[3], m.GetLocation(), NameOf(m)));
-            next:;
                 pm = m;
             }
         }

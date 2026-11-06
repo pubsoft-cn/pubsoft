@@ -10,7 +10,7 @@ public static class IdGeneratorServiceCollectionExtensions
 {
     /// <summary>
     /// Registers <see cref="SnowflakeIdGenerator"/> as the shared <see cref="IIdGenerator"/>.
-    /// <paramref name="workerId"/> (0–<see cref="SnowflakeIdGenerator.MaxWorkerId"/>) must be
+    /// <paramref name="workerId"/> (0-<see cref="SnowflakeIdGenerator.MaxWorkerId"/>) must be
     /// unique per replica - two generators sharing a worker id can emit colliding ids.
     /// A host-provided <see cref="IIdGenerator"/> registered earlier is honored instead.
     /// </summary>

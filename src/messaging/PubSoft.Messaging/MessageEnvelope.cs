@@ -39,7 +39,7 @@ public sealed class MessageEnvelope
     /// <summary>Intended consumer tag.</summary>
     public string? Target { get; }
 
-    /// <summary>Deserializes the payload into <typeparamref name="T"/> using the dispatcher's serializer options.</summary>
+    /// <summary>Deserializes the payload into <typeparamref name="TPayload"/> using the dispatcher's serializer options.</summary>
     [UnconditionalSuppressMessage("Trimming", "IL2026",
         Justification = "Payloads are serialized with host-provided JsonSerializerOptions; trimmed/AOT hosts must supply a TypeInfoResolver covering payload types.")]
     [UnconditionalSuppressMessage("AOT", "IL3050",

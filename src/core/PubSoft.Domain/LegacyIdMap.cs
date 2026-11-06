@@ -9,10 +9,6 @@ namespace PubSoft.Domain;
 public sealed class LegacyIdMap : Entity<long>, IMultiTenant
 {
     /// <summary>Parameterless constructor for ORM materialization.</summary>
-    private LegacyIdMap()
-    {
-    }
-
     /// <summary>
     /// Creates a mapping row; <paramref name="entityType"/> must be non-empty and
     /// trimmed, ids must be positive, and <paramref name="legacyId"/> must not be empty.
@@ -34,6 +30,11 @@ public sealed class LegacyIdMap : Entity<long>, IMultiTenant
         NewId = newId;
         TenantId = tenantId;
     }
+
+    private LegacyIdMap()
+    {
+    }
+
 
     /// <summary>Owning tenant; null for host-level rows.</summary>
     public long? TenantId { get; set; }

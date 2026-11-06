@@ -36,7 +36,7 @@ public sealed class SnowflakeIdGenerator : IIdGenerator
     private long _sequence;
     private readonly object _lock = new();
 
-    /// <summary>Creates a generator for the given worker (0–31) on the system clock.</summary>
+    /// <summary>Creates a generator for the given worker (0-31) on the system clock.</summary>
     public SnowflakeIdGenerator(long workerId) : this(workerId, TimeProvider.System)
     {
     }
