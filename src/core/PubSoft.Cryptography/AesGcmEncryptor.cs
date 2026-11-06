@@ -83,7 +83,7 @@ public sealed class AesGcmEncryptor
             throw InvalidEnvelope();
 
         var parts = envelope.Split(':');
-        if (parts.Length != 6 || parts[0] != "pubsoft" || parts[1] != "v1")
+        if (parts.Length != 6 || !string.Equals(parts[0], "pubsoft", System.StringComparison.Ordinal) || !string.Equals(parts[1], "v1", System.StringComparison.Ordinal))
             throw InvalidEnvelope();
 
         var keyId = parts[2];

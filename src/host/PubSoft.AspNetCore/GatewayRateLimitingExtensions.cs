@@ -317,7 +317,7 @@ internal sealed class ClientIdCardinalityGuard
     private readonly int _maxClientIdsPerIp;
     private readonly int _maxIps;
     private readonly TimeSpan _window;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly ConcurrentDictionary<string, IpWindow> _windows = new(StringComparer.Ordinal);
 
     public ClientIdCardinalityGuard(

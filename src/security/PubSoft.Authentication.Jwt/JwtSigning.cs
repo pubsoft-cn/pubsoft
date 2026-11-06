@@ -212,7 +212,7 @@ public static class JwtSigning
         ArgumentNullException.ThrowIfNull(keys);
         var jwt = ReadTokenAndValidateKid(token, expectedKeyId: null, SecurityAlgorithms.RsaSha256);
         var keyId = jwt.Header.Kid;
-        var matchingKeys = keys.Where(key => key is not null && key.KeyId == keyId).ToArray();
+        var matchingKeys = keys.Where(key => key is not null && string.Equals(key.KeyId, keyId, System.StringComparison.Ordinal)).ToArray();
         if (matchingKeys.Length != 1)
             throw new SecurityTokenSignatureKeyNotFoundException("Token key id does not identify exactly one configured signing key.");
 
@@ -251,7 +251,7 @@ public static class JwtSigning
         ArgumentNullException.ThrowIfNull(keys);
         var jwt = ReadTokenAndValidateKid(token, expectedKeyId: null, SecurityAlgorithms.HmacSha256);
         var keyId = jwt.Header.Kid;
-        var matchingKeys = keys.Where(key => key is not null && key.KeyId == keyId).ToArray();
+        var matchingKeys = keys.Where(key => key is not null && string.Equals(key.KeyId, keyId, System.StringComparison.Ordinal)).ToArray();
         if (matchingKeys.Length != 1)
             throw new SecurityTokenSignatureKeyNotFoundException("Token key id does not identify exactly one configured signing key.");
 
@@ -273,7 +273,7 @@ public static class JwtSigning
         var keys = keyMaterials.ToArray();
         if (keys.Any(key => key is null))
             throw new ArgumentException("JWKS keys cannot contain null entries.", nameof(keyMaterials));
-        if (keys.Select(key => key.KeyId).Distinct(StringComparer.Ordinal).Count() != keys.Length)
+        if (keys.GroupBy(key => key.KeyId, StringComparer.Ordinal).Any(group => group.Skip(1).Any()))
             throw new ArgumentException("JWKS key ids must be unique.", nameof(keyMaterials));
 
         return new JwtJwksDocument

@@ -17,7 +17,7 @@ public sealed class AuditRetentionCleanup<TDbContext>
     where TDbContext : DbContext
 {
     private readonly TDbContext _dbContext;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
 
     public AuditRetentionCleanup(TDbContext dbContext, TimeProvider? timeProvider = null)
     {

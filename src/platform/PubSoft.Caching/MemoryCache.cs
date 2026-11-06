@@ -14,11 +14,13 @@ public sealed class MemoryCache : ICache, IDisposable
     private readonly Timer _cleanupTimer;
     private readonly int _maxSize;
     private readonly object _lock = new();
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly ConcurrentDictionary<string, Regex> _regexCache = new(StringComparer.Ordinal);
     private bool _disposed;
 
-    public MemoryCache(TimeSpan? cleanupInterval = null, int maxSize = 10000)
+    public MemoryCache(TimeSpan? cleanupInterval = null, int maxSize = 10000, TimeProvider? timeProvider = null)
     {
+        _timeProvider = timeProvider ?? TimeProvider.System;
         var interval = cleanupInterval ?? TimeSpan.FromMinutes(5);
         if (interval <= TimeSpan.Zero)
             throw new ArgumentOutOfRangeException(nameof(cleanupInterval), "Cleanup interval must be positive.");
@@ -33,9 +35,9 @@ public sealed class MemoryCache : ICache, IDisposable
     {
         cancellationToken.ThrowIfCancellationRequested();
         ValidateKey(key);
-        if (_cache.TryGetValue(key, out var entry) && !entry.IsExpired)
+        if (_cache.TryGetValue(key, out var entry) && !entry.IsExpired(_timeProvider.GetUtcNow().UtcDateTime))
         {
-            entry.LastAccessTime = DateTime.UtcNow;
+            entry.LastAccessTime = _timeProvider.GetUtcNow().UtcDateTime;
             return Task.FromResult(entry.Value as T);
         }
         return Task.FromResult<T?>(null);
@@ -48,11 +50,11 @@ public sealed class MemoryCache : ICache, IDisposable
         ValidateValue(value);
         ValidateExpiry(expiry);
 
-        var now = DateTime.UtcNow;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
         lock (_lock)
         {
             ThrowIfDisposed();
-            if (!_cache.ContainsKey(key) && _cache.Count >= _maxSize)
+            if (!_cache.ContainsKey(key) && _cache.Count >= _maxSize) // pubsoft:exempt PUBSOFT012 "ContainsKey guards eviction only — set always writes"
                 EvictLRUEntries();
             _cache[key] = new CacheEntry(value, now, expiry.HasValue ? now.Add(expiry.Value) : null, now);
         }
@@ -71,7 +73,7 @@ public sealed class MemoryCache : ICache, IDisposable
     {
         cancellationToken.ThrowIfCancellationRequested();
         ValidateKey(key);
-        return Task.FromResult(_cache.TryGetValue(key, out var entry) && !entry.IsExpired);
+        return Task.FromResult(_cache.TryGetValue(key, out var entry) && !entry.IsExpired(_timeProvider.GetUtcNow().UtcDateTime));
     }
 
     public async Task<T> GetOrSetAsync<T>(string key, Func<Task<T>> factory, TimeSpan? expiry = null, CancellationToken cancellationToken = default) where T : class
@@ -105,11 +107,11 @@ public sealed class MemoryCache : ICache, IDisposable
         ArgumentNullException.ThrowIfNull(keys);
         cancellationToken.ThrowIfCancellationRequested();
         var result = new Dictionary<string, T?>(StringComparer.Ordinal);
-        var now = DateTime.UtcNow;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
         foreach (var key in keys)
         {
             ValidateKey(key);
-            if (_cache.TryGetValue(key, out var entry) && !entry.IsExpired)
+            if (_cache.TryGetValue(key, out var entry) && !entry.IsExpired(_timeProvider.GetUtcNow().UtcDateTime))
             {
                 entry.LastAccessTime = now;
                 result[key] = entry.Value as T;
@@ -134,14 +136,14 @@ public sealed class MemoryCache : ICache, IDisposable
             ValidateValue(item.Value);
         }
 
-        var now = DateTime.UtcNow;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
         DateTime? expiryTime = expiry.HasValue ? now.Add(expiry.Value) : null;
         lock (_lock)
         {
             ThrowIfDisposed();
             foreach (var item in materialized)
             {
-                if (!_cache.ContainsKey(item.Key) && _cache.Count >= _maxSize)
+                if (!_cache.ContainsKey(item.Key) && _cache.Count >= _maxSize) // pubsoft:exempt PUBSOFT012 "ContainsKey guards eviction only — set always writes"
                     EvictLRUEntries();
                 _cache[item.Key] = new CacheEntry(item.Value, now, expiryTime, now);
             }
@@ -197,7 +199,7 @@ public sealed class MemoryCache : ICache, IDisposable
             return new CacheStatistics
             {
                 TotalEntries = _cache.Count,
-                ExpiredEntries = _cache.Values.Count(entry => entry.IsExpired),
+                ExpiredEntries = _cache.Values.Count(entry => entry.IsExpired(_timeProvider.GetUtcNow().UtcDateTime)),
                 SizeLimit = _maxSize,
             };
         }
@@ -210,7 +212,7 @@ public sealed class MemoryCache : ICache, IDisposable
             if (_disposed) return;
             foreach (var pair in _cache)
             {
-                if (pair.Value.IsExpired)
+                if (pair.Value.IsExpired(_timeProvider.GetUtcNow().UtcDateTime))
                     _cache.TryRemove(pair.Key, out _);
             }
         }
@@ -298,7 +300,7 @@ public sealed class MemoryCache : ICache, IDisposable
         public DateTime? ExpiryTime { get; } = expiryTime;
         public DateTime LastAccessTime { get; set; } = lastAccessTime;
         public string Key { get; set; } = "";
-        public bool IsExpired => ExpiryTime.HasValue && DateTime.UtcNow >= ExpiryTime.Value;
+        public bool IsExpired(DateTime now) => ExpiryTime.HasValue && now >= ExpiryTime.Value;
     }
 
     public sealed class CacheStatistics

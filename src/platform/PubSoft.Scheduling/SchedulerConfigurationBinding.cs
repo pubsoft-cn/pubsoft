@@ -105,7 +105,7 @@ internal static class SchedulerConfigurationBinding
         if (children.All(c => int.TryParse(c.Key, out _)))
         {
             var array = new JsonArray();
-            foreach (var child in children.OrderBy(c => int.Parse(c.Key)))
+            foreach (var child in children.OrderBy(c => int.Parse(c.Key, System.Globalization.CultureInfo.InvariantCulture)))
                 array.Add(ToJsonNode(child));
             return array;
         }

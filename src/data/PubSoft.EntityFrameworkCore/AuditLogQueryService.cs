@@ -31,9 +31,9 @@ public class AuditLogQueryService<TDbContext>(TDbContext dbContext) where TDbCon
         else q = q.IgnoreScopeFilters();
 
         if (!string.IsNullOrWhiteSpace(entityType))
-            q = q.Where(a => a.EntityChanges.Any(e => e.EntityType == entityType.Trim()));
+            q = q.Where(a => a.EntityChanges.Any(e => e.EntityType == entityType.Trim())); // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
         if (!string.IsNullOrWhiteSpace(subjectId))
-            q = q.Where(a => a.SubjectId == subjectId.Trim());
+            q = q.Where(a => a.SubjectId == subjectId.Trim()); // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
         if (success.HasValue)
             q = q.Where(a => a.Success == success.Value);
         if (startedAfter.HasValue)
@@ -41,11 +41,11 @@ public class AuditLogQueryService<TDbContext>(TDbContext dbContext) where TDbCon
         if (startedBefore.HasValue)
             q = q.Where(a => a.StartedAt <= startedBefore.Value);
         if (!string.IsNullOrWhiteSpace(category))
-            q = q.Where(a => a.Category == category.Trim());
+            q = q.Where(a => a.Category == category.Trim()); // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
         if (!string.IsNullOrWhiteSpace(action))
-            q = q.Where(a => a.Action == action.Trim());
+            q = q.Where(a => a.Action == action.Trim()); // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
         if (!string.IsNullOrWhiteSpace(targetType))
-            q = q.Where(a => a.TargetType == targetType.Trim());
+            q = q.Where(a => a.TargetType == targetType.Trim()); // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
         if (!string.IsNullOrWhiteSpace(keyword))
         {
             var kw = keyword.Trim();

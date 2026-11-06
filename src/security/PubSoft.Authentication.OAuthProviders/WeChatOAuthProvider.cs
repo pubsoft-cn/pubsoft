@@ -33,8 +33,8 @@ public sealed class WeChatOAuthProvider : OAuthProviderBase
 
     public override Task<OAuthAuthorizeUrlResult> GetAuthorizeUrlAsync(OAuthAuthorizeUrlRequest request, CancellationToken ct = default)
     {
-        var scope = request.Scope ?? (request.ChannelType == OAuthChannelTypes.OpenPlatform ? "snsapi_login" : "snsapi_userinfo");
-        var baseUrl = request.ChannelType == OAuthChannelTypes.OpenPlatform
+        var scope = request.Scope ?? (string.Equals(request.ChannelType, OAuthChannelTypes.OpenPlatform, System.StringComparison.Ordinal) ? "snsapi_login" : "snsapi_userinfo");
+        var baseUrl = string.Equals(request.ChannelType, OAuthChannelTypes.OpenPlatform, System.StringComparison.Ordinal)
             ? "https://open.weixin.qq.com/connect/qrconnect"
             : "https://open.weixin.qq.com/connect/oauth2/authorize";
 

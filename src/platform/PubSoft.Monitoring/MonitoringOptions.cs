@@ -37,7 +37,7 @@ public sealed class MonitoringOptions
         foreach (var target in ProbeTargets)
         {
             if (!Uri.TryCreate(target, UriKind.Absolute, out var uri)
-                || uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps
+                || !string.Equals(uri.Scheme, Uri.UriSchemeHttp, System.StringComparison.Ordinal) && !string.Equals(uri.Scheme, Uri.UriSchemeHttps, System.StringComparison.Ordinal)
                 || !string.IsNullOrEmpty(uri.UserInfo))
             {
                 error = "Each probe target must be an absolute HTTP(S) URL without embedded credentials.";

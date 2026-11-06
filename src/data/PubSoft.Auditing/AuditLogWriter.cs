@@ -59,7 +59,7 @@ public sealed class AuditLogWriter(
             StatusCode: 0,
             entry.Success ? null : entry.FailureCode ?? "OperationFailed",
             entry.Duration ?? TimeSpan.Zero,
-            Changes: []);
+            Changes: System.Array.Empty<AuditEntityChange>());
 
         await sink.WriteAsync(snapshot, cancellationToken).ConfigureAwait(false);
     }

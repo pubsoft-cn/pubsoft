@@ -49,7 +49,7 @@ public readonly struct LogEntry
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
         ArgumentException.ThrowIfNullOrWhiteSpace(message);
 
-        TimestampUtc = DateTimeOffset.UtcNow;
+        TimestampUtc = DateTimeOffset.UtcNow; // pubsoft:exempt PUBSOFT018 "log entry default stamp — set at emission inside infrastructure"
         Level = level;
         Source = source.Trim();
         Message = message.Trim();

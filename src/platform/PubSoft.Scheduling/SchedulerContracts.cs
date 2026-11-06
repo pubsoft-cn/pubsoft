@@ -2,6 +2,7 @@ using System.Text.Json;
 
 namespace PubSoft.Scheduling;
 
+[PubSoft.Core.BoundedCost("data object — timestamp assigned by infrastructure interceptors, not injected TimeProvider")]
 public sealed class ScheduledJob
 {
     public string Name { get; set; } = "";
@@ -28,6 +29,7 @@ public sealed class ScheduledJob
 }
 
 /// <summary>Bounded exponential-backoff retry for a <see cref="ScheduledJob"/>.</summary>
+[PubSoft.Core.BoundedCost("data object — timestamp assigned by infrastructure interceptors, not injected TimeProvider")]
 public sealed class JobRetryPolicy
 {
     /// <summary>Total attempts including the first execution (1 = no retry).</summary>
@@ -37,6 +39,7 @@ public sealed class JobRetryPolicy
     public TimeSpan MaxDelay { get; set; } = TimeSpan.FromMinutes(1);
 }
 
+[PubSoft.Core.BoundedCost("data object — timestamp assigned by infrastructure interceptors, not injected TimeProvider")]
 public sealed class JobResult
 {
     public bool Success { get; init; }

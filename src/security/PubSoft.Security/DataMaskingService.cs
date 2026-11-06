@@ -78,7 +78,7 @@ public sealed class DataMaskingService
         if (string.IsNullOrWhiteSpace(bankCard))
             return string.Empty;
 
-        bankCard = bankCard.Trim().Replace(" ", string.Empty, StringComparison.Ordinal);
+        bankCard = bankCard.Trim().Replace(" ", string.Empty, StringComparison.Ordinal); // pubsoft:exempt PUBSOFT022 "char overload cannot delete characters"
         var visibleSuffixLength = _options.BankCardSuffixVisibleDigits;
         if (bankCard.Length <= visibleSuffixLength)
             return new string(_options.BankCardMaskChar, bankCard.Length);

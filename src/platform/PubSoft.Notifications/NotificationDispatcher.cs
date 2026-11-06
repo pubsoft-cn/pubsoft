@@ -9,7 +9,7 @@ public sealed class NotificationDispatcher
 {
     private readonly IReadOnlyDictionary<string, INotificationChannel> _channels;
     private readonly NotificationOptions _options;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly ILogger<NotificationDispatcher>? _logger;
     private readonly object _deduplicationLock = new();
     private readonly Dictionary<DeduplicationKey, DateTimeOffset?> _recent = [];
@@ -146,7 +146,7 @@ public sealed class NotificationDispatcher
     {
         lock (_deduplicationLock)
         {
-            if (_recent.ContainsKey(key))
+            if (_recent.ContainsKey(key)) // pubsoft:exempt PUBSOFT012 "write-only-if-present — TryGetValue reads a value this path ignores"
                 _recent[key] = expiresAt;
         }
     }

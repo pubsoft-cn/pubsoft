@@ -214,7 +214,7 @@ public sealed class EfCoreOutboxPublisher<TDbContext> : IOutboxPublisher
 {
     private readonly TDbContext _dbContext;
     private readonly OutboxOptions _options;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
 
     public EfCoreOutboxPublisher(TDbContext dbContext, OutboxOptions? options = null, TimeProvider? timeProvider = null)
     {

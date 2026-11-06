@@ -80,7 +80,7 @@ public sealed class RedisDistributedLock : IDistributedLock
 
     private readonly IConnectionMultiplexer _connection;
     private readonly RedisDistributedLockOptions _options;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
 
     public RedisDistributedLock(
         IConnectionMultiplexer connection,

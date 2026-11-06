@@ -89,6 +89,7 @@ internal sealed class EdgeRateCounter
 public sealed class EdgeRateLimitMiddleware : IDisposable
 {
     private readonly RequestDelegate _next;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly string _path;
     private readonly EdgeRateLimitOptions _options;
     private readonly bool _pseudoPathsEnabled;
@@ -102,8 +103,9 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
         string path,
         IOptions<EdgeRateLimitOptions> options,
         ILogger<EdgeRateLimitMiddleware> logger,
-        IOptions<EdgeGatewayOptions>? gatewayOptions = null)
+        IOptions<EdgeGatewayOptions>? gatewayOptions = null, TimeProvider? timeProvider = null)
     {
+        _timeProvider = timeProvider ?? TimeProvider.System;
         _next = next;
         _path = path.TrimEnd('/');
         _options = options.Value;
@@ -117,13 +119,13 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
         if (!HttpMethods.IsPost(context.Request.Method)
             || !EdgePathMatcher.TryMatch(context.Request.Path.Value, _path, _pseudoPathsEnabled, out var pseudoMethod))
         {
-            await _next(context);
+            await _next(context).ConfigureAwait(false);
             return;
         }
 
         if (!_options.Enabled)
         {
-            await _next(context);
+            await _next(context).ConfigureAwait(false);
             return;
         }
 
@@ -135,7 +137,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
             try
             {
                 request = await System.Text.Json.JsonSerializer.DeserializeAsync<EdgeRpcRequest>(
-                    context.Request.Body, EdgeJsonOptions.Default, context.RequestAborted);
+                    context.Request.Body, EdgeJsonOptions.Default, context.RequestAborted).ConfigureAwait(false);
             }
             catch
             {
@@ -160,7 +162,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
             _logger.LogWarning("[EdgeRateLimit] failure limit hit key={Key}", failKey);
             await WriteLimitedAsync(context, request, EdgeErrorCodes.FailureRateLimited,
                 "Too many failed requests, try again later",
-                (int)Math.Max(1, (failCounter.ResetAt - DateTime.UtcNow).TotalSeconds));
+                (int)Math.Max(1, (failCounter.ResetAt - _timeProvider.GetUtcNow().UtcDateTime).TotalSeconds)).ConfigureAwait(false);
             return;
         }
 
@@ -171,14 +173,14 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
 
         if (!_totalCounters.TryGetValue(totalKey, out var totalCounter))
         {
-            totalCounter = new EdgeRateCounter { Count = 0, ResetAt = DateTime.UtcNow.Add(window) };
+            totalCounter = new EdgeRateCounter { Count = 0, ResetAt = _timeProvider.GetUtcNow().UtcDateTime.Add(window) };
             _totalCounters[totalKey] = totalCounter;
         }
 
-        if (DateTime.UtcNow >= totalCounter.ResetAt)
+        if (_timeProvider.GetUtcNow().UtcDateTime >= totalCounter.ResetAt)
         {
             totalCounter.Count = 0;
-            totalCounter.ResetAt = DateTime.UtcNow.Add(window);
+            totalCounter.ResetAt = _timeProvider.GetUtcNow().UtcDateTime.Add(window);
         }
 
         if (totalCounter.IsExceeded(permitLimit))
@@ -187,7 +189,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
                 totalKey, totalCounter.Count, permitLimit);
             await WriteLimitedAsync(context, request, EdgeErrorCodes.RateLimited,
                 "Too many requests, try again later",
-                (int)Math.Max(1, (totalCounter.ResetAt - DateTime.UtcNow).TotalSeconds));
+                (int)Math.Max(1, (totalCounter.ResetAt - _timeProvider.GetUtcNow().UtcDateTime).TotalSeconds)).ConfigureAwait(false);
             return;
         }
 
@@ -199,7 +201,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
 
         try
         {
-            await _next(context);
+            await _next(context).ConfigureAwait(false);
 
             // Failure counting — error codes live in the body (HTTP is always 200).
             if (_options.FailureRateLimitEnabled)
@@ -209,11 +211,11 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
                 try
                 {
                     rpcResponse = await System.Text.Json.JsonSerializer.DeserializeAsync<EdgeRpcResponse>(
-                        memoryStream, EdgeJsonOptions.Default, context.RequestAborted);
+                        memoryStream, EdgeJsonOptions.Default, context.RequestAborted).ConfigureAwait(false);
                 }
                 catch { /* non-edge response — not counted */ }
 
-                if (rpcResponse is { Ok: false } && rpcResponse.Code != EdgeErrorCodes.RateLimited && rpcResponse.Code != EdgeErrorCodes.FailureRateLimited)
+                if (rpcResponse is { Ok: false } && !string.Equals(rpcResponse.Code, EdgeErrorCodes.RateLimited, System.StringComparison.Ordinal) && !string.Equals(rpcResponse.Code, EdgeErrorCodes.FailureRateLimited, System.StringComparison.Ordinal))
                 {
                     RecordFailure(failKey, TimeSpan.FromSeconds(Math.Max(1, GetFailureWindow(scheme, _options))));
                 }
@@ -230,7 +232,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
         finally
         {
             memoryStream.Position = 0;
-            await memoryStream.CopyToAsync(originalBodyStream, context.RequestAborted);
+            await memoryStream.CopyToAsync(originalBodyStream, context.RequestAborted).ConfigureAwait(false);
             context.Response.Body = originalBodyStream;
         }
     }
@@ -239,11 +241,11 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
     {
         context.Response.StatusCode = StatusCodes.Status200OK;
         context.Response.ContentType = "application/json; charset=utf-8";
-        context.Response.Headers.RetryAfter = retryAfter.ToString();
+        context.Response.Headers.RetryAfter = retryAfter.ToString(System.Globalization.CultureInfo.InvariantCulture);
         var response = EdgeRpcResponse.Error(code, message);
         if (request is not null)
             response = response.WithDiagnostics(request);
-        await System.Text.Json.JsonSerializer.SerializeAsync(context.Response.Body, response, EdgeJsonOptions.Default, context.RequestAborted);
+        await System.Text.Json.JsonSerializer.SerializeAsync(context.Response.Body, response, EdgeJsonOptions.Default, context.RequestAborted).ConfigureAwait(false);
     }
 
     private static string BuildTotalKey(string clientId, EdgeAuthScheme scheme, string? method, string ip)
@@ -286,7 +288,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
 
     private void RecordFailure(string key, TimeSpan window)
     {
-        var now = DateTime.UtcNow;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
         _failureCounters.AddOrUpdate(
             key,
             _ => new EdgeRateCounter { Count = 1, ResetAt = now.Add(window) },
@@ -305,7 +307,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
 
     private void CleanupExpired(object? state)
     {
-        var now = DateTime.UtcNow;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
         foreach (var kv in _totalCounters.Where(x => x.Value.ResetAt < now).ToList())
             _totalCounters.TryRemove(kv.Key, out _);
 

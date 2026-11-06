@@ -7,6 +7,7 @@ using PubSoft.Contracts;
 namespace PubSoft.Outbound;
 
 [RequiresUnreferencedCode("Contract request building uses reflection over request members; preserve contract types under trimming.")]
+[PubSoft.Core.BoundedCost("builder output contract — callers populate the returned params dictionary before dispatch")]
 public static class ContractRequestBuilder
 {
     private static readonly ConcurrentDictionary<(Type Type, INamingPolicy Policy), FieldEntry[]> Cache = new();

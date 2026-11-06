@@ -48,7 +48,7 @@ public static class PasswordHasher
             HashSize);
 
         CryptographicOperations.ZeroMemory(passwordBytes);
-        var encoded = $"{Prefix}${iterations.ToString(CultureInfo.InvariantCulture)}${Convert.ToHexString(salt)}${Convert.ToHexString(derived)}";
+        var encoded = $"{Prefix}${iterations.ToString(System.Globalization.CultureInfo.InvariantCulture)}${Convert.ToHexString(salt)}${Convert.ToHexString(derived)}";
         CryptographicOperations.ZeroMemory(derived);
         return encoded;
     }
@@ -111,7 +111,7 @@ public static class PasswordHasher
             return false;
 
         var parts = storedHash.Split('$');
-        if (parts.Length != 4 || parts[0] != Prefix ||
+        if (parts.Length != 4 || !string.Equals(parts[0], Prefix, System.StringComparison.Ordinal) ||
             !int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out iterations) ||
             iterations is < MinimumIterations or > MaximumIterations)
             return false;

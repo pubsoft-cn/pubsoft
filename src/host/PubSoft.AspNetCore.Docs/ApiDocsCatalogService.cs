@@ -18,6 +18,7 @@ namespace PubSoft.AspNetCore.Docs;
 /// </summary>
 public sealed class ApiDocsCatalogService
 {
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly EndpointDataSource _endpoints;
     private readonly IHostEnvironment _env;
     private readonly ApiDocsOptions _options;
@@ -59,7 +60,7 @@ public sealed class ApiDocsCatalogService
             if (raw.Contains('*')) continue; // catch-all SPA fallback 等永远不入目录
 
             string? summary = null;
-            var paramDocs = new Dictionary<string, string>();
+            var paramDocs = new Dictionary<string, string>(System.StringComparer.Ordinal);
             string? returns = null;
             var ps = new List<object>();
 
@@ -124,22 +125,22 @@ public sealed class ApiDocsCatalogService
             .OrderBy(g => g.Key)
             .Select(g => new { name = g.Key, endpoints = g.OrderBy(e => ((dynamic)e).path).Cast<object>().ToList() })
             .ToList();
-        return new { title = _options.Title, generatedAt = DateTimeOffset.UtcNow, groups };
+        return new { title = _options.Title, generatedAt = _timeProvider.GetUtcNow(), groups };
     }
 
     private bool IsOwnEndpoint(string raw)
     {
         var p = "/" + raw.TrimStart('/');
         // hosts may configure paths without a leading slash — normalize both sides
-        return p == "/" + _options.CatalogPath.TrimStart('/')
-            || (_options.PagePath is { } pp && p == "/" + pp.TrimStart('/'));
+        return string.Equals(p, "/" + _options.CatalogPath.TrimStart('/'), System.StringComparison.Ordinal)
+            || (_options.PagePath is { } pp && string.Equals(p, "/" + pp.TrimStart('/'), System.StringComparison.Ordinal));
     }
 
     private static readonly NullabilityInfoContext Nullability = new();
 
     // path params are always required; otherwise consult NRT metadata + default value
     private static bool IsRequired(ControllerParameterDescriptor p)
-        => p.BindingInfo?.BindingSource?.Id == "Path"
+        => string.Equals(p.BindingInfo?.BindingSource?.Id, "Path", System.StringComparison.Ordinal)
            || (!p.ParameterInfo.HasDefaultValue
                && Nullable.GetUnderlyingType(p.ParameterType) is null
                && Nullability.Create(p.ParameterInfo).ReadState != NullabilityState.Nullable);
@@ -168,7 +169,7 @@ public sealed class ApiDocsCatalogService
 
     private (Dictionary<string, OverlayEntry>, List<ApiDocExtraEndpoint>) LoadOverlay()
     {
-        var map = new Dictionary<string, OverlayEntry>();
+        var map = new Dictionary<string, OverlayEntry>(System.StringComparer.Ordinal);
         var extra = new List<ApiDocExtraEndpoint>();
         if (string.IsNullOrEmpty(_options.OverlayPath)) return (map, extra);
         var f = Path.IsPathRooted(_options.OverlayPath)
@@ -212,7 +213,7 @@ public sealed class ApiDocsCatalogService
     /// <summary>Parse every *.xml doc file next to the entry assembly set.</summary>
     private static Dictionary<string, XmlMember> LoadXmlDocs()
     {
-        var map = new Dictionary<string, XmlMember>();
+        var map = new Dictionary<string, XmlMember>(System.StringComparer.Ordinal);
         string[] files;
         try
         {

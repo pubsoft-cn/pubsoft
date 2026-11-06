@@ -4,4 +4,8 @@
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Framework-neutral authentication principal snapshot contracts for PubSoft.</Description>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../core/PubSoft.Core/PubSoft.Core.csproj" />
+  </ItemGroup>
+
 </Project>

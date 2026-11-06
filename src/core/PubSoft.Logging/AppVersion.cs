@@ -11,7 +11,7 @@ public static class AppVersion
     public static string Version => Parsed.Value.Version;
     public static string Short => ExtractShort(Version);
     public static string? BuildTime => Parsed.Value.BuildTime;
-    public static string? BuildDate => BuildTime is { Length: >= 10 } value ? value[..10].Replace("-", string.Empty) : null;
+    public static string? BuildDate => BuildTime is { Length: >= 10 } value ? value[..10].Replace("-", string.Empty) : null; // pubsoft:exempt PUBSOFT022 "char overload cannot delete characters"
 
     private static (string Full, string Version, string? BuildTime) Parse()
     {

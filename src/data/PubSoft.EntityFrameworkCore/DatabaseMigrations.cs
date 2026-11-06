@@ -61,8 +61,8 @@ public sealed class EfCoreDatabaseSchemaMigrator<TDbContext>(
     public async Task MigrateAsync(CancellationToken cancellationToken = default)
     {
         var pendingMigrations = (await dbContext.Database
-            .GetPendingMigrationsAsync(cancellationToken)
-            .ConfigureAwait(false)).ToArray();
+            .GetPendingMigrationsAsync(cancellationToken).ConfigureAwait(false)
+            ).ToArray();
         if (pendingMigrations.Length == 0)
         {
             logger?.LogDebug("No pending migrations for {DbContext}.", typeof(TDbContext).Name);

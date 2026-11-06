@@ -70,7 +70,7 @@ public static class OutboundContractMetadataResolver
         => RoutePath(Resolve(typeof(TRequest)), profileId);
 
     private static bool IsValidOperationId(string? value)
-        => !string.IsNullOrWhiteSpace(value) && value == value.Trim()
+        => !string.IsNullOrWhiteSpace(value) && string.Equals(value, value.Trim(), System.StringComparison.Ordinal)
             && value.Split('.').All(segment => segment.Length > 0
                 && !segment.Any(character => char.IsControl(character) || char.IsWhiteSpace(character)
                     || character is '/' or '\\' or '?' or '#'));

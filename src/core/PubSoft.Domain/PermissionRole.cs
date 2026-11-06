@@ -39,7 +39,7 @@ public sealed class PermissionRole : Entity<long>, IMultiTenant
     private static void ValidateClientCode(string clientCode)
     {
         ArgumentNullException.ThrowIfNull(clientCode);
-        if (clientCode.Length > 64 || clientCode != clientCode.Trim())
+        if (clientCode.Length > 64 || !string.Equals(clientCode, clientCode.Trim(), System.StringComparison.Ordinal))
             throw new ArgumentException("Client codes must be trimmed and at most 64 characters.", nameof(clientCode));
     }
 }
@@ -83,7 +83,7 @@ public sealed class SubjectPermissionRole : Entity<long>, IMultiTenant
     private static void ValidateClientCode(string clientCode)
     {
         ArgumentNullException.ThrowIfNull(clientCode);
-        if (clientCode.Length > 64 || clientCode != clientCode.Trim())
+        if (clientCode.Length > 64 || !string.Equals(clientCode, clientCode.Trim(), System.StringComparison.Ordinal))
             throw new ArgumentException("Client codes must be trimmed and at most 64 characters.", nameof(clientCode));
     }
 }
@@ -112,7 +112,7 @@ public sealed class PermissionGrantRecord : Entity<long>, IMultiTenant
         if (id <= 0 || roleId <= 0)
             throw new ArgumentOutOfRangeException(nameof(id));
         ArgumentException.ThrowIfNullOrWhiteSpace(moduleKey);
-        if (moduleKey != moduleKey.Trim())
+        if (!string.Equals(moduleKey, moduleKey.Trim(), System.StringComparison.Ordinal))
             throw new ArgumentException("Module keys must have no surrounding whitespace.", nameof(moduleKey));
         if (tenantId is <= 0)
             throw new ArgumentOutOfRangeException(nameof(roleId), "Specified IDs must be positive.");
@@ -129,7 +129,7 @@ public sealed class PermissionGrantRecord : Entity<long>, IMultiTenant
         if (flags == 0 && extensionFlags == 0 && string.IsNullOrWhiteSpace(customPermissionName))
             throw new ArgumentException("A grant must contain at least one permission.");
         if (customPermissionName is not null &&
-            (string.IsNullOrWhiteSpace(customPermissionName) || customPermissionName != customPermissionName.Trim()))
+            (string.IsNullOrWhiteSpace(customPermissionName) || !string.Equals(customPermissionName, customPermissionName.Trim(), System.StringComparison.Ordinal)))
             throw new ArgumentException("Custom permission names must be non-empty and trimmed.", nameof(customPermissionName));
 
         Flags = flags;

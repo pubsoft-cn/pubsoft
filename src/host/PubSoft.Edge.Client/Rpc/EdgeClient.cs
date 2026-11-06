@@ -22,6 +22,7 @@ namespace PubSoft.Edge;
 /// </summary>
 public sealed class EdgeClient
 {
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly HttpClient _http;
     private readonly string _clientId;
     private readonly EdgeAuthScheme _scheme;
@@ -90,11 +91,11 @@ public sealed class EdgeClient
         var request = BuildRequest(method, parameters);
         LastRequestId = request.RequestId;
 
-        using var response = await _http.PostAsJsonAsync(_path, request, EdgeJsonOptions.Default, ct);
+        using var response = await _http.PostAsJsonAsync(_path, request, EdgeJsonOptions.Default, ct).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
-            throw new EdgeRpcException(((int)response.StatusCode).ToString(), $"HTTP {response.StatusCode}", method);
+            throw new EdgeRpcException(((int)response.StatusCode).ToString(System.Globalization.CultureInfo.InvariantCulture), $"HTTP {response.StatusCode}", method);
 
-        var rpcResponse = await response.Content.ReadFromJsonAsync<EdgeRpcResponse>(EdgeJsonOptions.Default, ct);
+        var rpcResponse = await response.Content.ReadFromJsonAsync<EdgeRpcResponse>(EdgeJsonOptions.Default, ct).ConfigureAwait(false);
         if (rpcResponse is null || !rpcResponse.Ok)
             throw new EdgeRpcException(rpcResponse?.Code ?? "0", rpcResponse?.Message ?? "Unknown error", method);
 
@@ -105,7 +106,7 @@ public sealed class EdgeClient
     public EdgeRpcRequest BuildRequest(string method, object? parameters)
     {
         var requestId = Guid.NewGuid().ToString("N");
-        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        var timestamp = _timeProvider.GetUtcNow().ToUnixTimeMilliseconds();
 
         if (_scheme == EdgeAuthScheme.Session)
         {
@@ -156,7 +157,7 @@ public sealed class EdgeClient
     public string? GetSignPayload(string method, object? parameters)
     {
         return _scheme is EdgeAuthScheme.Hmac or EdgeAuthScheme.Md5
-            ? EdgeSigner.BuildSignPayload(method, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+            ? EdgeSigner.BuildSignPayload(method, _timeProvider.GetUtcNow().ToUnixTimeMilliseconds(),
                 Guid.NewGuid().ToString("N"), Guid.NewGuid().ToString("N"), parameters)
             : null;
     }

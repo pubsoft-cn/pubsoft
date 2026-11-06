@@ -95,7 +95,7 @@ public static class DualJwtAuthenticationExtensions
                         var headerJson = Encoding.UTF8.GetString(Convert.FromBase64String(PadBase64(parts[0])));
                         using var doc = JsonDocument.Parse(headerJson);
                         if (doc.RootElement.TryGetProperty("alg", out var alg)
-                            && alg.GetString() == "RS256")
+                            && string.Equals(alg.GetString(), "RS256", System.StringComparison.Ordinal))
                             return AuthServerScheme;
                     }
                     catch { }
@@ -124,7 +124,7 @@ public static class DualJwtAuthenticationExtensions
                         ClockSkew = TimeSpan.FromMinutes(1),
                         IssuerSigningKeyResolver = (_, _, kid, _) =>
                         {
-                            var key = keyProvider.ResolveSigningKeyAsync(kid ?? "").GetAwaiter().GetResult();
+                            var key = keyProvider.ResolveSigningKeyAsync(kid ?? "").GetAwaiter().GetResult(); // pubsoft:exempt PUBSOFT017 "intentional sync bridge — callback is sync by contract"
                             return key is null ? Array.Empty<SecurityKey>() : new[] { key };
                         },
                     };
@@ -139,7 +139,7 @@ public static class DualJwtAuthenticationExtensions
         if (options.CacheMinutes <= 0)
             throw new InvalidOperationException("AuthServer:CacheMinutes must be a positive number of minutes.");
         if (!Uri.TryCreate(options.JwksUri, UriKind.Absolute, out var uri)
-            || (uri.Scheme != Uri.UriSchemeHttps && !IsLoopbackHost(uri.Host) && !options.AllowInsecureJwksUri))
+            || (!string.Equals(uri.Scheme, Uri.UriSchemeHttps, System.StringComparison.Ordinal) && !IsLoopbackHost(uri.Host) && !options.AllowInsecureJwksUri))
             throw new InvalidOperationException(
                 "AuthServer:JwksUri must be an absolute https URI (loopback hosts are permitted for development); " +
                 "set AuthServer:AllowInsecureJwksUri = true to allow plaintext metadata on other hosts.");

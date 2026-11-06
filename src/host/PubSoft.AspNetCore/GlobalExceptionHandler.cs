@@ -44,7 +44,7 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             code = statusCode,
             message,
             traceId = httpContext.TraceIdentifier,
-        }), cancellationToken);
+        }), cancellationToken).ConfigureAwait(false);
         return true;
     }
 

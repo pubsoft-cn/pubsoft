@@ -49,7 +49,7 @@ public sealed class CorrelationIdMiddleware
     {
         if (!_options.Enabled)
         {
-            await _next(context);
+            await _next(context).ConfigureAwait(false);
             return;
         }
 
@@ -68,7 +68,7 @@ public sealed class CorrelationIdMiddleware
             }, (context, _options.ResponseHeaderName));
         }
 
-        await _next(context);
+        await _next(context).ConfigureAwait(false);
     }
 
     /// <summary>Inbound resolution order: valid <c>traceparent</c> (take trace-id
@@ -129,10 +129,10 @@ public static class CorrelationAmbient
     /// <summary>Shared g53 snowflake generator — worker id derived from machine name hash,
     /// collision-free across processes on one host.</summary>
     private static readonly PubSoft.Core.SnowflakeIdGenerator _gen = new(
-        Math.Abs(Environment.MachineName.GetHashCode()) % (PubSoft.Core.SnowflakeIdGenerator.MaxWorkerId + 1));
+        Math.Abs(StringComparer.Ordinal.GetHashCode(Environment.MachineName)) % (PubSoft.Core.SnowflakeIdGenerator.MaxWorkerId + 1));
 
     /// <summary>New span id — g53 snowflake → 16-hex (W3C spanId slot).</summary>
-    public static string NewSpanId() => _gen.NextId().ToString("x16");
+    public static string NewSpanId() => _gen.NextId().ToString("x16", System.Globalization.CultureInfo.InvariantCulture);
 }
 
 /// <summary>Outbound propagation handler — stamps the ambient trace onto outbound

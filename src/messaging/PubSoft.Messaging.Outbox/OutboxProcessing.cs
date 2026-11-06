@@ -52,7 +52,7 @@ public sealed class EfCoreInboxMessageProcessor<TDbContext> : IInboxMessageProce
     where TDbContext : PubSoftDbContext
 {
     private readonly TDbContext _dbContext;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
 
     public EfCoreInboxMessageProcessor(TDbContext dbContext, TimeProvider? timeProvider = null)
     {
@@ -77,10 +77,10 @@ public sealed class EfCoreInboxMessageProcessor<TDbContext> : IInboxMessageProce
         var tenantId = _dbContext.CurrentTenantId;
         var tenantKey = tenantId?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "host";
         var receipts = _dbContext.Set<InboxReceipt>();
-        if (await receipts.AnyAsync(receipt => receipt.TenantKey == tenantKey
-                && receipt.ConsumerName == consumerName
-                && receipt.MessageId == messageId, cancellationToken)
-            .ConfigureAwait(false))
+        if (await receipts.AnyAsync(receipt => receipt.TenantKey == tenantKey // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
+                && receipt.ConsumerName == consumerName // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
+                && receipt.MessageId == messageId, cancellationToken).ConfigureAwait(false)
+            )
             return false;
 
         await using var transaction = await _dbContext.Database
@@ -98,10 +98,10 @@ public sealed class EfCoreInboxMessageProcessor<TDbContext> : IInboxMessageProce
             _dbContext.ChangeTracker.Clear();
             await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
             await transaction.DisposeAsync().ConfigureAwait(false);
-            if (await receipts.AnyAsync(existing => existing.TenantKey == tenantKey
-                    && existing.ConsumerName == consumerName
-                    && existing.MessageId == messageId, cancellationToken)
-                .ConfigureAwait(false))
+            if (await receipts.AnyAsync(existing => existing.TenantKey == tenantKey // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
+                    && existing.ConsumerName == consumerName // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
+                    && existing.MessageId == messageId, cancellationToken).ConfigureAwait(false)
+                )
                 return false;
 
             throw;
@@ -134,7 +134,7 @@ public sealed class EfCoreOutboxStore<TDbContext> : IOutboxStore
 {
     private readonly TDbContext _dbContext;
     private readonly OutboxOptions _options;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
 
     public EfCoreOutboxStore(TDbContext dbContext, OutboxOptions? options = null, TimeProvider? timeProvider = null)
     {
@@ -362,8 +362,8 @@ public sealed class OutboxBackgroundService(
                 {
                     await foreach (var tenantScope in outboxScopeProvider
                         .CreateScopesAsync(stoppingToken)
-                        .WithCancellation(stoppingToken)
-                        .ConfigureAwait(false))
+                        .WithCancellation(stoppingToken).ConfigureAwait(false)
+                        )
                     {
                         await using var scope = tenantScope;
                         try

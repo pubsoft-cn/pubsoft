@@ -15,7 +15,7 @@ public sealed class EfCoreStateStore<TDbContext> : IStateStore
     private static readonly TimeSpan s_lastResultLifetime = TimeSpan.FromDays(7);
     private static readonly JsonSerializerOptions s_jsonOptions = new(JsonSerializerDefaults.Web);
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
 
     public EfCoreStateStore(IServiceScopeFactory scopeFactory, TimeProvider? timeProvider = null)
     {
@@ -61,9 +61,9 @@ public sealed class EfCoreStateStore<TDbContext> : IStateStore
         var context = services.GetRequiredService<TDbContext>();
         var identity = GetIdentity(tenant.TenantId, $"custom:{key}");
         var entries = await context.Set<SchedulerStateRecord>()
-            .Where(record => record.TenantScope == identity.TenantScope
-                && record.KeyHash == identity.KeyHash
-                && record.Key == identity.Key)
+            .Where(record => record.TenantScope == identity.TenantScope // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
+                && record.KeyHash == identity.KeyHash // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
+                && record.Key == identity.Key) // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         context.RemoveRange(entries);
@@ -79,9 +79,9 @@ public sealed class EfCoreStateStore<TDbContext> : IStateStore
         var context = services.GetRequiredService<TDbContext>();
         var identity = GetIdentity(tenant.TenantId, key);
         var entries = context.Set<SchedulerStateRecord>()
-            .Where(record => record.TenantScope == identity.TenantScope
-                && record.KeyHash == identity.KeyHash
-                && record.Key == identity.Key);
+            .Where(record => record.TenantScope == identity.TenantScope // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
+                && record.KeyHash == identity.KeyHash // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
+                && record.Key == identity.Key); // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
         var record = await entries
             .OrderByDescending(entry => entry.Id)
             .FirstOrDefaultAsync(cancellationToken)
@@ -109,9 +109,9 @@ public sealed class EfCoreStateStore<TDbContext> : IStateStore
         var context = services.GetRequiredService<TDbContext>();
         var identity = GetIdentity(tenant.TenantId, key);
         var entries = context.Set<SchedulerStateRecord>()
-            .Where(record => record.TenantScope == identity.TenantScope
-                && record.KeyHash == identity.KeyHash
-                && record.Key == identity.Key);
+            .Where(record => record.TenantScope == identity.TenantScope // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
+                && record.KeyHash == identity.KeyHash // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
+                && record.Key == identity.Key); // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
         var record = await entries
             .OrderByDescending(entry => entry.Id)
             .FirstOrDefaultAsync(cancellationToken)
@@ -159,7 +159,7 @@ public sealed class EfCoreStateStore<TDbContext> : IStateStore
     private static StateIdentity GetIdentity(long? tenantId, string key)
     {
         var tenantScope = tenantId is { } id
-            ? $"tenant:{id.ToString(CultureInfo.InvariantCulture)}"
+            ? $"tenant:{id.ToString(System.Globalization.CultureInfo.InvariantCulture)}"
             : "host";
         var keyHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(key)));
         return new StateIdentity(tenantId, tenantScope, key, keyHash);

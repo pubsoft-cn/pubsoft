@@ -10,6 +10,7 @@ namespace PubSoft.AspNetCore;
 
 public sealed class PubSoftRateLimitingMiddleware
 {
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly RequestDelegate _next;
     private readonly RateLimiter _rateLimiter;
     private int _proxyWarningEmitted;
@@ -67,7 +68,7 @@ public sealed class PubSoftRateLimitingMiddleware
     }
 
     private static int GetSecondsUntilReset(DateTime resetTime)
-        => Math.Max(0, (int)Math.Ceiling((resetTime - DateTime.UtcNow).TotalSeconds));
+        => Math.Max(0, (int)Math.Ceiling((resetTime - TimeProvider.System.GetUtcNow().UtcDateTime).TotalSeconds));
 }
 
 public static class PubSoftRateLimitingExtensions
@@ -119,7 +120,7 @@ public sealed class PubSoftRateLimitPolicy
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentException.ThrowIfNullOrWhiteSpace(options.Name);
-        if (options.Name != options.Name.Trim())
+        if (!string.Equals(options.Name, options.Name.Trim(), System.StringComparison.Ordinal))
             throw new ArgumentException("Policy names must have no surrounding whitespace.", nameof(options));
 
         Name = options.Name;
@@ -191,7 +192,7 @@ public sealed class PubSoftRateLimitPolicyMiddleware
 
         if (remaining != int.MaxValue && resetTime.HasValue)
         {
-            context.Response.Headers["RateLimit-Remaining"] = remaining.ToString(CultureInfo.InvariantCulture);
+            context.Response.Headers["RateLimit-Remaining"] = remaining.ToString(System.Globalization.CultureInfo.InvariantCulture);
             context.Response.Headers["RateLimit-Reset"] = GetSecondsUntilReset(resetTime.Value).ToString(CultureInfo.InvariantCulture);
         }
 
@@ -239,7 +240,7 @@ public sealed class PubSoftRateLimitPolicyMiddleware
     {
         var retryAfter = Math.Max(1, GetSecondsUntilReset(resetTime));
         context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-        context.Response.Headers.RetryAfter = retryAfter.ToString(CultureInfo.InvariantCulture);
+        context.Response.Headers.RetryAfter = retryAfter.ToString(System.Globalization.CultureInfo.InvariantCulture);
         var rejection = context.RequestServices?.GetService<PubSoftRateLimitRejection>();
         if (rejection?.BodyWriter is { } writer)
         {
@@ -252,7 +253,7 @@ public sealed class PubSoftRateLimitPolicyMiddleware
     }
 
     private static int GetSecondsUntilReset(DateTime resetTime)
-        => Math.Max(0, (int)Math.Ceiling((resetTime - DateTime.UtcNow).TotalSeconds));
+        => Math.Max(0, (int)Math.Ceiling((resetTime - TimeProvider.System.GetUtcNow().UtcDateTime).TotalSeconds));
 }
 
 public static class PubSoftRateLimitPolicyExtensions

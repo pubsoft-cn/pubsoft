@@ -19,7 +19,7 @@ public sealed class AuthenticatedSubjectResolver
         ArgumentException.ThrowIfNullOrWhiteSpace(trustedIssuer);
         if (tenantClaimType is not null && string.IsNullOrWhiteSpace(tenantClaimType))
             throw new ArgumentException("Tenant claim type cannot be empty when specified.", nameof(tenantClaimType));
-        if (subjectClaimType == tenantClaimType)
+        if (string.Equals(subjectClaimType, tenantClaimType, System.StringComparison.Ordinal))
             throw new ArgumentException("Subject and tenant claim types must differ.", nameof(tenantClaimType));
 
         _subjectClaimType = subjectClaimType;
@@ -36,7 +36,7 @@ public sealed class AuthenticatedSubjectResolver
         string? subjectValue = null;
         var subjectCount = 0;
         foreach (var claim in snapshot.Claims)
-            if (claim.Type == _subjectClaimType && claim.Issuer == _trustedIssuer)
+            if (string.Equals(claim.Type, _subjectClaimType, System.StringComparison.Ordinal) && string.Equals(claim.Issuer, _trustedIssuer, System.StringComparison.Ordinal))
             { subjectValue = claim.Value; subjectCount++; }
         if (subjectCount != 1 || !TryReadPositiveId(subjectValue!, out var subjectId))
             return null;
@@ -47,7 +47,7 @@ public sealed class AuthenticatedSubjectResolver
             string? tenantValue = null;
             var tenantCount = 0;
             foreach (var claim in snapshot.Claims)
-                if (claim.Type == _tenantClaimType && claim.Issuer == _trustedIssuer)
+                if (string.Equals(claim.Type, _tenantClaimType, System.StringComparison.Ordinal) && string.Equals(claim.Issuer, _trustedIssuer, System.StringComparison.Ordinal))
                 { tenantValue = claim.Value; tenantCount++; }
             if (tenantCount > 1)
                 return null;

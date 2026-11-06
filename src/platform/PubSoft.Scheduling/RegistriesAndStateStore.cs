@@ -61,7 +61,7 @@ public sealed class MemoryStateStore : IStateStore
 {
     private static readonly TimeSpan s_lastResultLifetime = TimeSpan.FromDays(7);
     private readonly ConcurrentDictionary<string, StoredValue> _values = new(StringComparer.Ordinal);
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly ILogger<MemoryStateStore>? _logger;
 
     public MemoryStateStore(TimeProvider? timeProvider = null, ILogger<MemoryStateStore>? logger = null)

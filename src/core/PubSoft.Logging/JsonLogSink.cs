@@ -30,7 +30,7 @@ public sealed class JsonLogSink(
         using var writer = new Utf8JsonWriter(buffer);
         writer.WriteStartObject();
         writer.WriteString("timestamp", entry.TimestampUtc);
-        writer.WriteString("level", entry.Level.ToString().ToUpperInvariant());
+        writer.WriteString("level", (entry.Level switch { AppLogLevel.Trace => "Trace", AppLogLevel.Debug => "Debug", AppLogLevel.Warn => "Warn", AppLogLevel.Error => "Error", AppLogLevel.Fatal => "Fatal", _ => "Info" }).ToUpperInvariant());
         writer.WriteString("message", entry.Message);
         writer.WriteString("source", entry.Source);
         if (entry.TraceId != 0)

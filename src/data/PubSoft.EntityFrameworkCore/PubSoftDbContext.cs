@@ -12,7 +12,7 @@ public abstract class PubSoftDbContext : DbContext, IPubSoftSaveParticipant
 
     private readonly ITenantContext _tenantContext;
     private readonly IMemberScopeContext? _memberScopeContext;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly ISaveChangesHook? _saveChangesHook;
 
     protected PubSoftDbContext(

@@ -43,7 +43,7 @@ public sealed class PermissionModuleRegistry
         foreach (var provider in _providers)
         {
             var displayName = provider.GetDisplayName(moduleKey);
-            if (!string.IsNullOrWhiteSpace(displayName) && displayName != moduleKey)
+            if (!string.IsNullOrWhiteSpace(displayName) && !string.Equals(displayName, moduleKey, System.StringComparison.Ordinal))
                 return displayName;
         }
 
@@ -80,7 +80,7 @@ public sealed class PermissionModuleAttribute(string moduleKey, string clientCod
     private static string ValidateClientCode(string value)
     {
         ArgumentNullException.ThrowIfNull(value);
-        return value.Length <= 64 && value == value.Trim()
+        return value.Length <= 64 && string.Equals(value, value.Trim(), System.StringComparison.Ordinal)
             ? value
             : throw new ArgumentException("Client codes must be trimmed and at most 64 characters.", nameof(value));
     }
@@ -102,7 +102,7 @@ public sealed class RequirePermissionAttribute(string moduleKey, PermissionFlags
     private static string ValidateClientCode(string value)
     {
         ArgumentNullException.ThrowIfNull(value);
-        return value.Length <= 64 && value == value.Trim()
+        return value.Length <= 64 && string.Equals(value, value.Trim(), System.StringComparison.Ordinal)
             ? value
             : throw new ArgumentException("Client codes must be trimmed and at most 64 characters.", nameof(value));
     }
@@ -124,7 +124,7 @@ public sealed class RequireCustomPermissionAttribute(string moduleKey, string pe
     private static string ValidateClientCode(string value)
     {
         ArgumentNullException.ThrowIfNull(value);
-        return value.Length <= 64 && value == value.Trim()
+        return value.Length <= 64 && string.Equals(value, value.Trim(), System.StringComparison.Ordinal)
             ? value
             : throw new ArgumentException("Client codes must be trimmed and at most 64 characters.", nameof(value));
     }
@@ -146,7 +146,7 @@ public sealed class RequireExtPermissionAttribute(string moduleKey, uint extFlag
     private static string ValidateClientCode(string value)
     {
         ArgumentNullException.ThrowIfNull(value);
-        return value.Length <= 64 && value == value.Trim()
+        return value.Length <= 64 && string.Equals(value, value.Trim(), System.StringComparison.Ordinal)
             ? value
             : throw new ArgumentException("Client codes must be trimmed and at most 64 characters.", nameof(value));
     }

@@ -9,8 +9,14 @@ public sealed class CircuitBreaker
 
     private readonly ConcurrentDictionary<string, CircuitState> _states = new(StringComparer.OrdinalIgnoreCase);
     private readonly ILogger<CircuitBreaker>? _logger;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
 
-    public CircuitBreaker(ILogger<CircuitBreaker>? logger = null) => _logger = logger;
+
+    public CircuitBreaker(ILogger<CircuitBreaker>? logger = null, TimeProvider? timeProvider = null)
+    {
+        _logger = logger;
+        _timeProvider = timeProvider ?? TimeProvider.System;
+    }
 
     public CircuitBreakerOptions Options { get; set; } = new();
 
@@ -23,7 +29,7 @@ public sealed class CircuitBreaker
             if (state.Status == State.Closed) return true;
             if (state.Status == State.Open)
             {
-                if (DateTimeOffset.UtcNow < state.OpenUntil) return false;
+                if (_timeProvider.GetUtcNow() < state.OpenUntil) return false;
                 state.Status = State.HalfOpen;
                 state.HalfOpenProbeInFlight = true;
                 _logger?.LogInformation("Circuit breaker for {Host} transitioned to HalfOpen", host);
@@ -62,7 +68,7 @@ public sealed class CircuitBreaker
             if (state.Status == State.HalfOpen || state.FailureCount >= Options.FailureThreshold)
             {
                 state.Status = State.Open;
-                state.OpenUntil = DateTimeOffset.UtcNow.Add(Options.OpenTimeout);
+                state.OpenUntil = _timeProvider.GetUtcNow().Add(Options.OpenTimeout);
                 _logger?.LogWarning("Circuit breaker for {Host} opened after {Count} failures until {Until}",
                     host, state.FailureCount, state.OpenUntil);
             }

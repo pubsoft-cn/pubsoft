@@ -9,6 +9,7 @@
     <PackageTags>modules;modularity;bootstrap;lifecycle</PackageTags>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../core/PubSoft.Core/PubSoft.Core.csproj" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />

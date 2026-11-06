@@ -18,7 +18,7 @@ public sealed class InboxRetentionCleanup<TDbContext>
     where TDbContext : PubSoftDbContext
 {
     private readonly TDbContext _dbContext;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
 
     public InboxRetentionCleanup(TDbContext dbContext, TimeProvider? timeProvider = null)
     {
@@ -54,7 +54,7 @@ public sealed class InboxRetentionCleanup<TDbContext>
         {
             var batch = await set
                 .Where(receipt => receipt.ProcessedAt < cutoff)
-                .Where(receipt => tenantKey == null || receipt.TenantKey == tenantKey)
+                .Where(receipt => tenantKey == null || receipt.TenantKey == tenantKey) // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
                 .OrderBy(receipt => receipt.ProcessedAt)
                 .Take(batchSize)
                 .ToListAsync(cancellationToken)

@@ -2,6 +2,7 @@ using System.Text.Json;
 
 namespace PubSoft.Domain;
 
+[PubSoft.Core.BoundedCost("data object — timestamp assigned by infrastructure interceptors, not injected TimeProvider")]
 public sealed class PermissionModule : Entity<long>, IMultiTenant
 {
     private const byte DefinedPermissionFlags = 0x3F;
@@ -84,20 +85,20 @@ public sealed class PermissionModule : Entity<long>, IMultiTenant
     private static void ValidateClientCode(string clientCode)
     {
         ArgumentNullException.ThrowIfNull(clientCode);
-        if (clientCode.Length > 64 || clientCode != clientCode.Trim())
+        if (clientCode.Length > 64 || !string.Equals(clientCode, clientCode.Trim(), System.StringComparison.Ordinal))
             throw new ArgumentException("Client codes must be trimmed and at most 64 characters.", nameof(clientCode));
     }
 
     private static void ValidateText(string value, int maxLength, string parameterName)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value, parameterName);
-        if (value != value.Trim() || value.Length > maxLength)
+        if (!string.Equals(value, value.Trim(), System.StringComparison.Ordinal) || value.Length > maxLength)
             throw new ArgumentException($"Value must be trimmed and no longer than {maxLength} characters.", parameterName);
     }
 
     private static void ValidateOptionalText(string? value, int maxLength, string parameterName)
     {
-        if (value is not null && (value != value.Trim() || value.Length > maxLength))
+        if (value is not null && (!string.Equals(value, value.Trim(), System.StringComparison.Ordinal) || value.Length > maxLength))
             throw new ArgumentException($"Value must be trimmed and no longer than {maxLength} characters.", parameterName);
     }
 
@@ -126,7 +127,7 @@ public sealed class PermissionModule : Entity<long>, IMultiTenant
             if (item.ValueKind != JsonValueKind.String)
                 throw new ArgumentException("Custom permissions must contain only strings.", nameof(json));
             var name = item.GetString();
-            if (string.IsNullOrWhiteSpace(name) || name != name.Trim() || !names.Add(name))
+            if (string.IsNullOrWhiteSpace(name) || !string.Equals(name, name.Trim(), System.StringComparison.Ordinal) || !names.Add(name))
                 throw new ArgumentException("Custom permission names must be non-empty, trimmed, and unique.", nameof(json));
         }
     }

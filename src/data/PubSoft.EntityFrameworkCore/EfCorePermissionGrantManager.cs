@@ -65,7 +65,7 @@ public sealed class EfCorePermissionGrantManager<TDbContext>(TDbContext dbContex
 
         await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
         var enabledRoleCount = await _dbContext.Set<PermissionRole>()
-            .CountAsync(role => role.TenantId == tenantId && role.ClientCode == clientCode
+            .CountAsync(role => role.TenantId == tenantId && role.ClientCode == clientCode // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
                 && role.IsEnabled && roleIdSnapshot.Contains(role.Id), cancellationToken)
             .ConfigureAwait(false);
         if (enabledRoleCount != roleIdSnapshot.Length)
@@ -73,7 +73,7 @@ public sealed class EfCorePermissionGrantManager<TDbContext>(TDbContext dbContex
 
         var existing = await _dbContext.Set<SubjectPermissionRole>()
             .Where(assignment => assignment.TenantId == tenantId
-                && assignment.ClientCode == clientCode && assignment.SubjectId == subjectId)
+                && assignment.ClientCode == clientCode && assignment.SubjectId == subjectId) // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         _dbContext.RemoveRange(existing);
@@ -99,7 +99,7 @@ public sealed class EfCorePermissionGrantManager<TDbContext>(TDbContext dbContex
     private static void ValidateClientCode(string clientCode)
     {
         ArgumentNullException.ThrowIfNull(clientCode);
-        if (clientCode.Length > 64 || clientCode != clientCode.Trim())
+        if (clientCode.Length > 64 || clientCode != clientCode.Trim()) // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison — == is the translatable form"
             throw new ArgumentException("Client codes must be trimmed and at most 64 characters.", nameof(clientCode));
     }
 
@@ -130,7 +130,7 @@ public sealed class EfCorePermissionGrantManager<TDbContext>(TDbContext dbContex
     {
         if (grants.Any(grant => grant.Id <= 0))
             throw new ArgumentException("Grant record IDs must be positive.", parameterName);
-        if (grants.Select(grant => grant.Id).Distinct().Count() != grants.Count)
+        if (grants.GroupBy(grant => grant.Id).Any(group => group.Skip(1).Any()))
             throw new ArgumentException("Grant record IDs must be unique.", parameterName);
     }
 }

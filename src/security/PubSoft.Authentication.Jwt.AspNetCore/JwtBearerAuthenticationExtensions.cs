@@ -86,7 +86,7 @@ public static class JwtBearerAuthenticationExtensions
                 IssuerSigningKeyResolver = useSymmetricKey
                     ? (_, _, keyId, _) => string.IsNullOrWhiteSpace(keyId)
                         ? [symmetricKey!]
-                        : symmetricKey!.KeyId == keyId ? [symmetricKey] : []
+                        : string.Equals(symmetricKey!.KeyId, keyId, System.StringComparison.Ordinal) ? [symmetricKey] : []
                     : useRemoteMetadata
                         ? (_, _, keyId, validationParameters) => ResolveSigningKeys(
                             keyId,
@@ -102,7 +102,7 @@ public static class JwtBearerAuthenticationExtensions
             return [];
 
         var matches = candidates
-            .Where(key => key.KeyId == keyId && IsPublicRsaSigningKey(key))
+            .Where(key => string.Equals(key.KeyId, keyId, System.StringComparison.Ordinal) && IsPublicRsaSigningKey(key))
             .Take(2)
             .ToArray();
 
@@ -112,9 +112,9 @@ public static class JwtBearerAuthenticationExtensions
     private static bool IsPublicRsaSigningKey(SecurityKey key)
     {
         if (key is JsonWebKey jwk)
-            return jwk.Kty == "RSA"
-                && (string.IsNullOrEmpty(jwk.Use) || jwk.Use == "sig")
-                && (string.IsNullOrEmpty(jwk.Alg) || jwk.Alg == SecurityAlgorithms.RsaSha256)
+            return string.Equals(jwk.Kty, "RSA", System.StringComparison.Ordinal)
+                && (string.IsNullOrEmpty(jwk.Use) || string.Equals(jwk.Use, "sig", System.StringComparison.Ordinal))
+                && (string.IsNullOrEmpty(jwk.Alg) || string.Equals(jwk.Alg, SecurityAlgorithms.RsaSha256, System.StringComparison.Ordinal))
                 && !string.IsNullOrWhiteSpace(jwk.N)
                 && !string.IsNullOrWhiteSpace(jwk.E)
                 && jwk.D is null
@@ -166,11 +166,11 @@ public static class JwtBearerAuthenticationExtensions
                 || !string.IsNullOrEmpty(metadataUri.UserInfo)
                 || !string.IsNullOrEmpty(metadataUri.Fragment))
                 throw new ArgumentException("Metadata address must be an absolute URL without user info or fragment.", nameof(options.MetadataAddress));
-            if (options.RequireHttpsMetadata && metadataUri.Scheme != Uri.UriSchemeHttps)
+            if (options.RequireHttpsMetadata && !string.Equals(metadataUri.Scheme, Uri.UriSchemeHttps, System.StringComparison.Ordinal))
                 throw new ArgumentException("Metadata address must use HTTPS.", nameof(options.MetadataAddress));
             if (!options.RequireHttpsMetadata
-                && metadataUri.Scheme != Uri.UriSchemeHttps
-                && metadataUri.Scheme != Uri.UriSchemeHttp)
+                && !string.Equals(metadataUri.Scheme, Uri.UriSchemeHttps, System.StringComparison.Ordinal)
+                && !string.Equals(metadataUri.Scheme, Uri.UriSchemeHttp, System.StringComparison.Ordinal))
                 throw new ArgumentException("Metadata address must use HTTP or HTTPS.", nameof(options.MetadataAddress));
         }
     }
@@ -183,9 +183,9 @@ public static class JwtBearerAuthenticationExtensions
         var keys = new JsonWebKeySet(jwksJson).Keys.ToArray();
         if (keys.Length is 0 or > 64)
             throw new ArgumentException("JWKS must contain between one and 64 signing keys.", nameof(jwksJson));
-        if (keys.Any(key => key.Kty != "RSA"
-            || key.Use != "sig"
-            || key.Alg != SecurityAlgorithms.RsaSha256
+        if (keys.Any(key => !string.Equals(key.Kty, "RSA", System.StringComparison.Ordinal)
+            || !string.Equals(key.Use, "sig", System.StringComparison.Ordinal)
+            || !string.Equals(key.Alg, SecurityAlgorithms.RsaSha256, System.StringComparison.Ordinal)
             || string.IsNullOrWhiteSpace(key.Kid)
             || string.IsNullOrWhiteSpace(key.N)
             || string.IsNullOrWhiteSpace(key.E)
@@ -197,7 +197,7 @@ public static class JwtBearerAuthenticationExtensions
             || key.QI is not null
             || key.Oth is { Count: > 0 }))
             throw new ArgumentException("JWKS must contain only public RSA/RS256 signing keys with unique key ids.", nameof(jwksJson));
-        if (keys.Select(key => key.Kid).Distinct(StringComparer.Ordinal).Count() != keys.Length)
+        if (keys.GroupBy(key => key.Kid, StringComparer.Ordinal).Any(group => group.Skip(1).Any()))
             throw new ArgumentException("JWKS key ids must be unique.", nameof(jwksJson));
 
         return keys;

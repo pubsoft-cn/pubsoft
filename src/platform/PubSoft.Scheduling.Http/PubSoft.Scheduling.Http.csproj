@@ -13,8 +13,9 @@
     <InternalsVisibleTo Include="PubSoft.Platform.Tests" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../platform/PubSoft.Scheduling/PubSoft.Scheduling.csproj" />
+    <ProjectReference Include="../../core/PubSoft.Core/PubSoft.Core.csproj" />
     <ProjectReference Include="../../core/PubSoft.Resilience/PubSoft.Resilience.csproj" />
+    <ProjectReference Include="../../platform/PubSoft.Scheduling/PubSoft.Scheduling.csproj" />
     <ProjectReference Include="../../platform/PubSoft.Tokens/PubSoft.Tokens.csproj" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Http" />

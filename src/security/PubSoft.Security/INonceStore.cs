@@ -17,7 +17,7 @@ public sealed class MemoryNonceStore : INonceStore
     private readonly object _gate = new();
     private readonly Dictionary<(string Scope, string Nonce), DateTimeOffset> _entries = [];
     private readonly int _maxEntries;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
 
     public MemoryNonceStore(int maxEntries = 100_000, TimeProvider? timeProvider = null)
     {

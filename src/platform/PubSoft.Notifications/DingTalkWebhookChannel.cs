@@ -9,6 +9,7 @@ namespace PubSoft.Notifications;
 /// <summary>DingTalk robot webhook channel. When <see cref="DingTalkWebhookOptions.Secret"/> is set the request is signed per the DingTalk robot spec.</summary>
 public sealed class DingTalkWebhookChannel : INotificationChannel
 {
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly DingTalkWebhookOptions _options;
     private readonly ILogger<DingTalkWebhookChannel>? _logger;
@@ -43,7 +44,7 @@ public sealed class DingTalkWebhookChannel : INotificationChannel
         var url = _options.WebhookUrl;
         if (!string.IsNullOrEmpty(_options.Secret))
         {
-            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            var timestamp = _timeProvider.GetUtcNow().ToUnixTimeMilliseconds();
             var sign = ComputeSign(timestamp, _options.Secret);
             url += $"&timestamp={timestamp}&sign={Uri.EscapeDataString(sign)}";
         }

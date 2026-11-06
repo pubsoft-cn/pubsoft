@@ -31,6 +31,7 @@ public interface IWeChatAccessTokenProvider
 /// </summary>
 public sealed class WeChatAccessTokenProvider : IWeChatAccessTokenProvider
 {
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly IOAuthChannelConfigProvider _configProvider;
     private readonly HttpClient _httpClient;
     private readonly ILogger? _logger;
@@ -52,7 +53,7 @@ public sealed class WeChatAccessTokenProvider : IWeChatAccessTokenProvider
         if (string.IsNullOrWhiteSpace(appId))
             return WeChatAccessTokenResult.Fail("AppId not provided");
 
-        if (_cache.TryGetValue(appId, out var cached) && cached.expiresAt > DateTime.UtcNow.AddMinutes(5))
+        if (_cache.TryGetValue(appId, out var cached) && cached.expiresAt > _timeProvider.GetUtcNow().UtcDateTime.AddMinutes(5))
             return WeChatAccessTokenResult.Ok(cached.token);
 
         var config = await _configProvider.GetByAppIdAsync(appId, ct).ConfigureAwait(false);
@@ -79,7 +80,7 @@ public sealed class WeChatAccessTokenProvider : IWeChatAccessTokenProvider
         var expiresIn = response.TryGetProperty("expires_in", out var x) && x.ValueKind == System.Text.Json.JsonValueKind.Number
             ? x.GetInt32() : 7200;
 
-        _cache[appId] = (token, DateTime.UtcNow.AddSeconds(expiresIn));
+        _cache[appId] = (token, _timeProvider.GetUtcNow().UtcDateTime.AddSeconds(expiresIn));
         return WeChatAccessTokenResult.Ok(token);
     }
 }

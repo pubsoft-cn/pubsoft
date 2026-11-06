@@ -8,7 +8,7 @@ public sealed class SchedulerHostedService : BackgroundService
 {
     private readonly SchedulerEngine _engine;
     private readonly IOptionsMonitor<SchedulerOptions> _options;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly ILogger<SchedulerHostedService>? _logger;
 
     public SchedulerHostedService(

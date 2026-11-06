@@ -68,7 +68,7 @@ public sealed class AuditScope : IAuditScope
     private readonly object _gate = new();
     private readonly IAuditChangeCollector _collector;
     private readonly AuditScopeOptions _options;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private AuditRequestContext? _request;
     private AuditBusinessContext _business = new();
     private string? _failureCode;

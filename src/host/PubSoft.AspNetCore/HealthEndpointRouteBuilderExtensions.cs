@@ -27,7 +27,7 @@ public static class HealthEndpointRouteBuilderExtensions
                 ? StatusCodes.Status503ServiceUnavailable
                 : StatusCodes.Status200OK;
             await context.Response.WriteAsJsonAsync(
-                new { status = status.ToString() },
+                new { status = status.ToString() }, // pubsoft:exempt PUBSOFT027 "enum name render on non-hot path (doc-gen/startup/log line)"
                 context.RequestAborted).ConfigureAwait(false);
         };
 

@@ -76,7 +76,7 @@ internal sealed class HttpExecutionSupport
 
     /// <summary>Target rules shared by the initial URL and every redirect hop.</summary>
     private bool IsValidTarget(Uri uri)
-        => (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+        => (string.Equals(uri.Scheme, Uri.UriSchemeHttp, System.StringComparison.Ordinal) || string.Equals(uri.Scheme, Uri.UriSchemeHttps, System.StringComparison.Ordinal))
             && string.IsNullOrEmpty(uri.UserInfo)
             && HttpEgressGuard.IsHostAllowed(uri.IdnHost, _options.AllowedHosts)
             && (!_options.BlockPrivateNetworks || !HttpEgressGuard.IsBlockedHostLiteral(uri));

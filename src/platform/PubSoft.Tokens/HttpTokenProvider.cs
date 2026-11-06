@@ -18,7 +18,7 @@ public sealed class HttpTokenProvider : ITokenProvider
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ICache _cache;
     private readonly IOptionsMonitor<TokenManagerOptions> _options;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly ILogger<HttpTokenProvider>? _logger;
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _refreshLocks = new(StringComparer.Ordinal);
 
@@ -94,7 +94,7 @@ public sealed class HttpTokenProvider : ITokenProvider
             || !credential.Method.Equals("GET", StringComparison.OrdinalIgnoreCase)
                 && !credential.Method.Equals("POST", StringComparison.OrdinalIgnoreCase)
             || !Uri.TryCreate(credential.Url, UriKind.Absolute, out var uri)
-            || uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps
+            || !string.Equals(uri.Scheme, Uri.UriSchemeHttp, System.StringComparison.Ordinal) && !string.Equals(uri.Scheme, Uri.UriSchemeHttps, System.StringComparison.Ordinal)
             || !string.IsNullOrEmpty(uri.UserInfo)
             || string.IsNullOrWhiteSpace(credential.TokenPath)
             || credential.TokenPath.Split('.').Any(string.IsNullOrWhiteSpace)
@@ -104,7 +104,7 @@ public sealed class HttpTokenProvider : ITokenProvider
 
         // Credentials are sent to this URL — plaintext http is rejected for
         // non-loopback endpoints unless explicitly opted in per credential.
-        if (uri.Scheme == Uri.UriSchemeHttp && !uri.IsLoopback && !credential.AllowInsecureUrl)
+        if (string.Equals(uri.Scheme, Uri.UriSchemeHttp, System.StringComparison.Ordinal) && !uri.IsLoopback && !credential.AllowInsecureUrl)
             return false;
 
         if (credential.ExpiryPath is { } expiryPath

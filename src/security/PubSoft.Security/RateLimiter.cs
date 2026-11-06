@@ -27,7 +27,7 @@ public sealed class RateLimiter
     private readonly ConcurrentDictionary<string, Window> _windows = new(StringComparer.Ordinal);
     private readonly object _capacityGate = new();
     private readonly RateLimiterOptions _options;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
 
     public RateLimiter(RateLimiterOptions? options = null, TimeProvider? timeProvider = null)
     {

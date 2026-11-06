@@ -69,7 +69,7 @@ PubSoft.Edge.EdgeOpenApiOptions.Version.set -> void
 PubSoft.Edge.EdgeRateLimitExtensions
 PubSoft.Edge.EdgeRateLimitMiddleware
 PubSoft.Edge.EdgeRateLimitMiddleware.Dispose() -> void
-PubSoft.Edge.EdgeRateLimitMiddleware.EdgeRateLimitMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, string! path, Microsoft.Extensions.Options.IOptions<PubSoft.Edge.EdgeRateLimitOptions!>! options, Microsoft.Extensions.Logging.ILogger<PubSoft.Edge.EdgeRateLimitMiddleware!>! logger, Microsoft.Extensions.Options.IOptions<PubSoft.Edge.EdgeGatewayOptions!>? gatewayOptions = null) -> void
+PubSoft.Edge.EdgeRateLimitMiddleware.EdgeRateLimitMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, string! path, Microsoft.Extensions.Options.IOptions<PubSoft.Edge.EdgeRateLimitOptions!>! options, Microsoft.Extensions.Logging.ILogger<PubSoft.Edge.EdgeRateLimitMiddleware!>! logger, Microsoft.Extensions.Options.IOptions<PubSoft.Edge.EdgeGatewayOptions!>? gatewayOptions = null, System.TimeProvider? timeProvider = null) -> void
 PubSoft.Edge.EdgeRateLimitMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
 PubSoft.Edge.EdgeRateLimitOptions
 PubSoft.Edge.EdgeRateLimitOptions.ClientPermitLimit.get -> int

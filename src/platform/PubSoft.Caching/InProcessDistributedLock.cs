@@ -44,7 +44,7 @@ public sealed class InProcessDistributedLock : IDistributedLock, IDisposable
     private readonly ConcurrentDictionary<string, LockEntry> _entries = new(StringComparer.Ordinal);
     /// <summary>新条目插入门闩——容量检查 + TryAdd 必须原子化，否则满载时可并发越过上限。</summary>
     private readonly object _entryGate = new();
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly int _maxEntries;
     private long _nextToken;
     private int _disposed;

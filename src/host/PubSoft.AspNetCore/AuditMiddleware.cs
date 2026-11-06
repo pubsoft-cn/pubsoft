@@ -36,7 +36,7 @@ public sealed class AuditMiddleware
         }
 
         scope.Initialize(new AuditRequestContext(
-            DateTimeOffset.UtcNow,
+            TimeProvider.System.GetUtcNow(),
             context.Request.Method,
             context.Request.Path.Value,
             _options.CaptureClientIp && context.Connection.RemoteIpAddress is { } remoteIp

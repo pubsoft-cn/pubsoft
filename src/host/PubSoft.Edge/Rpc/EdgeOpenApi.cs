@@ -24,6 +24,7 @@ namespace PubSoft.Edge;
 /// </summary>
 public sealed class EdgeOpenApiOptions
 {
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     public const string SectionName = "Edge:OpenApi";
 
     /// <summary>Path of the OpenAPI JSON document.</summary>
@@ -123,7 +124,7 @@ public static class EdgeOpenApiDocument
                 var entry = new JsonObject
                 {
                     ["method"] = method,
-                    ["schemes"] = new JsonArray(schemes.Select(s => (JsonNode)Camel.ConvertName(s.ToString())).ToArray()),
+                    ["schemes"] = new JsonArray(schemes.Select(s => (JsonNode)Camel.ConvertName(s.ToString())).ToArray()), // pubsoft:exempt PUBSOFT027 "enum name render on non-hot path (doc-gen/startup/log line)"
                     ["params"] = paramSchema.DeepClone(),
                 };
                 if (summary is not null)
@@ -219,7 +220,7 @@ public static class EdgeOpenApiDocument
 
         private JsonObject PseudoPath(string method, EdgeAuthScheme[] schemes, string? summary, JsonObject paramSchema)
         {
-            var schemeNames = string.Join("|", schemes.Select(s => Camel.ConvertName(s.ToString())));
+            var schemeNames = string.Join("|", schemes.Select(s => Camel.ConvertName(s.ToString()))); // pubsoft:exempt PUBSOFT027 "enum name render on non-hot path (doc-gen/startup/log line)"
             var media = new JsonObject { ["schema"] = PseudoRequestSchema(paramSchema, schemes) };
 
             // One ready-to-send example per accepted scheme — Swagger UI shows them as a
@@ -227,7 +228,7 @@ public static class EdgeOpenApiDocument
             var examples = new JsonObject();
             foreach (var scheme in schemes.OrderBy(TryOrder))
             {
-                examples[Camel.ConvertName(scheme.ToString())] = new JsonObject
+                examples[Camel.ConvertName(scheme.ToString())] = new JsonObject // pubsoft:exempt PUBSOFT027 "enum name render during one-time OpenAPI document generation"
                 {
                     ["summary"] = SchemeHint(scheme),
                     ["value"] = EnvelopeExample(null, scheme, paramSchema),
@@ -278,8 +279,8 @@ public static class EdgeOpenApiDocument
             envelopeProps["params"] = paramSchema;
             // Property-level examples — shown in the Schema tab and merged into generated samples.
             ((JsonObject)envelopeProps["clientId"]!)["example"] = opts.ClientIdExample ?? "demo-app";
-            ((JsonObject)envelopeProps["scheme"]!)["example"] = Camel.ConvertName(PreferredScheme(schemes).ToString());
-            ((JsonObject)envelopeProps["timestamp"]!)["example"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            ((JsonObject)envelopeProps["scheme"]!)["example"] = Camel.ConvertName(PreferredScheme(schemes).ToString()); // pubsoft:exempt PUBSOFT027 "enum name render during one-time OpenAPI document generation"
+            ((JsonObject)envelopeProps["timestamp"]!)["example"] = TimeProvider.System.GetUtcNow().ToUnixTimeMilliseconds();
             return new JsonObject
             {
                 ["type"] = "object",
@@ -309,7 +310,7 @@ public static class EdgeOpenApiDocument
             EdgeAuthScheme.Session => "scheme=session — put a sessionKey (from a login method) into credential",
             EdgeAuthScheme.Hmac => "scheme=hmac — credential = canonical HMAC-SHA256 signature",
             EdgeAuthScheme.Md5 => "scheme=md5 — credential = canonical MD5 signature",
-            _ => s.ToString(),
+            _ => s.ToString(), // pubsoft:exempt PUBSOFT027 "enum name render on non-hot path (doc-gen/startup/log line)"
         };
 
         /// <summary>A ready-to-edit request body example; method is null for pseudo-paths (path carries it).</summary>
@@ -321,16 +322,16 @@ public static class EdgeOpenApiDocument
             };
             if (method is not null)
                 body["method"] = method;
-            body["scheme"] = Camel.ConvertName(scheme.ToString());
+            body["scheme"] = Camel.ConvertName(scheme.ToString()); // pubsoft:exempt PUBSOFT027 "enum name render during one-time OpenAPI document generation"
             body["credential"] = scheme switch
             {
                 EdgeAuthScheme.Session => "<sessionKey>",
                 EdgeAuthScheme.Hmac or EdgeAuthScheme.Md5 => "<signature>",
                 _ => "",
             };
-            body["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            body["timestamp"] = TimeProvider.System.GetUtcNow().ToUnixTimeMilliseconds();
             body["nonce"] = "docs";
-            body["params"] = ExampleForSchema(paramSchema, []);
+            body["params"] = ExampleForSchema(paramSchema, new HashSet<string>(System.StringComparer.Ordinal));
             return body;
         }
 
@@ -551,7 +552,7 @@ public static class EdgeOpenApiDocument
         {
             if (_xmlCache.TryGetValue(assembly, out var cached))
                 return cached;
-            var docs = new Dictionary<string, XElement>();
+            var docs = new Dictionary<string, XElement>(System.StringComparer.Ordinal);
             try
             {
                 var xmlPath = assembly.Location is { Length: > 0 } loc ? Path.ChangeExtension(loc, ".xml") : null;

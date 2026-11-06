@@ -74,7 +74,7 @@ public abstract class DbFirstConfigProvider<TEntity, TInfo> where TEntity : clas
         var result = entities.Select(ToInfo).ToList();
 
         foreach (var info in FallbackList())
-            if (!result.Any(i => ConfigKey(i) == ConfigKey(info)))
+            if (!result.Any(i => string.Equals(ConfigKey(i), ConfigKey(info), System.StringComparison.Ordinal)))
                 result.Add(info);
         return result;
     }
@@ -82,7 +82,7 @@ public abstract class DbFirstConfigProvider<TEntity, TInfo> where TEntity : clas
     public void InvalidateCache(string key) => Cache.Remove(CachePrefix + key);
 
     protected virtual TInfo? FindFallbackInfo(string key)
-        => FallbackList().FirstOrDefault(i => ConfigKey(i) == key);
+        => FallbackList().FirstOrDefault(i => string.Equals(ConfigKey(i), key, System.StringComparison.Ordinal));
 
     protected virtual List<TInfo> FallbackList()
         => Configuration.GetSection(FallbackSectionName).Get<List<TInfo>>() ?? new();

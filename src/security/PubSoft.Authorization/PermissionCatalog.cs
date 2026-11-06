@@ -85,7 +85,7 @@ public sealed class PermissionDefinitionRegistry
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(moduleKey);
         ArgumentNullException.ThrowIfNull(clientCode);
-        if (clientCode.Length > 64 || clientCode != clientCode.Trim())
+        if (clientCode.Length > 64 || !string.Equals(clientCode, clientCode.Trim(), System.StringComparison.Ordinal))
             throw new ArgumentException("Client codes must be trimmed and at most 64 characters.", nameof(clientCode));
         return _byModuleClient.TryGetValue((moduleKey, clientCode), out var hits) ? hits : Empty;
     }
@@ -215,7 +215,7 @@ public sealed class PermissionDefinitionRegistry
         return true;
     }
 
-    private static string[] GetSegments(string path) => path == "/"
+    private static string[] GetSegments(string path) => string.Equals(path, "/", System.StringComparison.Ordinal)
         ? Array.Empty<string>()
         : path[1..].Split('/');
 }

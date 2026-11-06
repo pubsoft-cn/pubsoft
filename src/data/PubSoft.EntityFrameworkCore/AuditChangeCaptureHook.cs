@@ -8,7 +8,7 @@ public sealed class AuditChangeCaptureHook : ISaveChangesHook
 {
     private readonly IAuditChangeCollector _collector;
     private readonly AuditChangeCollectorOptions _options;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
 
     public AuditChangeCaptureHook(
         IAuditChangeCollector collector,

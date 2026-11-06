@@ -15,6 +15,7 @@ namespace PubSoft.OAuth;
 /// </summary>
 public sealed partial class AlipayOAuthProvider : OAuthProviderBase
 {
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     public AlipayOAuthProvider(
         IOAuthChannelConfigProvider configProvider,
         HttpClient httpClient,
@@ -55,7 +56,7 @@ public sealed partial class AlipayOAuthProvider : OAuthProviderBase
     {
         try
         {
-            var biz = new Dictionary<string, string> { ["grant_type"] = "authorization_code", ["code"] = code };
+            var biz = new Dictionary<string, string>(System.StringComparer.Ordinal) { ["grant_type"] = "authorization_code", ["code"] = code };
             var resp = await ExecuteAlipayGatewayAsync(appId, "alipay.system.oauth.token", biz, ct: ct).ConfigureAwait(false);
             var openId = GetString(resp, "open_id") ?? "";
             var userId = GetString(resp, "user_id") ?? "";
@@ -83,7 +84,7 @@ public sealed partial class AlipayOAuthProvider : OAuthProviderBase
     {
         try
         {
-            var resp = await ExecuteAlipayGatewayAsync(appId, "alipay.user.info.share", new Dictionary<string, string>(), authToken: accessToken, ct: ct).ConfigureAwait(false);
+            var resp = await ExecuteAlipayGatewayAsync(appId, "alipay.user.info.share", new Dictionary<string, string>(System.StringComparer.Ordinal), authToken: accessToken, ct: ct).ConfigureAwait(false);
             return new OAuthUserInfoResult
             {
                 Success = true,
@@ -106,13 +107,13 @@ public sealed partial class AlipayOAuthProvider : OAuthProviderBase
     {
         try
         {
-            var tokenBiz = new Dictionary<string, string> { ["grant_type"] = "authorization_code", ["code"] = code };
+            var tokenBiz = new Dictionary<string, string>(System.StringComparer.Ordinal) { ["grant_type"] = "authorization_code", ["code"] = code };
             var tokenResp = await ExecuteAlipayGatewayAsync(appId, "alipay.system.oauth.token", tokenBiz, ct: ct).ConfigureAwait(false);
             var accessToken = GetString(tokenResp, "access_token");
             if (string.IsNullOrWhiteSpace(accessToken))
                 return OAuthPhoneResult.Fail("Alipay phone query failed: no access_token returned");
 
-            var resp = await ExecuteAlipayGatewayAsync(appId, "alipay.user.info.share", new Dictionary<string, string>(), authToken: accessToken, ct: ct).ConfigureAwait(false);
+            var resp = await ExecuteAlipayGatewayAsync(appId, "alipay.user.info.share", new Dictionary<string, string>(System.StringComparer.Ordinal), authToken: accessToken, ct: ct).ConfigureAwait(false);
             var phone = GetString(resp, "mobile");
             if (string.IsNullOrWhiteSpace(phone))
                 return OAuthPhoneResult.Fail("Alipay user has no bound phone number");
@@ -142,14 +143,14 @@ public sealed partial class AlipayOAuthProvider : OAuthProviderBase
         var privateKey = privateKeyPem ?? throw new AlipayOAuthException("NO_PRIVATE_KEY", "Alipay channel has no app private key (ExtraJson.PrivateKeyPem)");
         gatewayUrl ??= "https://openapi.alipay.com/gateway.do";
 
-        var paramDict = new Dictionary<string, string>
+        var paramDict = new Dictionary<string, string>(System.StringComparer.Ordinal)
         {
             ["app_id"] = config.AppId,
             ["method"] = method,
             ["format"] = "JSON",
             ["charset"] = "utf-8",
             ["sign_type"] = "RSA2",
-            ["timestamp"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            ["timestamp"] = _timeProvider.GetLocalNow().DateTime.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture),
             ["version"] = "1.0",
         };
         if (!string.IsNullOrEmpty(authToken))
@@ -202,7 +203,7 @@ public sealed partial class AlipayOAuthProvider : OAuthProviderBase
                 throw new AlipayOAuthException("SIGN_VERIFY_FAILED", "Alipay response signature verification failed (possible tampering)");
         }
 
-        if (bizResp.TryGetProperty("code", out var codeEl) && codeEl.GetString() != "10000")
+        if (bizResp.TryGetProperty("code", out var codeEl) && !string.Equals(codeEl.GetString(), "10000", System.StringComparison.Ordinal))
         {
             var code = codeEl.GetString() ?? "";
             var msg = bizResp.TryGetProperty("msg", out var m) ? m.GetString() ?? "" : "";
@@ -271,7 +272,7 @@ public sealed partial class AlipayOAuthProvider : OAuthProviderBase
 
     private static byte[] ConvertPkcs1OrPkcs8ToPrivateKey(string privateKey)
     {
-        var cleaned = PemArmorRegex().Replace(privateKey, string.Empty)
+        var cleaned = PemArmorRegex().Replace(privateKey, string.Empty) // pubsoft:exempt PUBSOFT022 "char overload cannot delete characters"
             .Replace("\r", "").Replace("\n", "").Replace(" ", "").Trim();
         var raw = Convert.FromBase64String(cleaned);
         using var rsa = RSA.Create();
@@ -289,7 +290,7 @@ public sealed partial class AlipayOAuthProvider : OAuthProviderBase
 
     private static byte[] ConvertPublicKeyToRsa(string publicKey)
     {
-        var cleaned = publicKey
+        var cleaned = publicKey // pubsoft:exempt PUBSOFT022 "char overload cannot delete characters"
             .Replace("-----BEGIN PUBLIC KEY-----", "")
             .Replace("-----END PUBLIC KEY-----", "")
             .Replace("\r", "").Replace("\n", "").Replace(" ", "").Trim();

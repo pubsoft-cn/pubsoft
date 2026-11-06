@@ -33,7 +33,7 @@ public abstract class OAuthProviderBase : IOAuthProvider
         if (string.IsNullOrWhiteSpace(appId))
             throw new InvalidOperationException($"{Provider} login failed: AppId not provided");
 
-        var config = await ConfigProvider.GetByAppIdAsync(appId, ct)
+        var config = await ConfigProvider.GetByAppIdAsync(appId, ct).ConfigureAwait(false)
             ?? throw new InvalidOperationException($"{Provider} login failed: no channel config found for AppId={appId}");
 
         if (string.IsNullOrWhiteSpace(config.AppSecret))

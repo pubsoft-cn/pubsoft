@@ -31,7 +31,7 @@ PubSoft.Caching.MemoryCache.GetAsync<T>(string! key, System.Threading.Cancellati
 PubSoft.Caching.MemoryCache.GetManyAsync<T>(System.Collections.Generic.IEnumerable<string!>! keys, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.Dictionary<string!, T?>!>!
 PubSoft.Caching.MemoryCache.GetOrSetAsync<T>(string! key, System.Func<System.Threading.Tasks.Task<T!>!>! factory, System.TimeSpan? expiry = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<T!>!
 PubSoft.Caching.MemoryCache.GetStatistics() -> PubSoft.Caching.MemoryCache.CacheStatistics!
-PubSoft.Caching.MemoryCache.MemoryCache(System.TimeSpan? cleanupInterval = null, int maxSize = 10000) -> void
+PubSoft.Caching.MemoryCache.MemoryCache(System.TimeSpan? cleanupInterval = null, int maxSize = 10000, System.TimeProvider? timeProvider = null) -> void
 PubSoft.Caching.MemoryCache.RemoveAsync(string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 PubSoft.Caching.MemoryCache.RemoveByPatternAsync(string! pattern, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 PubSoft.Caching.MemoryCache.RemoveManyAsync(System.Collections.Generic.IEnumerable<string!>! keys, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!

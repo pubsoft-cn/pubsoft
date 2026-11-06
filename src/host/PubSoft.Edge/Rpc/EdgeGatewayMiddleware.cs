@@ -60,7 +60,7 @@ public sealed class EdgeGatewayMiddleware
         if (!HttpMethods.IsPost(context.Request.Method)
             || !EdgePathMatcher.TryMatch(context.Request.Path.Value, _path, _options.EnablePseudoPaths, out var pseudoMethod))
         {
-            await _next(context);
+            await _next(context).ConfigureAwait(false);
             return;
         }
 
@@ -73,11 +73,11 @@ public sealed class EdgeGatewayMiddleware
         {
             context.Request.EnableBuffering();
             request = await JsonSerializer.DeserializeAsync<EdgeRpcRequest>(
-                context.Request.Body, EdgeJsonOptions.Default, context.RequestAborted);
+                context.Request.Body, EdgeJsonOptions.Default, context.RequestAborted).ConfigureAwait(false);
         }
         catch (JsonException ex)
         {
-            await WriteResponseAsync(context, null, EdgeError.BadRequest($"Request parsing failed: {ex.Message}"));
+            await WriteResponseAsync(context, null, EdgeError.BadRequest($"Request parsing failed: {ex.Message}")).ConfigureAwait(false);
             return;
         }
 
@@ -87,13 +87,13 @@ public sealed class EdgeGatewayMiddleware
 
         if (request is null || string.IsNullOrWhiteSpace(request.Method))
         {
-            await WriteResponseAsync(context, request, EdgeError.BadRequest("method is required"));
+            await WriteResponseAsync(context, request, EdgeError.BadRequest("method is required")).ConfigureAwait(false);
             return;
         }
 
         if (string.IsNullOrWhiteSpace(request.ClientId))
         {
-            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.ClientIdRequired, "clientId is required"));
+            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.ClientIdRequired, "clientId is required")).ConfigureAwait(false);
             return;
         }
 
@@ -101,18 +101,18 @@ public sealed class EdgeGatewayMiddleware
         if (_options.TimestampToleranceSeconds > 0
             && request.Scheme is EdgeAuthScheme.Hmac or EdgeAuthScheme.Md5)
         {
-            var skew = Math.Abs(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - request.Timestamp);
+            var skew = Math.Abs(TimeProvider.System.GetUtcNow().ToUnixTimeMilliseconds() - request.Timestamp);
             if (skew > _options.TimestampToleranceSeconds * 1000L)
             {
                 await WriteResponseAsync(context, request,
-                    EdgeRpcResponse.Error(EdgeErrorCodes.TimestampOutOfRange, "timestamp outside accepted window"));
+                    EdgeRpcResponse.Error(EdgeErrorCodes.TimestampOutOfRange, "timestamp outside accepted window")).ConfigureAwait(false);
                 return;
             }
         }
 
         if (!handlerRegistry.TryGetHandler(request.Method, out var handler))
         {
-            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.MethodNotFound, $"method not found: {request.Method}"));
+            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.MethodNotFound, $"method not found: {request.Method}")).ConfigureAwait(false);
             return;
         }
 
@@ -122,7 +122,7 @@ public sealed class EdgeGatewayMiddleware
         if (allowedScheme.HasValue && request.Scheme != allowedScheme.Value)
         {
             await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.SchemeNotAccepted,
-                $"clientId={request.ClientId} only accepts scheme={allowedScheme.Value}"));
+                $"clientId={request.ClientId} only accepts scheme={allowedScheme.Value}")).ConfigureAwait(false);
             return;
         }
 
@@ -130,7 +130,7 @@ public sealed class EdgeGatewayMiddleware
         if (!handlerSchemes.Contains(request.Scheme))
         {
             await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.SchemeNotAccepted,
-                $"method does not accept scheme={request.Scheme}"));
+                $"method does not accept scheme={request.Scheme}")).ConfigureAwait(false);
             return;
         }
 
@@ -138,7 +138,7 @@ public sealed class EdgeGatewayMiddleware
         EdgeContext edgeContext;
         try
         {
-            edgeContext = await AuthenticateAsync(context, request, signKeyProvider, logger);
+            edgeContext = await AuthenticateAsync(context, request, signKeyProvider, logger).ConfigureAwait(false);
             if (!edgeContext.IsVerified && request.Scheme != EdgeAuthScheme.None)
             {
                 // Failure response was already written by AuthenticateAsync.
@@ -148,20 +148,20 @@ public sealed class EdgeGatewayMiddleware
         catch (Exception ex)
         {
             logger?.LogError(ex, "Edge authentication error: {Method}", request.Method);
-            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.AuthError, "Authentication error"));
+            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.AuthError, "Authentication error")).ConfigureAwait(false);
             return;
         }
 
         // Dispatch
         try
         {
-            var response = await handler.ExecuteAsync(request, edgeContext, context.RequestAborted);
-            await WriteResponseAsync(context, request, response);
+            var response = await handler.ExecuteAsync(request, edgeContext, context.RequestAborted).ConfigureAwait(false);
+            await WriteResponseAsync(context, request, response).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
             logger?.LogError(ex, "Edge handler error: {Method}", request.Method);
-            await WriteResponseAsync(context, request, EdgeError.InternalError("Internal error"));
+            await WriteResponseAsync(context, request, EdgeError.InternalError("Internal error")).ConfigureAwait(false);
         }
     }
 
@@ -184,13 +184,13 @@ public sealed class EdgeGatewayMiddleware
 
             case EdgeAuthScheme.Hmac:
             case EdgeAuthScheme.Md5:
-                return await AuthenticateSignatureAsync(context, request, signKeyProvider, baseContext, logger);
+                return await AuthenticateSignatureAsync(context, request, signKeyProvider, baseContext, logger).ConfigureAwait(false);
 
             case EdgeAuthScheme.Session:
-                return await AuthenticateSessionAsync(context, request, baseContext, logger);
+                return await AuthenticateSessionAsync(context, request, baseContext, logger).ConfigureAwait(false);
 
             default:
-                await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.UnknownScheme, $"Unknown scheme: {request.Scheme}"));
+                await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.UnknownScheme, $"Unknown scheme: {request.Scheme}")).ConfigureAwait(false);
                 return baseContext with { IsVerified = false };
         }
     }
@@ -202,14 +202,14 @@ public sealed class EdgeGatewayMiddleware
         if (signKeyProvider is null)
         {
             logger?.LogError("IEdgeSignKeyProvider not registered");
-            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.SignServiceNotConfigured, "Signing service not configured"));
+            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.SignServiceNotConfigured, "Signing service not configured")).ConfigureAwait(false);
             return baseContext with { IsVerified = false };
         }
 
         var secretKey = signKeyProvider.GetSecretKey(request.ClientId);
         if (string.IsNullOrEmpty(secretKey))
         {
-            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.ClientNotConfigured, $"clientId not configured: {request.ClientId}"));
+            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.ClientNotConfigured, $"clientId not configured: {request.ClientId}")).ConfigureAwait(false);
             return baseContext with { IsVerified = false };
         }
 
@@ -219,7 +219,7 @@ public sealed class EdgeGatewayMiddleware
             var msg = signKeyProvider.ShowSignDebug && result.SignPayload is not null
                 ? $"{result.ErrorMessage}, signing payload: {result.SignPayload}"
                 : result.ErrorMessage ?? "Signature verification failed";
-            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.SignatureInvalid, msg));
+            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.SignatureInvalid, msg)).ConfigureAwait(false);
             return baseContext with { IsVerified = false };
         }
 
@@ -233,20 +233,20 @@ public sealed class EdgeGatewayMiddleware
         if (sessionManager is null)
         {
             logger?.LogError("EdgeSessionManager not registered");
-            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.SessionServiceNotConfigured, "Session service not configured"));
+            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.SessionServiceNotConfigured, "Session service not configured")).ConfigureAwait(false);
             return baseContext with { IsVerified = false };
         }
 
         if (string.IsNullOrEmpty(request.Credential))
         {
-            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.SessionKeyRequired, "credential (sessionKey) is required"));
+            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.SessionKeyRequired, "credential (sessionKey) is required")).ConfigureAwait(false);
             return baseContext with { IsVerified = false };
         }
 
-        var session = await sessionManager.ValidateAsync(request.Credential, ct: context.RequestAborted);
+        var session = await sessionManager.ValidateAsync(request.Credential, ct: context.RequestAborted).ConfigureAwait(false);
         if (session is null)
         {
-            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.SessionKeyInvalid, "sessionKey expired or does not exist"));
+            await WriteResponseAsync(context, request, EdgeRpcResponse.Error(EdgeErrorCodes.SessionKeyInvalid, "sessionKey expired or does not exist")).ConfigureAwait(false);
             return baseContext with { IsVerified = false };
         }
 
@@ -269,7 +269,7 @@ public sealed class EdgeGatewayMiddleware
 
         context.Response.ContentType = "application/json; charset=utf-8";
         context.Response.StatusCode = 200;
-        await JsonSerializer.SerializeAsync(context.Response.Body, response, EdgeJsonOptions.Default, context.RequestAborted);
+        await JsonSerializer.SerializeAsync(context.Response.Body, response, EdgeJsonOptions.Default, context.RequestAborted).ConfigureAwait(false);
     }
 }
 

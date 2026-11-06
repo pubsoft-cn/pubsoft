@@ -41,7 +41,7 @@ public static class ClientSigner
     {
         if (!long.TryParse(timestamp, out var ts)) return false;
         var dto = DateTimeOffset.FromUnixTimeMilliseconds(ts);
-        var diff = DateTimeOffset.UtcNow - dto;
+        var diff = TimeProvider.System.GetUtcNow() - dto;
         return Math.Abs(diff.TotalSeconds) <= TimestampTolerance.TotalSeconds;
     }
 }

@@ -13,14 +13,14 @@ public sealed class PermissionGrant
         if (tenantId is <= 0)
             throw new ArgumentOutOfRangeException(nameof(tenantId), "Tenant ID must be positive when specified.");
         ArgumentException.ThrowIfNullOrWhiteSpace(moduleKey);
-        if (moduleKey != moduleKey.Trim())
+        if (!string.Equals(moduleKey, moduleKey.Trim(), System.StringComparison.Ordinal))
             throw new ArgumentException("Permission module keys must have no surrounding whitespace.", nameof(moduleKey));
         ValidateClientCode(clientCode, nameof(clientCode));
         if ((flags & ~PermissionFlags.All) != 0)
             throw new ArgumentOutOfRangeException(nameof(flags), "Permission grants may contain only defined flag bits.");
         var customPermissionSnapshot = (customPermissions ?? []).ToArray();
         if (customPermissionSnapshot.Any(permission => string.IsNullOrWhiteSpace(permission)
-            || permission != permission.Trim()))
+            || !string.Equals(permission, permission.Trim(), System.StringComparison.Ordinal)))
             throw new ArgumentException("Custom permission names must be non-empty and have no surrounding whitespace.", nameof(customPermissions));
         if (flags == PermissionFlags.None && extensionFlags == 0 && customPermissionSnapshot.Length == 0)
             throw new ArgumentException("A permission grant must contain at least one permission.");
@@ -43,7 +43,7 @@ public sealed class PermissionGrant
     private static void ValidateClientCode(string clientCode, string parameterName)
     {
         ArgumentNullException.ThrowIfNull(clientCode, parameterName);
-        if (clientCode.Length > 64 || clientCode != clientCode.Trim())
+        if (clientCode.Length > 64 || !string.Equals(clientCode, clientCode.Trim(), System.StringComparison.Ordinal))
             throw new ArgumentException("Client codes must be trimmed and at most 64 characters.", parameterName);
     }
 }
@@ -62,7 +62,7 @@ public interface IPermissionGrantProvider
         CancellationToken cancellationToken = default)
         => string.IsNullOrEmpty(clientCode)
             ? GetGrantsAsync(subjectId, tenantId, cancellationToken)
-            : Task.FromResult<IReadOnlyList<PermissionGrant>>([]);
+            : Task.FromResult<IReadOnlyList<PermissionGrant>>(System.Array.Empty<PermissionGrant>());
 
 }
 
@@ -143,7 +143,7 @@ public sealed class PermissionAuthorizationService
         ValidateClientCode(clientCode, nameof(clientCode));
         ArgumentException.ThrowIfNullOrWhiteSpace(moduleKey);
         ArgumentException.ThrowIfNullOrWhiteSpace(permissionName);
-        if (permissionName != permissionName.Trim())
+        if (!string.Equals(permissionName, permissionName.Trim(), System.StringComparison.Ordinal))
             throw new ArgumentException("Custom permission names must have no surrounding whitespace.", nameof(permissionName));
 
         var moduleDefinitions = _definitions.GetByModule(moduleKey, clientCode);
@@ -212,7 +212,7 @@ public sealed class PermissionAuthorizationService
     private static void ValidateClientCode(string clientCode, string parameterName)
     {
         ArgumentNullException.ThrowIfNull(clientCode, parameterName);
-        if (clientCode.Length > 64 || clientCode != clientCode.Trim())
+        if (clientCode.Length > 64 || !string.Equals(clientCode, clientCode.Trim(), System.StringComparison.Ordinal))
             throw new ArgumentException("Client codes must be trimmed and at most 64 characters.", parameterName);
     }
 }

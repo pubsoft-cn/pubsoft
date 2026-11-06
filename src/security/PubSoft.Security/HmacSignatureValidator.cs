@@ -31,7 +31,7 @@ public sealed class HmacSignatureValidator
 {
     private readonly INonceStore _nonceStore;
     private readonly HmacSignatureOptions _options;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
 
     public HmacSignatureValidator(
         INonceStore nonceStore,

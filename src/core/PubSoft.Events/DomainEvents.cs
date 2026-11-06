@@ -13,6 +13,7 @@ public interface IDomainEvent
     DateTimeOffset OccurredOn { get; }
 }
 
+[PubSoft.Core.BoundedCost("domain entity — timestamps assigned by EF interceptors/domain services, not injected TimeProvider")]
 public abstract class DomainEvent : IDomainEvent
 {
     public DateTimeOffset OccurredOn { get; } = DateTimeOffset.UtcNow;

@@ -20,7 +20,7 @@ public sealed class ModuleOrchestrator
     {
         ArgumentNullException.ThrowIfNull(modules);
         ArgumentNullException.ThrowIfNull(moduleFactory);
-        var duplicateName = modules.GroupBy(m => m.Name, StringComparer.Ordinal).FirstOrDefault(g => g.Count() > 1);
+        var duplicateName = modules.GroupBy(m => m.Name, StringComparer.Ordinal).FirstOrDefault(g => g.Skip(1).Any());
         if (duplicateName is not null)
             throw new ArgumentException($"duplicate module name: {duplicateName.Key}", nameof(modules));
         _modules = modules;
@@ -50,6 +50,7 @@ public sealed class ModuleOrchestrator
         }
     }
 
+    [PubSoft.Core.BoundedCost("sync lifecycle bridge for sync hosts — Orleans ISiloLifecycle pattern")]
     public void OnInitializationAll(ModuleContext ctx)
         => OnInitializationAllAsync(ctx).AsTask().GetAwaiter().GetResult();
 
@@ -64,6 +65,7 @@ public sealed class ModuleOrchestrator
         }
     }
 
+    [PubSoft.Core.BoundedCost("sync lifecycle bridge for sync hosts — Orleans ISiloLifecycle pattern")]
     public void OnShutdownAll(ModuleContext ctx)
         => OnShutdownAllAsync(ctx).AsTask().GetAwaiter().GetResult();
 
@@ -80,6 +82,7 @@ public sealed class ModuleOrchestrator
         }
     }
 
+    [PubSoft.Core.BoundedCost("sync lifecycle bridge for sync hosts — Orleans ISiloLifecycle pattern")]
     public bool TryReinitModule(string name, ModuleContext ctx, out string? error)
     {
         var result = TryReinitModuleAsync(name, ctx).AsTask().GetAwaiter().GetResult();
@@ -89,7 +92,7 @@ public sealed class ModuleOrchestrator
 
     public async ValueTask<(bool Ok, string? Error)> TryReinitModuleAsync(string name, ModuleContext ctx)
     {
-        var desc = _modules.FirstOrDefault(m => m.Name == name);
+        var desc = _modules.FirstOrDefault(m => string.Equals(m.Name, name, System.StringComparison.Ordinal));
         if (desc is null)
             return (false, $"unknown module: {name}");
         if (!desc.Optional) return (false, $"module {name} is critical — restart requires process recycle");

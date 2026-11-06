@@ -66,6 +66,7 @@ public sealed class MachineTokenOptions
 
 public sealed class MachineTokenProvider : ITokenProvider, IDisposable
 {
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     /// <summary>Keyed-DI service key for resolving this provider when multiple <see cref="ITokenProvider"/> implementations coexist.</summary>
     public const string ServiceKey = "machine";
 
@@ -81,7 +82,7 @@ public sealed class MachineTokenProvider : ITokenProvider, IDisposable
 
     public Task<string?> GetTokenAsync(string credentialKey, CancellationToken cancellationToken = default)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = _timeProvider.GetUtcNow();
         if (_cache.TryGetValue(credentialKey, out var cached) && cached.ExpiresAt - _options.RefreshBefore > now)
             return Task.FromResult<string?>(cached.Token);
 

@@ -14,6 +14,7 @@ namespace PubSoft.OAuth;
 /// </summary>
 public sealed class DingTalkOAuthProvider : OAuthProviderBase
 {
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     public DingTalkOAuthProvider(
         IOAuthChannelConfigProvider configProvider,
         HttpClient httpClient,
@@ -46,7 +47,7 @@ public sealed class DingTalkOAuthProvider : OAuthProviderBase
         var appKey = config.AppId;
         var appSecret = config.AppSecret!;
 
-        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+        var timestamp = _timeProvider.GetUtcNow().ToUnixTimeMilliseconds().ToString(System.Globalization.CultureInfo.InvariantCulture);
         var signContent = timestamp + "\n" + appSecret;
         var signature = Convert.ToBase64String(new HMACSHA256(Encoding.UTF8.GetBytes(appSecret)).ComputeHash(Encoding.UTF8.GetBytes(signContent)));
 

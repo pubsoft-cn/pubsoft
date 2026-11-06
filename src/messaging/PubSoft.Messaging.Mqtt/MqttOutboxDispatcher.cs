@@ -82,7 +82,7 @@ public sealed class MqttOutboxDispatcher : IOutboxDispatcher, IAsyncDisposable
         timeout.CancelAfter(_options.PublishTimeout);
         var result = await _client.PublishAsync(mqtt, timeout.Token).ConfigureAwait(false);
         if (!result.IsSuccess)
-            throw new InvalidOperationException($"MQTT publish failed for outbox message {message.Id}: {result.ReasonString ?? result.ReasonCode.ToString()}");
+            throw new InvalidOperationException($"MQTT publish failed for outbox message {message.Id}: {result.ReasonString ?? result.ReasonCode.ToString()}"); // pubsoft:exempt PUBSOFT027 "enum name render on non-hot path (doc-gen/startup/log line)"
     }
 
     private async Task EnsureConnectedAsync(CancellationToken ct)
@@ -99,7 +99,7 @@ public sealed class MqttOutboxDispatcher : IOutboxDispatcher, IAsyncDisposable
                 .WithCleanSession(!_options.PersistentSession);
             if (_options.Username is not null)
                 builder.WithCredentials(_options.Username, _options.Password ?? "");
-            if (uri.Scheme == "mqtts") builder.WithTlsOptions(o => o.UseTls());
+            if (string.Equals(uri.Scheme, "mqtts", System.StringComparison.Ordinal)) builder.WithTlsOptions(o => o.UseTls());
             await _client.ConnectAsync(builder.Build(), ct).ConfigureAwait(false);
             _connected = true;
         }

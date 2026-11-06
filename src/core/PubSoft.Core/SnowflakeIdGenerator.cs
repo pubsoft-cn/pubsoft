@@ -30,7 +30,7 @@ public sealed class SnowflakeIdGenerator
     public const int MaxBorrowMilliseconds = 512;
 
     private readonly long _workerId;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private long _lastTimestamp = -1L;
     private long _sequence;
     private readonly object _lock = new();

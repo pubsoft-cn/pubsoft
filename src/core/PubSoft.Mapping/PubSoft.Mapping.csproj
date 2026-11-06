@@ -8,4 +8,8 @@
     <Description>Lightweight expression-compiled object mapping with no external dependencies.</Description>
     <PackageTags>mapping;object-mapper;expression-tree</PackageTags>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../PubSoft.Core/PubSoft.Core.csproj" />
+  </ItemGroup>
+
 </Project>

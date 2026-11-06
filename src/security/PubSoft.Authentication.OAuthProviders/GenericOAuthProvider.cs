@@ -44,7 +44,7 @@ public abstract class GenericOAuthProvider : OAuthProviderBase
         var config = await ResolveConfigAsync(appId, ct).ConfigureAwait(false);
         var redirectUri = config.RedirectUri ?? "";
 
-        var formData = new Dictionary<string, string>
+        var formData = new Dictionary<string, string>(System.StringComparer.Ordinal)
         {
             ["grant_type"] = "authorization_code",
             ["code"] = code,

@@ -48,14 +48,14 @@ public static class Guard
     {
         return Type.GetTypeCode(Enum.GetUnderlyingType(typeof(T))) switch
         {
-            TypeCode.SByte => unchecked((ulong)Convert.ToSByte(value)),
-            TypeCode.Byte => Convert.ToByte(value),
-            TypeCode.Int16 => unchecked((ulong)Convert.ToInt16(value)),
-            TypeCode.UInt16 => Convert.ToUInt16(value),
-            TypeCode.Int32 => unchecked((ulong)Convert.ToInt32(value)),
-            TypeCode.UInt32 => Convert.ToUInt32(value),
-            TypeCode.Int64 => unchecked((ulong)Convert.ToInt64(value)),
-            TypeCode.UInt64 => Convert.ToUInt64(value),
+            TypeCode.SByte => unchecked((ulong)Convert.ToSByte(value, System.Globalization.CultureInfo.InvariantCulture)),
+            TypeCode.Byte => Convert.ToByte(value, System.Globalization.CultureInfo.InvariantCulture),
+            TypeCode.Int16 => unchecked((ulong)Convert.ToInt16(value, System.Globalization.CultureInfo.InvariantCulture)),
+            TypeCode.UInt16 => Convert.ToUInt16(value, System.Globalization.CultureInfo.InvariantCulture),
+            TypeCode.Int32 => unchecked((ulong)Convert.ToInt32(value, System.Globalization.CultureInfo.InvariantCulture)),
+            TypeCode.UInt32 => Convert.ToUInt32(value, System.Globalization.CultureInfo.InvariantCulture),
+            TypeCode.Int64 => unchecked((ulong)Convert.ToInt64(value, System.Globalization.CultureInfo.InvariantCulture)),
+            TypeCode.UInt64 => Convert.ToUInt64(value, System.Globalization.CultureInfo.InvariantCulture),
             _ => throw new InvalidOperationException("Unsupported enum underlying type.")
         };
     }

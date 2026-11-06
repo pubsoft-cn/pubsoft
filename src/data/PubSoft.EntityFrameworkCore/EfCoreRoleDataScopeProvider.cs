@@ -34,7 +34,7 @@ public sealed class EfCoreRoleDataScopeProvider<TDbContext>(TDbContext dbContext
 
         return scopeRows
             .Where(scope => !string.IsNullOrWhiteSpace(scope.Dimension)
-                && scope.Dimension == scope.Dimension.Trim())
+                && string.Equals(scope.Dimension, scope.Dimension.Trim(), System.StringComparison.Ordinal))
             .GroupBy(scope => scope.Dimension, StringComparer.OrdinalIgnoreCase)
             .Select(group =>
             {

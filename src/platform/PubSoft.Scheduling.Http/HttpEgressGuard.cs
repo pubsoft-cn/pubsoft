@@ -10,6 +10,7 @@ namespace PubSoft.Scheduling.Http;
 /// DNS answers cannot be swapped between validation and connect (rebinding);
 /// <c>TryReadConfig</c> does a cheaper literal/allowlist check for early rejection.
 /// </summary>
+[PubSoft.Core.BoundedCost("static CIDR table built once at type init — not per-call")]
 internal static class HttpEgressGuard
 {
     /// <summary>

@@ -1,5 +1,6 @@
 namespace PubSoft.Domain;
 
+[PubSoft.Core.BoundedCost("domain entity — timestamps assigned by EF interceptors/domain services, not injected TimeProvider")]
 public abstract class FullAuditedAggregateRoot : AggregateRoot<long>, IMultiTenant, ISoftDelete
 {
     public long? TenantId { get; set; }
@@ -14,6 +15,7 @@ public abstract class FullAuditedAggregateRoot : AggregateRoot<long>, IMultiTena
     protected FullAuditedAggregateRoot() => CreationTime = DateTime.UtcNow;
 }
 
+[PubSoft.Core.BoundedCost("data object — timestamp assigned by infrastructure interceptors, not injected TimeProvider")]
 public abstract class AuditedAggregateRoot : AggregateRoot<long>, IMultiTenant
 {
     public long? TenantId { get; set; }
@@ -25,6 +27,7 @@ public abstract class AuditedAggregateRoot : AggregateRoot<long>, IMultiTenant
     protected AuditedAggregateRoot() => CreationTime = DateTime.UtcNow;
 }
 
+[PubSoft.Core.BoundedCost("data object — timestamp assigned by infrastructure interceptors, not injected TimeProvider")]
 public abstract class CreationAuditedAggregateRoot : AggregateRoot<long>, IMultiTenant
 {
     public long? TenantId { get; set; }
@@ -34,6 +37,7 @@ public abstract class CreationAuditedAggregateRoot : AggregateRoot<long>, IMulti
     protected CreationAuditedAggregateRoot() => CreationTime = DateTime.UtcNow;
 }
 
+[PubSoft.Core.BoundedCost("data object — timestamp assigned by infrastructure interceptors, not injected TimeProvider")]
 public abstract class FullAuditedEntity<TKey> : Entity<TKey>, ISoftDelete
 {
     public long? CreatorId { get; set; }
@@ -47,6 +51,7 @@ public abstract class FullAuditedEntity<TKey> : Entity<TKey>, ISoftDelete
     protected FullAuditedEntity() => CreationTime = DateTime.UtcNow;
 }
 
+[PubSoft.Core.BoundedCost("data object — timestamp assigned by infrastructure interceptors, not injected TimeProvider")]
 public abstract class AuditedEntity<TKey> : Entity<TKey>
 {
     public long? CreatorId { get; set; }
@@ -57,6 +62,7 @@ public abstract class AuditedEntity<TKey> : Entity<TKey>
     protected AuditedEntity() => CreationTime = DateTime.UtcNow;
 }
 
+[PubSoft.Core.BoundedCost("data object — timestamp assigned by infrastructure interceptors, not injected TimeProvider")]
 public abstract class CreationAuditedEntity<TKey> : Entity<TKey>
 {
     public long? CreatorId { get; set; }

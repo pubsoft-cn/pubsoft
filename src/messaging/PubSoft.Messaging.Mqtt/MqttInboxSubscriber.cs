@@ -116,7 +116,7 @@ public sealed class MqttInboxSubscriber : BackgroundService
             builder.WithSessionExpiryInterval(_options.SessionExpirySeconds);
         if (_options.Username is not null)
             builder.WithCredentials(_options.Username, _options.Password ?? "");
-        if (uri.Scheme == "mqtts") builder.WithTlsOptions(o => o.UseTls());
+        if (string.Equals(uri.Scheme, "mqtts", System.StringComparison.Ordinal)) builder.WithTlsOptions(o => o.UseTls());
         return client.ConnectAsync(builder.Build(), ct);
     }
 
@@ -138,7 +138,7 @@ public sealed class MqttInboxSubscriber : BackgroundService
 
     internal static Guid? ExtractMessageId(MqttApplicationMessage message)
     {
-        var prop = message.UserProperties?.FirstOrDefault(p => p.Name == MqttInboxHeaders.OutboxMessageId);
+        var prop = message.UserProperties?.FirstOrDefault(p => string.Equals(p.Name, MqttInboxHeaders.OutboxMessageId, System.StringComparison.Ordinal));
         return prop is not null && Guid.TryParseExact(prop.Value, "N", out var id) ? id : null;
     }
 }

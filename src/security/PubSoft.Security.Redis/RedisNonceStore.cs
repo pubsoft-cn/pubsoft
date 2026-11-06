@@ -49,7 +49,7 @@ public sealed class RedisNonceStore : INonceStore
 
     private readonly IDatabase _database;
     private readonly RedisNonceStoreOptions _options;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
 
     public RedisNonceStore(
         IConnectionMultiplexer connection,

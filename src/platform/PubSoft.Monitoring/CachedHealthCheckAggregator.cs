@@ -5,7 +5,7 @@ public sealed class CachedHealthCheckAggregator
     private readonly HealthCheckAggregator _inner;
     private readonly TimeSpan _healthyCacheDuration;
     private readonly TimeSpan _unhealthyCacheDuration;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly SemaphoreSlim _refreshGate = new(1, 1);
     private readonly object _cacheLock = new();
     private CacheSnapshot? _cached;

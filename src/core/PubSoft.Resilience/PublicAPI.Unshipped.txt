@@ -1,7 +1,7 @@
 #nullable enable
 PubSoft.Resilience.CircuitBreaker
 PubSoft.Resilience.CircuitBreaker.Abandon(string! host) -> void
-PubSoft.Resilience.CircuitBreaker.CircuitBreaker(Microsoft.Extensions.Logging.ILogger<PubSoft.Resilience.CircuitBreaker!>? logger = null) -> void
+PubSoft.Resilience.CircuitBreaker.CircuitBreaker(Microsoft.Extensions.Logging.ILogger<PubSoft.Resilience.CircuitBreaker!>? logger = null, System.TimeProvider? timeProvider = null) -> void
 PubSoft.Resilience.CircuitBreaker.GetState(string! host) -> PubSoft.Resilience.CircuitBreaker.State
 PubSoft.Resilience.CircuitBreaker.Options.get -> PubSoft.Resilience.CircuitBreakerOptions!
 PubSoft.Resilience.CircuitBreaker.Options.set -> void

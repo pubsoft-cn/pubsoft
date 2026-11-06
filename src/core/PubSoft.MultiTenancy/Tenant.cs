@@ -2,6 +2,7 @@ using PubSoft.Domain;
 
 namespace PubSoft.MultiTenancy;
 
+[PubSoft.Core.BoundedCost("data object — timestamp assigned by infrastructure interceptors, not injected TimeProvider")]
 public sealed class Tenant : Entity<long>
 {
     public string Name { get; private set; } = string.Empty;

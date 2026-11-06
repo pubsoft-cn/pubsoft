@@ -54,14 +54,14 @@ public sealed class StartupDiagnosticsCollector
             if (i > 0) sb.Append(',');
             var e = entries[i];
             sb.Append("{\"area\":\"").Append(Esc(e.Area))
-              .Append("\",\"status\":\"").Append(e.Status.ToString().ToLowerInvariant())
+              .Append("\",\"status\":\"").Append(e.Status.ToString().ToLowerInvariant()) // pubsoft:exempt PUBSOFT027 "enum name render on non-hot path (doc-gen/startup/log line)"
               .Append("\",\"detail\":\"").Append(Esc(e.Detail)).Append("\"}");
         }
         return sb.Append(']').Append('}').ToString();
     }
 
     private static string Esc(string s)
-        => s.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n");
+        => s.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n"); // pubsoft:exempt PUBSOFT022 "char overload cannot do 1-to-N replacement"
 }
 
 public static class StartupDiagnosticsServiceCollectionExtensions

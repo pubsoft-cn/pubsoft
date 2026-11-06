@@ -17,7 +17,7 @@ public sealed class AlertRuleProcessor : IResultProcessor
     private readonly NotificationDispatcher _dispatcher;
     private readonly IProbeHealthCheck _probeHealthCheck;
     private readonly AlertProcessorOptions _options;
-    private readonly TimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly ILogger<AlertRuleProcessor>? _logger;
     /// <summary>job 级互斥锁表——按 jobKey 哈希键控；上限封顶 + 空闲项惰性清理，防止按 jobName 无界增长。</summary>
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _jobLocks = new(StringComparer.Ordinal);
@@ -39,7 +39,7 @@ public sealed class AlertRuleProcessor : IResultProcessor
             throw new OptionsValidationException(
                 nameof(AlertProcessorOptions),
                 typeof(AlertProcessorOptions),
-                ["FailureThreshold must be positive."]);
+                ["FailureThreshold must be positive."]); // pubsoft:exempt PUBSOFT025 "single-use validation failure message — cold path"
         _timeProvider = timeProvider ?? TimeProvider.System;
         _logger = logger;
     }

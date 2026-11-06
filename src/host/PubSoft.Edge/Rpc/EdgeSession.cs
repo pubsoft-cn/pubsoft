@@ -35,7 +35,7 @@ public sealed record EdgeSession
 
     /// <summary>Whether the session is expired.</summary>
     [System.Text.Json.Serialization.JsonIgnore]
-    public bool IsExpired => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() > ExpiresAt;
+    public bool IsExpired => TimeProvider.System.GetUtcNow().ToUnixTimeMilliseconds() > ExpiresAt;
 }
 
 /// <summary>
@@ -62,6 +62,7 @@ public interface IEdgeSessionStore
 /// </summary>
 public sealed class InMemoryEdgeSessionStore : IEdgeSessionStore, IDisposable
 {
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly ConcurrentDictionary<string, EdgeSession> _sessions = new();
     private readonly Timer _cleanupTimer;
 
@@ -98,7 +99,7 @@ public sealed class InMemoryEdgeSessionStore : IEdgeSessionStore, IDisposable
         {
             _sessions[sessionKey] = session with
             {
-                ExpiresAt = DateTimeOffset.UtcNow.Add(extendBy).ToUnixTimeMilliseconds()
+                ExpiresAt = _timeProvider.GetUtcNow().Add(extendBy).ToUnixTimeMilliseconds()
             };
         }
         return Task.CompletedTask;
@@ -107,7 +108,7 @@ public sealed class InMemoryEdgeSessionStore : IEdgeSessionStore, IDisposable
     [PubSoft.Core.BoundedCost("timer purge — bounded periodic scan")]
     private void CleanupExpired(object? state)
     {
-        var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        var now = _timeProvider.GetUtcNow().ToUnixTimeMilliseconds();
         foreach (var kv in _sessions.Where(kv => kv.Value.ExpiresAt < now).ToList())
             _sessions.TryRemove(kv.Key, out _);
     }
@@ -125,6 +126,7 @@ public sealed class InMemoryEdgeSessionStore : IEdgeSessionStore, IDisposable
 /// </summary>
 public sealed class EdgeSessionManager
 {
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly IEdgeSessionStore _store;
     private readonly TimeSpan _defaultExpiry;
 
@@ -148,7 +150,7 @@ public sealed class EdgeSessionManager
         CancellationToken ct = default)
     {
         var sessionKey = GenerateSessionKey(clientId, appId);
-        var expiresAt = DateTimeOffset.UtcNow.Add(expiry ?? _defaultExpiry).ToUnixTimeMilliseconds();
+        var expiresAt = _timeProvider.GetUtcNow().Add(expiry ?? _defaultExpiry).ToUnixTimeMilliseconds();
 
         var session = new EdgeSession
         {
@@ -162,7 +164,7 @@ public sealed class EdgeSessionManager
             ExpiresAt = expiresAt,
         };
 
-        await _store.SaveAsync(session, ct);
+        await _store.SaveAsync(session, ct).ConfigureAwait(false);
         return sessionKey;
     }
 
@@ -172,12 +174,12 @@ public sealed class EdgeSessionManager
         if (string.IsNullOrEmpty(sessionKey))
             return null;
 
-        var session = await _store.GetAsync(sessionKey, ct);
+        var session = await _store.GetAsync(sessionKey, ct).ConfigureAwait(false);
         if (session is null || session.IsExpired)
             return null;
 
         if (autoRenew)
-            await _store.RenewAsync(sessionKey, _defaultExpiry, ct);
+            await _store.RenewAsync(sessionKey, _defaultExpiry, ct).ConfigureAwait(false);
 
         return session;
     }
@@ -185,7 +187,7 @@ public sealed class EdgeSessionManager
     /// <summary>Actively revokes a session (logout).</summary>
     public async Task RevokeAsync(string sessionKey, CancellationToken ct = default)
     {
-        await _store.RemoveAsync(sessionKey, ct);
+        await _store.RemoveAsync(sessionKey, ct).ConfigureAwait(false);
     }
 
     /// <summary>Generates a sessionKey: {clientId}:{appId}:{guid}.</summary>

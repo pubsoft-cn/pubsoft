@@ -65,10 +65,10 @@ public static class NotificationChannelExtensions
     private static bool IsValidWebhookUrl(string url, bool allowInsecure)
     {
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)
-            || uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+            || !string.Equals(uri.Scheme, Uri.UriSchemeHttp, System.StringComparison.Ordinal) && !string.Equals(uri.Scheme, Uri.UriSchemeHttps, System.StringComparison.Ordinal))
             return false;
 
-        return uri.Scheme == Uri.UriSchemeHttps || uri.IsLoopback || allowInsecure;
+        return string.Equals(uri.Scheme, Uri.UriSchemeHttps, System.StringComparison.Ordinal) || uri.IsLoopback || allowInsecure;
     }
 
     private static IServiceCollection AddTeamsChannelCore(IServiceCollection services)

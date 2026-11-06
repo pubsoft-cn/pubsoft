@@ -49,7 +49,7 @@ public sealed class JwksKeyProvider
         var keys = await GetJwksAsync(ct).ConfigureAwait(false);
         if (keys is null) return null;
         foreach (var key in keys)
-            if (key.KeyId == keyId)
+            if (string.Equals(key.KeyId, keyId, System.StringComparison.Ordinal))
                 return key;
         return null;
     }

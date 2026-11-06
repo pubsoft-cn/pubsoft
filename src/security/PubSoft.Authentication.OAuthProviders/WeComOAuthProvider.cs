@@ -12,6 +12,7 @@ namespace PubSoft.OAuth;
 /// </summary>
 public sealed class WeComOAuthProvider : OAuthProviderBase
 {
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private static readonly ConcurrentDictionary<string, (string token, DateTime expiresAt)> _tokenCache = new(StringComparer.Ordinal);
 
     public WeComOAuthProvider(
@@ -75,7 +76,7 @@ public sealed class WeComOAuthProvider : OAuthProviderBase
 
     private async Task<string> GetAccessTokenAsync(string corpId, string corpSecret, CancellationToken ct)
     {
-        if (_tokenCache.TryGetValue(corpId, out var cached) && cached.expiresAt > DateTime.UtcNow.AddMinutes(5))
+        if (_tokenCache.TryGetValue(corpId, out var cached) && cached.expiresAt > _timeProvider.GetUtcNow().UtcDateTime.AddMinutes(5))
             return cached.token;
 
         var url = $"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corpId}&corpsecret={Uri.EscapeDataString(corpSecret)}";
@@ -84,7 +85,7 @@ public sealed class WeComOAuthProvider : OAuthProviderBase
             throw new InvalidOperationException($"WeCom failed to get access_token: {GetString(response, "errmsg")}");
 
         var token = GetString(response, "access_token") ?? "";
-        var expiresAt = DateTime.UtcNow.AddSeconds(GetInt(response, "expires_in", 7200));
+        var expiresAt = _timeProvider.GetUtcNow().UtcDateTime.AddSeconds(GetInt(response, "expires_in", 7200));
 
         _tokenCache[corpId] = (token, expiresAt);
         return token;
