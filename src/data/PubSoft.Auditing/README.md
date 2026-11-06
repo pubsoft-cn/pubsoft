@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Auditing
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/data/PubSoft.Auditing/README.zh-CN.md)
 
 Framework-independent audit primitives — no ASP.NET Core or EF Core dependency. Covers two write paths that converge on a single sink pipeline:
 
@@ -32,6 +32,13 @@ await writer.WriteAsync(new AuditLogEntry(
 ## Actor attribution
 
 `IAuditActorAccessor` is opt-in — the host maps claims to actor identity; nothing is inferred by default.
+
+## Sensitive fields
+
+Entity property values are redacted when either `SensitiveProperties` name-matches
+or the property is marked `[AuditSensitive]` — the attribute is the declarative
+path, the option the bulk/overrides path; either one triggers `[REDACTED]` in
+captured old/new values. Redaction needs `CaptureValues = true`.
 
 ## Boundaries
 

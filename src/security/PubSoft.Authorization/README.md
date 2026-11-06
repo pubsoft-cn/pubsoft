@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Authorization
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/security/PubSoft.Authorization/README.zh-CN.md)
 
 
 `PubSoft.Authorization` provides framework-independent permission metadata, lookup, and evaluation against host-supplied grants. It does not authenticate callers, store grants, or resolve user roles. `PubSoft.AspNetCore` adds an opt-in Minimal API endpoint filter; it is not global middleware and does not enforce MVC controllers.

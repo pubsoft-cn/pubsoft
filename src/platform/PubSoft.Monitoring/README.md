@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Monitoring
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/platform/PubSoft.Monitoring/README.zh-CN.md)
 
 
 `PubSoft.Monitoring` supplies HTTP dependency probes, provider-neutral application health checks, and low-cardinality metrics. It does not expose endpoints automatically or choose an exporter; hosts opt in to the checks/endpoints they need and configure their metrics backend separately.

@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Resilience.Http
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/platform/PubSoft.Resilience.Http/README.zh-CN.md)
 
 
 `PubSoft.Resilience.Http` adds bounded timeout, retry, and optional circuit-breaker behavior to a named `HttpClient`. The handler does not retry unsafe methods or requests with content, and there is no unsafe-retry override.

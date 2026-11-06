@@ -10,7 +10,6 @@ internal/
 feed/
 .env
 .env.*
-AGENTS.md
 
 # org-private identifier scan — pattern lists would leak the tokens they guard
 scripts/check-internal-identifiers.sh

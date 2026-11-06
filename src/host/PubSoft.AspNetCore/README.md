@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.AspNetCore
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/host/PubSoft.AspNetCore/README.zh-CN.md)
 
 
 `PubSoft.AspNetCore` contains opt-in middleware and endpoint helpers that adapt the framework-neutral PubSoft packages to ASP.NET Core. Nothing is enabled automatically. The host remains responsible for authentication/authorization policy, trusted proxy configuration, secret storage, and middleware order.

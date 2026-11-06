@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Tokens
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/platform/PubSoft.Tokens/README.zh-CN.md)
 
 
 `PubSoft.Tokens` obtains service tokens through `HttpClient`, caches them through `ICache`, and can add them to a named API client. It does not decide how a caller's identity maps to a service credential or whether an API operation is safe to replay.

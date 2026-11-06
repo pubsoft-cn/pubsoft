@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Security.Redis
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/security/PubSoft.Security.Redis/README.zh-CN.md)
 
 
 `PubSoft.Security.Redis` implements the `PubSoft.Security.INonceStore` contract for deployments that validate HMAC requests across multiple application instances. A nonce is reserved with one Redis `SET` using `NX` and a TTL; Redis Cluster routes each key independently. Concurrent attempts for the same scope and nonce produce at most one accepted reservation while the key exists.

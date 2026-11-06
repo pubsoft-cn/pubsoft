@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Security
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/security/PubSoft.Security/README.zh-CN.md)
 
 Generic security primitives, zero package dependencies — password hashing, PII masking, HMAC replay protection, and a bounded in-process rate limiter.
 

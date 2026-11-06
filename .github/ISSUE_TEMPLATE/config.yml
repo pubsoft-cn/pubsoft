@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/pubsoft-cn/pubsoft/security/policy
+    about: Do not open a public issue — see SECURITY.md for private disclosure.

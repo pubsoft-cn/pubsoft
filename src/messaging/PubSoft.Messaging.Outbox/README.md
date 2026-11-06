@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Messaging.Outbox
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/messaging/PubSoft.Messaging.Outbox/README.zh-CN.md)
 
 
 `PubSoft.Messaging.Outbox` stages durable messages in the business DbContext and provides a polling worker and Inbox receipt processor. Delivery is at-least-once. It does not enumerate tenants, register application handlers, delete receipts on a schedule, or make external effects exactly-once. (`InboxRetentionCleanup` provides the explicit bounded deletion primitive — see below.)

@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Monitoring.Scheduling
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/platform/PubSoft.Monitoring.Scheduling/README.zh-CN.md)
 
 Scheduler-driven health probes: turns `PubSoft.Monitoring` check results into three-state transitions and throttled alerts, executed as `PubSoft.Scheduling` jobs.
 

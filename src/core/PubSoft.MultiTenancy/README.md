@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.MultiTenancy
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/core/PubSoft.MultiTenancy/README.zh-CN.md)
 
 
 `PubSoft.MultiTenancy` provides a framework-independent tenant model and management DTO/service contracts. It depends on `PubSoft.Domain`; it does not provide an HTTP tenant resolver, current-tenant accessor, administrator authorization, or an application-service implementation.

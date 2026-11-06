@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Scheduling
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/platform/PubSoft.Scheduling/README.zh-CN.md)
 
 
 `PubSoft.Scheduling` is a Generic Host background scheduler with explicit executor and result-processor contracts. The core package has no ASP.NET, EF Core, or Redis dependency. It does not provide distributed job leases, cluster mutual exclusion, durable state by default, or misfire recovery.

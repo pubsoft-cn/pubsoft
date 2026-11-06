@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.EntityFrameworkCore
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/data/PubSoft.EntityFrameworkCore/README.zh-CN.md)
 
 
 `PubSoft.EntityFrameworkCore` adds an optional EF Core 10 adapter over the scope and soft-delete contracts in `PubSoft.Domain`. It has no ABP dependency. The current slice contains `PubSoftDbContext`, scope-safe repositories, scoped unit-of-work registration, `IgnoreScopeFilters()`, bounded manual query diagnostics, and the optional `PubSoft.Auditing` pre-save capture hook. Audit persistence and provider-specific integrations remain separate work.

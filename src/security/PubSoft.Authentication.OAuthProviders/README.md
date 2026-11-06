@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Authentication.OAuthProviders
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/security/PubSoft.Authentication.OAuthProviders/README.zh-CN.md)
 
 OAuth channel provider adapters (namespace `PubSoft.OAuth`) — a uniform contract over 19 vendor login flows.
 

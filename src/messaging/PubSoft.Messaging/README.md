@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Messaging
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/messaging/PubSoft.Messaging/README.zh-CN.md)
 
 
 `PubSoft.Messaging` defines a transport-neutral publisher contract, a JSON message envelope, and an explicit handler dispatcher. It does not provide a broker, persistence, delivery guarantees, retries, or deduplication. Use `PubSoft.Messaging.Outbox` when a message must be staged transactionally with database changes; a transport adapter must implement `IMessagePublisher`.

@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Identity
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/core/PubSoft.Identity/README.zh-CN.md)
 
 
 `PubSoft.Identity` contains a framework-neutral user model and a read-only profile contract. Use `IdentityUser` for the basic tenant-aware user aggregate, and `IdentityUserSnapshot` when passing profile data without credentials or entity behavior.

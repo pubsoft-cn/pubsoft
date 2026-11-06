@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Notifications
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/platform/PubSoft.Notifications/README.zh-CN.md)
 
 
 `PubSoft.Notifications` provides immutable notification messages, channel contracts, dispatch results, bounded in-process deduplication, and two built-in webhook channels (`teams`, `dingtalk`). It does not include persistent delivery or cross-instance deduplication. Vendor-specific integrations (SMS providers, email, push) intentionally live in the host application as its own `INotificationChannel` implementations.

@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Caching.Redis
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/platform/PubSoft.Caching.Redis/README.zh-CN.md)
 
 StackExchange.Redis-backed implementations of the `PubSoft.Caching` contracts. Requires a host-supplied `IConnectionMultiplexer`.
 

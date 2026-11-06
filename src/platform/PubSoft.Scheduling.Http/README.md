@@ -7,7 +7,7 @@ last-reviewed: 2026-10-13
 
 # PubSoft.Scheduling.Http
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/platform/PubSoft.Scheduling.Http/README.zh-CN.md)
 
 HTTP executors for `PubSoft.Scheduling` jobs — no ASP.NET Core dependency.
 

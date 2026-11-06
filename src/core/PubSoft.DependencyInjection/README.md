@@ -7,7 +7,7 @@ last-reviewed: 2026-10-17
 
 # PubSoft.DependencyInjection
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/core/PubSoft.DependencyInjection/README.zh-CN.md)
 
 Conventional service registration — opt-in marker interfaces scanned into `IServiceCollection`, removing per-class `services.AddTransient<IFoo, Foo>()` boilerplate without a container.
 

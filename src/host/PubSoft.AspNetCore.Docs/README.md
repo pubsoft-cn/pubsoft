@@ -7,7 +7,7 @@ last-reviewed: 2026-10-22
 
 # PubSoft.AspNetCore.Docs
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/host/PubSoft.AspNetCore.Docs/README.zh-CN.md)
 
 Self-hosted API documentation for ASP.NET Core services — a Swashbuckle-free
 catalog generated from `EndpointDataSource` + XML doc comments, merged with an
