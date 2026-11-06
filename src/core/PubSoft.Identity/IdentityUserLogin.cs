@@ -32,19 +32,14 @@ public sealed class IdentityUserLogin : FullAuditedAggregateRoot
         ProviderDisplayName = providerDisplayName;
     }
 
-    private IdentityUserLogin()
-    {
-        UserId = 0;
-        LoginProvider = string.Empty;
-        ProviderKey = string.Empty;
-    }
+    private IdentityUserLogin() { }
 
     /// <summary>The user this binding belongs to.</summary>
     public long UserId { get; }
     /// <summary>Provider identifier (e.g. "wechat", "alipay") - keys the OAuth provider registry.</summary>
-    public string LoginProvider { get; private set; }
+    public string LoginProvider { get; private set; } = string.Empty;
     /// <summary>The user's unique id at the provider (openid/unionid).</summary>
-    public string ProviderKey { get; private set; }
+    public string ProviderKey { get; private set; } = string.Empty;
     /// <summary>Friendly provider-side name for UI.</summary>
     public string? ProviderDisplayName { get; private set; }
 

@@ -43,6 +43,15 @@ public sealed class IdentityUser : FullAuditedAggregateRoot, IIdentityUser
     /// <summary>Rotated whenever credentials change - validators should treat a changed stamp as "re-authenticate".</summary>
     public string SecurityStamp { get; private set; } = CreateSecurityStamp();
 
+    /// <summary>Consecutive failed access attempts since the last success or reset.</summary>
+    public int AccessFailedCount { get; private set; }
+    /// <summary>When the current lockout expires; null when not locked out.</summary>
+    public DateTimeOffset? LockoutEnd { get; private set; }
+
+    /// <summary>Opaque host-defined extension payload (JSON). The entity validates nothing about its shape.</summary>
+    public string? ExtJson { get; set; }
+
+
     /// <summary>Changes the login name and refreshes its normalized form.</summary>
     public void SetUserName(string userName)
     {
@@ -83,14 +92,6 @@ public sealed class IdentityUser : FullAuditedAggregateRoot, IIdentityUser
         PasswordHash = null;
         SecurityStamp = CreateSecurityStamp();
     }
-
-    /// <summary>Consecutive failed access attempts since the last success or reset.</summary>
-    public int AccessFailedCount { get; private set; }
-    /// <summary>When the current lockout expires; null when not locked out.</summary>
-    public DateTimeOffset? LockoutEnd { get; private set; }
-
-    /// <summary>Opaque host-defined extension payload (JSON). The entity validates nothing about its shape.</summary>
-    public string? ExtJson { get; set; }
 
     /// <summary>Whether the account is locked out at <paramref name="now"/>.</summary>
     public bool IsLockedOut(DateTimeOffset now) => LockoutEnd is { } end && end > now;

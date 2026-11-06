@@ -5,7 +5,7 @@ public sealed class OAuthProviderRegistry : IOAuthProviderRegistry
 {
     private readonly Dictionary<string, IOAuthProvider> _providers;
 
-    /// <summary>Builds the name→provider index from registered providers.</summary>
+    /// <summary>Builds the name->provider index from registered providers.</summary>
     public OAuthProviderRegistry(IEnumerable<IOAuthProvider> providers)
     {
         _providers = new Dictionary<string, IOAuthProvider>(StringComparer.OrdinalIgnoreCase);

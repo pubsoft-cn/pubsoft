@@ -33,7 +33,7 @@ public sealed class TokenCredential
 /// <summary>Named credentials for <see cref="HttpTokenProvider"/>.</summary>
 public sealed class TokenManagerOptions
 {
-    /// <summary>Key → fetch recipe map.</summary>
+    /// <summary>Key -> fetch recipe map.</summary>
     public Dictionary<string, TokenCredential> Credentials { get; set; } = new(StringComparer.Ordinal);
 
     internal bool IsValid(out string error)

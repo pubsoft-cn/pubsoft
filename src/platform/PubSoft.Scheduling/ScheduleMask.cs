@@ -36,11 +36,11 @@ public readonly struct ScheduleMask
     public ulong Minutes { get; }
     /// <summary>Hours-of-day bits.</summary>
     public uint Hours { get; }
-    /// <summary>Days-of-month bits (1–31).</summary>
+    /// <summary>Days-of-month bits (1-31).</summary>
     public uint DaysOfMonth { get; }
-    /// <summary>Months-of-year bits (1–12).</summary>
+    /// <summary>Months-of-year bits (1-12).</summary>
     public ushort Months { get; }
-    /// <summary>Days-of-week bits (0–6, Sunday = 0).</summary>
+    /// <summary>Days-of-week bits (0-6, Sunday = 0).</summary>
     public byte DaysOfWeek { get; }
 
     /// <summary>Whether every field has at least one bit set (a job that can ever run).</summary>

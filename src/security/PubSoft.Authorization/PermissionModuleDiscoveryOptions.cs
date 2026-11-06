@@ -25,6 +25,6 @@ public sealed class PermissionModuleDiscoveryOptions
     public Func<ControllerActionDescriptor, byte?>? PinAvailableFlagsResolver { get; set; }
     /// <summary>Extracts named permissions an action requires.</summary>
     public Func<ControllerActionDescriptor, IEnumerable<string>>? CustomPermissionsExtractor { get; set; }
-    /// <summary>Route-prefix → module-key map for endpoints without explicit keys.</summary>
+    /// <summary>Route-prefix -> module-key map for endpoints without explicit keys.</summary>
     public Dictionary<string, string> RouteModuleMap { get; } = new(StringComparer.OrdinalIgnoreCase);
 }

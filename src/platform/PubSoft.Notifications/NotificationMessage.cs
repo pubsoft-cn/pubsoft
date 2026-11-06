@@ -120,7 +120,7 @@ public sealed class NotificationOptions
 }
 
 /// <summary>Per-channel outcome of a multi-channel dispatch.</summary>
-/// <param name="Results">Channel name → result.</param>
+/// <param name="Results">Channel name -> result.</param>
 public sealed record NotificationDispatchReport(
     IReadOnlyDictionary<string, NotificationResult> Results)
 {
