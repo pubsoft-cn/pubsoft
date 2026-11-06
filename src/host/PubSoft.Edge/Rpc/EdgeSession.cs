@@ -1,3 +1,4 @@
+using PubSoft.Core;
 using System.Collections.Concurrent;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -103,6 +104,7 @@ public sealed class InMemoryEdgeSessionStore : IEdgeSessionStore, IDisposable
         return Task.CompletedTask;
     }
 
+    [PubSoft.Core.BoundedCost("timer purge — bounded periodic scan")]
     private void CleanupExpired(object? state)
     {
         var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();

@@ -61,6 +61,7 @@ public sealed class OutboundContractRegistry : IOutboundContractRegistry
     }
 
     [RequiresUnreferencedCode("Assembly scanning discovers contract types that may be trimmed.")]
+    [PubSoft.Core.BoundedCost("assembly scan is opt-in and runs at registration, not per request")]
     public void ScanAssembly(Assembly assembly)
     {
         ArgumentNullException.ThrowIfNull(assembly);

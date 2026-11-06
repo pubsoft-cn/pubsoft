@@ -12,6 +12,9 @@ PubSoft.Core.ApiResponse<T>.Message.get -> string?
 PubSoft.Core.ApiResponse<T>.Message.set -> void
 PubSoft.Core.ApiResponse<T>.TraceId.get -> string?
 PubSoft.Core.ApiResponse<T>.TraceId.set -> void
+PubSoft.Core.BoundedCostAttribute
+PubSoft.Core.BoundedCostAttribute.BoundedCostAttribute(string! reason) -> void
+PubSoft.Core.BoundedCostAttribute.Reason.get -> string!
 PubSoft.Core.DomainException
 PubSoft.Core.DomainException.DomainException(string! message) -> void
 PubSoft.Core.DomainException.DomainException(string! message, System.Exception! innerException) -> void

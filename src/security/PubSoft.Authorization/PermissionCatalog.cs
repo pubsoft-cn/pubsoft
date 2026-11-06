@@ -1,3 +1,4 @@
+using PubSoft.Core;
 namespace PubSoft.Authorization;
 
 [Flags]
@@ -34,6 +35,10 @@ public interface IPermissionDefinitionProvider
 public sealed class PermissionDefinitionRegistry
 {
     private readonly IReadOnlyList<PermissionDefinition> _definitions;
+    private readonly Dictionary<string, IReadOnlyList<PermissionDefinition>> _byModule;
+    private readonly Dictionary<(string ModuleKey, string ClientCode), IReadOnlyList<PermissionDefinition>> _byModuleClient;
+    private readonly (PermissionDefinition Definition, (string Method, string[] Segments)[] ApiPaths, string[][] Routes)[] _matchers;
+    private static readonly IReadOnlyList<PermissionDefinition> Empty = Array.AsReadOnly(Array.Empty<PermissionDefinition>());
 
     public PermissionDefinitionRegistry(IEnumerable<IPermissionDefinitionProvider> providers)
     {
@@ -59,6 +64,13 @@ public sealed class PermissionDefinitionRegistry
         }
 
         _definitions = Array.AsReadOnly(definitions.ToArray());
+        _byModule = definitions.GroupBy(definition => definition.ModuleKey)
+            .ToDictionary(group => group.Key, group => (IReadOnlyList<PermissionDefinition>)Array.AsReadOnly(group.ToArray()));
+        _byModuleClient = definitions.GroupBy(definition => (definition.ModuleKey, definition.ClientCode))
+            .ToDictionary(group => group.Key, group => (IReadOnlyList<PermissionDefinition>)Array.AsReadOnly(group.ToArray()));
+        _matchers = definitions.Select(definition => (definition,
+            definition.ApiPaths.Select(pattern => (pattern[..pattern.IndexOf(' ')], GetSegments(pattern[(pattern.IndexOf(' ') + 1)..]))).ToArray(),
+            definition.FrontendRoutes.Select(GetSegments).ToArray())).ToArray();
     }
 
     public IReadOnlyList<PermissionDefinition> AllDefinitions => _definitions;
@@ -66,7 +78,7 @@ public sealed class PermissionDefinitionRegistry
     public IReadOnlyList<PermissionDefinition> GetByModule(string moduleKey)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(moduleKey);
-        return Array.AsReadOnly(_definitions.Where(definition => definition.ModuleKey == moduleKey).ToArray());
+        return _byModule.TryGetValue(moduleKey, out var hits) ? hits : Empty;
     }
 
     public IReadOnlyList<PermissionDefinition> GetByModule(string moduleKey, string clientCode)
@@ -75,28 +87,34 @@ public sealed class PermissionDefinitionRegistry
         ArgumentNullException.ThrowIfNull(clientCode);
         if (clientCode.Length > 64 || clientCode != clientCode.Trim())
             throw new ArgumentException("Client codes must be trimmed and at most 64 characters.", nameof(clientCode));
-        return Array.AsReadOnly(_definitions
-            .Where(definition => definition.ModuleKey == moduleKey && definition.ClientCode == clientCode)
-            .ToArray());
+        return _byModuleClient.TryGetValue((moduleKey, clientCode), out var hits) ? hits : Empty;
     }
 
     public IReadOnlyList<PermissionDefinition> GetByFrontendRoute(string route)
     {
         var normalizedRoute = ValidatePath(route, nameof(route), allowTemplates: false);
-        return Array.AsReadOnly(_definitions
-            .Where(definition => definition.FrontendRoutes.Any(pattern => PathMatches(pattern, normalizedRoute)))
-            .ToArray());
+        var segments = GetSegments(normalizedRoute);
+        var hits = new List<PermissionDefinition>();
+        foreach (var matcher in _matchers)
+            if (matcher.Routes.Any(pattern => SegmentsMatch(pattern, segments)))
+                hits.Add(matcher.Definition);
+        return hits.Count == 0 ? Empty : Array.AsReadOnly(hits.ToArray());
     }
 
     public IReadOnlyList<PermissionDefinition> GetByApiPath(string httpMethod, string path)
     {
         ValidateHttpMethod(httpMethod, nameof(httpMethod));
         var normalizedPath = ValidatePath(path, nameof(path), allowTemplates: false);
-        return Array.AsReadOnly(_definitions
-            .Where(definition => definition.ApiPaths.Any(pattern => ApiPathMatches(pattern, httpMethod, normalizedPath)))
-            .ToArray());
+        var segments = GetSegments(normalizedPath);
+        var hits = new List<PermissionDefinition>();
+        foreach (var matcher in _matchers)
+            if (matcher.ApiPaths.Any(pattern => pattern.Method.Equals(httpMethod, StringComparison.OrdinalIgnoreCase)
+                && SegmentsMatch(pattern.Segments, segments)))
+                hits.Add(matcher.Definition);
+        return hits.Count == 0 ? Empty : Array.AsReadOnly(hits.ToArray());
     }
 
+    [PubSoft.Core.BoundedCost("runs once per definition at registry construction")]
     private static PermissionDefinition ValidateAndSnapshot(PermissionDefinition definition)
     {
         if (string.IsNullOrWhiteSpace(definition.ModuleKey) || definition.ModuleKey != definition.ModuleKey.Trim())
@@ -180,17 +198,8 @@ public sealed class PermissionDefinitionRegistry
         && (char.IsAsciiLetter(name[0]) || name[0] == '_')
         && name.All(character => char.IsAsciiLetterOrDigit(character) || character == '_');
 
-    private static bool ApiPathMatches(string pattern, string httpMethod, string path)
+    private static bool SegmentsMatch(string[] patternSegments, string[] pathSegments)
     {
-        var separator = pattern.IndexOf(' ');
-        return pattern[..separator].Equals(httpMethod, StringComparison.OrdinalIgnoreCase)
-            && PathMatches(pattern[(separator + 1)..], path);
-    }
-
-    private static bool PathMatches(string pattern, string path)
-    {
-        var patternSegments = GetSegments(pattern);
-        var pathSegments = GetSegments(path);
         if (patternSegments.Length != pathSegments.Length)
             return false;
 

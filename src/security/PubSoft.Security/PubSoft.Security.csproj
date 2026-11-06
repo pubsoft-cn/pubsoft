@@ -4,4 +4,8 @@
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Dependency-free security primitives for PubSoft libraries.</Description>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../core/PubSoft.Core/PubSoft.Core.csproj" />
+  </ItemGroup>
+
 </Project>

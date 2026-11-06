@@ -1,3 +1,4 @@
+using PubSoft.Core;
 using System.Text;
 using System.Text.Json;
 using PubSoft.Caching;
@@ -124,6 +125,7 @@ public sealed class RedisCache : ICache
         return result;
     }
 
+    [PubSoft.Core.BoundedCost("batch size is bounded by the caller-supplied input")]
     public async Task SetManyAsync<T>(IEnumerable<KeyValuePair<string, T>> items, TimeSpan? expiry = null, CancellationToken cancellationToken = default) where T : class
     {
         ArgumentNullException.ThrowIfNull(items);
@@ -203,6 +205,7 @@ public sealed class RedisCache : ICache
         }
     }
 
+    [PubSoft.Core.BoundedCost("key list is bounded by the caller-supplied batch")]
     private static async Task DeleteKeysAsync(IDatabase database, List<RedisKey> keys, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();

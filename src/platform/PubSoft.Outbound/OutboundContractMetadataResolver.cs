@@ -1,3 +1,4 @@
+using PubSoft.Core;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using PubSoft.Contracts;
@@ -6,6 +7,7 @@ namespace PubSoft.Outbound;
 
 public static class OutboundContractMetadataResolver
 {
+    [PubSoft.Core.BoundedCost("assembly scan runs once at registration")]
     public static ApiContractMetadata Resolve(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type requestType)
         => Resolve(requestType, null);

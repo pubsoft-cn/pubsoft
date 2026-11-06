@@ -33,23 +33,27 @@ public sealed class AuthenticatedSubjectResolver
         if (!snapshot.IsAuthenticated)
             return null;
 
-        var subjectClaims = snapshot.Claims
-            .Where(claim => claim.Type == _subjectClaimType && claim.Issuer == _trustedIssuer)
-            .ToArray();
-        if (subjectClaims.Length != 1 || !TryReadPositiveId(subjectClaims[0].Value, out var subjectId))
+        string? subjectValue = null;
+        var subjectCount = 0;
+        foreach (var claim in snapshot.Claims)
+            if (claim.Type == _subjectClaimType && claim.Issuer == _trustedIssuer)
+            { subjectValue = claim.Value; subjectCount++; }
+        if (subjectCount != 1 || !TryReadPositiveId(subjectValue!, out var subjectId))
             return null;
 
         long? tenantId = null;
         if (_tenantClaimType is not null)
         {
-            var tenantClaims = snapshot.Claims
-                .Where(claim => claim.Type == _tenantClaimType && claim.Issuer == _trustedIssuer)
-                .ToArray();
-            if (tenantClaims.Length > 1)
+            string? tenantValue = null;
+            var tenantCount = 0;
+            foreach (var claim in snapshot.Claims)
+                if (claim.Type == _tenantClaimType && claim.Issuer == _trustedIssuer)
+                { tenantValue = claim.Value; tenantCount++; }
+            if (tenantCount > 1)
                 return null;
-            if (tenantClaims.Length == 1)
+            if (tenantCount == 1)
             {
-                if (!TryReadPositiveId(tenantClaims[0].Value, out var parsedTenantId))
+                if (!TryReadPositiveId(tenantValue!, out var parsedTenantId))
                     return null;
                 tenantId = parsedTenantId;
             }
