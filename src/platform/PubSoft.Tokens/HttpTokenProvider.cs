@@ -11,9 +11,9 @@ namespace PubSoft.Tokens;
 
 public sealed class HttpTokenProvider : ITokenProvider
 {
-    private const long MaxTokenResponseBytes = 64 * 1024;
 
     public const string HttpClientName = "PubSoft.Tokens";
+    private const long MaxTokenResponseBytes = 64 * 1024;
 
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ICache _cache;

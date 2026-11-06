@@ -27,10 +27,7 @@ public abstract class DbFirstConfigProvider<TEntity, TInfo> where TEntity : clas
     protected abstract string CachePrefix { get; }
     protected abstract string FallbackSectionName { get; }
     protected virtual TimeSpan CacheTtl => TimeSpan.FromMinutes(5);
-    protected abstract string ConfigKey(TInfo info);
-    protected abstract Expression<Func<TEntity, bool>> DbPredicate(string key);
     protected virtual Expression<Func<TEntity, bool>>? EnabledPredicate => null;
-    protected abstract TInfo ToInfo(TEntity entity);
 
     public async Task<TInfo?> GetConfigAsync(string key, CancellationToken cancellationToken = default)
     {
@@ -80,6 +77,9 @@ public abstract class DbFirstConfigProvider<TEntity, TInfo> where TEntity : clas
     }
 
     public void InvalidateCache(string key) => Cache.Remove(CachePrefix + key);
+    protected abstract string ConfigKey(TInfo info);
+    protected abstract Expression<Func<TEntity, bool>> DbPredicate(string key);
+    protected abstract TInfo ToInfo(TEntity entity);
 
     protected virtual TInfo? FindFallbackInfo(string key)
         => FallbackList().FirstOrDefault(i => string.Equals(ConfigKey(i), key, System.StringComparison.Ordinal));

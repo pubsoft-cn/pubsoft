@@ -11,14 +11,14 @@ namespace PubSoft.Security;
 /// </remarks>
 public static class PasswordHasher
 {
+
+    /// <summary>Iteration count used for newly created hashes.</summary>
+    public const int DefaultIterations = 600_000;
     private const string Prefix = "pbkdf2";
     private const int SaltSize = 16;
     private const int HashSize = 32;
     private const int MinimumIterations = 100_000;
     private const int MaximumIterations = 2_000_000;
-
-    /// <summary>Iteration count used for newly created hashes.</summary>
-    public const int DefaultIterations = 600_000;
 
     /// <summary>Verifies a password and optionally supplies a replacement hash for successful legacy or low-cost hashes.</summary>
     public static PasswordVerificationResult VerifyAndRehash(string password, string? storedHash)

@@ -6,12 +6,6 @@ using PubSoft.Auditing;
 
 namespace PubSoft.AspNetCore;
 
-public sealed class AuditMiddlewareOptions
-{
-    public bool CaptureClientIp { get; set; }
-    public bool CaptureUserAgent { get; set; }
-    public bool CaptureActor { get; set; }
-}
 
 public sealed class AuditMiddleware
 {
@@ -91,12 +85,4 @@ public sealed class AuditMiddleware
             return null;
         }
     }
-}
-
-public static class AuditMiddlewareExtensions
-{
-    public static IApplicationBuilder UsePubSoftAudit(
-        this IApplicationBuilder app,
-        AuditMiddlewareOptions? options = null)
-        => app.UseMiddleware<AuditMiddleware>(options);
 }

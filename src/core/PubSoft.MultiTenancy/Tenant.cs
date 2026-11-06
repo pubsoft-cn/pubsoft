@@ -5,14 +5,6 @@ namespace PubSoft.MultiTenancy;
 [PubSoft.Core.BoundedCost("data object — timestamp assigned by infrastructure interceptors, not injected TimeProvider")]
 public sealed class Tenant : Entity<long>
 {
-    public string Name { get; private set; } = string.Empty;
-    public string Code { get; private set; } = string.Empty;
-    public string DisplayName { get; private set; } = string.Empty;
-    public bool IsEnabled { get; private set; } = true;
-    public string? Description { get; private set; }
-    public DateTime CreationTime { get; private set; }
-
-    private Tenant() { }
 
     public Tenant(long id, string code, string name, string? displayName = null, string? description = null)
     {
@@ -23,6 +15,14 @@ public sealed class Tenant : Entity<long>
         Description = NormalizeBounded(description, nameof(description), 200);
         CreationTime = DateTime.UtcNow;
     }
+
+    private Tenant() { }
+    public string Name { get; private set; } = string.Empty;
+    public string Code { get; private set; } = string.Empty;
+    public string DisplayName { get; private set; } = string.Empty;
+    public bool IsEnabled { get; private set; } = true;
+    public string? Description { get; private set; }
+    public DateTime CreationTime { get; private set; }
 
     public void Update(string name, string? displayName, string? description)
     {

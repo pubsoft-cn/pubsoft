@@ -33,6 +33,20 @@ public abstract class PubSoftDbContext : DbContext, IPubSoftSaveParticipant
     public long? CurrentMemberId => _memberScopeContext?.MemberId;
     public bool IsMemberScoped => _memberScopeContext?.IsMemberScoped == true;
 
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        PrepareChanges();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override async Task<int> SaveChangesAsync(
+        bool acceptAllChangesOnSuccess,
+        CancellationToken cancellationToken = default)
+    {
+        PrepareChanges();
+        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken).ConfigureAwait(false);
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -75,20 +89,6 @@ public abstract class PubSoftDbContext : DbContext, IPubSoftSaveParticipant
                     Expression.Lambda(Expression.Equal(isDeleted, Expression.Constant(false)), parameter));
             }
         }
-    }
-
-    public override int SaveChanges(bool acceptAllChangesOnSuccess)
-    {
-        PrepareChanges();
-        return base.SaveChanges(acceptAllChangesOnSuccess);
-    }
-
-    public override async Task<int> SaveChangesAsync(
-        bool acceptAllChangesOnSuccess,
-        CancellationToken cancellationToken = default)
-    {
-        PrepareChanges();
-        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken).ConfigureAwait(false);
     }
 
     private void PrepareChanges()

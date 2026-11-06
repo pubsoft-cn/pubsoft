@@ -1,8 +1,8 @@
-using Microsoft.Extensions.DependencyInjection;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using PubSoft.Domain;
 using PubSoft.EntityFrameworkCore;
 using Xunit;

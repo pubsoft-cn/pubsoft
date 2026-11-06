@@ -9,18 +9,6 @@ public sealed class IdentityUser : FullAuditedAggregateRoot, IIdentityUser
     private const int MaxPhoneNumberLength = 32;
     private const int MaxPasswordHashLength = 512;
 
-    public string UserName { get; private set; } = string.Empty;
-    public string NormalizedUserName { get; private set; } = string.Empty;
-    public string Name { get; private set; } = string.Empty;
-    public string? PhoneNumber { get; private set; }
-    public bool PhoneNumberConfirmed { get; private set; }
-    public string? PasswordHash { get; private set; }
-    public string SecurityStamp { get; private set; } = CreateSecurityStamp();
-
-    private IdentityUser()
-    {
-    }
-
     public IdentityUser(long id, string userName, long? tenantId = null, string? name = null)
     {
         if (id <= 0)
@@ -33,6 +21,18 @@ public sealed class IdentityUser : FullAuditedAggregateRoot, IIdentityUser
         SetUserName(userName);
         Name = name ?? UserName;
     }
+
+    private IdentityUser()
+    {
+    }
+
+    public string UserName { get; private set; } = string.Empty;
+    public string NormalizedUserName { get; private set; } = string.Empty;
+    public string Name { get; private set; } = string.Empty;
+    public string? PhoneNumber { get; private set; }
+    public bool PhoneNumberConfirmed { get; private set; }
+    public string? PasswordHash { get; private set; }
+    public string SecurityStamp { get; private set; } = CreateSecurityStamp();
 
     public void SetUserName(string userName)
     {

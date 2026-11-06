@@ -205,6 +205,18 @@ public sealed class MemoryCache : ICache, IDisposable
         }
     }
 
+    public void Dispose()
+    {
+        lock (_lock)
+        {
+            if (_disposed) return;
+            _disposed = true;
+            _cleanupTimer.Dispose();
+            _cache.Clear();
+            _regexCache.Clear();
+        }
+    }
+
     private void CleanupExpiredEntries(object? state)
     {
         lock (_lock)
@@ -281,16 +293,11 @@ public sealed class MemoryCache : ICache, IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
     }
 
-    public void Dispose()
+    public sealed class CacheStatistics
     {
-        lock (_lock)
-        {
-            if (_disposed) return;
-            _disposed = true;
-            _cleanupTimer.Dispose();
-            _cache.Clear();
-            _regexCache.Clear();
-        }
+        public int TotalEntries { get; init; }
+        public int ExpiredEntries { get; init; }
+        public int SizeLimit { get; init; }
     }
 
     private sealed class CacheEntry(object value, DateTime createdTime, DateTime? expiryTime, DateTime lastAccessTime)
@@ -301,12 +308,5 @@ public sealed class MemoryCache : ICache, IDisposable
         public DateTime LastAccessTime { get; set; } = lastAccessTime;
         public string Key { get; set; } = "";
         public bool IsExpired(DateTime now) => ExpiryTime.HasValue && now >= ExpiryTime.Value;
-    }
-
-    public sealed class CacheStatistics
-    {
-        public int TotalEntries { get; init; }
-        public int ExpiredEntries { get; init; }
-        public int SizeLimit { get; init; }
     }
 }

@@ -11,14 +11,6 @@ public enum NotificationSeverity
 
 public sealed class NotificationMessage
 {
-    public string? Title { get; }
-    public string Content { get; }
-    public IReadOnlyList<string> Recipients { get; }
-    public string? TemplateCode { get; }
-    public IReadOnlyDictionary<string, string> TemplateParameters { get; }
-    public NotificationSeverity Severity { get; }
-    public string? Source { get; }
-    public string? CorrelationId { get; }
 
     public NotificationMessage(
         string content,
@@ -52,6 +44,14 @@ public sealed class NotificationMessage
         Source = NormalizeOptional(source);
         CorrelationId = NormalizeOptional(correlationId);
     }
+    public string? Title { get; }
+    public string Content { get; }
+    public IReadOnlyList<string> Recipients { get; }
+    public string? TemplateCode { get; }
+    public IReadOnlyDictionary<string, string> TemplateParameters { get; }
+    public NotificationSeverity Severity { get; }
+    public string? Source { get; }
+    public string? CorrelationId { get; }
 
     private static string? NormalizeOptional(string? value)
         => string.IsNullOrWhiteSpace(value) ? null : value.Trim();

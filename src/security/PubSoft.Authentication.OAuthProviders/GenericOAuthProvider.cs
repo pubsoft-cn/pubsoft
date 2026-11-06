@@ -9,16 +9,16 @@ namespace PubSoft.OAuth;
 /// </summary>
 public abstract class GenericOAuthProvider : OAuthProviderBase
 {
-    protected abstract string AuthorizeEndpoint { get; }
-    protected abstract string TokenEndpoint { get; }
-    protected abstract string UserInfoEndpoint { get; }
-    protected virtual string DefaultScope => "openid profile";
 
     protected GenericOAuthProvider(
         IOAuthChannelConfigProvider configProvider,
         HttpClient httpClient,
         ILogger? logger = null)
         : base(configProvider, httpClient, logger) { }
+    protected abstract string AuthorizeEndpoint { get; }
+    protected abstract string TokenEndpoint { get; }
+    protected abstract string UserInfoEndpoint { get; }
+    protected virtual string DefaultScope => "openid profile";
 
     public override bool SupportsChannelType(string channelType) =>
         channelType is OAuthChannelTypes.Web or OAuthChannelTypes.OpenPlatform;

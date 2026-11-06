@@ -1,0 +1,34 @@
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Microsoft.Extensions.DependencyInjection;
+using PubSoft.Auditing;
+using PubSoft.Domain;
+
+namespace PubSoft.EntityFrameworkCore.Auditing;
+
+public sealed class AuditLogRecord : IMultiTenant
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public long? TenantId { get; set; }
+    public DateTimeOffset StartedAt { get; set; }
+    public string? HttpMethod { get; set; }
+    public string? RequestPath { get; set; }
+    public string? ClientIp { get; set; }
+    public string? UserAgent { get; set; }
+    public string? SubjectId { get; set; }
+    public string? SubjectName { get; set; }
+    public bool? IsAdministrator { get; set; }
+    public bool Success { get; set; }
+    public int StatusCode { get; set; }
+    public string? FailureCode { get; set; }
+    public long DurationMilliseconds { get; set; }
+    public string? Category { get; set; }
+    public string? Action { get; set; }
+    public string? TargetType { get; set; }
+    public string? TargetId { get; set; }
+    public string? TargetName { get; set; }
+    public string? Detail { get; set; }
+    public ICollection<AuditEntityChangeRecord> EntityChanges { get; } = new List<AuditEntityChangeRecord>();
+}

@@ -13,6 +13,9 @@ public abstract class OAuthProviderBase : IOAuthProvider
     protected readonly HttpClient HttpClient;
     protected readonly ILogger? Logger;
 
+    /// <summary>上游响应体大小上限 — 异常/恶意提供方不得向内存灌入无限数据（1 MiB 足够任何 OAuth JSON 载荷）。</summary>
+    private const int MaxResponseBytes = 1_048_576;
+
     protected OAuthProviderBase(
         IOAuthChannelConfigProvider configProvider,
         HttpClient httpClient,
@@ -26,6 +29,27 @@ public abstract class OAuthProviderBase : IOAuthProvider
     public abstract string Provider { get; }
 
     public virtual bool SupportsChannelType(string channelType) => true;
+
+    public abstract Task<OAuthAuthorizeUrlResult> GetAuthorizeUrlAsync(OAuthAuthorizeUrlRequest request, CancellationToken ct = default);
+    public abstract Task<OAuthCodeExchangeResult> ExchangeCodeAsync(string appId, string code, string? channelType = null, CancellationToken ct = default);
+    public abstract Task<OAuthUserInfoResult> GetUserInfoAsync(string appId, string accessToken, CancellationToken ct = default);
+
+    /// <summary>Phone numbers are opt-in; providers that support it override this.</summary>
+    public virtual Task<OAuthPhoneResult> GetPhoneNumberAsync(string appId, string code, CancellationToken ct = default)
+        => Task.FromResult(OAuthPhoneResult.Fail("This provider does not support phone-number retrieval"));
+
+    /// <summary>Extracts a string field; numeric and boolean JSON values are returned as their raw text
+    /// (several providers emit ids as numbers rather than strings).</summary>
+    protected static string? GetString(JsonElement elem, string name) =>
+        !elem.TryGetProperty(name, out var p) ? null : p.ValueKind switch
+        {
+            JsonValueKind.String => p.GetString(),
+            JsonValueKind.Number or JsonValueKind.True or JsonValueKind.False => p.GetRawText(),
+            _ => null,
+        };
+
+    protected static int GetInt(JsonElement elem, string name, int defaultValue = 0) =>
+        elem.TryGetProperty(name, out var p) && p.ValueKind == JsonValueKind.Number ? p.GetInt32() : defaultValue;
 
     /// <summary>Resolves channel credentials for the given AppId; fails closed when missing.</summary>
     protected virtual async Task<OAuthChannelConfig> ResolveConfigAsync(string appId, CancellationToken ct)
@@ -41,17 +65,6 @@ public abstract class OAuthProviderBase : IOAuthProvider
 
         return config;
     }
-
-    public abstract Task<OAuthAuthorizeUrlResult> GetAuthorizeUrlAsync(OAuthAuthorizeUrlRequest request, CancellationToken ct = default);
-    public abstract Task<OAuthCodeExchangeResult> ExchangeCodeAsync(string appId, string code, string? channelType = null, CancellationToken ct = default);
-    public abstract Task<OAuthUserInfoResult> GetUserInfoAsync(string appId, string accessToken, CancellationToken ct = default);
-
-    /// <summary>Phone numbers are opt-in; providers that support it override this.</summary>
-    public virtual Task<OAuthPhoneResult> GetPhoneNumberAsync(string appId, string code, CancellationToken ct = default)
-        => Task.FromResult(OAuthPhoneResult.Fail("This provider does not support phone-number retrieval"));
-
-    /// <summary>上游响应体大小上限 — 异常/恶意提供方不得向内存灌入无限数据（1 MiB 足够任何 OAuth JSON 载荷）。</summary>
-    private const int MaxResponseBytes = 1_048_576;
 
     /// <summary>GET a URL and parse the JSON body without any serializer metadata.</summary>
     protected async Task<JsonElement> FetchJsonAsync(string url, CancellationToken ct)
@@ -98,17 +111,4 @@ public abstract class OAuthProviderBase : IOAuthProvider
             return System.Text.Encoding.UTF8.GetString(bytes, 0, total);
         }
     }
-
-    /// <summary>Extracts a string field; numeric and boolean JSON values are returned as their raw text
-    /// (several providers emit ids as numbers rather than strings).</summary>
-    protected static string? GetString(JsonElement elem, string name) =>
-        !elem.TryGetProperty(name, out var p) ? null : p.ValueKind switch
-        {
-            JsonValueKind.String => p.GetString(),
-            JsonValueKind.Number or JsonValueKind.True or JsonValueKind.False => p.GetRawText(),
-            _ => null,
-        };
-
-    protected static int GetInt(JsonElement elem, string name, int defaultValue = 0) =>
-        elem.TryGetProperty(name, out var p) && p.ValueKind == JsonValueKind.Number ? p.GetInt32() : defaultValue;
 }

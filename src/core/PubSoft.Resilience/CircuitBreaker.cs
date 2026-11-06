@@ -5,7 +5,6 @@ namespace PubSoft.Resilience;
 
 public sealed class CircuitBreaker
 {
-    public enum State { Closed, Open, HalfOpen }
 
     private readonly ConcurrentDictionary<string, CircuitState> _states = new(StringComparer.OrdinalIgnoreCase);
     private readonly ILogger<CircuitBreaker>? _logger;
@@ -90,6 +89,7 @@ public sealed class CircuitBreaker
         if (!_states.TryGetValue(host, out var state)) return State.Closed;
         lock (state.Sync) return state.Status;
     }
+    public enum State { Closed, Open, HalfOpen }
 
     private sealed class CircuitState
     {

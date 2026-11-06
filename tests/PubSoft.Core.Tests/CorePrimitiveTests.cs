@@ -1,7 +1,7 @@
+using Microsoft.Extensions.DependencyInjection;
+using PubSoft.Authentication;
 using PubSoft.Core;
 using PubSoft.Domain;
-using PubSoft.Authentication;
-using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace PubSoft.Core.Tests;

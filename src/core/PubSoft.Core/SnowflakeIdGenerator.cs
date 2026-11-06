@@ -14,20 +14,20 @@ namespace PubSoft.Core;
 /// </remarks>
 public sealed class SnowflakeIdGenerator
 {
-    private const long Epoch = 1704067200000L;
-    private const int WorkerIdBits = 5;
-    private const int SequenceBits = 7;
     public const long MaxWorkerId = (1L << WorkerIdBits) - 1;
-    private const long MaxSequence = (1L << SequenceBits) - 1;
-    private const long MaxTimestamp = Epoch + (1L << 41) - 1;
-    private const int WorkerIdShift = SequenceBits;
-    private const int TimestampShift = SequenceBits + WorkerIdBits;
 
     /// <summary>
     /// Maximum milliseconds the generator may run ahead of the wall clock
     /// (sequence-overflow borrowing and tolerated clock rollback).
     /// </summary>
     public const int MaxBorrowMilliseconds = 512;
+    private const long Epoch = 1704067200000L;
+    private const int WorkerIdBits = 5;
+    private const int SequenceBits = 7;
+    private const long MaxSequence = (1L << SequenceBits) - 1;
+    private const long MaxTimestamp = Epoch + (1L << 41) - 1;
+    private const int WorkerIdShift = SequenceBits;
+    private const int TimestampShift = SequenceBits + WorkerIdBits;
 
     private readonly long _workerId;
     private readonly TimeProvider _timeProvider = TimeProvider.System;

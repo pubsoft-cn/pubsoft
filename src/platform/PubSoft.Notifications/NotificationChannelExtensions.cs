@@ -62,6 +62,30 @@ public static class NotificationChannelExtensions
         return AddTeamsChannelCore(services);
     }
 
+    /// <summary>Registers the DingTalk webhook channel bound to a configuration section.</summary>
+    public static IServiceCollection AddDingTalkNotificationChannel(
+        this IServiceCollection services, IConfiguration section)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        return services.AddDingTalkNotificationChannel(o =>
+        {
+            o.WebhookUrl = section["WebhookUrl"] ?? "";
+            o.Secret = section["Secret"] ?? "";
+            o.AllowInsecureUrl = bool.TryParse(section["AllowInsecureUrl"], out var allow) && allow;
+        });
+    }
+
+    /// <summary>Registers the DingTalk webhook channel with inline options.</summary>
+    public static IServiceCollection AddDingTalkNotificationChannel(
+        this IServiceCollection services, Action<DingTalkWebhookOptions> configure)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        services.AddOptions<DingTalkWebhookOptions>().Configure(configure)
+            .Validate(o => IsValidWebhookUrl(o.WebhookUrl, o.AllowInsecureUrl),
+                "DingTalkWebhookOptions.WebhookUrl must be an absolute https URL; http is allowed only for loopback or with AllowInsecureUrl.");
+        return AddDingTalkChannelCore(services);
+    }
+
     private static bool IsValidWebhookUrl(string url, bool allowInsecure)
     {
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)
@@ -80,19 +104,6 @@ public static class NotificationChannelExtensions
         return services;
     }
 
-    /// <summary>Registers the DingTalk webhook channel bound to a configuration section.</summary>
-    public static IServiceCollection AddDingTalkNotificationChannel(
-        this IServiceCollection services, IConfiguration section)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-        return services.AddDingTalkNotificationChannel(o =>
-        {
-            o.WebhookUrl = section["WebhookUrl"] ?? "";
-            o.Secret = section["Secret"] ?? "";
-            o.AllowInsecureUrl = bool.TryParse(section["AllowInsecureUrl"], out var allow) && allow;
-        });
-    }
-
     private static IServiceCollection AddDingTalkChannelCore(IServiceCollection services)
     {
         AddDingTalkHttpClient(services);
@@ -100,17 +111,6 @@ public static class NotificationChannelExtensions
         services.AddSingleton<INotificationChannel>(sp => sp.GetRequiredService<DingTalkWebhookChannel>());
         services.TryAddSingleton<NotificationDispatcher>();
         return services;
-    }
-
-    /// <summary>Registers the DingTalk webhook channel with inline options.</summary>
-    public static IServiceCollection AddDingTalkNotificationChannel(
-        this IServiceCollection services, Action<DingTalkWebhookOptions> configure)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-        services.AddOptions<DingTalkWebhookOptions>().Configure(configure)
-            .Validate(o => IsValidWebhookUrl(o.WebhookUrl, o.AllowInsecureUrl),
-                "DingTalkWebhookOptions.WebhookUrl must be an absolute https URL; http is allowed only for loopback or with AllowInsecureUrl.");
-        return AddDingTalkChannelCore(services);
     }
 
     private static void AddTeamsHttpClient(IServiceCollection services)

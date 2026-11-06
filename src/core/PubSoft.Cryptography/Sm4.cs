@@ -50,6 +50,64 @@ public static class Sm4
         0x10171E25,0x2C333A41,0x484F565D,0x646B7279,
     ];
 
+    /// <summary>SM4-ECB 加密（自动 PKCS7 填充）。key/明文 → 密文。</summary>
+    public static byte[] EncryptEcb(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext)
+    {
+        var rk = ExpandKey(key);
+        var paddedLen = (plaintext.Length / BlockSize + 1) * BlockSize;
+        var padded = new byte[paddedLen];
+        plaintext.CopyTo(padded);
+        var pad = (byte)(paddedLen - plaintext.Length);
+        for (var i = plaintext.Length; i < paddedLen; i++)
+            padded[i] = pad;
+
+        var output = new byte[paddedLen];
+        for (var i = 0; i < paddedLen; i += BlockSize)
+            CryptBlock(padded.AsSpan(i, BlockSize), output.AsSpan(i, BlockSize), rk, decrypt: false);
+        return output;
+    }
+
+    /// <summary>SM4-ECB 解密并去 PKCS7 填充。填充非法时抛 <see cref="System.Security.Cryptography.CryptographicException"/>。</summary>
+    public static byte[] DecryptEcb(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext)
+    {
+        if (ciphertext.Length == 0 || ciphertext.Length % BlockSize != 0)
+            throw new ArgumentException("SM4-ECB ciphertext length must be a non-empty multiple of 16.", nameof(ciphertext));
+
+        var rk = ExpandKey(key);
+        var output = new byte[ciphertext.Length];
+        for (var i = 0; i < ciphertext.Length; i += BlockSize)
+            CryptBlock(ciphertext.Slice(i, BlockSize), output.AsSpan(i, BlockSize), rk, decrypt: true);
+
+        var pad = output[^1];
+        if (pad == 0 || pad > BlockSize)
+            throw new System.Security.Cryptography.CryptographicException("Invalid SM4 padding.");
+        // 校验全部填充字节，防 padding-oracle 形变
+        for (var i = output.Length - pad; i < output.Length; i++)
+            if (output[i] != pad)
+                throw new System.Security.Cryptography.CryptographicException("Invalid SM4 padding.");
+        return output[..^pad];
+    }
+
+    /// <summary>SM4-ECB 加密：hex 密钥 + UTF-8 明文 → 小写 hex 密文。</summary>
+    public static string EncryptEcbHex(string hexKey, string plaintext)
+    {
+        var key = Convert.FromHexString(hexKey);
+        var cipher = EncryptEcb(key, Encoding.UTF8.GetBytes(plaintext));
+        return Convert.ToHexString(cipher).ToLowerInvariant();
+    }
+
+    /// <summary>SM4-ECB 解密：hex 密钥 + hex 密文 → UTF-8 明文。</summary>
+    public static string DecryptEcbHex(string hexKey, string cipherHex)
+    {
+        var key = Convert.FromHexString(hexKey);
+        var plain = DecryptEcb(key, Convert.FromHexString(cipherHex));
+        return Encoding.UTF8.GetString(plain);
+    }
+
+    /// <summary>SM4-ECB 加密：Base64 密钥 + UTF-8 明文 → 小写 hex 密文。</summary>
+    public static string EncryptEcbBase64Key(string base64Key, string plaintext)
+        => EncryptEcbHex(Convert.ToHexString(Convert.FromBase64String(base64Key)), plaintext);
+
     private static uint Rotl(uint x, int n) => (x << n) | (x >> (32 - n));
 
     private static uint Tau(uint a)
@@ -109,62 +167,4 @@ public static class Sm4
         for (var i = 0; i < 4; i++)
             BinaryPrimitives.WriteUInt32BigEndian(output.Slice(i * 4, 4), x[35 - i]);
     }
-
-    /// <summary>SM4-ECB 加密（自动 PKCS7 填充）。key/明文 → 密文。</summary>
-    public static byte[] EncryptEcb(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext)
-    {
-        var rk = ExpandKey(key);
-        var paddedLen = (plaintext.Length / BlockSize + 1) * BlockSize;
-        var padded = new byte[paddedLen];
-        plaintext.CopyTo(padded);
-        var pad = (byte)(paddedLen - plaintext.Length);
-        for (var i = plaintext.Length; i < paddedLen; i++)
-            padded[i] = pad;
-
-        var output = new byte[paddedLen];
-        for (var i = 0; i < paddedLen; i += BlockSize)
-            CryptBlock(padded.AsSpan(i, BlockSize), output.AsSpan(i, BlockSize), rk, decrypt: false);
-        return output;
-    }
-
-    /// <summary>SM4-ECB 解密并去 PKCS7 填充。填充非法时抛 <see cref="System.Security.Cryptography.CryptographicException"/>。</summary>
-    public static byte[] DecryptEcb(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext)
-    {
-        if (ciphertext.Length == 0 || ciphertext.Length % BlockSize != 0)
-            throw new ArgumentException("SM4-ECB ciphertext length must be a non-empty multiple of 16.", nameof(ciphertext));
-
-        var rk = ExpandKey(key);
-        var output = new byte[ciphertext.Length];
-        for (var i = 0; i < ciphertext.Length; i += BlockSize)
-            CryptBlock(ciphertext.Slice(i, BlockSize), output.AsSpan(i, BlockSize), rk, decrypt: true);
-
-        var pad = output[^1];
-        if (pad == 0 || pad > BlockSize)
-            throw new System.Security.Cryptography.CryptographicException("Invalid SM4 padding.");
-        // 校验全部填充字节，防 padding-oracle 形变
-        for (var i = output.Length - pad; i < output.Length; i++)
-            if (output[i] != pad)
-                throw new System.Security.Cryptography.CryptographicException("Invalid SM4 padding.");
-        return output[..^pad];
-    }
-
-    /// <summary>SM4-ECB 加密：hex 密钥 + UTF-8 明文 → 小写 hex 密文。</summary>
-    public static string EncryptEcbHex(string hexKey, string plaintext)
-    {
-        var key = Convert.FromHexString(hexKey);
-        var cipher = EncryptEcb(key, Encoding.UTF8.GetBytes(plaintext));
-        return Convert.ToHexString(cipher).ToLowerInvariant();
-    }
-
-    /// <summary>SM4-ECB 解密：hex 密钥 + hex 密文 → UTF-8 明文。</summary>
-    public static string DecryptEcbHex(string hexKey, string cipherHex)
-    {
-        var key = Convert.FromHexString(hexKey);
-        var plain = DecryptEcb(key, Convert.FromHexString(cipherHex));
-        return Encoding.UTF8.GetString(plain);
-    }
-
-    /// <summary>SM4-ECB 加密：Base64 密钥 + UTF-8 明文 → 小写 hex 密文。</summary>
-    public static string EncryptEcbBase64Key(string base64Key, string plaintext)
-        => EncryptEcbHex(Convert.ToHexString(Convert.FromBase64String(base64Key)), plaintext);
 }

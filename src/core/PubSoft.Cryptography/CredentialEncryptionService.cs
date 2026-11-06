@@ -3,10 +3,6 @@ using System.Text;
 
 namespace PubSoft.Cryptography;
 
-public sealed record DecryptedCredential(
-    string Plaintext,
-    bool RequiresReEncryption,
-    string? ReplacementCiphertext);
 
 /// <summary>Writes credentials with AEAD and optionally migrates legacy AES-CBC values on read.</summary>
 /// <remarks>

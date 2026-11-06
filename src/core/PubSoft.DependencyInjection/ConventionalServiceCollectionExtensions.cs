@@ -3,33 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace PubSoft.DependencyInjection;
 
-/// <summary>Marker: register as transient when scanned by convention.</summary>
-public interface ITransientDependency;
-
-/// <summary>Marker: register as scoped when scanned by convention.</summary>
-public interface IScopedDependency;
-
-/// <summary>Marker: register as singleton when scanned by convention.</summary>
-public interface ISingletonDependency;
-
-/// <summary>
-/// Overrides the service types a convention-scanned class is registered under.
-/// When present, only the listed types (plus the concrete type itself) are registered —
-/// use when a class implements interfaces that should not become DI entry points.
-/// </summary>
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-public sealed class ExposeServicesAttribute : Attribute
-{
-    /// <summary>Service types exposed by the decorated class.</summary>
-    public Type[] ServiceTypes { get; }
-
-    /// <summary>Creates the attribute for the given service types.</summary>
-    public ExposeServicesAttribute(params Type[] serviceTypes)
-    {
-        ArgumentNullException.ThrowIfNull(serviceTypes);
-        ServiceTypes = serviceTypes;
-    }
-}
 
 /// <summary>
 /// Convention-based service registration — concrete classes carrying a

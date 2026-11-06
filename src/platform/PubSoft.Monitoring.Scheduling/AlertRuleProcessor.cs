@@ -13,6 +13,7 @@ namespace PubSoft.Monitoring.Scheduling;
 public sealed class AlertRuleProcessor : IResultProcessor
 {
     private static readonly JsonSerializerOptions s_jsonOptions = new(JsonSerializerDefaults.Web);
+    private const int MaxJobLocks = 4_096;
     private readonly IStateStore _stateStore;
     private readonly NotificationDispatcher _dispatcher;
     private readonly IProbeHealthCheck _probeHealthCheck;
@@ -21,7 +22,6 @@ public sealed class AlertRuleProcessor : IResultProcessor
     private readonly ILogger<AlertRuleProcessor>? _logger;
     /// <summary>job 级互斥锁表——按 jobKey 哈希键控；上限封顶 + 空闲项惰性清理，防止按 jobName 无界增长。</summary>
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _jobLocks = new(StringComparer.Ordinal);
-    private const int MaxJobLocks = 4_096;
 
     public AlertRuleProcessor(
         IStateStore stateStore,
@@ -160,14 +160,6 @@ public sealed class AlertRuleProcessor : IResultProcessor
             _ => false
         };
 
-    private async Task<bool> IsThrottledAsync(string key, TimeSpan? throttle, CancellationToken cancellationToken)
-    {
-        if (throttle is null || throttle <= TimeSpan.Zero)
-            return false;
-        var lastSent = await GetStateAsync<DateTimeOffset>(key, cancellationToken).ConfigureAwait(false);
-        return lastSent is { } timestamp && _timeProvider.GetUtcNow() - timestamp < throttle;
-    }
-
     private static NotificationMessage BuildMessage(AlertRule rule, AlertContext context)
     {
         var severity = rule.Severity switch
@@ -231,6 +223,20 @@ public sealed class AlertRuleProcessor : IResultProcessor
             && (rule.Throttle is null || rule.Throttle >= TimeSpan.Zero)
             && rule.DelayThresholdMs is not < 0;
 
+    private static string GetStableKey(string value)
+        => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
+
+    private static string GetStateKey(string jobKey, string stateName)
+        => $"monitoring-alert:v1:{jobKey}:{stateName}";
+
+    private async Task<bool> IsThrottledAsync(string key, TimeSpan? throttle, CancellationToken cancellationToken)
+    {
+        if (throttle is null || throttle <= TimeSpan.Zero)
+            return false;
+        var lastSent = await GetStateAsync<DateTimeOffset>(key, cancellationToken).ConfigureAwait(false);
+        return lastSent is { } timestamp && _timeProvider.GetUtcNow() - timestamp < throttle;
+    }
+
     private async Task<T?> GetStateAsync<T>(string key, CancellationToken cancellationToken) where T : struct
     {
         var value = await _stateStore.GetCustomStateAsync<StateValue<T>>(key, cancellationToken).ConfigureAwait(false);
@@ -257,12 +263,6 @@ public sealed class AlertRuleProcessor : IResultProcessor
             if (pair.Value.CurrentCount == 1)
                 _jobLocks.TryRemove(pair);
     }
-
-    private static string GetStableKey(string value)
-        => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
-
-    private static string GetStateKey(string jobKey, string stateName)
-        => $"monitoring-alert:v1:{jobKey}:{stateName}";
 
     private sealed record StateValue<T>(T Value) where T : struct;
 }

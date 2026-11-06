@@ -12,8 +12,6 @@ public sealed class TeamsWebhookChannel : INotificationChannel
     private readonly TeamsWebhookOptions _options;
     private readonly ILogger<TeamsWebhookChannel>? _logger;
 
-    public string Name => "teams";
-
     public TeamsWebhookChannel(
         IHttpClientFactory httpClientFactory,
         IOptions<TeamsWebhookOptions> options,
@@ -23,6 +21,8 @@ public sealed class TeamsWebhookChannel : INotificationChannel
         _options = options.Value;
         _logger = logger;
     }
+
+    public string Name => "teams";
 
     public async Task<NotificationResult> SendAsync(NotificationMessage message, CancellationToken cancellationToken = default)
     {

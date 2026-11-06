@@ -30,6 +30,14 @@ internal static class SchedulerConfigurationBinding
         return options;
     }
 
+    /// <summary>Materializes a configuration subtree into a <see cref="JsonElement"/>.</summary>
+    internal static JsonElement ToJsonElement(IConfiguration section)
+    {
+        // JsonDocument DOM parse keeps this trim/AOT-safe (no reflection-based serialization).
+        using var doc = JsonDocument.Parse(ToJsonNode(section)?.ToJsonString() ?? "null");
+        return doc.RootElement.Clone();
+    }
+
     private static ScheduledJob BindJob(IConfiguration section)
     {
         var job = new ScheduledJob
@@ -79,14 +87,6 @@ internal static class SchedulerConfigurationBinding
             job.ResultProcessorConfig = ToJsonElement(processorConfig);
 
         return job;
-    }
-
-    /// <summary>Materializes a configuration subtree into a <see cref="JsonElement"/>.</summary>
-    internal static JsonElement ToJsonElement(IConfiguration section)
-    {
-        // JsonDocument DOM parse keeps this trim/AOT-safe (no reflection-based serialization).
-        using var doc = JsonDocument.Parse(ToJsonNode(section)?.ToJsonString() ?? "null");
-        return doc.RootElement.Clone();
     }
 
     private static JsonNode? ToJsonNode(IConfiguration config)

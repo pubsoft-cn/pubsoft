@@ -7,24 +7,6 @@ using PubSoft.Modularity;
 
 namespace PubSoft.AspNetCore;
 
-/// <summary>A <see cref="ModuleContext"/> that also carries the web pipeline being built.</summary>
-public sealed class WebModuleContext : ModuleContext
-{
-    public required IApplicationBuilder App { get; init; }
-    public IHostEnvironment? Environment { get; init; }
-}
-
-public static class WebModuleContextExtensions
-{
-    /// <summary>
-    /// The <see cref="IApplicationBuilder"/> a module may wire middleware into — available only
-    /// when initialization runs through <see cref="PubSoftModuleAspNetCoreExtensions.UsePubSoftModulesAsync"/>.
-    /// </summary>
-    public static IApplicationBuilder GetAppBuilder(this ModuleContext context)
-        => (context as WebModuleContext)?.App
-           ?? throw new InvalidOperationException(
-               "No web module context — module middleware wiring requires UsePubSoftModulesAsync on the web host.");
-}
 
 public static class PubSoftModuleAspNetCoreExtensions
 {

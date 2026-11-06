@@ -1,6 +1,6 @@
-using PubSoft.Core;
 using System.Collections.Concurrent;
 using Microsoft.Extensions.DependencyInjection;
+using PubSoft.Core;
 
 namespace PubSoft.Edge;
 
@@ -105,6 +105,8 @@ public sealed class InMemoryEdgeSessionStore : IEdgeSessionStore, IDisposable
         return Task.CompletedTask;
     }
 
+    public void Dispose() => _cleanupTimer.Dispose();
+
     [PubSoft.Core.BoundedCost("timer purge — bounded periodic scan")]
     private void CleanupExpired(object? state)
     {
@@ -112,8 +114,6 @@ public sealed class InMemoryEdgeSessionStore : IEdgeSessionStore, IDisposable
         foreach (var kv in _sessions.Where(kv => kv.Value.ExpiresAt < now).ToList())
             _sessions.TryRemove(kv.Key, out _);
     }
-
-    public void Dispose() => _cleanupTimer.Dispose();
 }
 
 /// <summary>

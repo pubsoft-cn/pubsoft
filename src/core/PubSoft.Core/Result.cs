@@ -8,6 +8,9 @@ public readonly struct Result<T>
     private readonly T? _value;
     private readonly ResultError _error;
 
+    private Result(T value) { _value = value; _error = default; IsOk = true; }
+    private Result(ResultError error) { _value = default; _error = error; IsOk = false; }
+
     [MemberNotNullWhen(true, nameof(_value))]
     public bool IsOk { get; }
 
@@ -22,9 +25,6 @@ public readonly struct Result<T>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => _error;
     }
-
-    private Result(T value) { _value = value; _error = default; IsOk = true; }
-    private Result(ResultError error) { _value = default; _error = error; IsOk = false; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Result<T> Ok(T value) => new(value);
@@ -55,10 +55,10 @@ public readonly struct Result<T>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator Result<T>(T value) => Ok(value);
 
+    public override string ToString() => IsOk ? $"Ok({_value})" : $"Fail({_error})";
+
     [DoesNotReturn]
     private static T ThrowNoValue() => throw new InvalidOperationException("Cannot access Value on a failed Result.");
-
-    public override string ToString() => IsOk ? $"Ok({_value})" : $"Fail({_error})";
 }
 
 public readonly struct ResultError(string code, string message)

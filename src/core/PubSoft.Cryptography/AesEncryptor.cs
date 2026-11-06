@@ -10,11 +10,6 @@ namespace PubSoft.Cryptography;
 /// </summary>
 public static class AesEncryptor
 {
-    private static byte[] DeriveKey(string masterKey)
-    {
-        // 用 SHA-256 派生 32 字节密钥（AES-256）
-        return SHA256.HashData(Encoding.UTF8.GetBytes(masterKey));
-    }
 
     /// <summary>加密明文，返回 base64(iv):base64(ciphertext+tag)。</summary>
     public static string Encrypt(string plaintext, string masterKey)
@@ -71,5 +66,10 @@ public static class AesEncryptor
     {
         var bytes = RandomNumberGenerator.GetBytes(32);
         return Convert.ToBase64String(bytes);
+    }
+    private static byte[] DeriveKey(string masterKey)
+    {
+        // 用 SHA-256 派生 32 字节密钥（AES-256）
+        return SHA256.HashData(Encoding.UTF8.GetBytes(masterKey));
     }
 }

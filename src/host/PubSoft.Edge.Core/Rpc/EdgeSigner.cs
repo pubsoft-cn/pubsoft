@@ -113,7 +113,7 @@ public static class EdgeSigner
     /// Canonical JSON — recursive ordinal key sort, compact, null/undefined excluded.
     /// 0/false/"" participate; only null/undefined are dropped.
     /// </summary>
-    public static string CanonicalizeJson(object? value)
+    public static string CanonicalizeJson(object? value) // pubsoft:exempt PUBSOFT032 "#region grouping is the ordering mechanism here"
     {
         if (value is null)
             return "{}";
@@ -227,7 +227,7 @@ public static class EdgeSigner
 
     #region JSON options
 
-    internal static readonly JsonSerializerOptions CanonicalJsonOptions = new(JsonSerializerDefaults.Web)
+    internal static readonly JsonSerializerOptions CanonicalJsonOptions = new(JsonSerializerDefaults.Web) // pubsoft:exempt PUBSOFT031 "#region grouping is the ordering mechanism here"
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never,

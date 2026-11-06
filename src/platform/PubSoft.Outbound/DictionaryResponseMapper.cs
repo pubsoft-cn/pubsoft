@@ -1,7 +1,7 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
-using System.Diagnostics.CodeAnalysis;
 using PubSoft.Contracts;
 
 namespace PubSoft.Outbound;

@@ -4,19 +4,6 @@ public sealed class PermissionRole : Entity<long>, IMultiTenant
 {
     private string _clientCode = string.Empty;
 
-    public long? TenantId { get; set; }
-    public string ClientCode
-    {
-        get => _clientCode;
-        set
-        {
-            ValidateClientCode(value);
-            _clientCode = value;
-        }
-    }
-    public string Name { get; set; } = string.Empty;
-    public bool IsEnabled { get; set; } = true;
-
     public PermissionRole()
     {
     }
@@ -36,6 +23,19 @@ public sealed class PermissionRole : Entity<long>, IMultiTenant
         ClientCode = clientCode;
     }
 
+    public long? TenantId { get; set; }
+    public string ClientCode
+    {
+        get => _clientCode;
+        set
+        {
+            ValidateClientCode(value);
+            _clientCode = value;
+        }
+    }
+    public string Name { get; set; } = string.Empty;
+    public bool IsEnabled { get; set; } = true;
+
     private static void ValidateClientCode(string clientCode)
     {
         ArgumentNullException.ThrowIfNull(clientCode);
@@ -47,19 +47,6 @@ public sealed class PermissionRole : Entity<long>, IMultiTenant
 public sealed class SubjectPermissionRole : Entity<long>, IMultiTenant
 {
     private string _clientCode = string.Empty;
-
-    public long? TenantId { get; set; }
-    public string ClientCode
-    {
-        get => _clientCode;
-        set
-        {
-            ValidateClientCode(value);
-            _clientCode = value;
-        }
-    }
-    public long SubjectId { get; set; }
-    public long RoleId { get; set; }
 
     public SubjectPermissionRole()
     {
@@ -80,6 +67,19 @@ public sealed class SubjectPermissionRole : Entity<long>, IMultiTenant
         ClientCode = clientCode;
     }
 
+    public long? TenantId { get; set; }
+    public string ClientCode
+    {
+        get => _clientCode;
+        set
+        {
+            ValidateClientCode(value);
+            _clientCode = value;
+        }
+    }
+    public long SubjectId { get; set; }
+    public long RoleId { get; set; }
+
     private static void ValidateClientCode(string clientCode)
     {
         ArgumentNullException.ThrowIfNull(clientCode);
@@ -90,16 +90,6 @@ public sealed class SubjectPermissionRole : Entity<long>, IMultiTenant
 
 public sealed class PermissionGrantRecord : Entity<long>, IMultiTenant
 {
-    public long? TenantId { get; set; }
-    public long RoleId { get; set; }
-    public string ModuleKey { get; set; } = string.Empty;
-    public byte Flags { get; set; }
-    public uint ExtensionFlags { get; set; }
-    public string? CustomPermissionName { get; set; }
-    private PermissionGrantRecord()
-    {
-    }
-
     public PermissionGrantRecord(
         long id,
         long roleId,
@@ -123,6 +113,18 @@ public sealed class PermissionGrantRecord : Entity<long>, IMultiTenant
         TenantId = tenantId;
         SetPermissions(flags, extensionFlags, customPermissionName);
     }
+
+    private PermissionGrantRecord()
+    {
+    }
+
+    public long? TenantId { get; set; }
+    public long RoleId { get; set; }
+    public string ModuleKey { get; set; } = string.Empty;
+    public byte Flags { get; set; }
+    public uint ExtensionFlags { get; set; }
+
+    public string? CustomPermissionName { get; set; }
 
     public void SetPermissions(byte flags, uint extensionFlags, string? customPermissionName)
     {

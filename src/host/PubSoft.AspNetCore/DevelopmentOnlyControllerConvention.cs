@@ -4,8 +4,6 @@ using Microsoft.Extensions.Hosting;
 
 namespace PubSoft.AspNetCore;
 
-[AttributeUsage(AttributeTargets.Class)]
-public sealed class DevelopmentOnlyAttribute : Attribute;
 
 public sealed class DevelopmentOnlyControllerConvention : IApplicationModelConvention
 {
@@ -28,20 +26,5 @@ public sealed class DevelopmentOnlyControllerConvention : IApplicationModelConve
             if (application.Controllers[index].Attributes.OfType<DevelopmentOnlyAttribute>().Any())
                 application.Controllers.RemoveAt(index);
         }
-    }
-}
-
-public static class DevelopmentOnlyControllerConventionExtensions
-{
-    public static IMvcBuilder AddPubSoftDevelopmentOnlyControllerConvention(
-        this IMvcBuilder builder,
-        IHostEnvironment environment)
-    {
-        ArgumentNullException.ThrowIfNull(builder);
-        ArgumentNullException.ThrowIfNull(environment);
-
-        builder.AddMvcOptions(options =>
-            options.Conventions.Add(new DevelopmentOnlyControllerConvention(environment)));
-        return builder;
     }
 }

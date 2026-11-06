@@ -2,65 +2,6 @@ using System.Collections.ObjectModel;
 
 namespace PubSoft.Auditing;
 
-public sealed record AuditRequestContext(
-    DateTimeOffset StartedAt,
-    string? HttpMethod,
-    string? RequestPath,
-    string? ClientIp = null,
-    string? UserAgent = null,
-    AuditActorContext? Actor = null);
-
-public sealed record AuditActorContext(string? SubjectId, string? DisplayName, bool? IsAdministrator = null);
-
-public interface IAuditActorAccessor
-{
-    AuditActorContext? GetCurrentActor();
-}
-
-public sealed record AuditBusinessContext(
-    string? Category = null,
-    string? Action = null,
-    string? TargetType = null,
-    string? TargetId = null,
-    string? TargetName = null,
-    string? Detail = null);
-
-public sealed record AuditRequestSnapshot(
-    AuditRequestContext Request,
-    AuditBusinessContext Business,
-    bool Success,
-    int StatusCode,
-    string? FailureCode,
-    TimeSpan Duration,
-    IReadOnlyList<AuditEntityChange> Changes);
-
-public sealed class AuditScopeOptions
-{
-    public bool Enabled { get; set; } = true;
-    public bool AuditGetRequests { get; set; }
-}
-
-public interface IAuditScope
-{
-    bool IsEnabled { get; }
-    bool IsFinalizing { get; }
-
-    void Initialize(AuditRequestContext request);
-    void SetBusiness(
-        string? category = null,
-        string? action = null,
-        string? targetType = null,
-        string? targetId = null,
-        string? targetName = null,
-        string? detail = null);
-    void MarkFailure(string? failureCode = null);
-    AuditRequestSnapshot? Finalize(bool success, int statusCode);
-}
-
-public interface IAuditSnapshotSink
-{
-    ValueTask WriteAsync(AuditRequestSnapshot snapshot, CancellationToken cancellationToken = default);
-}
 
 public sealed class AuditScope : IAuditScope
 {

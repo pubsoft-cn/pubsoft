@@ -8,22 +8,6 @@ public sealed class PermissionModule : Entity<long>, IMultiTenant
     private const byte DefinedPermissionFlags = 0x3F;
     private const int MaxCustomPermissionsJsonLength = 4000;
 
-    public long? TenantId { get; set; }
-    public string ClientCode { get; private set; } = string.Empty;
-    public string ModuleKey { get; private set; } = string.Empty;
-    public string DisplayName { get; private set; } = string.Empty;
-    public string? Description { get; private set; }
-    public byte AvailableFlags { get; private set; }
-    public string? CustomPermissionsJson { get; private set; }
-    public int SortOrder { get; private set; }
-    public bool IsEnabled { get; set; } = true;
-    public DateTime CreationTime { get; private set; }
-    public DateTime? UpdatedAt { get; private set; }
-
-    private PermissionModule()
-    {
-    }
-
     public PermissionModule(
         long id,
         string clientCode,
@@ -57,6 +41,22 @@ public sealed class PermissionModule : Entity<long>, IMultiTenant
         SortOrder = sortOrder;
         CreationTime = DateTime.UtcNow;
     }
+
+    private PermissionModule()
+    {
+    }
+
+    public long? TenantId { get; set; }
+    public string ClientCode { get; private set; } = string.Empty;
+    public string ModuleKey { get; private set; } = string.Empty;
+    public string DisplayName { get; private set; } = string.Empty;
+    public string? Description { get; private set; }
+    public byte AvailableFlags { get; private set; }
+    public string? CustomPermissionsJson { get; private set; }
+    public int SortOrder { get; private set; }
+    public bool IsEnabled { get; set; } = true;
+    public DateTime CreationTime { get; private set; }
+    public DateTime? UpdatedAt { get; private set; }
 
     public void Update(
         string displayName,

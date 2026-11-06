@@ -13,6 +13,26 @@ namespace PubSoft.Scheduling.Http;
 [PubSoft.Core.BoundedCost("static CIDR table built once at type init — not per-call")]
 internal static class HttpEgressGuard
 {
+
+    /// <summary>IANA IPv6 special-purpose ranges that are not globally routable.</summary>
+    private static readonly (byte[] Prefix, int Bits)[] BlockedV6Prefixes =
+    [
+        ([0xfc], 7),                                          // fc00::/7 unique-local
+        ([0xfe, 0x80], 10),                                   // fe80::/10 link-local
+        ([0xff], 8),                                          // ff00::/8 multicast
+        ([0x01, 0, 0, 0, 0, 0, 0, 0], 64),                    // 100::/64 discard-only
+        ([0, 0x64, 0xff, 0x9b, 0, 1], 48),                    // 64:ff9b:1::/48 v4v6 doc
+        ([0x20, 0x01, 0, 0], 32),                             // 2001::/32 Teredo
+        ([0x20, 0x01, 0, 0x02, 0, 0], 48),                    // 2001:2::/48 benchmarking
+        ([0x20, 0x01, 0, 0x04, 0x01, 0x12], 48),              // 2001:4:112::/48 AS112
+        ([0x20, 0x01, 0, 0x10], 28),                          // 2001:10::/28 ORCHID
+        ([0x20, 0x01, 0, 0x20], 28),                          // 2001:20::/28 ORCHIDv2
+        ([0x20, 0x01, 0, 0x30], 28),                          // 2001:30::/28 DRIP
+        ([0x20, 0x01, 0x0d, 0xb8], 32),                       // 2001:db8::/32 documentation
+        ([0x20, 0x02], 16),                                   // 2002::/16 6to4
+        ([0x3f, 0xff, 0], 20),                                // 3fff::/20 documentation
+        ([0x5f, 0x00], 16),                                   // 5f00::/16 SRv6 SIDs
+    ];
     /// <summary>
     /// Host allowlist match. Entries: exact host (<c>api.example.com</c>) or suffix
     /// wildcard (<c>.example.com</c> / <c>*.example.com</c> — matches subdomains AND
@@ -89,37 +109,6 @@ internal static class HttpEgressGuard
         return true;
     }
 
-    /// <summary>IANA IPv6 special-purpose ranges that are not globally routable.</summary>
-    private static readonly (byte[] Prefix, int Bits)[] BlockedV6Prefixes =
-    [
-        ([0xfc], 7),                                          // fc00::/7 unique-local
-        ([0xfe, 0x80], 10),                                   // fe80::/10 link-local
-        ([0xff], 8),                                          // ff00::/8 multicast
-        ([0x01, 0, 0, 0, 0, 0, 0, 0], 64),                    // 100::/64 discard-only
-        ([0, 0x64, 0xff, 0x9b, 0, 1], 48),                    // 64:ff9b:1::/48 v4v6 doc
-        ([0x20, 0x01, 0, 0], 32),                             // 2001::/32 Teredo
-        ([0x20, 0x01, 0, 0x02, 0, 0], 48),                    // 2001:2::/48 benchmarking
-        ([0x20, 0x01, 0, 0x04, 0x01, 0x12], 48),              // 2001:4:112::/48 AS112
-        ([0x20, 0x01, 0, 0x10], 28),                          // 2001:10::/28 ORCHID
-        ([0x20, 0x01, 0, 0x20], 28),                          // 2001:20::/28 ORCHIDv2
-        ([0x20, 0x01, 0, 0x30], 28),                          // 2001:30::/28 DRIP
-        ([0x20, 0x01, 0x0d, 0xb8], 32),                       // 2001:db8::/32 documentation
-        ([0x20, 0x02], 16),                                   // 2002::/16 6to4
-        ([0x3f, 0xff, 0], 20),                                // 3fff::/20 documentation
-        ([0x5f, 0x00], 16),                                   // 5f00::/16 SRv6 SIDs
-    ];
-
-    private static bool IsInPrefix(byte[] address, byte[] prefix, int bits)
-    {
-        var whole = bits / 8;
-        for (var i = 0; i < whole; i++)
-            if (address[i] != prefix[i])
-                return false;
-        var remainder = bits % 8;
-        return remainder == 0
-            || (address[whole] & (0xff << (8 - remainder))) == (prefix[whole] & (0xff << (8 - remainder)));
-    }
-
     /// <summary>
     /// <see cref="SocketsHttpHandler.ConnectCallback"/> enforcing
     /// <see cref="IsBlockedAddress"/> at connect time: resolves the host itself,
@@ -165,5 +154,16 @@ internal static class HttpEgressGuard
         throw new HttpRequestException(anyPublic
             ? $"egress connect failed for '{host}'"
             : $"egress blocked: '{host}' resolves only to non-public addresses");
+    }
+
+    private static bool IsInPrefix(byte[] address, byte[] prefix, int bits)
+    {
+        var whole = bits / 8;
+        for (var i = 0; i < whole; i++)
+            if (address[i] != prefix[i])
+                return false;
+        var remainder = bits % 8;
+        return remainder == 0
+            || (address[whole] & (0xff << (8 - remainder))) == (prefix[whole] & (0xff << (8 - remainder)));
     }
 }

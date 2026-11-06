@@ -1,7 +1,7 @@
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 using PubSoft.Messaging;
 using PubSoft.Messaging.Outbox;
-using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace PubSoft.Core.Tests;

@@ -2,11 +2,6 @@ namespace PubSoft.Domain;
 
 public sealed class RoleDataScope : Entity<long>, IMultiTenant
 {
-    public long RoleId { get; set; }
-    public string Dimension { get; set; } = string.Empty;
-    public long ScopeId { get; set; }
-    public bool IsAll { get; set; }
-    public long? TenantId { get; set; }
 
     public RoleDataScope()
     {
@@ -27,6 +22,11 @@ public sealed class RoleDataScope : Entity<long>, IMultiTenant
         TenantId = tenantId;
         IsAll = isAll;
     }
+    public long RoleId { get; set; }
+    public string Dimension { get; set; } = string.Empty;
+    public long ScopeId { get; set; }
+    public bool IsAll { get; set; }
+    public long? TenantId { get; set; }
 }
 
 public interface IRoleDataScopeProvider

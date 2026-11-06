@@ -13,11 +13,11 @@ namespace PubSoft.AspNetCore;
 [ApiController]
 public abstract class PubSoftController : ControllerBase
 {
-    /// <summary>当前认证主体（DI 注入，可能为匿名）。</summary>
-    protected IAuthenticatedSubjectAccessor? SubjectAccessor { get; }
 
     protected PubSoftController(IAuthenticatedSubjectAccessor? subjectAccessor)
         => SubjectAccessor = subjectAccessor;
+    /// <summary>当前认证主体（DI 注入，可能为匿名）。</summary>
+    protected IAuthenticatedSubjectAccessor? SubjectAccessor { get; }
 }
 
 /// <summary>

@@ -6,58 +6,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace PubSoft.Authentication.Jwt;
 
-public sealed class RsaSigningKeyMaterial : IDisposable
-{
-    private bool _disposed;
-
-    internal RsaSigningKeyMaterial(string keyId, RSA rsa)
-    {
-        KeyId = keyId;
-        Rsa = rsa;
-        SecurityKey = new RsaSecurityKey(rsa) { KeyId = keyId };
-    }
-
-    public string KeyId { get; }
-    public RSA Rsa { get; }
-    public RsaSecurityKey SecurityKey { get; }
-
-    public void Dispose()
-    {
-        if (_disposed)
-            return;
-        Rsa.Dispose();
-        _disposed = true;
-    }
-}
-
-/// <summary>
-/// Explicitly selected symmetric (HMAC) JWT signing key. This exists for hosts that
-/// deliberately run symmetric service-to-service tokens — the algorithm is always an
-/// explicit choice and is never a fallback from an asymmetric path.
-/// </summary>
-public sealed class SymmetricSigningKeyMaterial : IDisposable
-{
-    private readonly byte[] _keyBytes;
-    private bool _disposed;
-
-    internal SymmetricSigningKeyMaterial(string keyId, byte[] keyBytes)
-    {
-        KeyId = keyId;
-        _keyBytes = keyBytes;
-        SecurityKey = new SymmetricSecurityKey(keyBytes) { KeyId = keyId };
-    }
-
-    public string KeyId { get; }
-    public SymmetricSecurityKey SecurityKey { get; }
-
-    public void Dispose()
-    {
-        if (_disposed)
-            return;
-        CryptographicOperations.ZeroMemory(_keyBytes);
-        _disposed = true;
-    }
-}
 
 public static class JwtSigning
 {
@@ -360,29 +308,5 @@ public static class JwtSigning
         ArgumentException.ThrowIfNullOrWhiteSpace(value, parameterName);
         if (value.Any(char.IsControl))
             throw new ArgumentException("Issuer and audience cannot contain control characters.", parameterName);
-    }
-}
-
-public sealed class JwtJwksDocument
-{
-    public List<JwtJwksKey> Keys { get; init; } = [];
-}
-
-public sealed class JwtJwksKey
-{
-    public string Kty { get; init; } = "RSA";
-    public string Use { get; init; } = "sig";
-    public string Kid { get; init; } = string.Empty;
-    public string Alg { get; init; } = SecurityAlgorithms.RsaSha256;
-    public string N { get; init; } = string.Empty;
-    public string E { get; init; } = string.Empty;
-}
-
-public static class RefreshTokenGenerator
-{
-    public static string CreateRefreshToken()
-    {
-        var bytes = RandomNumberGenerator.GetBytes(32);
-        return "rt_" + Base64UrlEncoder.Encode(bytes);
     }
 }

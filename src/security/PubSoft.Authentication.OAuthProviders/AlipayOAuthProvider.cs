@@ -27,16 +27,6 @@ public sealed partial class AlipayOAuthProvider : OAuthProviderBase
     public override bool SupportsChannelType(string channelType) =>
         channelType is OAuthChannelTypes.MiniProgram or OAuthChannelTypes.Web;
 
-    /// <summary>Alipay channels sign with RSA2 from ExtraJson and intentionally carry no AppSecret.</summary>
-    protected override async Task<OAuthChannelConfig> ResolveConfigAsync(string appId, CancellationToken ct)
-    {
-        if (string.IsNullOrWhiteSpace(appId))
-            throw new InvalidOperationException($"{Provider} login failed: AppId not provided");
-
-        return await ConfigProvider.GetByAppIdAsync(appId, ct).ConfigureAwait(false)
-            ?? throw new InvalidOperationException($"{Provider} login failed: no channel config found for AppId={appId}");
-    }
-
     public override Task<OAuthAuthorizeUrlResult> GetAuthorizeUrlAsync(OAuthAuthorizeUrlRequest request, CancellationToken ct = default)
     {
         var state = request.State ?? Guid.NewGuid().ToString("N");
@@ -132,87 +122,14 @@ public sealed partial class AlipayOAuthProvider : OAuthProviderBase
         }
     }
 
-    // ── Alipay gateway call (inline RSA2 sign + verify) ──
-
-    private async Task<JsonElement> ExecuteAlipayGatewayAsync(
-        string appId, string method, Dictionary<string, string> bizContent,
-        string? authToken = null, CancellationToken ct = default)
+    /// <summary>Alipay channels sign with RSA2 from ExtraJson and intentionally carry no AppSecret.</summary>
+    protected override async Task<OAuthChannelConfig> ResolveConfigAsync(string appId, CancellationToken ct)
     {
-        var config = await ResolveConfigAsync(appId, ct).ConfigureAwait(false);
-        var (privateKeyPem, platformPublicKeyPem, gatewayUrl) = ParseAlipayExtra(config.ExtraJson);
-        var privateKey = privateKeyPem ?? throw new AlipayOAuthException("NO_PRIVATE_KEY", "Alipay channel has no app private key (ExtraJson.PrivateKeyPem)");
-        gatewayUrl ??= "https://openapi.alipay.com/gateway.do";
+        if (string.IsNullOrWhiteSpace(appId))
+            throw new InvalidOperationException($"{Provider} login failed: AppId not provided");
 
-        var paramDict = new Dictionary<string, string>(System.StringComparer.Ordinal)
-        {
-            ["app_id"] = config.AppId,
-            ["method"] = method,
-            ["format"] = "JSON",
-            ["charset"] = "utf-8",
-            ["sign_type"] = "RSA2",
-            ["timestamp"] = _timeProvider.GetLocalNow().DateTime.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture),
-            ["version"] = "1.0",
-        };
-        if (!string.IsNullOrEmpty(authToken))
-            paramDict["auth_token"] = authToken;
-
-        paramDict["biz_content"] = SerializeBizContent(bizContent);
-
-        var signContent = BuildSignContent(paramDict);
-        paramDict["sign"] = SignWithRsa2(signContent, privateKey);
-
-        var formData = new FormUrlEncodedContent(paramDict);
-        var sw = Stopwatch.StartNew();
-        var resp = await HttpClient.PostAsync(gatewayUrl, formData, ct).ConfigureAwait(false);
-        if (resp.Content.Headers.ContentLength > 1_048_576)
-            throw new InvalidDataException("Alipay response exceeded 1 MiB");
-        var respBytes = await resp.Content.ReadAsByteArrayAsync(ct).ConfigureAwait(false);
-        if (respBytes.Length > 1_048_576)
-            throw new InvalidDataException("Alipay response exceeded 1 MiB");
-        sw.Stop();
-        Logger?.LogInformation("Alipay {Method} appId={AppId} elapsed={Elapsed}ms", method, appId, sw.ElapsedMilliseconds);
-
-        // Alipay may respond in GBK; GB18030 requires the code-pages provider, fall back to UTF-8.
-        var charset = "UTF-8";
-        var contentType = resp.Content.Headers.ContentType?.CharSet;
-        if (!string.IsNullOrEmpty(contentType) &&
-            (contentType.Contains("GBK", StringComparison.OrdinalIgnoreCase) ||
-             contentType.Contains("GB2312", StringComparison.OrdinalIgnoreCase)))
-            charset = "GB18030";
-        Encoding encoding;
-        try { encoding = Encoding.GetEncoding(charset); }
-        catch { encoding = Encoding.UTF8; }
-        var respText = encoding.GetString(respBytes);
-
-        using var doc = JsonDocument.Parse(respText);
-        var root = doc.RootElement;
-        var responseKey = method.Replace('.', '_') + "_response";
-        if (!root.TryGetProperty(responseKey, out var bizResp))
-        {
-            if (root.TryGetProperty("error_response", out var errResp))
-                throw new AlipayOAuthException("ALIPAY_GATEWAY_ERROR", errResp.GetRawText());
-            throw new AlipayOAuthException("UNKNOWN_RESPONSE", respText);
-        }
-
-        // Response signature verification (guards against tampering).
-        var sign = root.TryGetProperty("sign", out var signEl) ? signEl.GetString() : null;
-        if (!string.IsNullOrEmpty(sign) && !string.IsNullOrEmpty(platformPublicKeyPem))
-        {
-            var bizRespRaw = ExtractResponseRaw(respText, responseKey) ?? bizResp.GetRawText();
-            if (!VerifyWithRsa2(bizRespRaw, sign, platformPublicKeyPem, encoding))
-                throw new AlipayOAuthException("SIGN_VERIFY_FAILED", "Alipay response signature verification failed (possible tampering)");
-        }
-
-        if (bizResp.TryGetProperty("code", out var codeEl) && !string.Equals(codeEl.GetString(), "10000", System.StringComparison.Ordinal))
-        {
-            var code = codeEl.GetString() ?? "";
-            var msg = bizResp.TryGetProperty("msg", out var m) ? m.GetString() ?? "" : "";
-            var subCode = bizResp.TryGetProperty("sub_code", out var sc) ? sc.GetString() ?? "" : "";
-            var subMsg = bizResp.TryGetProperty("sub_msg", out var sm) ? sm.GetString() ?? "" : "";
-            throw new AlipayOAuthException(code, $"{msg} | {subCode}: {subMsg}");
-        }
-
-        return bizResp.Clone();
+        return await ConfigProvider.GetByAppIdAsync(appId, ct).ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"{Provider} login failed: no channel config found for AppId={appId}");
     }
 
     // ── RSA2 sign/verify helpers ──
@@ -347,11 +264,94 @@ public sealed partial class AlipayOAuthProvider : OAuthProviderBase
             return (null, null, null);
         }
     }
+
+    // ── Alipay gateway call (inline RSA2 sign + verify) ──
+
+    private async Task<JsonElement> ExecuteAlipayGatewayAsync(
+        string appId, string method, Dictionary<string, string> bizContent,
+        string? authToken = null, CancellationToken ct = default)
+    {
+        var config = await ResolveConfigAsync(appId, ct).ConfigureAwait(false);
+        var (privateKeyPem, platformPublicKeyPem, gatewayUrl) = ParseAlipayExtra(config.ExtraJson);
+        var privateKey = privateKeyPem ?? throw new AlipayOAuthException("NO_PRIVATE_KEY", "Alipay channel has no app private key (ExtraJson.PrivateKeyPem)");
+        gatewayUrl ??= "https://openapi.alipay.com/gateway.do";
+
+        var paramDict = new Dictionary<string, string>(System.StringComparer.Ordinal)
+        {
+            ["app_id"] = config.AppId,
+            ["method"] = method,
+            ["format"] = "JSON",
+            ["charset"] = "utf-8",
+            ["sign_type"] = "RSA2",
+            ["timestamp"] = _timeProvider.GetLocalNow().DateTime.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture),
+            ["version"] = "1.0",
+        };
+        if (!string.IsNullOrEmpty(authToken))
+            paramDict["auth_token"] = authToken;
+
+        paramDict["biz_content"] = SerializeBizContent(bizContent);
+
+        var signContent = BuildSignContent(paramDict);
+        paramDict["sign"] = SignWithRsa2(signContent, privateKey);
+
+        var formData = new FormUrlEncodedContent(paramDict);
+        var sw = Stopwatch.StartNew();
+        var resp = await HttpClient.PostAsync(gatewayUrl, formData, ct).ConfigureAwait(false);
+        if (resp.Content.Headers.ContentLength > 1_048_576)
+            throw new InvalidDataException("Alipay response exceeded 1 MiB");
+        var respBytes = await resp.Content.ReadAsByteArrayAsync(ct).ConfigureAwait(false);
+        if (respBytes.Length > 1_048_576)
+            throw new InvalidDataException("Alipay response exceeded 1 MiB");
+        sw.Stop();
+        Logger?.LogInformation("Alipay {Method} appId={AppId} elapsed={Elapsed}ms", method, appId, sw.ElapsedMilliseconds);
+
+        // Alipay may respond in GBK; GB18030 requires the code-pages provider, fall back to UTF-8.
+        var charset = "UTF-8";
+        var contentType = resp.Content.Headers.ContentType?.CharSet;
+        if (!string.IsNullOrEmpty(contentType) &&
+            (contentType.Contains("GBK", StringComparison.OrdinalIgnoreCase) ||
+             contentType.Contains("GB2312", StringComparison.OrdinalIgnoreCase)))
+            charset = "GB18030";
+        Encoding encoding;
+        try { encoding = Encoding.GetEncoding(charset); }
+        catch { encoding = Encoding.UTF8; }
+        var respText = encoding.GetString(respBytes);
+
+        using var doc = JsonDocument.Parse(respText);
+        var root = doc.RootElement;
+        var responseKey = method.Replace('.', '_') + "_response";
+        if (!root.TryGetProperty(responseKey, out var bizResp))
+        {
+            if (root.TryGetProperty("error_response", out var errResp))
+                throw new AlipayOAuthException("ALIPAY_GATEWAY_ERROR", errResp.GetRawText());
+            throw new AlipayOAuthException("UNKNOWN_RESPONSE", respText);
+        }
+
+        // Response signature verification (guards against tampering).
+        var sign = root.TryGetProperty("sign", out var signEl) ? signEl.GetString() : null;
+        if (!string.IsNullOrEmpty(sign) && !string.IsNullOrEmpty(platformPublicKeyPem))
+        {
+            var bizRespRaw = ExtractResponseRaw(respText, responseKey) ?? bizResp.GetRawText();
+            if (!VerifyWithRsa2(bizRespRaw, sign, platformPublicKeyPem, encoding))
+                throw new AlipayOAuthException("SIGN_VERIFY_FAILED", "Alipay response signature verification failed (possible tampering)");
+        }
+
+        if (bizResp.TryGetProperty("code", out var codeEl) && !string.Equals(codeEl.GetString(), "10000", System.StringComparison.Ordinal))
+        {
+            var code = codeEl.GetString() ?? "";
+            var msg = bizResp.TryGetProperty("msg", out var m) ? m.GetString() ?? "" : "";
+            var subCode = bizResp.TryGetProperty("sub_code", out var sc) ? sc.GetString() ?? "" : "";
+            var subMsg = bizResp.TryGetProperty("sub_msg", out var sm) ? sm.GetString() ?? "" : "";
+            throw new AlipayOAuthException(code, $"{msg} | {subCode}: {subMsg}");
+        }
+
+        return bizResp.Clone();
+    }
 }
 
 /// <summary>Alipay OAuth failure carrying a vendor/internal error code.</summary>
 public sealed class AlipayOAuthException : Exception
 {
-    public string Code { get; }
     public AlipayOAuthException(string code, string message) : base(message) => Code = code;
+    public string Code { get; }
 }

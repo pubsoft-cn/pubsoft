@@ -14,8 +14,6 @@ public sealed class DingTalkWebhookChannel : INotificationChannel
     private readonly DingTalkWebhookOptions _options;
     private readonly ILogger<DingTalkWebhookChannel>? _logger;
 
-    public string Name => "dingtalk";
-
     public DingTalkWebhookChannel(
         IHttpClientFactory httpClientFactory,
         IOptions<DingTalkWebhookOptions> options,
@@ -25,6 +23,8 @@ public sealed class DingTalkWebhookChannel : INotificationChannel
         _options = options.Value;
         _logger = logger;
     }
+
+    public string Name => "dingtalk";
 
     public async Task<NotificationResult> SendAsync(NotificationMessage message, CancellationToken cancellationToken = default)
     {

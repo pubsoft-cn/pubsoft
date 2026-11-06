@@ -18,6 +18,8 @@ namespace PubSoft.AspNetCore.Docs;
 /// </summary>
 public sealed class ApiDocsCatalogService
 {
+
+    private static readonly NullabilityInfoContext Nullability = new();
     private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly EndpointDataSource _endpoints;
     private readonly IHostEnvironment _env;
@@ -39,6 +41,79 @@ public sealed class ApiDocsCatalogService
     public void Invalidate()
     {
         lock (_lock) _catalog = null;
+    }
+
+    // path params are always required; otherwise consult NRT metadata + default value
+    private static bool IsRequired(ControllerParameterDescriptor p)
+        => string.Equals(p.BindingInfo?.BindingSource?.Id, "Path", System.StringComparison.Ordinal)
+           || (!p.ParameterInfo.HasDefaultValue
+               && Nullable.GetUnderlyingType(p.ParameterType) is null
+               && Nullability.Create(p.ParameterInfo).ReadState != NullabilityState.Nullable);
+
+    private static string DefaultGroup(string path)
+    {
+        var segs = path.Trim('/').Split('/');
+        return segs.Length >= 2 ? $"{segs[0]}/{segs[1]}" : segs[0];
+    }
+
+    private static Type UnwrapTask(Type t)
+        => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Task<>)
+            ? t.GetGenericArguments()[0] : t;
+
+    private static string FriendlyName(Type t)
+    {
+        if (Nullable.GetUnderlyingType(t) is { } u) return FriendlyName(u) + "?";
+        if (t.IsGenericType)
+            return t.Name[..t.Name.IndexOf('`')] + "<" + string.Join(",", t.GetGenericArguments().Select(FriendlyName)) + ">";
+        return t.Name;
+    }
+
+    /// <summary>Parse every *.xml doc file next to the entry assembly set.</summary>
+    private static Dictionary<string, XmlMember> LoadXmlDocs()
+    {
+        var map = new Dictionary<string, XmlMember>(System.StringComparer.Ordinal);
+        string[] files;
+        try
+        {
+            files = Directory.GetFiles(AppContext.BaseDirectory, "*.xml");
+        }
+        catch
+        {
+            return map;
+        }
+        foreach (var f in files)
+        {
+            try
+            {
+                var doc = XDocument.Load(f);
+                foreach (var m in doc.Descendants("member"))
+                {
+                    var name = m.Attribute("name")?.Value;
+                    if (name == null || !name.StartsWith("M:", StringComparison.Ordinal)) continue;
+                    var ps = m.Elements("param")
+                        .ToDictionary(p => p.Attribute("name")?.Value ?? "", p => p.Value.Trim());
+                    map.TryAdd(name[2..], new XmlMember(m.Element("summary")?.Value.Trim(), ps));
+                }
+            }
+            catch { /* malformed xml doc file never blocks catalog generation */ }
+        }
+        return map;
+    }
+
+    private static string? XmlMemberKey(MethodInfo m)
+    {
+        var t = m.DeclaringType;
+        if (t == null) return null;
+        return $"{t.FullName}.{m.Name}({string.Join(",", m.GetParameters().Select(p => XmlTypeName(p.ParameterType)))})";
+    }
+
+    private static string XmlTypeName(Type t)
+    {
+        if (t.IsGenericParameter) return t.Name;
+        var n = t.FullName ?? t.Name;
+        if (t.IsGenericType)
+            n = n[..n.IndexOf('`')] + "{" + string.Join(",", t.GetGenericArguments().Select(XmlTypeName)) + "}";
+        return n;
     }
 
     private object Build()
@@ -136,37 +211,6 @@ public sealed class ApiDocsCatalogService
             || (_options.PagePath is { } pp && string.Equals(p, "/" + pp.TrimStart('/'), System.StringComparison.Ordinal));
     }
 
-    private static readonly NullabilityInfoContext Nullability = new();
-
-    // path params are always required; otherwise consult NRT metadata + default value
-    private static bool IsRequired(ControllerParameterDescriptor p)
-        => string.Equals(p.BindingInfo?.BindingSource?.Id, "Path", System.StringComparison.Ordinal)
-           || (!p.ParameterInfo.HasDefaultValue
-               && Nullable.GetUnderlyingType(p.ParameterType) is null
-               && Nullability.Create(p.ParameterInfo).ReadState != NullabilityState.Nullable);
-
-    private static string DefaultGroup(string path)
-    {
-        var segs = path.Trim('/').Split('/');
-        return segs.Length >= 2 ? $"{segs[0]}/{segs[1]}" : segs[0];
-    }
-
-    private static Type UnwrapTask(Type t)
-        => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Task<>)
-            ? t.GetGenericArguments()[0] : t;
-
-    private static string FriendlyName(Type t)
-    {
-        if (Nullable.GetUnderlyingType(t) is { } u) return FriendlyName(u) + "?";
-        if (t.IsGenericType)
-            return t.Name[..t.Name.IndexOf('`')] + "<" + string.Join(",", t.GetGenericArguments().Select(FriendlyName)) + ">";
-        return t.Name;
-    }
-
-    // ---------- overlay ----------
-
-    private sealed record OverlayEntry(string? Group, string? Note, string? Auth, JsonElement? Example);
-
     private (Dictionary<string, OverlayEntry>, List<ApiDocExtraEndpoint>) LoadOverlay()
     {
         var map = new Dictionary<string, OverlayEntry>(System.StringComparer.Ordinal);
@@ -206,55 +250,11 @@ public sealed class ApiDocsCatalogService
         return (map, extra);
     }
 
+    // ---------- overlay ----------
+
+    private sealed record OverlayEntry(string? Group, string? Note, string? Auth, JsonElement? Example);
+
     // ---------- XML doc ----------
 
     private sealed record XmlMember(string? Summary, Dictionary<string, string> Params);
-
-    /// <summary>Parse every *.xml doc file next to the entry assembly set.</summary>
-    private static Dictionary<string, XmlMember> LoadXmlDocs()
-    {
-        var map = new Dictionary<string, XmlMember>(System.StringComparer.Ordinal);
-        string[] files;
-        try
-        {
-            files = Directory.GetFiles(AppContext.BaseDirectory, "*.xml");
-        }
-        catch
-        {
-            return map;
-        }
-        foreach (var f in files)
-        {
-            try
-            {
-                var doc = XDocument.Load(f);
-                foreach (var m in doc.Descendants("member"))
-                {
-                    var name = m.Attribute("name")?.Value;
-                    if (name == null || !name.StartsWith("M:", StringComparison.Ordinal)) continue;
-                    var ps = m.Elements("param")
-                        .ToDictionary(p => p.Attribute("name")?.Value ?? "", p => p.Value.Trim());
-                    map.TryAdd(name[2..], new XmlMember(m.Element("summary")?.Value.Trim(), ps));
-                }
-            }
-            catch { /* malformed xml doc file never blocks catalog generation */ }
-        }
-        return map;
-    }
-
-    private static string? XmlMemberKey(MethodInfo m)
-    {
-        var t = m.DeclaringType;
-        if (t == null) return null;
-        return $"{t.FullName}.{m.Name}({string.Join(",", m.GetParameters().Select(p => XmlTypeName(p.ParameterType)))})";
-    }
-
-    private static string XmlTypeName(Type t)
-    {
-        if (t.IsGenericParameter) return t.Name;
-        var n = t.FullName ?? t.Name;
-        if (t.IsGenericType)
-            n = n[..n.IndexOf('`')] + "{" + string.Join(",", t.GetGenericArguments().Select(XmlTypeName)) + "}";
-        return n;
-    }
 }

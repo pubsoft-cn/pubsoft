@@ -1,6 +1,6 @@
-using PubSoft.Security;
 using System.Security.Cryptography;
 using System.Text;
+using PubSoft.Security;
 
 var passwordHash = PasswordHasher.Hash("consumer-smoke", 100_000);
 if (!PasswordHasher.Verify("consumer-smoke", passwordHash) || PasswordHasher.Verify("wrong", passwordHash))

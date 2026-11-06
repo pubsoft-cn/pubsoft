@@ -12,8 +12,8 @@ namespace PubSoft.OAuth;
 /// </summary>
 public sealed class WeComOAuthProvider : OAuthProviderBase
 {
-    private readonly TimeProvider _timeProvider = TimeProvider.System;
     private static readonly ConcurrentDictionary<string, (string token, DateTime expiresAt)> _tokenCache = new(StringComparer.Ordinal);
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
 
     public WeComOAuthProvider(
         IOAuthChannelConfigProvider configProvider,

@@ -14,20 +14,6 @@ public enum AppLogLevel : byte
 
 public readonly struct LogEntry
 {
-    public DateTimeOffset TimestampUtc { get; }
-    public AppLogLevel Level { get; }
-    public string Source { get; }
-    public string Message { get; }
-    public string? ExceptionDetail { get; }
-    public long TraceId { get; }
-    public string? Service { get; }
-    public string? ServiceVersion { get; }
-    public string? ServiceInstanceId { get; }
-    public string? SpanId { get; }
-    public string? UserId { get; }
-    public string? Environment { get; }
-    public string? HostName { get; }
-    public IReadOnlyDictionary<string, object?>? Context { get; }
 
     public LogEntry(
         AppLogLevel level,
@@ -66,6 +52,20 @@ public readonly struct LogEntry
             ? null
             : new ReadOnlyDictionary<string, object?>(new Dictionary<string, object?>(context, StringComparer.Ordinal));
     }
+    public DateTimeOffset TimestampUtc { get; }
+    public AppLogLevel Level { get; }
+    public string Source { get; }
+    public string Message { get; }
+    public string? ExceptionDetail { get; }
+    public long TraceId { get; }
+    public string? Service { get; }
+    public string? ServiceVersion { get; }
+    public string? ServiceInstanceId { get; }
+    public string? SpanId { get; }
+    public string? UserId { get; }
+    public string? Environment { get; }
+    public string? HostName { get; }
+    public IReadOnlyDictionary<string, object?>? Context { get; }
 
     private static string? TrimOrNull(string? value)
         => string.IsNullOrWhiteSpace(value) ? null : value.Trim();

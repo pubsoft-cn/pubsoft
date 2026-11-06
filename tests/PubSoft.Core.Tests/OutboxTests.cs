@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -5,8 +7,6 @@ using Microsoft.Extensions.Hosting;
 using PubSoft.Domain;
 using PubSoft.EntityFrameworkCore;
 using PubSoft.Messaging.Outbox;
-using System.Collections.Concurrent;
-using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace PubSoft.Core.Tests;

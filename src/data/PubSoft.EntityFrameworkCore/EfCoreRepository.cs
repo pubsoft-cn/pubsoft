@@ -19,11 +19,6 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
         _saveBoundary = saveBoundary;
     }
 
-    // autoSave=false stages only when a host-level save point is armed in this scope
-    // (request-end middleware or an explicitly activated unit-of-work boundary).
-    // Without one there is no later flush — persist immediately or the write is lost.
-    private bool ShouldSaveNow(bool autoSave) => autoSave || _saveBoundary is not { IsActive: true };
-
     public Task<IQueryable<TEntity>> GetQueryableAsync()
         => Task.FromResult<IQueryable<TEntity>>(_dbSet);
 
@@ -148,6 +143,11 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         => await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+    // autoSave=false stages only when a host-level save point is armed in this scope
+    // (request-end middleware or an explicitly activated unit-of-work boundary).
+    // Without one there is no later flush — persist immediately or the write is lost.
+    private bool ShouldSaveNow(bool autoSave) => autoSave || _saveBoundary is not { IsActive: true };
 
     private Microsoft.EntityFrameworkCore.Metadata.IProperty GetSingleKeyProperty()
     {

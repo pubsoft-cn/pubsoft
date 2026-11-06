@@ -4,27 +4,6 @@ using System.Text;
 
 namespace PubSoft.Security;
 
-public sealed class HmacSignatureResult
-{
-    public bool IsValid { get; init; }
-    public string? Error { get; init; }
-    public string? AppId { get; init; }
-}
-
-public sealed class HmacSignatureOptions
-{
-    public int MaxTimestampSkewSeconds { get; set; } = 300;
-    public int MaxAppIdLength { get; set; } = 128;
-    public int MaxNonceLength { get; set; } = 256;
-}
-
-public static class HmacSignatureHeaders
-{
-    public const string AppId = "X-Fend-App-Id";
-    public const string Signature = "X-Fend-Signature";
-    public const string Timestamp = "X-Fend-Timestamp";
-    public const string Nonce = "X-Fend-Nonce";
-}
 
 /// <summary>Validates HMAC-SHA256 requests and atomically rejects nonce replays.</summary>
 public sealed class HmacSignatureValidator

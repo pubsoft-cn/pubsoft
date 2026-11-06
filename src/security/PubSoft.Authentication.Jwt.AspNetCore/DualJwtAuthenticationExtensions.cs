@@ -10,13 +10,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace PubSoft.Authentication.Jwt.AspNetCore;
 
-public sealed class DualJwtOptions
-{
-    public const string SectionName = "Jwt";
-    public string Issuer { get; set; } = "";
-    public string Audience { get; set; } = "";
-    public string SecretKey { get; set; } = "";
-}
 
 public static class DualJwtAuthenticationExtensions
 {

@@ -5,10 +5,10 @@ using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
 using PubSoft.Domain;
 using PubSoft.EntityFrameworkCore;
+using PubSoft.EntityFrameworkCore.Migrations;
 using PubSoft.Messaging.Outbox;
 using PubSoft.Scheduling;
 using PubSoft.Scheduling.EntityFrameworkCore;
-using PubSoft.EntityFrameworkCore.Migrations;
 using Xunit;
 
 namespace PubSoft.Core.Tests;

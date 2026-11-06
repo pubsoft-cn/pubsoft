@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
-using PubSoft.Domain;
 using PubSoft.Authorization;
+using PubSoft.Domain;
 using PubSoft.EntityFrameworkCore;
 using Xunit;
 

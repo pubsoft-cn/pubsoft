@@ -14,6 +14,8 @@ internal sealed class HttpExecutionSupport
 {
     public const string HttpClientName = "PubSoft.Scheduling.Http";
 
+    private const int MaxRedirects = 8;
+
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ITokenProvider? _tokenProvider;
     private readonly HttpExecutorOptions _options;
@@ -29,6 +31,12 @@ internal sealed class HttpExecutionSupport
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         _tokenProvider = tokenProvider;
         _logger = logger;
+    }
+
+    public static string GetCircuitKey(Uri uri)
+    {
+        var hostHash = SHA256.HashData(Encoding.UTF8.GetBytes(uri.IdnHost.ToLowerInvariant()));
+        return Convert.ToHexString(hostHash);
     }
 
     public bool TryReadConfig(
@@ -73,15 +81,6 @@ internal sealed class HttpExecutionSupport
 
         return true;
     }
-
-    /// <summary>Target rules shared by the initial URL and every redirect hop.</summary>
-    private bool IsValidTarget(Uri uri)
-        => (string.Equals(uri.Scheme, Uri.UriSchemeHttp, System.StringComparison.Ordinal) || string.Equals(uri.Scheme, Uri.UriSchemeHttps, System.StringComparison.Ordinal))
-            && string.IsNullOrEmpty(uri.UserInfo)
-            && HttpEgressGuard.IsHostAllowed(uri.IdnHost, _options.AllowedHosts)
-            && (!_options.BlockPrivateNetworks || !HttpEgressGuard.IsBlockedHostLiteral(uri));
-
-    private const int MaxRedirects = 8;
 
     public async Task<HttpAttemptResult> SendAsync(
         HttpExecutorConfig config,
@@ -130,6 +129,27 @@ internal sealed class HttpExecutionSupport
             target = next;
         }
     }
+
+    private static bool TryCreateMethod(string? methodName, out HttpMethod method)
+    {
+        method = HttpMethod.Get;
+        if (string.IsNullOrWhiteSpace(methodName)
+            || methodName.Any(character => !IsHttpTokenCharacter(character)))
+            return false;
+
+        method = new HttpMethod(methodName);
+        return true;
+    }
+
+    private static bool IsHttpTokenCharacter(char character)
+        => char.IsAsciiLetterOrDigit(character) || "!#$%&'*+-.^_`|~".Contains(character);
+
+    /// <summary>Target rules shared by the initial URL and every redirect hop.</summary>
+    private bool IsValidTarget(Uri uri)
+        => (string.Equals(uri.Scheme, Uri.UriSchemeHttp, System.StringComparison.Ordinal) || string.Equals(uri.Scheme, Uri.UriSchemeHttps, System.StringComparison.Ordinal))
+            && string.IsNullOrEmpty(uri.UserInfo)
+            && HttpEgressGuard.IsHostAllowed(uri.IdnHost, _options.AllowedHosts)
+            && (!_options.BlockPrivateNetworks || !HttpEgressGuard.IsBlockedHostLiteral(uri));
 
     /// <summary>Single attempt; returns the result plus the redirect Location (when followable).</summary>
     private async Task<(HttpAttemptResult Result, Uri? Location)> SendOnceAsync(
@@ -210,26 +230,6 @@ internal sealed class HttpExecutionSupport
             return (HttpAttemptResult.Failure(0, stopwatch.Elapsed, "request failed", exception), null);
         }
     }
-
-    public static string GetCircuitKey(Uri uri)
-    {
-        var hostHash = SHA256.HashData(Encoding.UTF8.GetBytes(uri.IdnHost.ToLowerInvariant()));
-        return Convert.ToHexString(hostHash);
-    }
-
-    private static bool TryCreateMethod(string? methodName, out HttpMethod method)
-    {
-        method = HttpMethod.Get;
-        if (string.IsNullOrWhiteSpace(methodName)
-            || methodName.Any(character => !IsHttpTokenCharacter(character)))
-            return false;
-
-        method = new HttpMethod(methodName);
-        return true;
-    }
-
-    private static bool IsHttpTokenCharacter(char character)
-        => char.IsAsciiLetterOrDigit(character) || "!#$%&'*+-.^_`|~".Contains(character);
 }
 
 internal sealed record HttpAttemptResult(

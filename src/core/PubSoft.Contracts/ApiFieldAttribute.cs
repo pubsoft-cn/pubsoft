@@ -20,6 +20,9 @@ public enum FieldSource : byte
 [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
 public sealed class ApiFieldAttribute : Attribute
 {
+
+    public ApiFieldAttribute(string name) => Name = name;
+    public ApiFieldAttribute() => Name = string.Empty;
     public string Name { get; }
     public int Order { get; set; }
     public EmitBehavior Emit { get; set; } = EmitBehavior.Always;
@@ -31,7 +34,4 @@ public sealed class ApiFieldAttribute : Attribute
 
     public bool IsRequired { get; set; }
     public bool Flatten { get; set; }
-
-    public ApiFieldAttribute(string name) => Name = name;
-    public ApiFieldAttribute() => Name = string.Empty;
 }

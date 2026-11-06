@@ -1,7 +1,7 @@
-using PubSoft.Core;
 using System.Text;
 using System.Text.Json;
 using PubSoft.Caching;
+using PubSoft.Core;
 using StackExchange.Redis;
 
 namespace PubSoft.Caching.Redis;
@@ -58,9 +58,6 @@ public sealed class RedisCache : ICache
         await Database.StringSetAsync(PhysicalKey(key), json, ToExpiration(expiry))
             .WaitAsync(cancellationToken).ConfigureAwait(false);
     }
-
-    private static Expiration ToExpiration(TimeSpan? expiry)
-        => expiry.HasValue ? new Expiration(expiry.Value) : Expiration.Default;
 
     public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)
     {
@@ -204,6 +201,9 @@ public sealed class RedisCache : ICache
                 await DeleteKeysAsync(database, keys, cancellationToken).ConfigureAwait(false);
         }
     }
+
+    private static Expiration ToExpiration(TimeSpan? expiry)
+        => expiry.HasValue ? new Expiration(expiry.Value) : Expiration.Default;
 
     [PubSoft.Core.BoundedCost("key list is bounded by the caller-supplied batch")]
     private static async Task DeleteKeysAsync(IDatabase database, List<RedisKey> keys, CancellationToken cancellationToken)

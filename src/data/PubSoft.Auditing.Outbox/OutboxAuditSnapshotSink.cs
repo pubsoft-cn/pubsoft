@@ -6,7 +6,6 @@ using PubSoft.Messaging.Outbox;
 
 namespace PubSoft.Auditing.Outbox;
 
-public sealed record AuditSnapshotOutboxEvent(int SchemaVersion, AuditRequestSnapshot Snapshot);
 
 public sealed class OutboxAuditSnapshotSink<TDbContext>(
     TDbContext dbContext,
@@ -27,17 +26,5 @@ public sealed class OutboxAuditSnapshotSink<TDbContext>(
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-    }
-}
-
-public static class AuditOutboxServiceCollectionExtensions
-{
-    public static IServiceCollection AddPubSoftAuditOutbox<TDbContext>(this IServiceCollection services)
-        where TDbContext : PubSoftDbContext
-    {
-        ArgumentNullException.ThrowIfNull(services);
-        services.RemoveAll<IAuditSnapshotSink>();
-        services.AddScoped<IAuditSnapshotSink, OutboxAuditSnapshotSink<TDbContext>>();
-        return services;
     }
 }

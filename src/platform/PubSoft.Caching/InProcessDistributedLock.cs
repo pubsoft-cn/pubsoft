@@ -18,29 +18,6 @@ public sealed class InProcessDistributedLock : IDistributedLock, IDisposable
 {
     private static readonly TimeSpan PollSlice = TimeSpan.FromMilliseconds(50);
 
-    private sealed class LockEntry
-    {
-        public readonly object Sync = new();
-        public readonly SemaphoreSlim Semaphore = new(1, 1);
-        public long HolderToken;
-        public DateTimeOffset ExpiryUtc;
-        public int WaiterCount;
-        public bool Removed;
-    }
-
-    private sealed class Releaser(InProcessDistributedLock owner, LockEntry entry, long token) : IAsyncDisposable
-    {
-        private int _disposed;
-
-        public ValueTask DisposeAsync()
-        {
-            if (Interlocked.Exchange(ref _disposed, 1) == 0)
-                owner.Release(entry, token);
-
-            return ValueTask.CompletedTask;
-        }
-    }
-
     private readonly ConcurrentDictionary<string, LockEntry> _entries = new(StringComparer.Ordinal);
     /// <summary>新条目插入门闩——容量检查 + TryAdd 必须原子化，否则满载时可并发越过上限。</summary>
     private readonly object _entryGate = new();
@@ -190,6 +167,29 @@ public sealed class InProcessDistributedLock : IDistributedLock, IDisposable
 
             entry.HolderToken = 0;
             entry.Semaphore.Release();
+        }
+    }
+
+    private sealed class LockEntry
+    {
+        public readonly object Sync = new();
+        public readonly SemaphoreSlim Semaphore = new(1, 1);
+        public long HolderToken;
+        public DateTimeOffset ExpiryUtc;
+        public int WaiterCount;
+        public bool Removed;
+    }
+
+    private sealed class Releaser(InProcessDistributedLock owner, LockEntry entry, long token) : IAsyncDisposable
+    {
+        private int _disposed;
+
+        public ValueTask DisposeAsync()
+        {
+            if (Interlocked.Exchange(ref _disposed, 1) == 0)
+                owner.Release(entry, token);
+
+            return ValueTask.CompletedTask;
         }
     }
 }

@@ -4,6 +4,12 @@ namespace PubSoft.Events;
 
 public sealed class DomainEventBackgroundService(DomainEventDispatcher dispatcher) : BackgroundService
 {
+
+    public override Task StopAsync(CancellationToken cancellationToken)
+    {
+        dispatcher.CompleteWriter();
+        return base.StopAsync(cancellationToken);
+    }
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
@@ -14,11 +20,5 @@ public sealed class DomainEventBackgroundService(DomainEventDispatcher dispatche
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
         }
-    }
-
-    public override Task StopAsync(CancellationToken cancellationToken)
-    {
-        dispatcher.CompleteWriter();
-        return base.StopAsync(cancellationToken);
     }
 }

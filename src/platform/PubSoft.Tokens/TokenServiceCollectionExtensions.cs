@@ -62,6 +62,22 @@ public static class TokenServiceCollectionExtensions
         return services.AddPubSoftMachineTokens(options => BindMachineTokenOptions(section, options));
     }
 
+    public static IHttpClientBuilder AddTokenHandler(
+        this IHttpClientBuilder builder,
+        string credentialKey,
+        string? headerName = null,
+        string? headerPrefix = null)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        ArgumentException.ThrowIfNullOrWhiteSpace(credentialKey);
+        return builder.AddHttpMessageHandler(services => new TokenDelegatingHandler(
+            services.GetRequiredService<ITokenProvider>(),
+            services.GetRequiredService<Microsoft.Extensions.Options.IOptions<TokenHandlerOptions>>(),
+            credentialKey,
+            headerName,
+            headerPrefix));
+    }
+
     // Explicit reads keep this AOT-safe; the reflection-based configuration binder is not referenced.
     private static void BindMachineTokenOptions(IConfiguration section, MachineTokenOptions options)
     {
@@ -88,21 +104,5 @@ public static class TokenServiceCollectionExtensions
                 credential.Claims[claim.Key] = claim.Value ?? string.Empty;
             options.Credentials[credentialSection.Key] = credential;
         }
-    }
-
-    public static IHttpClientBuilder AddTokenHandler(
-        this IHttpClientBuilder builder,
-        string credentialKey,
-        string? headerName = null,
-        string? headerPrefix = null)
-    {
-        ArgumentNullException.ThrowIfNull(builder);
-        ArgumentException.ThrowIfNullOrWhiteSpace(credentialKey);
-        return builder.AddHttpMessageHandler(services => new TokenDelegatingHandler(
-            services.GetRequiredService<ITokenProvider>(),
-            services.GetRequiredService<Microsoft.Extensions.Options.IOptions<TokenHandlerOptions>>(),
-            credentialKey,
-            headerName,
-            headerPrefix));
     }
 }

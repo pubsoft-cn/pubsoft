@@ -10,60 +10,6 @@ using Microsoft.Extensions.Options;
 
 namespace PubSoft.AspNetCore;
 
-public sealed class GatewayRateLimitOptions
-{
-    public const string SectionName = "Gateway:RateLimit";
-    public bool Enabled { get; set; } = true;
-    public int PermitLimit { get; set; } = 200;
-    public int WindowSeconds { get; set; } = 60;
-    public int QueueLimit { get; set; }
-    public bool PerEndpoint { get; set; } = true;
-    public int LoginPermitLimit { get; set; } = 20;
-    public int LoginWindowSeconds { get; set; } = 60;
-    public string LoginPathPrefixes { get; set; } = "/api/auth/admin-login,/api/auth/refresh-token,/api/auth/revoke";
-    public int OAuthPermitLimit { get; set; } = 2000;
-    public int OAuthWindowSeconds { get; set; } = 60;
-    public int OAuthFailureLimit { get; set; } = 30;
-    public string OAuthPathPrefixes { get; set; } = "/api/auth/oauth/relay/exchange,/api/auth/oauth/relay/exchange-admin,/api/auth/oauth/relay/mini-program";
-    public int ValidatePermitLimit { get; set; } = 2000;
-    public int ValidateAnonymousPermitLimit { get; set; } = 10;
-    /// <summary>Aggregate per-IP ceiling for validate routes — applies to every request,
-    /// with or without a client identity, so forged client IDs cannot multiply the total.</summary>
-    public int ValidatePerIpPermitLimit { get; set; } = 1200;
-    public int ValidateWindowSeconds { get; set; } = 60;
-    public int ValidateFailureLimit { get; set; } = 50;
-    public string ValidatePathPrefixes { get; set; } = "/api/auth/validate";
-    /// <summary>Aggregate per-IP ceiling for OAuth routes — same anti-partitioning role as
-    /// <see cref="ValidatePerIpPermitLimit"/>.</summary>
-    public int OAuthPerIpPermitLimit { get; set; } = 600;
-    public int HealthPermitLimit { get; set; } = 60;
-    public int HealthWindowSeconds { get; set; } = 60;
-    public string HealthPathPrefixes { get; set; } = "/health";
-    public bool FailureRateLimitEnabled { get; set; } = true;
-    public int FailurePermitLimit { get; set; } = 50;
-    public int FailureWindowSeconds { get; set; } = 60;
-    public bool NotFoundRateLimitEnabled { get; set; } = true;
-    public int NotFoundPermitLimit { get; set; } = 50;
-    public int NotFoundWindowSeconds { get; set; } = 60;
-    /// <summary>Max distinct client identities one IP may claim inside
-    /// <see cref="ClientIdWindowSeconds"/>. Beyond the cap the request is bucketed by IP
-    /// alone — rotating X-Client-Id cannot keep minting fresh limiter partitions.</summary>
-    public int MaxClientIdsPerIp { get; set; } = 32;
-    public int ClientIdWindowSeconds { get; set; } = 300;
-    /// <summary>Upper bound on IPs tracked for client-ID cardinality. At capacity, unseen
-    /// IPs fall back to IP-only bucketing.</summary>
-    public int MaxTrackedIps { get; set; } = 10_000;
-    /// <summary>Trusted reverse-proxy socket peers (IPv4/IPv6). Combined with
-    /// <see cref="TrustedNetworks"/>: when either is non-empty, only listed peers may
-    /// supply forwarded headers. When both are empty every peer is trusted — safe only
-    /// when the backend socket is reachable exclusively through the edge gateway.
-    /// Invalid entries fail startup.</summary>
-    public string[] TrustedProxies { get; set; } = [];
-    /// <summary>Trusted proxy networks in CIDR notation ("172.16.0.0/12"). Invalid entries fail startup.</summary>
-    public string[] TrustedNetworks { get; set; } = [];
-    /// <summary>Max X-Forwarded-For entries consumed from the right. Null = process all entries.</summary>
-    public int? ForwardLimit { get; set; }
-}
 
 public static class GatewayRateLimitingExtensions
 {
@@ -186,6 +132,48 @@ public static class GatewayRateLimitingExtensions
         return app;
     }
 
+    internal static string Path(HttpContext context) => context.Request.Path.Value ?? "/";
+
+    internal static string Ip(HttpContext context)
+    {
+        var ip = IpNormalizer.GetRemoteIp(context);
+        return string.IsNullOrEmpty(ip) ? "unknown" : ip;
+    }
+
+    internal static string Identity(HttpContext context, ClientIdCardinalityGuard guard)
+        => TrustedClientId(context, guard) is { } c ? $"{c}@{Ip(context)}" : Ip(context);
+
+    internal static string? ClientId(HttpContext context)
+    {
+        var clientId = context.Request.Headers["X-Client-Id"].FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(clientId))
+            return clientId.Trim();
+
+        var authHeader = context.Request.Headers.Authorization.FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(authHeader) && authHeader.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                var encoded = authHeader["Basic ".Length..].Trim();
+                var decoded = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(encoded));
+                var parts = decoded.Split(':', 2);
+                if (parts.Length > 0 && !string.IsNullOrWhiteSpace(parts[0]))
+                    return parts[0].Trim();
+            }
+            catch { }
+        }
+
+        return null;
+    }
+
+    internal static string EndpointGroup(string path)
+    {
+        var segs = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        return segs.Length >= 3 ? $"{segs[1]}/{segs[2]}"
+            : segs.Length == 2 ? segs[1]
+            : "root";
+    }
+
     private static void Add(
         IServiceCollection services, string name, int limit, int windowSec,
         Func<HttpContext, bool> appliesTo, Func<HttpContext, string> identifier)
@@ -215,45 +203,11 @@ public static class GatewayRateLimitingExtensions
             o.IdentifierSelector = ctx => $"{Identity(ctx, guard)}:{EndpointGroup(Path(ctx))}";
         });
 
-    internal static string Path(HttpContext context) => context.Request.Path.Value ?? "/";
-
-    internal static string Ip(HttpContext context)
-    {
-        var ip = IpNormalizer.GetRemoteIp(context);
-        return string.IsNullOrEmpty(ip) ? "unknown" : ip;
-    }
-
-    internal static string Identity(HttpContext context, ClientIdCardinalityGuard guard)
-        => TrustedClientId(context, guard) is { } c ? $"{c}@{Ip(context)}" : Ip(context);
-
     private static string? TrustedClientId(HttpContext context, ClientIdCardinalityGuard guard)
         => ClientId(context) is { } c && guard.Admit(Ip(context), c) ? c : null;
 
     private static bool IsApi(HttpContext context)
         => Path(context).StartsWith("/api/", StringComparison.OrdinalIgnoreCase);
-
-    internal static string? ClientId(HttpContext context)
-    {
-        var clientId = context.Request.Headers["X-Client-Id"].FirstOrDefault();
-        if (!string.IsNullOrWhiteSpace(clientId))
-            return clientId.Trim();
-
-        var authHeader = context.Request.Headers.Authorization.FirstOrDefault();
-        if (!string.IsNullOrWhiteSpace(authHeader) && authHeader.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
-        {
-            try
-            {
-                var encoded = authHeader["Basic ".Length..].Trim();
-                var decoded = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(encoded));
-                var parts = decoded.Split(':', 2);
-                if (parts.Length > 0 && !string.IsNullOrWhiteSpace(parts[0]))
-                    return parts[0].Trim();
-            }
-            catch { }
-        }
-
-        return null;
-    }
 
     private static List<string> SplitPrefixes(string? csv)
         => csv?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
@@ -261,14 +215,6 @@ public static class GatewayRateLimitingExtensions
 
     private static bool MatchesPrefix(string path, List<string> prefixes)
         => prefixes.Count > 0 && prefixes.Any(p => path.StartsWith(p, StringComparison.OrdinalIgnoreCase));
-
-    internal static string EndpointGroup(string path)
-    {
-        var segs = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
-        return segs.Length >= 3 ? $"{segs[1]}/{segs[2]}"
-            : segs.Length == 2 ? segs[1]
-            : "root";
-    }
 
     private static List<IPAddress> ParseAddresses(string[] entries, string optionName)
     {
@@ -297,69 +243,5 @@ public static class GatewayRateLimitingExtensions
             result.Add(new System.Net.IPNetwork(prefix, prefixLength));
         }
         return result;
-    }
-}
-
-/// <summary>
-/// Bounds how many distinct client identities a single remote IP may claim within a
-/// window. Client-ID headers are unauthenticated input — without this bound a caller
-/// could mint a fresh rate-limit partition per forged value. Over-cap identities are
-/// refused so the request falls back to IP-only bucketing.
-/// </summary>
-internal sealed class ClientIdCardinalityGuard
-{
-    private sealed class IpWindow
-    {
-        public DateTimeOffset Start;
-        public HashSet<string> ClientIds = new(StringComparer.Ordinal);
-    }
-
-    private readonly int _maxClientIdsPerIp;
-    private readonly int _maxIps;
-    private readonly TimeSpan _window;
-    private readonly TimeProvider _timeProvider = TimeProvider.System;
-    private readonly ConcurrentDictionary<string, IpWindow> _windows = new(StringComparer.Ordinal);
-
-    public ClientIdCardinalityGuard(
-        int maxClientIdsPerIp, int maxIps, TimeSpan window, TimeProvider? timeProvider = null)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxClientIdsPerIp);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxIps);
-        if (window <= TimeSpan.Zero)
-            throw new ArgumentOutOfRangeException(nameof(window));
-        _maxClientIdsPerIp = maxClientIdsPerIp;
-        _maxIps = maxIps;
-        _window = window;
-        _timeProvider = timeProvider ?? TimeProvider.System;
-    }
-
-    /// <summary>Returns whether the IP may still claim this client identity this window.
-    /// Already-seen identities always pass; new identities beyond the cap are refused.</summary>
-    public bool Admit(string ip, string clientId)
-    {
-        var now = _timeProvider.GetUtcNow();
-        if (!_windows.TryGetValue(ip, out var window))
-        {
-            // Soft bound: at capacity a racy extra entry is acceptable; the map is
-            // still bounded to roughly _maxIps + concurrency.
-            if (_windows.Count >= _maxIps)
-                return false;
-            window = _windows.GetOrAdd(ip, _ => new IpWindow { Start = now });
-        }
-
-        lock (window)
-        {
-            if (now - window.Start >= _window)
-            {
-                window.Start = now;
-                window.ClientIds.Clear();
-            }
-            if (window.ClientIds.Contains(clientId))
-                return true;
-            if (window.ClientIds.Count >= _maxClientIdsPerIp)
-                return false;
-            window.ClientIds.Add(clientId);
-            return true;
-        }
     }
 }

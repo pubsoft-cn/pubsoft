@@ -5,17 +5,17 @@ namespace PubSoft.Core;
 /// </summary>
 public readonly struct Money : IEquatable<Money>, IComparable<Money>, IComparable
 {
-    public long Fen { get; }
 
     public Money(long fen) => Fen = fen;
-
-    public static Money FromYuan(decimal yuan) => new((long)Math.Round(yuan * 100m, MidpointRounding.AwayFromZero));
-    public static Money FromFen(long fen) => new(fen);
-    public decimal ToYuan() => Fen / 100m;
+    public long Fen { get; }
     public static Money Zero => new(0);
     public bool IsZero => Fen == 0;
     public bool IsPositive => Fen > 0;
     public bool IsNegative => Fen < 0;
+
+    public static Money FromYuan(decimal yuan) => new((long)Math.Round(yuan * 100m, MidpointRounding.AwayFromZero));
+    public static Money FromFen(long fen) => new(fen);
+    public decimal ToYuan() => Fen / 100m;
 
     public static Money operator +(Money a, Money b) => new(checked(a.Fen + b.Fen));
     public static Money operator -(Money a, Money b) => new(checked(a.Fen - b.Fen));

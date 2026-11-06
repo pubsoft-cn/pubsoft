@@ -1,9 +1,9 @@
 using System.Net;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using PubSoft.AspNetCore;
 using PubSoft.Authentication.Jwt.AspNetCore;
 using PubSoft.Tokens;

@@ -7,9 +7,3 @@ public enum ProbeHealth
     Unreachable,
     Degraded,
 }
-
-/// <summary>Checks whether the configured probe targets are reachable.</summary>
-public interface IProbeHealthCheck
-{
-    Task<ProbeHealth> CheckAsync(CancellationToken cancellationToken = default);
-}

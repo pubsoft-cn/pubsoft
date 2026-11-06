@@ -2,23 +2,6 @@ using System.Collections.Concurrent;
 
 namespace PubSoft.Security;
 
-public sealed class RateLimiterOptions
-{
-    public int RequestsPerWindow { get; set; } = 100;
-    public TimeSpan WindowSize { get; set; } = TimeSpan.FromMinutes(1);
-    public bool Enabled { get; set; } = true;
-    public bool LimitByIpAddress { get; set; } = true;
-    public bool LimitByUserId { get; set; }
-    public int MaxIdentifiers { get; set; } = 100_000;
-}
-
-public sealed class RateLimitResult
-{
-    public bool IsAllowed { get; init; }
-    public int RemainingRequests { get; init; }
-    public DateTime ResetTime { get; init; }
-    public string? RejectionReason { get; init; }
-}
 
 /// <summary>A bounded, process-local fixed-window limiter with atomic per-identifier accounting.</summary>
 /// <remarks>This limiter is not distributed and must not be used as a cluster-wide quota.</remarks>

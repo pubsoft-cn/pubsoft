@@ -1,0 +1,17 @@
+using System.Net.Http.Headers;
+using System.Text.Json;
+using Microsoft.Extensions.Logging;
+
+namespace PubSoft.OAuth;
+
+
+/// <summary>Toutiao OAuth — website-app QR login.</summary>
+public sealed class ToutiaoOAuthProvider : GenericOAuthProvider
+{
+    public ToutiaoOAuthProvider(IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<ToutiaoOAuthProvider>? l = null) : base(cp, hc, l) { }
+    public override string Provider => OAuthProviderNames.Toutiao;
+    protected override string AuthorizeEndpoint => "https://open.snssdk.com/auth/authorize";
+    protected override string TokenEndpoint => "https://open.snssdk.com/auth/access_token";
+    protected override string UserInfoEndpoint => "https://open.snssdk.com/auth/userinfo";
+    protected override string DefaultScope => "user_info";
+}

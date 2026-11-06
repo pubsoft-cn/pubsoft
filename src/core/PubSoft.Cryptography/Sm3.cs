@@ -21,20 +21,6 @@ public static class Sm3
         0xA96F30BC, 0x163138AA, 0xE38DEE4D, 0xB0FB0E4E,
     ];
 
-    private static uint T(int j) => j < 16 ? 0x79CC4519u : 0x7A879D8Au;
-
-    private static uint FF(uint x, uint y, uint z, int j)
-        => j < 16 ? x ^ y ^ z : (x & y) | (x & z) | (y & z);
-
-    private static uint GG(uint x, uint y, uint z, int j)
-        => j < 16 ? x ^ y ^ z : (x & y) | (~x & z);
-
-    private static uint P0(uint x) => x ^ Rotl(x, 9) ^ Rotl(x, 17);
-
-    private static uint P1(uint x) => x ^ Rotl(x, 15) ^ Rotl(x, 23);
-
-    private static uint Rotl(uint x, int n) => (x << n) | (x >> (32 - n));
-
     /// <summary>计算 SM3 摘要，返回 32 字节。</summary>
     public static byte[] Hash(ReadOnlySpan<byte> data)
     {
@@ -89,6 +75,20 @@ public static class Sm3
     /// <summary>计算 HMAC-SM3，返回小写 hex。</summary>
     public static string HmacHex(ReadOnlySpan<byte> key, ReadOnlySpan<byte> data)
         => ToLowerHex(Hmac(key, data));
+
+    private static uint T(int j) => j < 16 ? 0x79CC4519u : 0x7A879D8Au;
+
+    private static uint FF(uint x, uint y, uint z, int j)
+        => j < 16 ? x ^ y ^ z : (x & y) | (x & z) | (y & z);
+
+    private static uint GG(uint x, uint y, uint z, int j)
+        => j < 16 ? x ^ y ^ z : (x & y) | (~x & z);
+
+    private static uint P0(uint x) => x ^ Rotl(x, 9) ^ Rotl(x, 17);
+
+    private static uint P1(uint x) => x ^ Rotl(x, 15) ^ Rotl(x, 23);
+
+    private static uint Rotl(uint x, int n) => (x << n) | (x >> (32 - n));
 
     /// <summary>Merkle–Damgård 主循环：填充 → 分块压缩，就地更新 state。</summary>
     private static void HashCore(uint[] state, ReadOnlySpan<byte> data)

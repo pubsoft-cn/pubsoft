@@ -46,6 +46,39 @@ public abstract class AsyncBackbone<T> : IAsyncDisposable
             : PublishWhenAvailableAsync(item, cancellationToken);
     }
 
+    public async ValueTask DrainAsync(TimeSpan timeout)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(timeout, TimeSpan.Zero);
+        Interlocked.Exchange(ref _draining, 1);
+        _channel.Writer.TryComplete();
+
+        try
+        {
+            await _consumerTask.WaitAsync(timeout).ConfigureAwait(false);
+        }
+        catch (TimeoutException)
+        {
+            _cancellation.Cancel();
+            await _consumerTask.ConfigureAwait(false);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+            return;
+
+        await DrainAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+        _cancellation.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
+    protected abstract ValueTask ProcessBatchAsync(ReadOnlyMemory<T> batch, CancellationToken cancellationToken);
+
+    protected virtual void OnProcessingError(Exception exception, int batchCount)
+    {
+    }
+
     private async ValueTask PublishWhenAvailableAsync(T item, CancellationToken cancellationToken)
     {
         while (await _channel.Writer.WaitToWriteAsync(cancellationToken).ConfigureAwait(false))
@@ -94,38 +127,5 @@ public abstract class AsyncBackbone<T> : IAsyncDisposable
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
         }
-    }
-
-    protected abstract ValueTask ProcessBatchAsync(ReadOnlyMemory<T> batch, CancellationToken cancellationToken);
-
-    protected virtual void OnProcessingError(Exception exception, int batchCount)
-    {
-    }
-
-    public async ValueTask DrainAsync(TimeSpan timeout)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(timeout, TimeSpan.Zero);
-        Interlocked.Exchange(ref _draining, 1);
-        _channel.Writer.TryComplete();
-
-        try
-        {
-            await _consumerTask.WaitAsync(timeout).ConfigureAwait(false);
-        }
-        catch (TimeoutException)
-        {
-            _cancellation.Cancel();
-            await _consumerTask.ConfigureAwait(false);
-        }
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
-            return;
-
-        await DrainAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
-        _cancellation.Dispose();
-        GC.SuppressFinalize(this);
     }
 }

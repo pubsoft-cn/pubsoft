@@ -12,6 +12,8 @@ namespace PubSoft.AspNetCore.Docs;
 /// <summary>Registration and endpoint mapping for the PubSoft API docs catalog.</summary>
 public static class ApiDocsExtensions
 {
+
+    private static string? _page;
     /// <summary>Register the catalog service. Call <see cref="MapPubSoftApiDocs"/> to expose it.</summary>
     public static IServiceCollection AddPubSoftApiDocs(
         this IServiceCollection services, Action<ApiDocsOptions>? configure = null)
@@ -58,8 +60,6 @@ public static class ApiDocsExtensions
         }
         return app;
     }
-
-    private static string? _page;
 
     private static string LoadPage()
     {

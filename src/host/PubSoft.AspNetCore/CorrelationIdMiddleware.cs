@@ -4,31 +4,6 @@ using Microsoft.Extensions.Primitives;
 
 namespace PubSoft.AspNetCore;
 
-/// <summary>
-/// Cross-service correlation — accepts W3C <c>traceparent</c> or a custom
-/// correlation header; assigns <see cref="HttpContext.TraceIdentifier"/>,
-/// echoes the id on the response, and exposes it for outbound propagation.
-/// <para>
-/// Design: upstream (edge gateway/reverse proxy) generates a trace id when the
-/// client sends none; this middleware adopts it so every hop logs under the same
-/// key. Outbound HTTP calls can re-emit <see cref="CorrelationIdMiddleware.CurrentId(HttpContext)"/>
-/// as <c>traceparent</c>/<c>X-Correlation-Id</c> to keep the chain intact.
-/// </para>
-/// </summary>
-public sealed class CorrelationIdOptions
-{
-    /// <summary>Response header carrying the resolved id. Default <c>X-Correlation-Id</c>.</summary>
-    public string ResponseHeaderName { get; set; } = "X-Correlation-Id";
-
-    /// <summary>Additional accepted inbound header names (checked after traceparent).</summary>
-    public string[] InboundHeaderNames { get; set; } = ["X-Correlation-Id", "X-Request-Id"];
-
-    /// <summary>Echo the id on the response header. Default true.</summary>
-    public bool EchoResponseHeader { get; set; } = true;
-
-    /// <summary>Enabled switch — default true.</summary>
-    public bool Enabled { get; set; } = true;
-}
 
 public sealed class CorrelationIdMiddleware
 {
@@ -101,58 +76,5 @@ public sealed class CorrelationIdMiddleware
             if (!Uri.IsHexDigit(c)) return false;
         traceId = seg.ToString().ToLowerInvariant();
         return true;
-    }
-}
-
-public static class CorrelationIdMiddlewareExtensions
-{
-    /// <summary>Register correlation-id adoption + echo — place before any
-    /// middleware/logging that should share the id.</summary>
-    public static IApplicationBuilder UsePubSoftCorrelationId(
-        this IApplicationBuilder app, CorrelationIdOptions? options = null)
-        => app.UseMiddleware<CorrelationIdMiddleware>(options);
-}
-
-/// <summary>Ambient correlation state — AsyncLocal flows to outbound async calls
-/// without IHttpContextAccessor registration. Middleware sets; handler reads.</summary>
-public static class CorrelationAmbient
-{
-    private static readonly System.Threading.AsyncLocal<(string TraceId, string SpanId)?> _current = new();
-
-    /// <summary>Current (traceId, spanId) pair — null outside a request scope.</summary>
-    public static (string TraceId, string SpanId)? Current
-    {
-        get => _current.Value;
-        internal set => _current.Value = value;
-    }
-
-    /// <summary>Shared g53 snowflake generator — worker id derived from machine name hash,
-    /// collision-free across processes on one host.</summary>
-    private static readonly PubSoft.Core.SnowflakeIdGenerator _gen = new(
-        Math.Abs(StringComparer.Ordinal.GetHashCode(Environment.MachineName)) % (PubSoft.Core.SnowflakeIdGenerator.MaxWorkerId + 1));
-
-    /// <summary>New span id — g53 snowflake → 16-hex (W3C spanId slot).</summary>
-    public static string NewSpanId() => _gen.NextId().ToString("x16", System.Globalization.CultureInfo.InvariantCulture);
-}
-
-/// <summary>Outbound propagation handler — stamps the ambient trace onto outbound
-/// requests so the next hop sees the same trace-id (parent = this service's span).
-/// <para>Usage: <c>services.AddHttpClient("x").AddHttpMessageHandler&lt;CorrelationPropagationHandler&gt;()</c></para></summary>
-public sealed class CorrelationPropagationHandler : DelegatingHandler
-{
-    /// <summary>Also emit the resolved id under this header (default <c>X-Correlation-Id</c>);
-    /// set null to emit traceparent only.</summary>
-    public string? CorrelationHeaderName { get; set; } = "X-Correlation-Id";
-
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-    {
-        if (CorrelationAmbient.Current is { } cur)
-        {
-            // 下游视本服务 spanId 为父 — DAG 连续边
-            request.Headers.TryAddWithoutValidation("traceparent", $"00-{cur.TraceId}-{cur.SpanId}-01");
-            if (CorrelationHeaderName is { } h)
-                request.Headers.TryAddWithoutValidation(h, cur.TraceId);
-        }
-        return base.SendAsync(request, cancellationToken);
     }
 }
