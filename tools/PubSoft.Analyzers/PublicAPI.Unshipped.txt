@@ -57,3 +57,15 @@ const PubSoft.Analyzers.PerfDisciplineWave2Analyzer.TryGetValueId = "PUBSOFT012"
 PubSoft.Analyzers.PerfDisciplineWave2Analyzer.Rules -> Microsoft.CodeAnalysis.DiagnosticDescriptor[]!
 override PubSoft.Analyzers.PerfDisciplineWave2Analyzer.Initialize(Microsoft.CodeAnalysis.Diagnostics.AnalysisContext! context) -> void
 override PubSoft.Analyzers.PerfDisciplineWave2Analyzer.SupportedDiagnostics.get -> System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.DiagnosticDescriptor!>
+PubSoft.Analyzers.LayoutDisciplineAnalyzer
+PubSoft.Analyzers.LayoutDisciplineAnalyzer.LayoutDisciplineAnalyzer() -> void
+const PubSoft.Analyzers.LayoutDisciplineAnalyzer.AccessOrderId = "PUBSOFT032" -> string!
+const PubSoft.Analyzers.LayoutDisciplineAnalyzer.ConstStaticId = "PUBSOFT034" -> string!
+const PubSoft.Analyzers.LayoutDisciplineAnalyzer.ExplicitAccessId = "PUBSOFT033" -> string!
+const PubSoft.Analyzers.LayoutDisciplineAnalyzer.FilePerTypeId = "PUBSOFT035" -> string!
+const PubSoft.Analyzers.LayoutDisciplineAnalyzer.MemberOrderId = "PUBSOFT031" -> string!
+const PubSoft.Analyzers.LayoutDisciplineAnalyzer.MinimizeId = "PUBSOFT036" -> string!
+const PubSoft.Analyzers.LayoutDisciplineAnalyzer.UsingsOrderId = "PUBSOFT030" -> string!
+PubSoft.Analyzers.LayoutDisciplineAnalyzer.Rules -> Microsoft.CodeAnalysis.DiagnosticDescriptor[]!
+override PubSoft.Analyzers.LayoutDisciplineAnalyzer.Initialize(Microsoft.CodeAnalysis.Diagnostics.AnalysisContext! context) -> void
+override PubSoft.Analyzers.LayoutDisciplineAnalyzer.SupportedDiagnostics.get -> System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.DiagnosticDescriptor!>
