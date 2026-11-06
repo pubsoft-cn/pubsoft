@@ -8,6 +8,7 @@ using PubSoft.Messaging.Outbox;
 namespace PubSoft.Messaging.Mqtt;
 
 
+/// <summary>MQTT outbox dispatcher registration.</summary>
 public static class MqttOutboxServiceCollectionExtensions
 {
     /// <summary>Registers the MQTT outbox dispatcher as the IOutboxDispatcher implementation.</summary>

@@ -20,6 +20,7 @@ public sealed class MqttOutboxDispatcher : IOutboxDispatcher, IAsyncDisposable
     private readonly SemaphoreSlim _connectGate = new(1, 1);
     private volatile bool _connected;
 
+    /// <summary>Creates the dispatcher.</summary>
     public MqttOutboxDispatcher(MqttOutboxOptions options)
     {
         _options = (options ?? throw new ArgumentNullException(nameof(options))).CloneAndValidate();
@@ -28,6 +29,7 @@ public sealed class MqttOutboxDispatcher : IOutboxDispatcher, IAsyncDisposable
 
     internal IMqttClient Client => _client; // test seam
 
+    /// <inheritdoc />
     public async Task DispatchAsync(OutboxMessage message, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(message);
@@ -44,7 +46,7 @@ public sealed class MqttOutboxDispatcher : IOutboxDispatcher, IAsyncDisposable
             .WithQualityOfServiceLevel((MqttQualityOfServiceLevel)_options.QualityOfService)
             .Build();
         // dedup identity rides as MQTT5 user property - consumers key InboxReceipt on it
-        mqtt.UserProperties = [new MqttUserProperty(MqttInboxHeaders.OutboxMessageId, message.Id.ToString("N"))];
+        mqtt.UserProperties = [new MqttUserProperty(MqttInboxHeaders.OutboxMessageId, message.Id.ToString(System.Globalization.CultureInfo.InvariantCulture))];
         if (message.AggregateKey is { } agg)
             mqtt.UserProperties.Add(new MqttUserProperty(MqttInboxHeaders.OutboxAggregateKey, agg));
 
@@ -55,6 +57,7 @@ public sealed class MqttOutboxDispatcher : IOutboxDispatcher, IAsyncDisposable
             throw new InvalidOperationException($"MQTT publish failed for outbox message {message.Id}: {result.ReasonString ?? result.ReasonCode.ToString()}"); // pubsoft:exempt PUBSOFT027 "enum name render on non-hot path (doc-gen/startup/log line)"
     }
 
+    /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
         if (_client.IsConnected)

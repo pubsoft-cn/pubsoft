@@ -7,13 +7,16 @@ using PubSoft.Messaging.Outbox;
 namespace PubSoft.Auditing.Outbox;
 
 
+/// <summary><see cref="IAuditSnapshotSink"/> that publishes snapshots as outbox events.</summary>
 public sealed class OutboxAuditSnapshotSink<TDbContext>(
     TDbContext dbContext,
     IOutboxPublisher outboxPublisher) : IAuditSnapshotSink
     where TDbContext : PubSoftDbContext
 {
+    /// <summary>Outbox target module name.</summary>
     public const string TargetModule = "PubSoft.Auditing";
 
+    /// <inheritdoc />
     public async ValueTask WriteAsync(
         AuditRequestSnapshot snapshot,
         CancellationToken cancellationToken = default)

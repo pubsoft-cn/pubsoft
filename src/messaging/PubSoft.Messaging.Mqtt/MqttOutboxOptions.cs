@@ -14,7 +14,9 @@ public sealed class MqttOutboxOptions
     public string BrokerUri { get; set; } = "mqtt://localhost:1883";
     /// <summary>MQTT client identifier.</summary>
     public string ClientId { get; set; } = "pubsoft-outbox";
+    /// <summary>Broker username.</summary>
     public string? Username { get; set; }
+    /// <summary>Broker password.</summary>
     public string? Password { get; set; }
     /// <summary>Topic prefix -- events publish to {TopicPrefix}{EventType}.</summary>
     public string TopicPrefix { get; set; } = "outbox/";

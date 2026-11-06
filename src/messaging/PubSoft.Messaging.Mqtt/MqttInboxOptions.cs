@@ -14,7 +14,9 @@ public sealed class MqttInboxOptions
     public string BrokerUri { get; set; } = "mqtt://localhost:1883";
     /// <summary>MQTT client identifier -- must be unique per instance.</summary>
     public string ClientId { get; set; } = "pubsoft-inbox";
+    /// <summary>Broker username.</summary>
     public string? Username { get; set; }
+    /// <summary>Broker password.</summary>
     public string? Password { get; set; }
     /// <summary>Topic filter, e.g. "ext/outbox/#".</summary>
     public string TopicFilter { get; set; } = "outbox/#";
