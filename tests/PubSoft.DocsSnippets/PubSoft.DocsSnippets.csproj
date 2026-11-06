@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/core/PubSoft.Core/PubSoft.Core.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.DependencyInjection/PubSoft.DependencyInjection.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Domain/PubSoft.Domain.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Cryptography/PubSoft.Cryptography.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Identity/PubSoft.Identity.csproj" />
+    <ProjectReference Include="../../src/data/PubSoft.EntityFrameworkCore/PubSoft.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="../../src/data/PubSoft.Auditing/PubSoft.Auditing.csproj" />
+    <ProjectReference Include="../../src/messaging/PubSoft.Messaging.Outbox/PubSoft.Messaging.Outbox.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Scheduling/PubSoft.Scheduling.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Caching.Redis/PubSoft.Caching.Redis.csproj" />
+    <ProjectReference Include="../../src/security/PubSoft.Authentication.Jwt/PubSoft.Authentication.Jwt.csproj" />
+    <ProjectReference Include="../../src/host/PubSoft.AspNetCore/PubSoft.AspNetCore.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+  </ItemGroup>
+</Project>

@@ -35,8 +35,9 @@ Every doc carries front-matter: `purpose / audience / owner / last-reviewed`.
 ## Code examples must be trustworthy
 
 README code blocks are claims, not decorations — they must match the shipped
-public API. Direction (adopted from Microsoft Learn): a `tests/PubSoft.DocsSnippets`
-project that compiles the exact snippets READMEs quote — planned next node; until
+public API. Direction (adopted from Microsoft Learn): `tests/PubSoft.DocsSnippets`
+compiles the exact snippets READMEs quote (project-referenced, so API drift breaks the
+build); until
 it lands, reviewers verify examples against `PublicAPI.Unshipped.txt` by hand.
 
 

@@ -32,7 +32,7 @@ last-reviewed: 2026-11-05
 ## 示例代码必须可信
 
 README 代码块是承诺不是装饰——必须与发布的公共 API 一致。方向（取自 Microsoft Learn）：
-建 `tests/PubSoft.DocsSnippets` 项目把 README 示例改成可编译引用——计划下个节点落地；
+`tests/PubSoft.DocsSnippets` 已落地——项目引用编译 README 示例（API 漂移即断构建）；
 落地前评审以 `PublicAPI.Unshipped.txt` 逐块人工核对。
 
 
