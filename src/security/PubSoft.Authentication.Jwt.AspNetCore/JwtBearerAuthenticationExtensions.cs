@@ -24,6 +24,7 @@ public static class JwtBearerAuthenticationExtensions
         var options = new PubSoftJwtBearerOptions();
         configure(options);
         ValidateCommonOptions(options);
+        builder.Services.AddSingleton<PubSoft.Monitoring.IStartupDiagnostics>(new JwtPostureStartupDiagnostics(options));
         var useRemoteMetadata = !string.IsNullOrWhiteSpace(options.MetadataAddress);
         var useStaticJwks = !string.IsNullOrWhiteSpace(options.JwksJson);
         var useSymmetricKey = options.SymmetricKey is { Length: > 0 };

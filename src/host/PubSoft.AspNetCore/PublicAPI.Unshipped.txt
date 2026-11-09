@@ -1,4 +1,5 @@
 #nullable enable
+const PubSoft.AspNetCore.StartupDiagnosticsRouteBuilderExtensions.DefaultPath = "/startup-diagnostics" -> string!
 PubSoft.AspNetCore.AuditMiddleware
 PubSoft.AspNetCore.AuditMiddleware.AuditMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, PubSoft.AspNetCore.AuditMiddlewareOptions? options = null, System.TimeProvider? timeProvider = null) -> void
 PubSoft.AspNetCore.AuditMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
@@ -243,6 +244,9 @@ PubSoft.AspNetCore.HttpContextTenantOptions.ReadHeader.set -> void
 PubSoft.AspNetCore.IAppSecretResolver
 PubSoft.AspNetCore.IAppSecretResolver.ResolveSecretAsync(string! appId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<string?>
 PubSoft.AspNetCore.IpNormalizer
+PubSoft.AspNetCore.NonceStoreStartupDiagnostics
+PubSoft.AspNetCore.NonceStoreStartupDiagnostics.Collect() -> System.Collections.Generic.IEnumerable<PubSoft.Monitoring.StartupDiagnosticsEntry>!
+PubSoft.AspNetCore.NonceStoreStartupDiagnostics.NonceStoreStartupDiagnostics(System.IServiceProvider! services) -> void
 PubSoft.AspNetCore.ProxyDeploymentDiagnostics
 PubSoft.AspNetCore.PubSoftApplicationService
 PubSoft.AspNetCore.PubSoftApplicationService.Logger.get -> Microsoft.Extensions.Logging.ILogger!
@@ -339,6 +343,7 @@ PubSoft.AspNetCore.SecurityHeadersOptions.XContentTypeOptions.set -> void
 PubSoft.AspNetCore.SecurityHeadersOptions.XFrameOptions.get -> string!
 PubSoft.AspNetCore.SecurityHeadersOptions.XFrameOptions.set -> void
 PubSoft.AspNetCore.ServiceDefaultsExtensions
+PubSoft.AspNetCore.StartupDiagnosticsRouteBuilderExtensions
 PubSoft.AspNetCore.TenantContextServiceCollectionExtensions
 PubSoft.AspNetCore.WebModuleContext
 PubSoft.AspNetCore.WebModuleContext.App.get -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
@@ -396,5 +401,6 @@ static PubSoft.AspNetCore.SecurityHeadersMiddlewareExtensions.UsePubSoftSecurity
 static PubSoft.AspNetCore.ServiceDefaultsExtensions.AddPubSoftServiceDefaults(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! configuration) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.ServiceDefaultsExtensions.UsePubSoftServiceDefaults(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
 static PubSoft.AspNetCore.ServiceDefaultsExtensions.UsePubSoftServiceDefaults(this Microsoft.AspNetCore.Builder.WebApplication! app) -> Microsoft.AspNetCore.Builder.WebApplication!
+static PubSoft.AspNetCore.StartupDiagnosticsRouteBuilderExtensions.MapPubSoftStartupDiagnostics(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder! endpoints, string! pattern = "/startup-diagnostics") -> Microsoft.AspNetCore.Builder.IEndpointConventionBuilder!
 static PubSoft.AspNetCore.TenantContextServiceCollectionExtensions.AddPubSoftTenantContext(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.AspNetCore.HttpContextTenantOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.WebModuleContextExtensions.GetAppBuilder(this PubSoft.Modularity.ModuleContext! context) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!

@@ -36,6 +36,7 @@ public static class HmacValidationServiceCollectionExtensions
             return new HmacSignatureValidator(sp.GetRequiredService<INonceStore>(), options);
         });
         services.Configure(configure ?? (_ => { }));
+        services.AddSingleton<PubSoft.Monitoring.IStartupDiagnostics, NonceStoreStartupDiagnostics>();
         return services;
     }
 

@@ -79,6 +79,10 @@ PubSoft.Monitoring.StartupDiagnosticsEntry.StartupDiagnosticsEntry() -> void
 PubSoft.Monitoring.StartupDiagnosticsEntry.StartupDiagnosticsEntry(string! Area, PubSoft.Monitoring.StartupDiagnosticsStatus Status, string! Detail) -> void
 PubSoft.Monitoring.StartupDiagnosticsEntry.Status.get -> PubSoft.Monitoring.StartupDiagnosticsStatus
 PubSoft.Monitoring.StartupDiagnosticsEntry.Status.init -> void
+PubSoft.Monitoring.StartupDiagnosticsHostedService
+PubSoft.Monitoring.StartupDiagnosticsHostedService.StartAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+PubSoft.Monitoring.StartupDiagnosticsHostedService.StartupDiagnosticsHostedService(PubSoft.Monitoring.StartupDiagnosticsCollector! collector, Microsoft.Extensions.Logging.ILogger<PubSoft.Monitoring.StartupDiagnosticsHostedService!>! logger) -> void
+PubSoft.Monitoring.StartupDiagnosticsHostedService.StopAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 PubSoft.Monitoring.StartupDiagnosticsServiceCollectionExtensions
 PubSoft.Monitoring.StartupDiagnosticsStatus
 PubSoft.Monitoring.StartupDiagnosticsStatus.Error = 2 -> PubSoft.Monitoring.StartupDiagnosticsStatus
@@ -98,6 +102,7 @@ static PubSoft.Monitoring.MonitoringServiceCollectionExtensions.AddPubSoftParall
 static PubSoft.Monitoring.StartupDiagnosticsEntry.operator !=(PubSoft.Monitoring.StartupDiagnosticsEntry left, PubSoft.Monitoring.StartupDiagnosticsEntry right) -> bool
 static PubSoft.Monitoring.StartupDiagnosticsEntry.operator ==(PubSoft.Monitoring.StartupDiagnosticsEntry left, PubSoft.Monitoring.StartupDiagnosticsEntry right) -> bool
 static PubSoft.Monitoring.StartupDiagnosticsServiceCollectionExtensions.AddPubSoftStartupDiagnostics<T>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Monitoring.StartupDiagnosticsServiceCollectionExtensions.AddPubSoftStartupDiagnosticsHostedService(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 ~override PubSoft.Monitoring.AppHealthCheckResult.Equals(object obj) -> bool
 ~override PubSoft.Monitoring.AppHealthCheckResult.ToString() -> string
 ~override PubSoft.Monitoring.StartupDiagnosticsEntry.Equals(object obj) -> bool

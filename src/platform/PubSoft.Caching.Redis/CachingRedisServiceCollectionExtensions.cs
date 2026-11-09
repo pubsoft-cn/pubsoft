@@ -19,7 +19,9 @@ public static class CachingRedisServiceCollectionExtensions
 
         var options = new RedisCacheOptions();
         configure?.Invoke(options);
+        services.TryAddSingleton(connection);
         services.Replace(ServiceDescriptor.Singleton<ICache>(new RedisCache(connection, options)));
+        services.AddSingleton<PubSoft.Monitoring.IStartupDiagnostics, RedisConnectionStartupDiagnostics>();
         return services;
     }
 }

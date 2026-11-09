@@ -81,6 +81,7 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 | `AddPubSoftMonitoringMetrics` |
 | `AddPubSoftParallelHealthChecks` |
 | `AddPubSoftStartupDiagnostics` |
+| `AddPubSoftStartupDiagnosticsHostedService` |
 
 **(options & records)**
 

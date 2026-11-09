@@ -44,3 +44,6 @@ PubSoft.Caching.Redis.RedisHealthCheck.RedisHealthCheck(StackExchange.Redis.ICon
 PubSoft.Caching.Redis.RedisHealthCheck.CheckHealthAsync(Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckContext! context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult>!
 PubSoft.Caching.Redis.RedisHealthCheckExtensions
 static PubSoft.Caching.Redis.RedisHealthCheckExtensions.AddPubSoftRedisCheck(this Microsoft.Extensions.DependencyInjection.IHealthChecksBuilder! builder, string! name = "redis") -> Microsoft.Extensions.DependencyInjection.IHealthChecksBuilder!
+PubSoft.Caching.Redis.RedisConnectionStartupDiagnostics
+PubSoft.Caching.Redis.RedisConnectionStartupDiagnostics.RedisConnectionStartupDiagnostics(System.IServiceProvider! services) -> void
+PubSoft.Caching.Redis.RedisConnectionStartupDiagnostics.Collect() -> System.Collections.Generic.IEnumerable<PubSoft.Monitoring.StartupDiagnosticsEntry>!

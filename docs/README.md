@@ -8,6 +8,7 @@
 
 - [Design Principles](design-principles.md) — fail-closed defaults, explicit opt-in, boundedness, inversion-of-control contracts, ambient scope rules, AOT policy, package layering
 - [Packaging & Release Engineering](packaging.md) — versioning, Public API baselines, dependency consistency checks, isolated-consumer verification, AOT smoke, release gates
+- [Upgrade Notes](upgrade-notes.md) — per-version consumer friction: dependency floor bumps, removed/ghost package ids, dev/alpha version streams, restore pitfalls (NU1102 source-mapping, NU1109, feed jitter)
 - [Native AOT Feasibility](aot-feasibility.md) — upstream support surface, annotated packages, verified publish results
 - [Security Model](security-cryptography.md) — Security/Cryptography/AspNetCore package boundaries, AEAD envelope format, nonce/HMAC semantics
 - [Security & Trust-Boundary Analysis](security-boundary-analysis.md) — external audit: controls/responsibility matrix, API inventory, prioritized findings R1-R6, host deployment checklist

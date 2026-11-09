@@ -55,3 +55,6 @@ static PubSoft.Authentication.Jwt.AspNetCore.DualJwtAuthenticationExtensions.Add
 static PubSoft.Authentication.Jwt.AspNetCore.JwtBearerAuthenticationExtensions.AddPubSoftJwtBearer(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! builder, System.Action<PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions!>! configure, string! scheme = "Bearer") -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!
 PubSoft.Authentication.Jwt.AspNetCore.DualJwtOptions.ClientIdClaimType.get -> string!
 PubSoft.Authentication.Jwt.AspNetCore.DualJwtOptions.ClientIdClaimType.set -> void
+PubSoft.Authentication.Jwt.AspNetCore.JwtPostureStartupDiagnostics
+PubSoft.Authentication.Jwt.AspNetCore.JwtPostureStartupDiagnostics.JwtPostureStartupDiagnostics(PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions! options) -> void
+PubSoft.Authentication.Jwt.AspNetCore.JwtPostureStartupDiagnostics.Collect() -> System.Collections.Generic.IEnumerable<PubSoft.Monitoring.StartupDiagnosticsEntry>!

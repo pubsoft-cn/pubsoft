@@ -10,5 +10,6 @@
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
     <ProjectReference Include="../../platform/PubSoft.Caching/PubSoft.Caching.csproj" />
     <ProjectReference Include="../../core/PubSoft.Core/PubSoft.Core.csproj" />
+    <ProjectReference Include="../PubSoft.Monitoring/PubSoft.Monitoring.csproj" />
   </ItemGroup>
 </Project>

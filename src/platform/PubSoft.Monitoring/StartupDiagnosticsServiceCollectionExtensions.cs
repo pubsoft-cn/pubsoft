@@ -19,4 +19,12 @@ public static class StartupDiagnosticsServiceCollectionExtensions
         services.AddSingleton<IStartupDiagnostics, T>();
         return services;
     }
+
+    /// <summary>Registers the hosted service that logs every collected entry once at startup.</summary>
+    public static IServiceCollection AddPubSoftStartupDiagnosticsHostedService(this IServiceCollection services)
+    {
+        services.TryAddSingleton<StartupDiagnosticsCollector>();
+        services.AddHostedService<StartupDiagnosticsHostedService>();
+        return services;
+    }
 }

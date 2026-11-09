@@ -206,6 +206,7 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 | `AddPubSoftServiceDefaults` |
 | `AddPubSoftTenantContext` |
 | `MapPubSoftHealthEndpoint` |
+| `MapPubSoftStartupDiagnostics` |
 | `UsePubSoftAudit` |
 | `UsePubSoftCorrelationId` |
 | `UsePubSoftExceptionHandling` |
