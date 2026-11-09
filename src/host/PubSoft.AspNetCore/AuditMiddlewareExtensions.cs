@@ -7,8 +7,10 @@ using PubSoft.Auditing;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Registration for the audit middleware.</summary>
 public static class AuditMiddlewareExtensions
 {
+    /// <summary>Adds the audit middleware.</summary>
     public static IApplicationBuilder UsePubSoftAudit(
         this IApplicationBuilder app,
         AuditMiddlewareOptions? options = null)

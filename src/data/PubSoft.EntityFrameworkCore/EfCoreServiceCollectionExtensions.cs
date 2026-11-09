@@ -6,8 +6,10 @@ using PubSoft.Domain;
 
 namespace PubSoft.EntityFrameworkCore;
 
+/// <summary>Registration for EF-backed PubSoft services.</summary>
 public static class EfCoreServiceCollectionExtensions
 {
+    /// <summary>Registers the EF permission-grant provider.</summary>
     public static IServiceCollection AddPubSoftEfCorePermissionGrantProvider<TDbContext>(this IServiceCollection services)
         where TDbContext : PubSoftDbContext
     {
@@ -16,6 +18,7 @@ public static class EfCoreServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>Registers the EF permission-grant manager.</summary>
     public static IServiceCollection AddPubSoftEfCorePermissionGrantManager<TDbContext>(this IServiceCollection services)
         where TDbContext : PubSoftDbContext
     {
@@ -24,6 +27,7 @@ public static class EfCoreServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>Registers the EF role-data-scope provider.</summary>
     public static IServiceCollection AddPubSoftEfCoreRoleDataScopeProvider<TDbContext>(this IServiceCollection services)
         where TDbContext : PubSoftDbContext
     {
@@ -32,6 +36,7 @@ public static class EfCoreServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>Registers the EF repository for the entity type.</summary>
     public static IServiceCollection AddPubSoftRepository<TEntity, TKey, TDbContext>(this IServiceCollection services)
         where TEntity : class
         where TDbContext : PubSoftDbContext
@@ -46,6 +51,7 @@ public static class EfCoreServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>Registers the unit of work.</summary>
     public static IServiceCollection AddPubSoftUnitOfWork<TDbContext>(this IServiceCollection services)
         where TDbContext : DbContext
     {
@@ -62,6 +68,7 @@ public static class EfCoreServiceCollectionExtensions
     /// a save on an unchanged context is a no-op. Register each context once -- either here or via
     /// <see cref="AddPubSoftRequestUnitOfWork{TDbContext}"/>, not both.
     /// </remarks>
+    /// <summary>Registers a save participant.</summary>
     public static IServiceCollection AddPubSoftSaveParticipant<TDbContext>(this IServiceCollection services)
         where TDbContext : PubSoftDbContext
     {
@@ -83,6 +90,7 @@ public static class EfCoreServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>Registers a SaveChanges hook.</summary>
     public static IServiceCollection AddPubSoftSaveChangesHook<TDbContext, THook>(this IServiceCollection services)
         where TDbContext : PubSoftDbContext
         where THook : class, ISaveChangesHook
@@ -91,6 +99,7 @@ public static class EfCoreServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>Registers the audit change-capture hook.</summary>
     public static IServiceCollection AddPubSoftAuditChangeCapture(
         this IServiceCollection services,
         Action<AuditChangeCollectorOptions>? configure = null,

@@ -4,8 +4,10 @@ using Microsoft.Extensions.Primitives;
 
 namespace PubSoft.AspNetCore;
 
+/// <summary>Client-IP normalization for rate-limit partitioning.</summary>
 public static class IpNormalizer
 {
+    /// <summary>Normalizes an IP literal; IPv4-mapped IPv6 collapses to IPv4, unparseable becomes empty.</summary>
     public static string Normalize(string? ip)
     {
         if (string.IsNullOrWhiteSpace(ip))

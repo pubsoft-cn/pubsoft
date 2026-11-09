@@ -75,8 +75,7 @@ public static class JwtSigning
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    /// <summary>Generates a fresh symmetric (HS256) signing key of at least 256 bits.</summary>
-    /// <summary>Generates a symmetric signing key.</summary>
+    /// <summary>Generates a fresh symmetric (HS256) signing key of at least 256 bits - Generates a symmetric signing key.</summary>
     public static SymmetricSigningKeyMaterial CreateSymmetricKey(string keyId, int keySizeBits = 256)
     {
         ValidateKeyId(keyId);
@@ -86,8 +85,7 @@ public static class JwtSigning
         return new SymmetricSigningKeyMaterial(keyId, RandomNumberGenerator.GetBytes(keySizeBits / 8));
     }
 
-    /// <summary>Imports an existing symmetric (HS256) key. Keys below 256 bits are rejected.</summary>
-    /// <summary>Imports raw symmetric key bytes.</summary>
+    /// <summary>Imports an existing symmetric (HS256) key. Keys below 256 bits are rejected - Imports raw symmetric key bytes.</summary>
     public static SymmetricSigningKeyMaterial ImportSymmetricKey(string keyId, ReadOnlySpan<byte> keyBytes)
     {
         ValidateKeyId(keyId);
@@ -97,16 +95,14 @@ public static class JwtSigning
         return new SymmetricSigningKeyMaterial(keyId, keyBytes.ToArray());
     }
 
-    /// <summary>Imports an existing symmetric (HS256) key from text. Keys below 256 bits are rejected.</summary>
-    /// <summary>Imports a base64 symmetric key.</summary>
+    /// <summary>Imports an existing symmetric (HS256) key from text. Keys below 256 bits are rejected - Imports a base64 symmetric key.</summary>
     public static SymmetricSigningKeyMaterial ImportSymmetricKey(string keyId, string key)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
         return ImportSymmetricKey(keyId, Encoding.UTF8.GetBytes(key));
     }
 
-    /// <summary>Issues an HS256 access token -- an explicit algorithm choice, never a fallback.</summary>
-    /// <summary>Issues a symmetric-signed access token.</summary>
+    /// <summary>Issues an HS256 access token -- an explicit algorithm choice, never a fallback - Issues a symmetric-signed access token.</summary>
     public static string CreateAccessToken(
         SymmetricSigningKeyMaterial keyMaterial,
         string issuer,
@@ -180,8 +176,7 @@ public static class JwtSigning
         return ToClaimsDictionary(principal);
     }
 
-    /// <summary>Validates an HS256 token against a single explicit symmetric key.</summary>
-    /// <summary>Validates a token against key material, returning claims.</summary>
+    /// <summary>Validates an HS256 token against a single explicit symmetric key - Validates a token against key material, returning claims.</summary>
     public static IReadOnlyDictionary<string, string> ValidateAccessToken(
         string token,
         string issuer,
@@ -198,8 +193,7 @@ public static class JwtSigning
         return ToClaimsDictionary(principal);
     }
 
-    /// <summary>Validates an HS256 token against a set of symmetric keys selected by kid.</summary>
-    /// <summary>Validates a token against key material, returning claims.</summary>
+    /// <summary>Validates an HS256 token against a set of symmetric keys selected by kid - Validates a token against key material, returning claims.</summary>
     public static IReadOnlyDictionary<string, string> ValidateAccessToken(
         string token,
         string issuer,

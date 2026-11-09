@@ -7,17 +7,20 @@ using PubSoft.Core;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary><see cref="IExceptionHandler"/> mapping exceptions to status-coded JSON responses.</summary>
 public sealed class GlobalExceptionHandler : IExceptionHandler
 {
     private readonly GlobalExceptionHandlerOptions _options;
     private readonly ILogger<GlobalExceptionHandler> _logger;
 
+    /// <summary>Creates the handler.</summary>
     public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, GlobalExceptionHandlerOptions? options = null)
     {
         _logger = logger;
         _options = options ?? new();
     }
 
+    /// <inheritdoc />
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {

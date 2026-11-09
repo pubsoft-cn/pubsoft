@@ -16,6 +16,7 @@ namespace PubSoft.AspNetCore.Authentication;
 /// </summary>
 public interface IClientCredentialVerifier
 {
+    /// <summary>Verifies the client id + secret pair.</summary>
     Task<ClientCredentialVerificationResult> VerifyAsync(
         string clientId,
         string clientSecret,

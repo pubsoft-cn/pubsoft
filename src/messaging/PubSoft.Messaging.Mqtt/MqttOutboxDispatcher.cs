@@ -46,9 +46,9 @@ public sealed class MqttOutboxDispatcher : IOutboxDispatcher, IAsyncDisposable
             .WithQualityOfServiceLevel((MqttQualityOfServiceLevel)_options.QualityOfService)
             .Build();
         // dedup identity rides as MQTT5 user property - consumers key InboxReceipt on it
-        mqtt.UserProperties = [new MqttUserProperty(MqttInboxHeaders.OutboxMessageId, message.Id.ToString(System.Globalization.CultureInfo.InvariantCulture))];
+        mqtt.UserProperties = [new MqttUserProperty(MqttInboxHeaders.OutboxMessageId, System.Text.Encoding.UTF8.GetBytes(message.Id.ToString(System.Globalization.CultureInfo.InvariantCulture)))];
         if (message.AggregateKey is { } agg)
-            mqtt.UserProperties.Add(new MqttUserProperty(MqttInboxHeaders.OutboxAggregateKey, agg));
+            mqtt.UserProperties.Add(new MqttUserProperty(MqttInboxHeaders.OutboxAggregateKey, System.Text.Encoding.UTF8.GetBytes(agg)));
 
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(_options.PublishTimeout);

@@ -9,8 +9,10 @@ using PubSoft.Security;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Registration for the fixed-window rate limiter.</summary>
 public static class PubSoftRateLimitingExtensions
 {
+    /// <summary>Registers the rate-limiting middleware with options.</summary>
     public static IServiceCollection AddPubSoftRateLimiting(
         this IServiceCollection services,
         Action<RateLimiterOptions>? configure = null)
@@ -27,6 +29,7 @@ public static class PubSoftRateLimitingExtensions
         return services;
     }
 
+    /// <summary>Adds the rate-limiting middleware.</summary>
     public static IApplicationBuilder UsePubSoftRateLimiting(this IApplicationBuilder app)
     {
         ArgumentNullException.ThrowIfNull(app);

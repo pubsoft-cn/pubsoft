@@ -9,12 +9,14 @@ using PubSoft.Domain;
 namespace PubSoft.EntityFrameworkCore.Auditing;
 
 
+/// <summary>EF mapping for audit-log and entity-change records.</summary>
 public static class AuditPersistenceModelBuilderExtensions
 {
     private static readonly ValueConverter<DateTimeOffset, long> UtcTicksConverter = new(
         instant => instant.UtcTicks,
         ticks => new DateTimeOffset(ticks, TimeSpan.Zero));
 
+    /// <summary>Maps the audit tables; Snowflake ids are application-assigned, timestamps stored as UTC ticks.</summary>
     public static ModelBuilder ConfigurePubSoftAuditPersistence(this ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);

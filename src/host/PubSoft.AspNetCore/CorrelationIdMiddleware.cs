@@ -5,11 +5,13 @@ using Microsoft.Extensions.Primitives;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Propagates a correlation id through the request via <see cref="HttpContext.TraceIdentifier"/>.</summary>
 public sealed class CorrelationIdMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly CorrelationIdOptions _options;
 
+    /// <summary>Creates the middleware.</summary>
     public CorrelationIdMiddleware(RequestDelegate next, CorrelationIdOptions? options = null)
     {
         _next = next ?? throw new ArgumentNullException(nameof(next));
@@ -20,6 +22,7 @@ public sealed class CorrelationIdMiddleware
     /// propagating to outbound calls (same id, whichever inbound form arrived).</summary>
     public static string CurrentId(HttpContext context) => context.TraceIdentifier;
 
+    /// <summary>Sets the trace identifier then forwards.</summary>
     public async Task InvokeAsync(HttpContext context)
     {
         if (!_options.Enabled)

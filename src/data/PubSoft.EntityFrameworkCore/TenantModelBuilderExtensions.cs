@@ -4,8 +4,10 @@ using PubSoft.MultiTenancy;
 
 namespace PubSoft.EntityFrameworkCore;
 
+/// <summary>EF mapping for tenant entities.</summary>
 public static class TenantModelBuilderExtensions
 {
+    /// <summary>Maps tenant tables.</summary>
     public static ModelBuilder ConfigurePubSoftTenants(
         this ModelBuilder modelBuilder,
         string tableName = "PubSoftTenants")

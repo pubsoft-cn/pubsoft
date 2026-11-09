@@ -7,7 +7,6 @@ namespace PubSoft.Authentication;
 /// strictness as <see cref="AuthenticatedSubjectResolver"/>: exactly one subject claim,
 /// at most one of each single-valued claim, all filtered to the trusted issuer.
 /// </summary>
-/// <summary>Derives <see cref="CurrentSubject"/> from a claims snapshot per the claim dialect.</summary>
 public sealed class CurrentSubjectResolver
 {
     private readonly SubjectClaimDialect _dialect;

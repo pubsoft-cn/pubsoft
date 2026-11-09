@@ -9,8 +9,10 @@ using PubSoft.EntityFrameworkCore;
 namespace PubSoft.Messaging.Outbox;
 
 
+/// <summary>Enqueues an event into the transactional outbox inside the ambient DbContext transaction.</summary>
 public interface IOutboxPublisher
 {
+    /// <summary>Writes the event; returns the Snowflake message id. Correlation falls back to the ambient Activity trace id.</summary>
     Task<long> PublishAsync<TEvent>(
         TEvent @event,
         string? targetModule = null,

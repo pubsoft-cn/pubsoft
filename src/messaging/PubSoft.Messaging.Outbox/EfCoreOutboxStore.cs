@@ -8,6 +8,7 @@ using PubSoft.EntityFrameworkCore;
 namespace PubSoft.Messaging.Outbox;
 
 
+/// <summary>EF-backed outbox store: lease claiming, dead-lettering of exhausted leases, and lease-fenced completion.</summary>
 public sealed class EfCoreOutboxStore<TDbContext> : IOutboxStore
     where TDbContext : PubSoftDbContext
 {
@@ -15,6 +16,7 @@ public sealed class EfCoreOutboxStore<TDbContext> : IOutboxStore
     private readonly OutboxOptions _options;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
+    /// <summary>Creates the store; <paramref name="timeProvider"/> defaults to the system clock.</summary>
     public EfCoreOutboxStore(TDbContext dbContext, OutboxOptions? options = null, TimeProvider? timeProvider = null)
     {
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
@@ -22,6 +24,7 @@ public sealed class EfCoreOutboxStore<TDbContext> : IOutboxStore
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<OutboxMessage>> ClaimBatchAsync(CancellationToken cancellationToken = default)
     {
         var now = _timeProvider.GetUtcNow();
@@ -106,6 +109,7 @@ public sealed class EfCoreOutboxStore<TDbContext> : IOutboxStore
         return claimedMessages;
     }
 
+    /// <inheritdoc />
     public async Task<bool> MarkDeliveredAsync(
         long messageId,
         Guid leaseToken,
@@ -128,6 +132,7 @@ public sealed class EfCoreOutboxStore<TDbContext> : IOutboxStore
         return updated == 1;
     }
 
+    /// <inheritdoc />
     public async Task<bool> MarkFailedAsync(
         long messageId,
         Guid leaseToken,

@@ -9,6 +9,7 @@ using PubSoft.Security;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Compiled rate-limit policy resolved from <see cref="PubSoftRateLimitPolicyOptions"/>.</summary>
 public sealed class PubSoftRateLimitPolicy
 {
     private readonly Func<HttpContext, bool> _appliesTo;
@@ -16,6 +17,7 @@ public sealed class PubSoftRateLimitPolicy
     private readonly Func<HttpContext, int, bool> _isFailureResponse;
     private readonly RateLimiter _limiter;
 
+    /// <summary>Creates the compiled policy.</summary>
     public PubSoftRateLimitPolicy(PubSoftRateLimitPolicyOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -36,7 +38,9 @@ public sealed class PubSoftRateLimitPolicy
         });
     }
 
+    /// <summary>Policy name.</summary>
     public string Name { get; }
+    /// <summary>Whether only failure responses count.</summary>
     public bool CountFailuresOnly { get; }
     internal bool Applies(HttpContext context) => _appliesTo(context);
     internal string? GetIdentifier(HttpContext context) => _identifierSelector(context);

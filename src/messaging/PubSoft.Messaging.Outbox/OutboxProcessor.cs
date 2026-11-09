@@ -8,11 +8,13 @@ using PubSoft.EntityFrameworkCore;
 namespace PubSoft.Messaging.Outbox;
 
 
+/// <summary>Poll worker: claims leased batches, dispatches each, and marks the outcome.</summary>
 public sealed class OutboxProcessor(
     IOutboxStore store,
     IOutboxDispatcher dispatcher,
     ILogger<OutboxProcessor>? logger = null)
 {
+    /// <summary>Claims and dispatches one batch; returns the delivered count.</summary>
     public async Task<int> ProcessBatchAsync(CancellationToken cancellationToken = default)
     {
         var messages = await store.ClaimBatchAsync(cancellationToken).ConfigureAwait(false);

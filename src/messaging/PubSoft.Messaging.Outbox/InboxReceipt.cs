@@ -9,6 +9,7 @@ using PubSoft.EntityFrameworkCore;
 namespace PubSoft.Messaging.Outbox;
 
 
+/// <summary>Inbox dedup receipt: a processed (consumer, messageId) pair.</summary>
 public sealed class InboxReceipt : IMultiTenant
 {
 
@@ -22,9 +23,14 @@ public sealed class InboxReceipt : IMultiTenant
     }
     private InboxReceipt() { }
 
+    /// <summary>Tenant partition; null for host-scope messages.</summary>
     public long? TenantId { get; set; }
+    /// <summary>Tenant discriminator segment ("host" when null).</summary>
     public string TenantKey { get; private set; } = string.Empty;
+    /// <summary>Consuming component name.</summary>
     public string ConsumerName { get; private set; } = string.Empty;
+    /// <summary>Source message identifier.</summary>
     public long MessageId { get; private set; }
+    /// <summary>When processing completed.</summary>
     public DateTimeOffset ProcessedAt { get; private set; }
 }

@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Http;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Emits the configured response security headers.</summary>
 public sealed class SecurityHeadersMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly SecurityHeadersOptions _options;
 
+    /// <summary>Creates the middleware.</summary>
     public SecurityHeadersMiddleware(RequestDelegate next, SecurityHeadersOptions? options = null)
     {
         _next = next ?? throw new ArgumentNullException(nameof(next));
@@ -21,6 +23,7 @@ public sealed class SecurityHeadersMiddleware
         ValidateHeaderValue(_options.StrictTransportSecurity, nameof(options));
     }
 
+    /// <summary>Sets headers then forwards.</summary>
     public async Task InvokeAsync(HttpContext context)
     {
         if (_options.Enabled)

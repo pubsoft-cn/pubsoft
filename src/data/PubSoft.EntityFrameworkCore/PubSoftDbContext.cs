@@ -4,10 +4,14 @@ using PubSoft.Domain;
 
 namespace PubSoft.EntityFrameworkCore;
 
+/// <summary>Base DbContext wiring tenant/member/soft-delete scope filters and the save-participant chain.</summary>
 public abstract class PubSoftDbContext : DbContext, IPubSoftSaveParticipant
 {
+    /// <summary>Tenant query-filter key.</summary>
     public const string TenantFilter = "PubSoft.Tenant";
+    /// <summary>Member query-filter key.</summary>
     public const string MemberFilter = "PubSoft.Member";
+    /// <summary>Soft-delete query-filter key.</summary>
     public const string SoftDeleteFilter = "PubSoft.SoftDelete";
 
     private readonly ITenantContext _tenantContext;
@@ -15,6 +19,7 @@ public abstract class PubSoftDbContext : DbContext, IPubSoftSaveParticipant
     private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly ISaveChangesHook? _saveChangesHook;
 
+    /// <summary>Creates the context with scope sources.</summary>
     protected PubSoftDbContext(
         DbContextOptions options,
         ITenantContext tenantContext,
@@ -29,10 +34,14 @@ public abstract class PubSoftDbContext : DbContext, IPubSoftSaveParticipant
         _saveChangesHook = saveChangesHook;
     }
 
+    /// <summary>Ambient tenant id.</summary>
     public long? CurrentTenantId => _tenantContext.TenantId;
+    /// <summary>Ambient member id.</summary>
     public long? CurrentMemberId => _memberScopeContext?.MemberId;
+    /// <summary>Whether member scoping is active.</summary>
     public bool IsMemberScoped => _memberScopeContext?.IsMemberScoped == true;
 
+    /// <inheritdoc />
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
         PrepareChanges();

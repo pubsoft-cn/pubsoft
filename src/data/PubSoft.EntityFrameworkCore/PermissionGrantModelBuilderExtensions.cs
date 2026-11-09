@@ -3,8 +3,10 @@ using PubSoft.Domain;
 
 namespace PubSoft.EntityFrameworkCore;
 
+/// <summary>EF mapping for permission grants.</summary>
 public static class PermissionGrantModelBuilderExtensions
 {
+    /// <summary>Maps permission-grant tables.</summary>
     public static ModelBuilder ConfigurePubSoftPermissionGrants(this ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);

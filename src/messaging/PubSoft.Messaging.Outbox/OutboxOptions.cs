@@ -9,14 +9,22 @@ using PubSoft.EntityFrameworkCore;
 namespace PubSoft.Messaging.Outbox;
 
 
+/// <summary>Outbox polling, retry, and lease tuning.</summary>
 public sealed class OutboxOptions
 {
+    /// <summary>Messages fetched per poll.</summary>
     public int BatchSize { get; set; } = 50;
+    /// <summary>Delivery attempts before dead-lettering.</summary>
     public int MaxAttempts { get; set; } = 5;
+    /// <summary>Payload size bound; larger events fail at publish.</summary>
     public int MaximumPayloadCharacters { get; set; } = 1_048_576;
+    /// <summary>Processing lease length; expired leases are reclaimable.</summary>
     public TimeSpan LeaseDuration { get; set; } = TimeSpan.FromMinutes(1);
+    /// <summary>Delay between polling passes.</summary>
     public TimeSpan PollInterval { get; set; } = TimeSpan.FromSeconds(5);
+    /// <summary>First retry delay; subsequent attempts back off exponentially.</summary>
     public TimeSpan BaseRetryDelay { get; set; } = TimeSpan.FromSeconds(30);
+    /// <summary>Retry delay ceiling.</summary>
     public TimeSpan MaxRetryDelay { get; set; } = TimeSpan.FromHours(1);
 
     internal OutboxOptions CloneAndValidate()

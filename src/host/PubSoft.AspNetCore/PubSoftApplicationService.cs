@@ -18,6 +18,7 @@ public abstract class PubSoftApplicationService : ITransientDependency
     [ActivatorUtilitiesConstructor]
     protected PubSoftApplicationService(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 
+    /// <summary>Parameterless constructor for inheritance paths without DI.</summary>
     protected PubSoftApplicationService() { }
 
     /// <summary>Logger -- prefers resolving through the injected IServiceProvider, falls back to NullLogger.</summary>

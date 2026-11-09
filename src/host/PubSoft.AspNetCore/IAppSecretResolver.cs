@@ -9,11 +9,14 @@ using PubSoft.Security;
 
 namespace PubSoft.AspNetCore;
 
+/// <summary>Host seam resolving the shared secret for an app id.</summary>
 public interface IAppSecretResolver
 {
+    /// <summary>Returns the secret for <paramref name="appId"/>, or null when unknown (fail-closed).</summary>
     ValueTask<string?> ResolveSecretAsync(string appId, CancellationToken cancellationToken = default);
 }
 
+/// <summary>Validates request signatures against the host-resolved app secret.</summary>
 public sealed class HmacValidationMiddleware
 {
     private const int MaximumAllowedBodyBytes = 16 * 1024 * 1024;
@@ -22,6 +25,7 @@ public sealed class HmacValidationMiddleware
     private readonly HmacSignatureValidator _validator;
     private readonly HmacValidationOptions _options;
 
+    /// <summary>Creates the middleware.</summary>
     public HmacValidationMiddleware(
         RequestDelegate next,
         IAppSecretResolver secretResolver,
@@ -36,6 +40,7 @@ public sealed class HmacValidationMiddleware
         ArgumentOutOfRangeException.ThrowIfGreaterThan(_options.MaximumBodyBytes, MaximumAllowedBodyBytes);
     }
 
+    /// <summary>Verifies the signature then forwards.</summary>
     public async Task InvokeAsync(HttpContext context)
     {
         var path = context.Request.Path.Value ?? string.Empty;

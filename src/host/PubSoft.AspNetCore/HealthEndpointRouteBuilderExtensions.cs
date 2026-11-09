@@ -6,8 +6,10 @@ using PubSoft.Monitoring;
 
 namespace PubSoft.AspNetCore;
 
+/// <summary>Health-endpoint mapping extensions.</summary>
 public static class HealthEndpointRouteBuilderExtensions
 {
+    /// <summary>Default health endpoint path.</summary>
     public const string DefaultPath = "/health";
 
     /// <summary>Maps an opt-in aggregate health endpoint with no per-check details.</summary>

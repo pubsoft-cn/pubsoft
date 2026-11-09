@@ -9,6 +9,7 @@ using PubSoft.Scheduling;
 
 namespace PubSoft.Scheduling.EntityFrameworkCore;
 
+/// <summary>EF-backed scheduler state store: last-result snapshots and custom key-value state with expiry.</summary>
 public sealed class EfCoreStateStore<TDbContext> : IStateStore
     where TDbContext : DbContext
 {
@@ -17,18 +18,21 @@ public sealed class EfCoreStateStore<TDbContext> : IStateStore
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
+    /// <summary>Creates the store; <paramref name="timeProvider"/> defaults to the system clock.</summary>
     public EfCoreStateStore(IServiceScopeFactory scopeFactory, TimeProvider? timeProvider = null)
     {
         _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
+    /// <inheritdoc />
     public Task<JobResult?> GetLastResultAsync(string jobName, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(jobName);
         return GetAsync<JobResult>($"last:{jobName}", cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task UpdateStateAsync(string jobName, JobResult result, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(jobName);
@@ -36,12 +40,14 @@ public sealed class EfCoreStateStore<TDbContext> : IStateStore
         return SetAsync($"last:{jobName}", result, s_lastResultLifetime, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task<T?> GetCustomStateAsync<T>(string key, CancellationToken cancellationToken) where T : class
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
         return GetAsync<T>($"custom:{key}", cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task SetCustomStateAsync<T>(string key, T value, TimeSpan? expiry, CancellationToken cancellationToken)
         where T : class
     {
@@ -52,6 +58,7 @@ public sealed class EfCoreStateStore<TDbContext> : IStateStore
         return SetAsync($"custom:{key}", value, expiry, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task RemoveCustomStateAsync(string key, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);

@@ -14,12 +14,14 @@ namespace PubSoft.Messaging.Outbox;
 /// unless a tenant-key restriction is passed. Invoke from a host-scoped maintenance context.
 /// Very large tables may prefer host-managed bulk SQL instead.
 /// </remarks>
+/// <summary>Retention sweeper deleting processed inbox receipts older than the cutoff.</summary>
 public sealed class InboxRetentionCleanup<TDbContext>
     where TDbContext : PubSoftDbContext
 {
     private readonly TDbContext _dbContext;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
+    /// <summary>Creates the sweeper.</summary>
     public InboxRetentionCleanup(TDbContext dbContext, TimeProvider? timeProvider = null)
     {
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));

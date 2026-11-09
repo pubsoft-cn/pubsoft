@@ -12,11 +12,13 @@ using PubSoft.Domain;
 
 namespace PubSoft.AspNetCore.Authorization;
 
+/// <summary>Minimal-API filter enforcing the required permission before the endpoint runs.</summary>
 public sealed class PermissionEndpointFilter(
     IAuthenticatedSubjectAccessor subjectAccessor,
     ITenantContext tenantContext,
     PermissionAuthorizationService authorizationService) : IEndpointFilter
 {
+    /// <inheritdoc />
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
         var metadata = context.HttpContext.GetEndpoint()?.Metadata;
@@ -36,11 +38,13 @@ public sealed class PermissionEndpointFilter(
     }
 }
 
+/// <summary>MVC authorization filter enforcing the required permission.</summary>
 public sealed class PermissionMvcAuthorizationFilter(
     IAuthenticatedSubjectAccessor subjectAccessor,
     ITenantContext tenantContext,
     PermissionAuthorizationService authorizationService) : IAsyncAuthorizationFilter
 {
+    /// <inheritdoc />
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
         var failureStatusCode = await PermissionRequirementEvaluator.GetFailureStatusCodeAsync(
@@ -54,8 +58,10 @@ public sealed class PermissionMvcAuthorizationFilter(
     }
 }
 
+/// <summary>MVC registration helpers for permission authorization.</summary>
 public static class PermissionMvcAuthorizationExtensions
 {
+    /// <summary>Registers the permission authorization filter globally.</summary>
     public static IMvcBuilder AddPubSoftPermissionAuthorization(this IMvcBuilder mvcBuilder)
     {
         ArgumentNullException.ThrowIfNull(mvcBuilder);
@@ -66,6 +72,7 @@ public static class PermissionMvcAuthorizationExtensions
 
 internal static class PermissionRequirementEvaluator
 {
+    /// <summary>Maps an authorization failure to an HTTP status code.</summary>
     public static async ValueTask<int?> GetFailureStatusCodeAsync(
         IEnumerable<object> metadata,
         IAuthenticatedSubjectAccessor subjectAccessor,
@@ -131,14 +138,17 @@ internal static class PermissionRequirementEvaluator
     }
 }
 
+/// <summary>Minimal-API registration helpers for permission authorization.</summary>
 public static class PermissionEndpointFilterExtensions
 {
+    /// <summary>Attaches permission authorization to the endpoint.</summary>
     public static RouteHandlerBuilder AddPubSoftPermissionAuthorization(this RouteHandlerBuilder endpoint)
     {
         ArgumentNullException.ThrowIfNull(endpoint);
         return endpoint.AddEndpointFilter<PermissionEndpointFilter>();
     }
 
+    /// <summary>Attaches permission authorization to the route group.</summary>
     public static RouteGroupBuilder AddPubSoftPermissionAuthorization(this RouteGroupBuilder group)
     {
         ArgumentNullException.ThrowIfNull(group);

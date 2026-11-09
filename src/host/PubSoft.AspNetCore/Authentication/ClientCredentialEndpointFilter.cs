@@ -11,8 +11,10 @@ using PubSoft.Domain;
 namespace PubSoft.AspNetCore.Authentication;
 
 
+/// <summary>Minimal-API filter enforcing a verified client credential.</summary>
 public sealed class ClientCredentialEndpointFilter : IEndpointFilter
 {
+    /// <inheritdoc />
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
         var evaluation = await ClientCredentialEvaluator

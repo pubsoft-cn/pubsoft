@@ -9,6 +9,7 @@ using PubSoft.EntityFrameworkCore;
 namespace PubSoft.Messaging.Outbox;
 
 
+/// <summary>Persisted outbox row: at-least-once delivery envelope with lease/retry/dead-letter bookkeeping.</summary>
 public sealed class OutboxMessage : IMultiTenant
 {
 
@@ -37,19 +38,33 @@ public sealed class OutboxMessage : IMultiTenant
 
     /// <summary>Snowflake id assigned at publish (IIdGenerator).</summary>
     public long Id { get; private set; }
+    /// <summary>Tenant partition; null for host-scope events.</summary>
     public long? TenantId { get; set; }
+    /// <summary>Event type discriminator (truncated to 512 chars at publish).</summary>
     public string EventType { get; private set; } = string.Empty;
+    /// <summary>Serialized event payload.</summary>
     public string PayloadJson { get; private set; } = string.Empty;
+    /// <summary>Target module hint for routing (truncated to 128 chars).</summary>
     public string? TargetModule { get; private set; }
+    /// <summary>Aggregate key for ordering/compaction hints (truncated to 256 chars).</summary>
     public string? AggregateKey { get; private set; }
+    /// <summary>When the domain event occurred.</summary>
     public DateTimeOffset OccurredAt { get; private set; }
+    /// <summary>Delivery state.</summary>
     public OutboxMessageStatus Status { get; private set; }
+    /// <summary>Delivery attempts taken so far.</summary>
     public int AttemptCount { get; private set; }
+    /// <summary>Attempts allowed before dead-lettering.</summary>
     public int MaxAttempts { get; private set; }
+    /// <summary>Earliest retry time after a failed attempt.</summary>
     public DateTimeOffset? NextAttemptAt { get; private set; }
+    /// <summary>Fencing token of the active processing lease.</summary>
     public Guid? LeaseToken { get; private set; }
+    /// <summary>Lease expiry; lapsed leases are reclaimable by other workers.</summary>
     public DateTimeOffset? LeaseExpiresAt { get; private set; }
+    /// <summary>When the message was dispatched (null until delivered).</summary>
     public DateTimeOffset? DeliveredAt { get; private set; }
+    /// <summary>Error code from the last failed attempt.</summary>
     public string? LastErrorCode { get; private set; }
 
     /// <summary>

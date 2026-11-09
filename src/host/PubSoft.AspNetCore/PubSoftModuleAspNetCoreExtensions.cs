@@ -8,6 +8,7 @@ using PubSoft.Modularity;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Module-lifecycle wiring for the ASP.NET host.</summary>
 public static class PubSoftModuleAspNetCoreExtensions
 {
     /// <summary>

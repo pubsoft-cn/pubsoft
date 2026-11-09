@@ -4,6 +4,7 @@ using PubSoft.Domain;
 
 namespace PubSoft.EntityFrameworkCore;
 
+/// <summary>EF-backed <see cref="IEfCoreRepository{TEntity, TKey}"/> over <typeparamref name="TDbContext"/>.</summary>
 public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreRepository<TEntity, TKey>, IReadOnlyRepository<TEntity, TKey>
     where TEntity : class
     where TDbContext : PubSoftDbContext
@@ -12,6 +13,7 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
     private readonly DbSet<TEntity> _dbSet;
     private readonly ISaveChangesBoundary? _saveBoundary;
 
+    /// <summary>Creates the repository.</summary>
     public EfCoreRepository(TDbContext dbContext, ISaveChangesBoundary? saveBoundary = null)
     {
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
@@ -19,16 +21,20 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
         _saveBoundary = saveBoundary;
     }
 
+    /// <inheritdoc />
     public Task<IQueryable<TEntity>> GetQueryableAsync()
         => Task.FromResult<IQueryable<TEntity>>(_dbSet);
 
+    /// <inheritdoc />
     public Task<DbSet<TEntity>> GetDbSetAsync()
         => Task.FromResult(_dbSet);
 
+    /// <inheritdoc />
     public async Task<TEntity> GetAsync(TKey id, CancellationToken cancellationToken = default)
         => await FindAsync(id, cancellationToken).ConfigureAwait(false)
             ?? throw new KeyNotFoundException($"{typeof(TEntity).Name} with id '{id}' not found.");
 
+    /// <inheritdoc />
     public async Task<TEntity?> FindAsync(TKey id, CancellationToken cancellationToken = default)
     {
         var keyProperty = GetSingleKeyProperty();
@@ -47,6 +53,7 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
         return IsVisible(entity, state) ? entity : null;
     }
 
+    /// <inheritdoc />
     public async Task<TEntity> InsertAsync(TEntity entity, bool autoSave = false, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(entity);
@@ -57,6 +64,7 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
         return entity;
     }
 
+    /// <inheritdoc />
     public async Task<TEntity> UpdateAsync(TEntity entity, bool autoSave = false, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(entity);
@@ -70,6 +78,7 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
         return existing;
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(TKey id, bool autoSave = false, CancellationToken cancellationToken = default)
     {
         var entity = await FindAsync(id, cancellationToken).ConfigureAwait(false);
@@ -81,6 +90,7 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
             await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(TEntity entity, bool autoSave = false, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(entity);
@@ -94,6 +104,7 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
             await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public async Task UpdateManyAsync(IEnumerable<TEntity> entities, bool autoSave = false, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(entities);
@@ -126,6 +137,7 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
             await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public async Task InsertManyAsync(IEnumerable<TEntity> entities, bool autoSave = false, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(entities);
@@ -141,6 +153,7 @@ public sealed class EfCoreRepository<TEntity, TKey, TDbContext> : IEfCoreReposit
             await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         => await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

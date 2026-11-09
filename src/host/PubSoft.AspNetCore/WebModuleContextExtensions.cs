@@ -8,6 +8,7 @@ using PubSoft.Modularity;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary><see cref="WebModuleContext"/> accessors.</summary>
 public static class WebModuleContextExtensions
 {
     /// <summary>

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Primitives;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Registration for the correlation-id middleware.</summary>
 public static class CorrelationIdMiddlewareExtensions
 {
     /// <summary>Register correlation-id adoption + echo -- place before any

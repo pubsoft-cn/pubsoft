@@ -9,8 +9,10 @@ using PubSoft.Security;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Registration for declarative rate-limit policies.</summary>
 public static class PubSoftRateLimitPolicyExtensions
 {
+    /// <summary>Registers one named policy.</summary>
     public static IServiceCollection AddPubSoftRateLimitPolicy(
         this IServiceCollection services,
         Action<PubSoftRateLimitPolicyOptions> configure)
@@ -31,6 +33,7 @@ public static class PubSoftRateLimitPolicyExtensions
         return services;
     }
 
+    /// <summary>Adds the policy rate-limiting middleware.</summary>
     public static IApplicationBuilder UsePubSoftRateLimitPolicies(this IApplicationBuilder app)
     {
         ArgumentNullException.ThrowIfNull(app);

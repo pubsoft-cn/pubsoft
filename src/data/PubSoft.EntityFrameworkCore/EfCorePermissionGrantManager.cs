@@ -3,11 +3,13 @@ using PubSoft.Domain;
 
 namespace PubSoft.EntityFrameworkCore;
 
+/// <summary>EF-backed permission-grant manager.</summary>
 public sealed class EfCorePermissionGrantManager<TDbContext>(TDbContext dbContext)
     where TDbContext : PubSoftDbContext
 {
     private readonly TDbContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
+    /// <inheritdoc />
     public async Task ReplaceRoleGrantsAsync(
         long roleId,
         long? tenantId,
@@ -39,6 +41,7 @@ public sealed class EfCorePermissionGrantManager<TDbContext>(TDbContext dbContex
         await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public async Task AssignSubjectRolesAsync(
         long subjectId,
         long? tenantId,
@@ -47,6 +50,7 @@ public sealed class EfCorePermissionGrantManager<TDbContext>(TDbContext dbContex
         => await AssignSubjectRolesAsync(subjectId, tenantId, string.Empty, roleIds, cancellationToken)
             .ConfigureAwait(false);
 
+    /// <inheritdoc />
     public async Task AssignSubjectRolesAsync(
         long subjectId,
         long? tenantId,

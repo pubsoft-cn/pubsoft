@@ -3,8 +3,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace PubSoft.Scheduling.EntityFrameworkCore;
 
+/// <summary>EF mapping for <see cref="SchedulerStateRecord"/>.</summary>
 public static class SchedulerStateModelBuilderExtensions
 {
+    /// <summary>Maps the scheduler-state table with the (TenantScope, KeyHash) uniqueness invariant.</summary>
     public static ModelBuilder ConfigurePubSoftSchedulerState(this ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);

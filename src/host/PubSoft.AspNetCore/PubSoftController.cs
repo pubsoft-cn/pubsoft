@@ -14,6 +14,7 @@ namespace PubSoft.AspNetCore;
 public abstract class PubSoftController : ControllerBase
 {
 
+    /// <summary>Creates the controller with the subject accessor.</summary>
     protected PubSoftController(IAuthenticatedSubjectAccessor? subjectAccessor)
         => SubjectAccessor = subjectAccessor;
     /// <summary>The authenticated subject resolved from DI (may be anonymous).</summary>

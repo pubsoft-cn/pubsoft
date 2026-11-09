@@ -7,8 +7,10 @@ using PubSoft.Monitoring;
 
 namespace PubSoft.AspNetCore;
 
+/// <summary>Opinionated host defaults (headers, limits, tenant context).</summary>
 public static class ServiceDefaultsExtensions
 {
+    /// <summary>Registers the default service set.</summary>
     public static IServiceCollection AddPubSoftServiceDefaults(
         this IServiceCollection services, IConfiguration configuration)
     {
@@ -21,6 +23,7 @@ public static class ServiceDefaultsExtensions
         return services;
     }
 
+    /// <summary>Adds the default middleware pipeline.</summary>
     public static IApplicationBuilder UsePubSoftServiceDefaults(this IApplicationBuilder app)
     {
         app.UsePubSoftGatewayRateLimiting();
@@ -28,6 +31,7 @@ public static class ServiceDefaultsExtensions
         return app;
     }
 
+    /// <summary>Adds the default middleware pipeline.</summary>
     public static WebApplication UsePubSoftServiceDefaults(this WebApplication app)
     {
         ((IApplicationBuilder)app).UsePubSoftServiceDefaults();

@@ -9,6 +9,7 @@ using PubSoft.EntityFrameworkCore;
 namespace PubSoft.Messaging.Outbox;
 
 
+/// <summary>EF-backed outbox publisher writing rows inside the ambient DbContext transaction.</summary>
 public sealed class EfCoreOutboxPublisher<TDbContext> : IOutboxPublisher
     where TDbContext : PubSoftDbContext
 {
@@ -17,6 +18,7 @@ public sealed class EfCoreOutboxPublisher<TDbContext> : IOutboxPublisher
     private readonly OutboxOptions _options;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
+    /// <summary>Creates the publisher; <paramref name="idGenerator"/> is required (fail-closed: no Guid fallback).</summary>
     public EfCoreOutboxPublisher(TDbContext dbContext, PubSoft.Core.IIdGenerator idGenerator, OutboxOptions? options = null, TimeProvider? timeProvider = null)
     {
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
@@ -25,6 +27,7 @@ public sealed class EfCoreOutboxPublisher<TDbContext> : IOutboxPublisher
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
+    /// <inheritdoc />
     public Task<long> PublishAsync<TEvent>(
         TEvent @event,
         string? targetModule = null,

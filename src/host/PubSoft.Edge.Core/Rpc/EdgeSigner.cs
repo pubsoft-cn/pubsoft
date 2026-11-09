@@ -237,10 +237,7 @@ public static class EdgeSigner
     #endregion
 }
 
-/// <summary>
-/// Signature verification result -- carries the canonical payload for debugging.
-/// </summary>
-/// <summary>Signature verification outcome.</summary>
+/// <summary>Signature verification result -- carries the canonical payload for debugging. - Signature verification outcome.</summary>
 /// <param name="Success">Whether the signature is valid.</param>
 /// <param name="ErrorMessage">Failure detail.</param>
 /// <param name="SignPayload">The canonical payload that was signed (diagnostics only).</param>

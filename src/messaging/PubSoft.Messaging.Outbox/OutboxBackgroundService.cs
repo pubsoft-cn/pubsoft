@@ -8,6 +8,7 @@ using PubSoft.EntityFrameworkCore;
 namespace PubSoft.Messaging.Outbox;
 
 
+/// <summary>Hosted polling loop driving <see cref="OutboxProcessor"/> on the configured interval.</summary>
 public sealed class OutboxBackgroundService(
     IServiceScopeFactory scopeFactory,
     OutboxOptions options,

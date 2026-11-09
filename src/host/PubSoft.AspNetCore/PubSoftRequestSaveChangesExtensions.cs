@@ -6,8 +6,10 @@ using PubSoft.Domain;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Registration for per-request SaveChanges.</summary>
 public static class PubSoftRequestSaveChangesExtensions
 {
+    /// <summary>Registers the SaveChanges boundary.</summary>
     public static IServiceCollection AddPubSoftRequestSaveChanges(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -16,6 +18,7 @@ public static class PubSoftRequestSaveChangesExtensions
         return services;
     }
 
+    /// <summary>Adds the per-request SaveChanges middleware.</summary>
     public static IApplicationBuilder UsePubSoftRequestSaveChanges(this IApplicationBuilder app)
     {
         ArgumentNullException.ThrowIfNull(app);

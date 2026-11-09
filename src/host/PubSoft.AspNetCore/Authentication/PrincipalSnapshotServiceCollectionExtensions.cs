@@ -4,8 +4,10 @@ using PubSoft.Authentication;
 
 namespace PubSoft.AspNetCore.Authentication;
 
+/// <summary>Registration for principal/subject snapshot accessors.</summary>
 public static class PrincipalSnapshotServiceCollectionExtensions
 {
+    /// <summary>Registers the HTTP-context principal snapshot accessor.</summary>
     public static IServiceCollection AddPrincipalSnapshotAccessor(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -14,6 +16,7 @@ public static class PrincipalSnapshotServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>Registers the authenticated-subject accessor bound to the claim dialect.</summary>
     public static IServiceCollection AddAuthenticatedSubjectAccessor(
         this IServiceCollection services,
         string subjectClaimType,

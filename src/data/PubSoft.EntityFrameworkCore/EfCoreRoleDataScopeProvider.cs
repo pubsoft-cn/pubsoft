@@ -3,11 +3,13 @@ using PubSoft.Domain;
 
 namespace PubSoft.EntityFrameworkCore;
 
+/// <summary>EF-backed role-data-scope provider.</summary>
 public sealed class EfCoreRoleDataScopeProvider<TDbContext>(TDbContext dbContext) : IRoleDataScopeProvider
     where TDbContext : PubSoftDbContext
 {
     private readonly TDbContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<DataScopeDimension>> GetRoleScopesAsync(
         long subjectId,
         long? tenantId,

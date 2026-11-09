@@ -8,6 +8,7 @@ using PubSoft.Core;
 
 namespace PubSoft.AspNetCore;
 
+/// <summary>Maps unhandled exceptions to status-coded responses per <see cref="GlobalExceptionHandlerOptions"/>.</summary>
 public sealed class ExceptionHandlingMiddleware
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
@@ -15,6 +16,7 @@ public sealed class ExceptionHandlingMiddleware
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
     private readonly IHostEnvironment _environment;
 
+    /// <summary>Creates the middleware.</summary>
     public ExceptionHandlingMiddleware(
         RequestDelegate next,
         ILogger<ExceptionHandlingMiddleware> logger,
@@ -25,6 +27,7 @@ public sealed class ExceptionHandlingMiddleware
         _environment = environment ?? throw new ArgumentNullException(nameof(environment));
     }
 
+    /// <summary>Forwards then maps thrown exceptions.</summary>
     public async Task InvokeAsync(HttpContext context)
     {
         try
@@ -99,8 +102,10 @@ public sealed class ExceptionHandlingMiddleware
         string? StackTrace);
 }
 
+/// <summary>Registration for the exception-handling middleware.</summary>
 public static class ExceptionHandlingMiddlewareExtensions
 {
+    /// <summary>Adds the exception-handling middleware.</summary>
     public static IApplicationBuilder UsePubSoftExceptionHandling(this IApplicationBuilder app)
         => app.UseMiddleware<ExceptionHandlingMiddleware>();
 }

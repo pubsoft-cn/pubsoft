@@ -5,8 +5,10 @@ using Microsoft.Extensions.Hosting;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Registration for the development-only controller convention.</summary>
 public static class DevelopmentOnlyControllerConventionExtensions
 {
+    /// <summary>Registers the convention.</summary>
     public static IMvcBuilder AddPubSoftDevelopmentOnlyControllerConvention(
         this IMvcBuilder builder,
         IHostEnvironment environment)

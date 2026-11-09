@@ -3,8 +3,10 @@ using PubSoft.Domain;
 
 namespace PubSoft.EntityFrameworkCore;
 
+/// <summary>EF mapping for role data scopes.</summary>
 public static class RoleDataScopeModelBuilderExtensions
 {
+    /// <summary>Maps the role-data-scope table.</summary>
     public static ModelBuilder ConfigurePubSoftRoleDataScopes(
         this ModelBuilder modelBuilder,
         string tableName = "pubsoft_role_data_scope")

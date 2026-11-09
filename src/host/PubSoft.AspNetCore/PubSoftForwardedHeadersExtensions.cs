@@ -8,8 +8,10 @@ using Microsoft.Extensions.Options;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Forwarded-header processing wired to the trusted-proxy options.</summary>
 public static class PubSoftForwardedHeadersExtensions
 {
+    /// <summary>Socket-peer cache key for trusted-proxy checks.</summary>
     private static readonly object SocketPeerKey = new();
 
     /// <summary>

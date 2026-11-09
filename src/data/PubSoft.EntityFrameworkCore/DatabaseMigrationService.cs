@@ -6,12 +6,14 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.EntityFrameworkCore.Migrations;
 
 
+/// <summary>Hosted migration runner.</summary>
 public sealed class DatabaseMigrationService : IDatabaseMigrationService
 {
     private readonly IDatabaseSchemaMigrator[] _schemaMigrators;
     private readonly IDataSeeder[] _dataSeeders;
     private readonly ILogger<DatabaseMigrationService>? _logger;
 
+    /// <summary>Creates the service.</summary>
     public DatabaseMigrationService(
         IEnumerable<IDatabaseSchemaMigrator> schemaMigrators,
         IEnumerable<IDataSeeder> dataSeeders,
@@ -24,6 +26,7 @@ public sealed class DatabaseMigrationService : IDatabaseMigrationService
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public async Task RunAsync(CancellationToken cancellationToken = default)
     {
         _logger?.LogInformation("Database migration started.");

@@ -5,8 +5,10 @@ using PubSoft.Scheduling;
 
 namespace PubSoft.Scheduling.EntityFrameworkCore;
 
+/// <summary>Registration for the EF-backed scheduler state store.</summary>
 public static class SchedulingEntityFrameworkCoreServiceCollectionExtensions
 {
+    /// <summary>Swaps <see cref="IStateStore"/> for the EF-backed implementation on <typeparamref name="TDbContext"/>.</summary>
     public static IServiceCollection AddPubSoftEfCoreSchedulerStateStore<TDbContext>(this IServiceCollection services)
         where TDbContext : DbContext
     {

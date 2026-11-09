@@ -4,8 +4,10 @@ using PubSoft.Monitoring;
 
 namespace PubSoft.EntityFrameworkCore;
 
+/// <summary>Registration for the EF health check.</summary>
 public static class EfCoreHealthCheckExtensions
 {
+    /// <summary>Registers the DbContext probe check.</summary>
     public static IServiceCollection AddPubSoftEfCoreHealthCheck<TDbContext>(
         this IServiceCollection services, string name = "db", string probeSql = "SELECT 1")
         where TDbContext : DbContext
@@ -17,8 +19,10 @@ public static class EfCoreHealthCheckExtensions
     }
 }
 
+/// <summary>Opinionated EF service defaults.</summary>
 public static class EfCoreServiceDefaultsExtensions
 {
+    /// <summary>Registers the EF default service set.</summary>
     public static IServiceCollection AddPubSoftEfCoreServiceDefaults<TDbContext>(
         this IServiceCollection services, string healthCheckName = "db")
         where TDbContext : DbContext

@@ -5,16 +5,19 @@ using Microsoft.Extensions.Hosting;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Convention stripping designated controllers outside Development.</summary>
 public sealed class DevelopmentOnlyControllerConvention : IApplicationModelConvention
 {
     private readonly bool _isDevelopment;
 
+    /// <summary>Creates the convention.</summary>
     public DevelopmentOnlyControllerConvention(IHostEnvironment environment)
     {
         ArgumentNullException.ThrowIfNull(environment);
         _isDevelopment = environment.IsDevelopment();
     }
 
+    /// <inheritdoc />
     public void Apply(ApplicationModel application)
     {
         ArgumentNullException.ThrowIfNull(application);

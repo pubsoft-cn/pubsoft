@@ -8,18 +8,21 @@ using PubSoft.EntityFrameworkCore;
 namespace PubSoft.Messaging.Outbox;
 
 
+/// <summary>EF-backed inbox dedup: unique-key admission on (TenantKey, ConsumerName, MessageId) then handler then receipt.</summary>
 public sealed class EfCoreInboxMessageProcessor<TDbContext> : IInboxMessageProcessor
     where TDbContext : PubSoftDbContext
 {
     private readonly TDbContext _dbContext;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
+    /// <summary>Creates the processor.</summary>
     public EfCoreInboxMessageProcessor(TDbContext dbContext, TimeProvider? timeProvider = null)
     {
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
+    /// <inheritdoc />
     public async Task<bool> ProcessOnceAsync(
         string consumerName,
         long messageId,

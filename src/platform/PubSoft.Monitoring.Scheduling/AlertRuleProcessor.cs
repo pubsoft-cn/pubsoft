@@ -10,6 +10,7 @@ using PubSoft.Scheduling;
 
 namespace PubSoft.Monitoring.Scheduling;
 
+/// <summary>Result processor evaluating declared alert rules against job-run health transitions and dispatching to notification channels.</summary>
 public sealed class AlertRuleProcessor : IResultProcessor
 {
     private static readonly JsonSerializerOptions s_jsonOptions = new(JsonSerializerDefaults.Web);
@@ -23,6 +24,7 @@ public sealed class AlertRuleProcessor : IResultProcessor
     /// <summary>Per-job mutex table keyed by jobKey -- capped with lazy eviction of idle entries so job names cannot grow it unboundedly.</summary>
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _jobLocks = new(StringComparer.Ordinal);
 
+    /// <summary>Creates the processor; <paramref name="timeProvider"/> defaults to the system clock.</summary>
     public AlertRuleProcessor(
         IStateStore stateStore,
         NotificationDispatcher dispatcher,
@@ -44,8 +46,10 @@ public sealed class AlertRuleProcessor : IResultProcessor
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public string Name => "AlertRules";
 
+    /// <inheritdoc />
     public async Task ProcessAsync(ScheduledJob job, JobResult result, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(job);

@@ -11,9 +11,10 @@ using PubSoft.Domain;
 namespace PubSoft.AspNetCore.Authentication;
 
 
-/// <summary>Outcome of a machine credential check.</summary>
+/// <summary>Outcome of a client-credential verification.</summary>
 public sealed class ClientCredentialVerificationResult
 {
+    /// <summary>Whether verification passed.</summary>
     public bool Success { get; init; }
 
     /// <summary>Canonical client identifier to attach to the machine principal.</summary>
@@ -28,7 +29,9 @@ public sealed class ClientCredentialVerificationResult
     /// <summary>Additional claims to attach to the machine principal.</summary>
     public IReadOnlyDictionary<string, string>? Claims { get; init; }
 
+    /// <summary>Builds a failed result.</summary>
     public static ClientCredentialVerificationResult Fail() => new();
+    /// <summary>Builds a successful result.</summary>
     public static ClientCredentialVerificationResult Ok(string clientId, long? tenantId = null,
         IReadOnlyDictionary<string, string>? claims = null)
         => new() { Success = true, ClientId = clientId, TenantId = tenantId, Claims = claims };

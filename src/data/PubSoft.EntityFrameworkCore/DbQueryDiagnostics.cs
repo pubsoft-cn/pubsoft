@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.EntityFrameworkCore;
 
 
+/// <summary>Query-execution diagnostics: fingerprints, percentiles, and slow-query capture.</summary>
 public sealed class DbQueryDiagnostics
 {
     private readonly ILogger<DbQueryDiagnostics>? _logger;
@@ -19,6 +20,7 @@ public sealed class DbQueryDiagnostics
     private long _totalErrors;
     private long _slowQueryCount;
 
+    /// <summary>Creates the diagnostics collector.</summary>
     public DbQueryDiagnostics(DbQueryDiagnosticsOptions? options = null, ILogger<DbQueryDiagnostics>? logger = null)
     {
         _options = (options ?? new DbQueryDiagnosticsOptions()).CloneAndValidate();
@@ -26,6 +28,7 @@ public sealed class DbQueryDiagnostics
         _overflowStats = new QueryStats("other", "overflow", _options.MaxLatencySamplesPerTemplate);
     }
 
+    /// <summary>Runs the delegate while recording timing/failure stats.</summary>
     public async Task<TResult> ExecuteAsync<TResult>(
         string operation,
         string sql,
@@ -61,6 +64,7 @@ public sealed class DbQueryDiagnostics
         }
     }
 
+    /// <summary>Runs a non-query command while recording stats.</summary>
     public Task<int> ExecuteNonQueryAsync(
         string operation,
         string sql,
@@ -71,6 +75,7 @@ public sealed class DbQueryDiagnostics
         return ExecuteAsync(operation, sql, token => command.ExecuteNonQueryAsync(token), cancellationToken);
     }
 
+    /// <summary>Returns the aggregated snapshot.</summary>
     public DiagnosticSnapshot GetSnapshot()
     {
         var snapshots = _stats.Values.Select(stats => stats.GetSnapshot()).ToList();
@@ -84,6 +89,7 @@ public sealed class DbQueryDiagnostics
             snapshots.OrderByDescending(query => query.TotalMs).Take(20).ToArray());
     }
 
+    /// <summary>Clears captured stats.</summary>
     public void Reset()
     {
         lock (_statsLock)

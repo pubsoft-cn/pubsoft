@@ -11,6 +11,7 @@ using PubSoft.Domain;
 namespace PubSoft.AspNetCore.Authentication;
 
 
+/// <summary>Registration helpers for client-credential authorization.</summary>
 public static class ClientCredentialAuthorizationExtensions
 {
     /// <summary>Registers the MVC action filter enforcing <see cref="RequireClientCredentialAttribute"/>.</summary>
@@ -28,6 +29,7 @@ public static class ClientCredentialAuthorizationExtensions
         return endpoint.AddEndpointFilter<ClientCredentialEndpointFilter>();
     }
 
+    /// <summary>Attaches the client-credential filter to the route group.</summary>
     public static RouteGroupBuilder AddPubSoftClientCredential(this RouteGroupBuilder group)
     {
         ArgumentNullException.ThrowIfNull(group);

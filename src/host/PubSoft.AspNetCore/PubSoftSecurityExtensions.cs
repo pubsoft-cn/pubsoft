@@ -13,6 +13,7 @@ namespace PubSoft.AspNetCore;
 /// </summary>
 public static class PubSoftSecurityExtensions
 {
+    /// <summary>Registers the security service set.</summary>
     public static IServiceCollection AddPubSoftSecurity(
         this IServiceCollection services,
         IConfiguration? configuration = null)

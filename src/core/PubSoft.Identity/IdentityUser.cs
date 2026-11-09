@@ -100,7 +100,6 @@ public sealed class IdentityUser : FullAuditedAggregateRoot, IIdentityUser
     /// Counts a failed access attempt; reaching <paramref name="maxFailedAttempts"/> ends the
     /// streak and locks the account until <paramref name="now"/> + <paramref name="lockoutDuration"/>.
     /// </summary>
-    /// <summary>Counts one failed attempt; reaching <paramref name="maxFailedAttempts"/> clears the counter and locks until <paramref name="now"/> + <paramref name="lockoutDuration"/>.</summary>
     public void RecordAccessFailure(int maxFailedAttempts, TimeSpan lockoutDuration, DateTimeOffset now)
     {
         if (maxFailedAttempts <= 0)

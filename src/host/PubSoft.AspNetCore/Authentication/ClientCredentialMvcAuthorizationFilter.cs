@@ -11,8 +11,10 @@ using PubSoft.Domain;
 namespace PubSoft.AspNetCore.Authentication;
 
 
+/// <summary>MVC action filter enforcing a verified client credential.</summary>
 public sealed class ClientCredentialMvcAuthorizationFilter : IAsyncActionFilter
 {
+    /// <inheritdoc />
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         var evaluation = await ClientCredentialEvaluator

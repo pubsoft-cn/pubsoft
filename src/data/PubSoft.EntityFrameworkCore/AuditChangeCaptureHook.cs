@@ -4,12 +4,14 @@ using PubSoft.Auditing;
 
 namespace PubSoft.EntityFrameworkCore;
 
+/// <summary>SaveChanges hook capturing entity changes into the audit scope.</summary>
 public sealed class AuditChangeCaptureHook : ISaveChangesHook
 {
     private readonly IAuditChangeCollector _collector;
     private readonly AuditChangeCollectorOptions _options;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
+    /// <summary>Creates the hook.</summary>
     public AuditChangeCaptureHook(
         IAuditChangeCollector collector,
         AuditChangeCollectorOptions? options = null,
@@ -20,6 +22,7 @@ public sealed class AuditChangeCaptureHook : ISaveChangesHook
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
+    /// <inheritdoc />
     public void BeforeSaveChanges(DbContext context)
     {
         ArgumentNullException.ThrowIfNull(context);

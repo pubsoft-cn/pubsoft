@@ -9,12 +9,14 @@ using PubSoft.EntityFrameworkCore;
 namespace PubSoft.Messaging.Outbox;
 
 
+/// <summary>EF mappings for <see cref="OutboxMessage"/> and <see cref="InboxReceipt"/>.</summary>
 public static class OutboxModelBuilderExtensions
 {
     private static readonly ValueConverter<DateTimeOffset, long> UtcTicksConverter = new(
         instant => instant.UtcTicks,
         ticks => new DateTimeOffset(ticks, TimeSpan.Zero));
 
+    /// <summary>Maps the outbox and inbox-receipt tables; application-assigned Snowflake ids.</summary>
     public static ModelBuilder ConfigurePubSoftOutbox(this ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);

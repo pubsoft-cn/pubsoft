@@ -35,7 +35,7 @@ public sealed class MqttInboxSubscriber : BackgroundService
     internal static long? ExtractMessageId(MqttApplicationMessage message)
     {
         var prop = message.UserProperties?.FirstOrDefault(p => string.Equals(p.Name, MqttInboxHeaders.OutboxMessageId, System.StringComparison.Ordinal));
-        return prop is not null && long.TryParse(prop.Value, out var id) && id > 0 ? id : null;
+        return prop is not null && long.TryParse(prop.ReadValueAsString(), out var id) && id > 0 ? id : null;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

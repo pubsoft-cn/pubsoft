@@ -14,10 +14,15 @@ namespace PubSoft.AspNetCore.Authentication;
 /// <summary>Configurable pieces of machine credential authorization.</summary>
 public sealed class ClientCredentialOptions
 {
+    /// <summary>Header carrying the client id.</summary>
     public string ClientIdHeader { get; set; } = "X-Client-Id";
+    /// <summary>Header carrying the client secret.</summary>
     public string ClientSecretHeader { get; set; } = "X-Client-Secret";
+    /// <summary>Claim type for the client id.</summary>
     public string ClientIdClaimType { get; set; } = "client_id";
+    /// <summary>Claim type for the caller type.</summary>
     public string CallerTypeClaimType { get; set; } = "caller_type";
+    /// <summary>Caller-type value for machine callers.</summary>
     public string CallerTypeMachine { get; set; } = "Machine";
 
     /// <summary>Header carrying the request signature -- presence switches to signed-credential mode.</summary>

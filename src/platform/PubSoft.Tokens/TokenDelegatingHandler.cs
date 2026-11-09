@@ -12,8 +12,7 @@ public sealed class TokenDelegatingHandler : DelegatingHandler
     private readonly string? _clientHeaderName;
     private readonly string? _clientHeaderPrefix;
 
-    /// <summary>Creates the handler using configured defaults.</summary>
-    /// <summary>Creates the handler with client-level overrides.</summary>
+    /// <summary>Creates the handler using configured defaults - Creates the handler with client-level overrides.</summary>
     public TokenDelegatingHandler(ITokenProvider tokenProvider, IOptions<TokenHandlerOptions> options)
         : this(tokenProvider, options, null, null, null)
     {

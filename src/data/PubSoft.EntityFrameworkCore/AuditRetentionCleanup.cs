@@ -19,6 +19,7 @@ public sealed class AuditRetentionCleanup<TDbContext>
     private readonly TDbContext _dbContext;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
+    /// <summary>Creates the sweeper.</summary>
     public AuditRetentionCleanup(TDbContext dbContext, TimeProvider? timeProvider = null)
     {
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));

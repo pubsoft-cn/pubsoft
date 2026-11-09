@@ -5,17 +5,22 @@ using PubSoft.Domain;
 
 namespace PubSoft.EntityFrameworkCore;
 
+/// <summary>EF-backed permission-grant provider.</summary>
 public sealed class EfCorePermissionGrantProvider<TDbContext>(TDbContext dbContext) : IPermissionGrantProvider
     where TDbContext : PubSoftDbContext
 {
     private readonly TDbContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
+    /// <inheritdoc />
+    /// <inheritdoc />
+    /// <inheritdoc />
     public async Task<IReadOnlyList<PermissionGrant>> GetGrantsAsync(
         long subjectId,
         long? tenantId,
         CancellationToken cancellationToken = default)
         => await GetGrantsAsync(subjectId, tenantId, string.Empty, cancellationToken).ConfigureAwait(false);
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<PermissionGrant>> GetGrantsAsync(
         long subjectId,
         long? tenantId,

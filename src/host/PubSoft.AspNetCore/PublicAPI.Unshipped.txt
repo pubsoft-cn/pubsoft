@@ -1,6 +1,6 @@
 #nullable enable
 PubSoft.AspNetCore.AuditMiddleware
-PubSoft.AspNetCore.AuditMiddleware.AuditMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, PubSoft.AspNetCore.AuditMiddlewareOptions? options = null) -> void
+PubSoft.AspNetCore.AuditMiddleware.AuditMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, PubSoft.AspNetCore.AuditMiddlewareOptions? options = null, System.TimeProvider? timeProvider = null) -> void
 PubSoft.AspNetCore.AuditMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
 PubSoft.AspNetCore.AuditMiddlewareExtensions
 PubSoft.AspNetCore.AuditMiddlewareOptions
@@ -277,7 +277,7 @@ PubSoft.AspNetCore.PubSoftRateLimitPolicy.PubSoftRateLimitPolicy(PubSoft.AspNetC
 PubSoft.AspNetCore.PubSoftRateLimitPolicyExtensions
 PubSoft.AspNetCore.PubSoftRateLimitPolicyMiddleware
 PubSoft.AspNetCore.PubSoftRateLimitPolicyMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
-PubSoft.AspNetCore.PubSoftRateLimitPolicyMiddleware.PubSoftRateLimitPolicyMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, System.Collections.Generic.IEnumerable<PubSoft.AspNetCore.PubSoftRateLimitPolicy!>! policies) -> void
+PubSoft.AspNetCore.PubSoftRateLimitPolicyMiddleware.PubSoftRateLimitPolicyMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, System.Collections.Generic.IEnumerable<PubSoft.AspNetCore.PubSoftRateLimitPolicy!>! policies, System.TimeProvider? timeProvider = null) -> void
 PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions
 PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.AppliesTo.get -> System.Func<Microsoft.AspNetCore.Http.HttpContext!, bool>!
 PubSoft.AspNetCore.PubSoftRateLimitPolicyOptions.AppliesTo.set -> void

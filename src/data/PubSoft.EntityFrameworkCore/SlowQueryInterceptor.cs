@@ -4,17 +4,20 @@ using Microsoft.Extensions.Logging;
 
 namespace PubSoft.EntityFrameworkCore;
 
+/// <summary>Interceptor logging commands exceeding the slow-query threshold.</summary>
 public class SlowQueryInterceptor : DbCommandInterceptor
 {
     private readonly TimeSpan _slowQueryThreshold;
     private readonly ILogger<SlowQueryInterceptor>? _logger;
 
+    /// <summary>Creates the interceptor.</summary>
     public SlowQueryInterceptor(TimeSpan slowQueryThreshold, ILogger<SlowQueryInterceptor>? logger = null)
     {
         _slowQueryThreshold = slowQueryThreshold;
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public override ValueTask<DbDataReader> ReaderExecutedAsync(
         DbCommand command, CommandExecutedEventData eventData, DbDataReader result,
         CancellationToken cancellationToken = default)
@@ -23,6 +26,7 @@ public class SlowQueryInterceptor : DbCommandInterceptor
         return base.ReaderExecutedAsync(command, eventData, result, cancellationToken);
     }
 
+    /// <inheritdoc />
     public override ValueTask<int> NonQueryExecutedAsync(
         DbCommand command, CommandExecutedEventData eventData, int result,
         CancellationToken cancellationToken = default)

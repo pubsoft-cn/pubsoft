@@ -9,9 +9,11 @@ using PubSoft.Domain;
 namespace PubSoft.EntityFrameworkCore.Auditing;
 
 
+/// <summary>EF audit sink writing request snapshots plus entity changes with Snowflake ids.</summary>
 public sealed class EfCoreAuditSnapshotSink<TDbContext>(TDbContext dbContext, PubSoft.Core.IIdGenerator idGenerator) : IAuditSnapshotSink
     where TDbContext : DbContext
 {
+    /// <inheritdoc />
     public async ValueTask WriteAsync(AuditRequestSnapshot snapshot, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(snapshot);

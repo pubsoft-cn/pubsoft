@@ -7,6 +7,7 @@ namespace PubSoft.AspNetCore;
 
 /// <summary>Collects persistence callbacks and executes them once for a successful request.</summary>
 /// <remarks>Callbacks run sequentially and are not an atomic transaction across multiple stores.</remarks>
+/// <summary>Per-request save boundary collecting callbacks and enrolled participants.</summary>
 public sealed class PubSoftRequestSaveChanges : ISaveChangesBoundary
 {
     private readonly object _sync = new();
@@ -17,11 +18,14 @@ public sealed class PubSoftRequestSaveChanges : ISaveChangesBoundary
     private Task? _saveTask;
 
     /// <inheritdoc />
+    /// <inheritdoc />
     public bool IsActive => _isActive;
 
     /// <inheritdoc />
+    /// <summary>Marks the boundary active (callbacks may be registered).</summary>
     public void Activate() => _isActive = true;
 
+    /// <summary>Enrolls a save callback before saving starts.</summary>
     public void Register(Func<CancellationToken, Task> saveCallback)
     {
         ArgumentNullException.ThrowIfNull(saveCallback);
@@ -53,6 +57,7 @@ public sealed class PubSoftRequestSaveChanges : ISaveChangesBoundary
         }
     }
 
+    /// <summary>Runs all enrolled callbacks once.</summary>
     public Task SaveAllAsync(CancellationToken cancellationToken = default)
     {
         Func<CancellationToken, Task>[] callbacks;

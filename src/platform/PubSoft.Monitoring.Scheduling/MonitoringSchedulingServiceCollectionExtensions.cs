@@ -4,8 +4,10 @@ using PubSoft.Scheduling;
 
 namespace PubSoft.Monitoring.Scheduling;
 
+/// <summary>Registration for the scheduling-alert integration.</summary>
 public static class MonitoringSchedulingServiceCollectionExtensions
 {
+    /// <summary>Registers <see cref="AlertRuleProcessor"/> with validated options.</summary>
     public static IServiceCollection AddPubSoftMonitoringScheduling(
         this IServiceCollection services,
         Action<AlertProcessorOptions>? configure = null)

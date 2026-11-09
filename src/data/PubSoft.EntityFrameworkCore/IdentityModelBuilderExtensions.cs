@@ -3,8 +3,10 @@ using PubSoft.Identity;
 
 namespace PubSoft.EntityFrameworkCore;
 
+/// <summary>EF mapping for identity users and logins.</summary>
 public static class IdentityModelBuilderExtensions
 {
+    /// <summary>Maps the identity-user table.</summary>
     public static ModelBuilder ConfigurePubSoftIdentityUsers(
         this ModelBuilder modelBuilder,
         string tableName = "pubsoft_identity_user")

@@ -7,7 +7,6 @@ using Microsoft.Extensions.Options;
 namespace PubSoft.Notifications;
 
 /// <summary>DingTalk robot webhook channel. When <see cref="DingTalkWebhookOptions.Secret"/> is set the request is signed per the DingTalk robot spec.</summary>
-/// <summary>DingTalk group-bot webhook channel.</summary>
 public sealed class DingTalkWebhookChannel : INotificationChannel
 {
     private readonly TimeProvider _timeProvider = TimeProvider.System;
@@ -87,8 +86,7 @@ public sealed class DingTalkWebhookChannel : INotificationChannel
     }
 }
 
-/// <summary>DingTalk robot webhook channel options.</summary>
-/// <summary>DingTalk webhook settings.</summary>
+/// <summary>DingTalk robot webhook channel options - DingTalk webhook settings.</summary>
 public sealed class DingTalkWebhookOptions
 {
     /// <summary>Webhook URL including the access token.</summary>

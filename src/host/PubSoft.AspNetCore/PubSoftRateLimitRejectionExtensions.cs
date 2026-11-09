@@ -9,6 +9,7 @@ using PubSoft.Security;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Registration for the 429 rejection hook.</summary>
 public static class PubSoftRateLimitRejectionExtensions
 {
     /// <summary>

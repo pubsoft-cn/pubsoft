@@ -4,6 +4,7 @@ using PubSoft.Cryptography;
 
 namespace PubSoft.EntityFrameworkCore;
 
+/// <summary>EF value converters for encrypted columns.</summary>
 public static class EncryptionModelBuilderExtensions
 {
     /// <summary>

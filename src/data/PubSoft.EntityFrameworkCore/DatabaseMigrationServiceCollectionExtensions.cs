@@ -6,8 +6,10 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.EntityFrameworkCore.Migrations;
 
 
+/// <summary>Registration for database migration.</summary>
 public static class DatabaseMigrationServiceCollectionExtensions
 {
+    /// <summary>Registers the migration hosted service.</summary>
     public static IServiceCollection AddPubSoftDatabaseMigrationService(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -15,6 +17,7 @@ public static class DatabaseMigrationServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>Registers EF-based schema migration for <typeparamref name="TDbContext"/>.</summary>
     public static IServiceCollection AddPubSoftEfCoreMigration<TDbContext>(this IServiceCollection services)
         where TDbContext : DbContext
     {

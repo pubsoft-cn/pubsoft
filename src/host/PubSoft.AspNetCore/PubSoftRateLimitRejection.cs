@@ -17,6 +17,7 @@ namespace PubSoft.AspNetCore;
 /// </summary>
 public sealed class PubSoftRateLimitRejection
 {
+    /// <summary>Creates the rejection hook.</summary>
     public PubSoftRateLimitRejection(Func<HttpContext, Task> bodyWriter)
     {
         BodyWriter = bodyWriter ?? throw new ArgumentNullException(nameof(bodyWriter));

@@ -6,10 +6,12 @@ using PubSoft.Domain;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Commits the ambient unit of work at request end.</summary>
 public sealed class PubSoftRequestSaveChangesMiddleware(RequestDelegate next)
 {
     private readonly RequestDelegate _next = next ?? throw new ArgumentNullException(nameof(next));
 
+    /// <summary>Forwards then saves changes.</summary>
     public async Task InvokeAsync(HttpContext context)
     {
         var saveChanges = context.RequestServices.GetService<PubSoftRequestSaveChanges>();
