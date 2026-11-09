@@ -54,11 +54,11 @@ public static class ClientSigner
     }
 
     /// <summary>Whether the timestamp parses and falls inside the accepted window.</summary>
-    public static bool IsTimestampValid(string timestamp)
+    public static bool IsTimestampValid(string timestamp, TimeProvider? timeProvider = null)
     {
         if (!long.TryParse(timestamp, out var ts)) return false;
         var dto = DateTimeOffset.FromUnixTimeMilliseconds(ts);
-        var diff = TimeProvider.System.GetUtcNow() - dto;
+        var diff = (timeProvider ?? TimeProvider.System).GetUtcNow() - dto;
         return Math.Abs(diff.TotalSeconds) <= TimestampTolerance.TotalSeconds;
     }
 }

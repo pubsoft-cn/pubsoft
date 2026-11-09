@@ -8,11 +8,7 @@ namespace PubSoft.Domain;
 /// </summary>
 public sealed class LegacyIdMap : Entity<long>, IMultiTenant
 {
-    /// <summary>Parameterless constructor for ORM materialization.</summary>
-    /// <summary>
-    /// Creates a mapping row; <paramref name="entityType"/> must be non-empty and
-    /// trimmed, ids must be positive, and <paramref name="legacyId"/> must not be empty.
-    /// </summary>
+    /// <summary>Parameterless constructor for ORM materialization - Creates a mapping row; <paramref name="entityType"/> must be non-empty and trimmed, ids must be positive, and <paramref name="legacyId"/> must not be empty.</summary>
     public LegacyIdMap(long id, string entityType, Guid legacyId, long newId, long? tenantId = null)
     {
         if (id <= 0 || newId <= 0)

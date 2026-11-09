@@ -7,8 +7,7 @@ namespace PubSoft.OAuth;
 
 // ── International providers ──
 
-/// <summary>Microsoft Account / Microsoft Entra ID OAuth.</summary>
-/// <summary>Microsoft OAuth provider.</summary>
+/// <summary>Microsoft Account / Microsoft Entra ID OAuth provider.</summary>
 public sealed class MicrosoftOAuthProvider : GenericOAuthProvider
 {
     /// <summary>Creates the provider.</summary>

@@ -5,8 +5,7 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.OAuth;
 
 
-/// <summary>Huawei account OAuth (HMS).</summary>
-/// <summary>Huawei OAuth provider.</summary>
+/// <summary>Huawei account OAuth (HMS) - Huawei OAuth provider.</summary>
 public sealed class HuaweiOAuthProvider : GenericOAuthProvider
 {
     /// <summary>Creates the provider.</summary>

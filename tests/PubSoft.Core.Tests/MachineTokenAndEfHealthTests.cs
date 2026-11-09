@@ -51,7 +51,7 @@ public sealed class MachineTokenAndEfHealthTests
             {
                 ["Jwt:Issuer"] = "Hwd",
                 ["Jwt:Audience"] = "Hwd",
-                ["Jwt:SecretKey"] = "unit-test-signing-key-not-a-real-secret-2",
+                ["Jwt:SecretKey"] = System.Convert.ToBase64String(new byte[48]),
                 ["Jwt:Credentials:svc:Claims:caller_type"] = "Machine"
             }).Build();
         var services = new ServiceCollection();
@@ -117,7 +117,7 @@ public sealed class MachineTokenAndEfHealthTests
     {
         Issuer = "issuer",
         Audience = "api",
-        SigningKey = "unit-test-signing-key-not-a-real-secret-2",
+        SigningKey = System.Convert.ToBase64String(new byte[48]),
         Credentials = { ["svc"] = new MachineTokenCredential { Claims = { ["caller_type"] = "Machine" } } }
     });
 
@@ -145,7 +145,7 @@ public sealed class MachineTokenAndEfHealthTests
     private sealed class FakeProvider : ITokenProvider
     {
         public Task<string?> GetTokenAsync(string credentialKey, CancellationToken cancellationToken = default)
-            => Task.FromResult("fake");
+            => Task.FromResult<string?>("fake");
         public Task InvalidateAsync(string credentialKey, CancellationToken cancellationToken = default)
             => Task.CompletedTask;
     }

@@ -15,7 +15,7 @@ namespace PubSoft.Edge;
 /// </summary>
 internal sealed class EdgeRateCounter
 {
-    public int Count { get; set; }
+    public int Count;
     public DateTime ResetAt { get; set; }
 
     public bool IsExceeded(int limit) => Count >= limit;

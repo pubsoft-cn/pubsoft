@@ -5,8 +5,7 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.OAuth;
 
 
-/// <summary>Google Sign-In OAuth.</summary>
-/// <summary>Google OAuth provider.</summary>
+/// <summary>Google Sign-In OAuth - Google OAuth provider.</summary>
 public sealed class GoogleOAuthProvider : GenericOAuthProvider
 {
     /// <summary>Creates the provider.</summary>

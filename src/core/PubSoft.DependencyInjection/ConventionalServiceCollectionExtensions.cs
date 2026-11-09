@@ -38,7 +38,7 @@ public static class ConventionalServiceCollectionExtensions
 
         foreach (var assembly in assemblies)
         {
-            foreach (var type in assembly.GetTypes())
+            foreach (var type in GetLoadableTypes(assembly))
             {
                 if (!IsConventionalType(type, predicate))
                     continue;
@@ -82,5 +82,16 @@ public static class ConventionalServiceCollectionExtensions
             (false, false, true) => ServiceLifetime.Singleton,
             _ => null, // unmarked or multiply-marked - skip
         };
+    }
+    private static System.Collections.Generic.IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+    {
+        try
+        {
+            return assembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            return ex.Types.Where(t => t is not null)!;
+        }
     }
 }

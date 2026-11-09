@@ -10,6 +10,8 @@ public sealed class Tenant : Entity<long>
     /// <summary>Creates a tenant; code/name are required and bounded.</summary>
     public Tenant(long id, string code, string name, string? displayName = null, string? description = null)
     {
+        if (id <= 0)
+            throw new ArgumentOutOfRangeException(nameof(id), "Tenant ID must be positive.");
         Id = id;
         Code = NormalizeRequired(code, nameof(code), 64);
         Name = NormalizeRequired(name, nameof(name), 100);

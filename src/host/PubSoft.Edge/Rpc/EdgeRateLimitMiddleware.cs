@@ -43,6 +43,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
         _next = next;
         _path = path.TrimEnd('/');
         _options = options.Value;
+        _options.Validate();
         _pseudoPathsEnabled = gatewayOptions?.Value.EnablePseudoPaths ?? false;
         _logger = logger;
         _cleanupTimer = new Timer(CleanupExpired, null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
@@ -74,9 +75,8 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
                 request = await System.Text.Json.JsonSerializer.DeserializeAsync<EdgeRpcRequest>(
                     context.Request.Body, EdgeJsonOptions.Default, context.RequestAborted).ConfigureAwait(false);
             }
-            catch
+            catch // pubsoft:exempt PUBSOFT041 "body parse failures are delegated to the gateway middleware"
             {
-                // Parse failures are left to the gateway middleware.
             }
             context.Request.Body.Position = 0;
         }
@@ -114,7 +114,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
 
         if (_timeProvider.GetUtcNow().UtcDateTime >= totalCounter.ResetAt)
         {
-            totalCounter.Count = 0;
+            Interlocked.Exchange(ref totalCounter.Count, 0);
             totalCounter.ResetAt = _timeProvider.GetUtcNow().UtcDateTime.Add(window);
         }
 
@@ -128,7 +128,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
             return;
         }
 
-        totalCounter.Count++;
+        Interlocked.Increment(ref totalCounter.Count);
 
         var originalBodyStream = context.Response.Body;
         using var memoryStream = new MemoryStream();
@@ -148,7 +148,7 @@ public sealed class EdgeRateLimitMiddleware : IDisposable
                     rpcResponse = await System.Text.Json.JsonSerializer.DeserializeAsync<EdgeRpcResponse>(
                         memoryStream, EdgeJsonOptions.Default, context.RequestAborted).ConfigureAwait(false);
                 }
-                catch { /* non-edge response - not counted */ }
+                catch { /* pubsoft:exempt PUBSOFT041 "non-edge response body — not counted toward failure rate" */ }
 
                 if (rpcResponse is { Ok: false } && !string.Equals(rpcResponse.Code, EdgeErrorCodes.RateLimited, System.StringComparison.Ordinal) && !string.Equals(rpcResponse.Code, EdgeErrorCodes.FailureRateLimited, System.StringComparison.Ordinal))
                 {

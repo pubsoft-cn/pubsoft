@@ -5,8 +5,7 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.OAuth;
 
 
-/// <summary>Toutiao OAuth -- website-app QR login.</summary>
-/// <summary>Toutiao OAuth provider.</summary>
+/// <summary>Toutiao OAuth -- website-app QR login - Toutiao OAuth provider.</summary>
 public sealed class ToutiaoOAuthProvider : GenericOAuthProvider
 {
     /// <summary>Creates the provider.</summary>

@@ -43,8 +43,7 @@ public abstract class OAuthProviderBase : IOAuthProvider
     /// <summary>Fetches user info with an access token.</summary>
     public abstract Task<OAuthUserInfoResult> GetUserInfoAsync(string appId, string accessToken, CancellationToken ct = default);
 
-    /// <summary>Phone numbers are opt-in; providers that support it override this.</summary>
-    /// <summary>Fetches a phone number (providers that support it; default = unsupported).</summary>
+    /// <summary>Phone numbers are opt-in; providers that support it override this - Fetches a phone number (providers that support it; default = unsupported).</summary>
     public virtual Task<OAuthPhoneResult> GetPhoneNumberAsync(string appId, string code, CancellationToken ct = default)
         => Task.FromResult(OAuthPhoneResult.Fail("This provider does not support phone-number retrieval"));
 

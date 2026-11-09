@@ -18,6 +18,14 @@ public sealed class RoleDataScope : Entity<long>, IMultiTenant
         long? tenantId = null,
         bool isAll = false)
     {
+        if (id <= 0 || roleId <= 0 || scopeId < 0)
+            throw new ArgumentOutOfRangeException(nameof(id), "Ids must be positive; scopeId may be 0 only with IsAll.");
+        ArgumentException.ThrowIfNullOrWhiteSpace(dimension);
+        if (!string.Equals(dimension, dimension.Trim(), System.StringComparison.Ordinal))
+            throw new ArgumentException("Dimension must have no surrounding whitespace.", nameof(dimension));
+        if (tenantId is <= 0)
+            throw new ArgumentOutOfRangeException(nameof(tenantId), "Tenant ID must be positive when specified.");
+
         Id = id;
         RoleId = roleId;
         Dimension = dimension;

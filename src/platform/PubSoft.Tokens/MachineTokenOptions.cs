@@ -61,7 +61,15 @@ public sealed class MachineTokenOptions
     {
         if (string.IsNullOrWhiteSpace(key))
             return false;
-        var length = System.Text.Encoding.UTF8.GetByteCount(key);
-        return length is >= 32 and <= 128;
+        byte[] decoded;
+        try
+        {
+            decoded = Convert.FromBase64String(key);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+        return decoded.Length is >= 32 and <= 128;
     }
 }

@@ -91,8 +91,7 @@ public sealed class SubjectPermissionRole : Entity<long>, IMultiTenant
     }
     /// <summary>The bound subject (user or client id).</summary>
     public long SubjectId { get; set; }
-    /// <summary>The bound role.</summary>
-    /// <summary>The role receiving the grant.</summary>
+    /// <summary>The bound role - The role receiving the grant.</summary>
     public long RoleId { get; set; }
 
     private static void ValidateClientCode(string clientCode)
@@ -122,7 +121,7 @@ public sealed class PermissionGrantRecord : Entity<long>, IMultiTenant
         if (!string.Equals(moduleKey, moduleKey.Trim(), System.StringComparison.Ordinal))
             throw new ArgumentException("Module keys must have no surrounding whitespace.", nameof(moduleKey));
         if (tenantId is <= 0)
-            throw new ArgumentOutOfRangeException(nameof(roleId), "Specified IDs must be positive.");
+            throw new ArgumentOutOfRangeException(nameof(tenantId), "Specified IDs must be positive.");
 
         Id = id;
         RoleId = roleId;

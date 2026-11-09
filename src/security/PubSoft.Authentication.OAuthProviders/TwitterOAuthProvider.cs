@@ -5,11 +5,7 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.OAuth;
 
 
-/// <summary>
-/// Twitter/X OAuth 2.0 with PKCE (User Context). The caller must supply a PKCE
-/// <see cref="OAuthAuthorizeUrlRequest.CodeChallenge"/> (S256); this package does not retain the verifier.
-/// </summary>
-/// <summary>Twitter OAuth provider.</summary>
+/// <summary>Twitter/X OAuth 2.0 with PKCE (User Context). The caller must supply a PKCE <see cref="OAuthAuthorizeUrlRequest.CodeChallenge"/> (S256); this package does not retain the verifier. - Twitter OAuth provider.</summary>
 public sealed class TwitterOAuthProvider : GenericOAuthProvider
 {
     /// <summary>Creates the provider.</summary>

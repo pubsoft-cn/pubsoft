@@ -5,8 +5,7 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.OAuth;
 
 
-/// <summary>Taobao OAuth -- user info requires the TOP API (top.taobao.userinfo.get).</summary>
-/// <summary>Taobao OAuth provider.</summary>
+/// <summary>Taobao OAuth -- user info requires the TOP API (top.taobao.userinfo.get) - Taobao OAuth provider.</summary>
 public sealed class TaobaoOAuthProvider : GenericOAuthProvider
 {
     /// <summary>Creates the provider.</summary>

@@ -63,4 +63,19 @@ public sealed class EdgeRateLimitOptions
 
     /// <summary>None-scheme failure limit (login-endpoint anti-brute-force, per IP).</summary>
     public int NoneFailurePermitLimit { get; set; } = 10;
+    internal void Validate()
+    {
+        foreach (var (name, value) in new (string, int)[]
+        {
+            (nameof(ClientPermitLimit), ClientPermitLimit),
+            (nameof(WindowSeconds), WindowSeconds),
+            (nameof(QueueLimit), QueueLimit),
+            (nameof(HmacPermitLimit), HmacPermitLimit),
+            (nameof(SessionPermitLimit), SessionPermitLimit),
+        })
+            if (value < 0)
+                throw new ArgumentOutOfRangeException(name, $"{name} cannot be negative.");
+        if (WindowSeconds <= 0)
+            throw new ArgumentOutOfRangeException(nameof(WindowSeconds));
+    }
 }

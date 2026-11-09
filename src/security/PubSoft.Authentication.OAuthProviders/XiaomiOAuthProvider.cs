@@ -5,8 +5,7 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.OAuth;
 
 
-/// <summary>Xiaomi account OAuth.</summary>
-/// <summary>Xiaomi OAuth provider.</summary>
+/// <summary>Xiaomi account OAuth - Xiaomi OAuth provider.</summary>
 public sealed class XiaomiOAuthProvider : GenericOAuthProvider
 {
     /// <summary>Creates the provider.</summary>
@@ -18,9 +17,9 @@ IOAuthChannelConfigProvider cp, HttpClient hc, ILogger<XiaomiOAuthProvider>? l =
     protected override string UserInfoEndpoint => "https://open.account.xiaomi.com/user/profile";
     protected override string DefaultScope => "user/profile:read";
 
-    protected override async Task<OAuthUserInfoResult> FetchUserInfoAsync(string accessToken, CancellationToken ct)
+    protected override async Task<OAuthUserInfoResult> FetchUserInfoAsync(OAuthChannelConfig config, string accessToken, CancellationToken ct)
     {
-        var url = $"{UserInfoEndpoint}?clientId={{appId}}&token={accessToken}";
+        var url = $"{UserInfoEndpoint}?clientId={Uri.EscapeDataString(config.AppId)}&token={Uri.EscapeDataString(accessToken)}";
         var response = await FetchJsonAsync(url, ct).ConfigureAwait(false);
         return new OAuthUserInfoResult
         {

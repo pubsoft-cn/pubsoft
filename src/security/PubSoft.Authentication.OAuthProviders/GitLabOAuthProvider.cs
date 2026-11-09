@@ -5,8 +5,7 @@ using Microsoft.Extensions.Logging;
 namespace PubSoft.OAuth;
 
 
-/// <summary>GitLab.com / self-hosted GitLab OAuth.</summary>
-/// <summary>GitLab OAuth provider.</summary>
+/// <summary>GitLab.com / self-hosted GitLab OAuth - GitLab OAuth provider.</summary>
 public sealed class GitLabOAuthProvider : GenericOAuthProvider
 {
     /// <summary>Creates the provider.</summary>

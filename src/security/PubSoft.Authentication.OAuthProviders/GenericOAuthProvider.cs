@@ -80,7 +80,7 @@ public abstract class GenericOAuthProvider : OAuthProviderBase
         // When the token response carries no openid, fall back to userinfo.
         if (string.IsNullOrWhiteSpace(openId) && !string.IsNullOrWhiteSpace(accessToken))
         {
-            var userInfo = await FetchUserInfoAsync(accessToken, ct).ConfigureAwait(false);
+            var userInfo = await FetchUserInfoAsync(config, accessToken, ct).ConfigureAwait(false);
             if (userInfo.Success)
                 openId = userInfo.OpenId;
         }
@@ -95,7 +95,14 @@ public abstract class GenericOAuthProvider : OAuthProviderBase
     }
 
     /// <inheritdoc />
-    public override Task<OAuthUserInfoResult> GetUserInfoAsync(string appId, string accessToken, CancellationToken ct = default)
+    public override async Task<OAuthUserInfoResult> GetUserInfoAsync(string appId, string accessToken, CancellationToken ct = default)
+    {
+        var config = await ResolveConfigAsync(appId, ct).ConfigureAwait(false);
+        return await FetchUserInfoAsync(config, accessToken, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>User-info fetch with the resolved channel config; providers needing the AppId override this overload.</summary>
+    protected virtual Task<OAuthUserInfoResult> FetchUserInfoAsync(OAuthChannelConfig config, string accessToken, CancellationToken ct)
         => FetchUserInfoAsync(accessToken, ct);
 
     /// <summary>Derived classes may override to map provider-specific user-info fields.</summary>

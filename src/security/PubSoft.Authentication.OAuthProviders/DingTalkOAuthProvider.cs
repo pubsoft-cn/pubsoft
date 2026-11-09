@@ -6,13 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace PubSoft.OAuth;
 
-/// <summary>
-/// DingTalk OAuth provider -- QR login / H5 code -> openid/unionid.
-/// API: POST https://oapi.dingtalk.com/sns/getuserinfo_bycode
-/// Signing: HmacSHA256(timestamp + "\n" + appSecret) -> Base64 -> UrlEncode
-/// AppId=appKey, AppSecret=appSecret.
-/// </summary>
-/// <summary>DingTalk OAuth provider.</summary>
+/// <summary>DingTalk OAuth provider -- QR login / H5 code -> openid/unionid. API: POST https://oapi.dingtalk.com/sns/getuserinfo_bycode Signing: HmacSHA256(timestamp + "\n" + appSecret) -> Base64 -> UrlEncode AppId=appKey, AppSecret=appSecret. - DingTalk OAuth provider.</summary>
 public sealed class DingTalkOAuthProvider : OAuthProviderBase
 {
     private readonly TimeProvider _timeProvider = TimeProvider.System;

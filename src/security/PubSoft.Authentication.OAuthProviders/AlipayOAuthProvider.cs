@@ -350,8 +350,7 @@ public sealed partial class AlipayOAuthProvider : OAuthProviderBase
     }
 }
 
-/// <summary>Alipay OAuth failure carrying a vendor/internal error code.</summary>
-/// <summary>Alipay API error.</summary>
+/// <summary>Alipay OAuth failure carrying a vendor/internal error code - Alipay API error.</summary>
 public sealed class AlipayOAuthException : Exception
 {
     /// <summary>Creates the exception with the provider error code.</summary>

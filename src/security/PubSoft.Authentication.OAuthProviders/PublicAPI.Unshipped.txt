@@ -280,6 +280,7 @@ static PubSoft.OAuth.WeChatAccessTokenResult.Fail(string! msg) -> PubSoft.OAuth.
 static PubSoft.OAuth.WeChatAccessTokenResult.Ok(string! token) -> PubSoft.OAuth.WeChatAccessTokenResult!
 static readonly PubSoft.OAuth.OAuthProviderNames.BuiltIn -> string![]!
 virtual PubSoft.OAuth.GenericOAuthProvider.DefaultScope.get -> string!
+virtual PubSoft.OAuth.GenericOAuthProvider.FetchUserInfoAsync(PubSoft.OAuth.OAuthChannelConfig! config, string! accessToken, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthUserInfoResult!>!
 virtual PubSoft.OAuth.GenericOAuthProvider.FetchUserInfoAsync(string! accessToken, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthUserInfoResult!>!
 virtual PubSoft.OAuth.OAuthProviderBase.GetPhoneNumberAsync(string! appId, string! code, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthPhoneResult!>!
 virtual PubSoft.OAuth.OAuthProviderBase.ResolveConfigAsync(string! appId, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<PubSoft.OAuth.OAuthChannelConfig!>!

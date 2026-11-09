@@ -6,8 +6,7 @@ namespace PubSoft.OAuth;
 
 // ── China-market providers ──
 
-/// <summary>Douyin (TikTok China) OAuth -- website-app QR login. AppId=client_key, AppSecret=client_secret.</summary>
-/// <summary>Douyin OAuth provider.</summary>
+/// <summary>Douyin (TikTok China) OAuth -- website-app QR login. AppId=client_key, AppSecret=client_secret - Douyin OAuth provider.</summary>
 public sealed class DouyinOAuthProvider : GenericOAuthProvider
 {
     /// <summary>Creates the provider.</summary>
