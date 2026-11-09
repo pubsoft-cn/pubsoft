@@ -44,3 +44,14 @@ The EF mapping is opt-in and does not create or migrate tables by itself; add `I
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Identity`: `IIdentityUser` `IdentityUser` `IdentityUserSnapshot` `IdentityUserLogin`
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+`AccessFailedCount`, `CreationTime`, `CreatorId`, `DeleterId`, `DeletionTime`, `ExtJson`, `IsDeleted`, `LastModificationTime`, `LastModifierId`, `LockoutEnd`, `LoginProvider`, `NormalizedUserName`, `PasswordHash`, `PhoneNumber`, `PhoneNumberConfirmed`, `ProviderDisplayName`, `ProviderKey`, `SecurityStamp`, `TenantId`, `UserName`
+
+<!-- pubsoft:api-surface:end -->
+

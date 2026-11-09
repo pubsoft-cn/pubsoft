@@ -12,6 +12,7 @@ namespace PubSoft.DocsSnippets;
 internal static class IdentityGenerationSnippets
 {
     // src/core/PubSoft.DependencyInjection/README.md — "AddPubSoftIdGenerator"
+    #region snippet_AddPubSoftIdGenerator
     internal static void ExplicitWorkerId(IServiceCollection services, long workerId)
         => services.AddPubSoftIdGenerator(workerId);
 
@@ -20,6 +21,7 @@ internal static class IdentityGenerationSnippets
 
     internal static void FromConfiguration(IServiceCollection services, IConfiguration configuration)
         => services.AddPubSoftIdGenerator(configuration);
+    #endregion
 
     // src/core/PubSoft.Core/README.md — SnowflakeIdGenerator usage
     internal static long NextId(IIdGenerator generator) => generator.NextId();

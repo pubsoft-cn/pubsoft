@@ -77,3 +77,15 @@ app.MapEdgeOpenApi("/rpc");
 - `Edge:Gateway:EnablePseudoPaths` — accept `POST /rpc/{method}` pseudo-paths (default false)
 - `Edge:RateLimit:*` — per-clientId/scheme/IP limits + failure limiting
 - `Edge:OpenApi:*` — document/UI paths, title, clientId example
+
+## API surface
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+`ClientId`, `ClientIdExample`, `ClientPermitLimit`, `Description`, `DevelopmentOnly`, `DocumentPath`, `Enabled`, `EnablePseudoPaths`, `ExpiresAt`, `FailurePermitLimit`, `FailureRateLimitEnabled`, `FailureWindowSeconds`, `HelpLink`, `HmacPermitLimit`, `HResult`, `HttpContext`, `IsVerified`, `Md5PermitLimit`, `MemberId`, `NoneFailurePermitLimit`, `NonePermitLimit`, `OpenId`, `QueueLimit`, `RequestId`, `Roles`, `Scheme`, `Session`, `SessionKey`, `SessionPermitLimit`, `Source`, `SwaggerUiBundleUrl`, `SwaggerUiCssUrl`, `TenantId`, `TimestampToleranceSeconds`, `Title`, `Token`, `UiEnabled`, `UiPath`, `UserId`, `Version`, `WindowSeconds`
+
+<!-- pubsoft:api-surface:end -->

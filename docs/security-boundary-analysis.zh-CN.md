@@ -151,16 +151,16 @@ Scheduled HTTP 与 Outbound 也可以从宿主后台任务直接调用外部系�
 | API6 敏感业务流访问无限制 | 登录/validate、OAuth 流程、出站任务、Edge 方法、管理 API | 业务流限流与事务授权随应用而定；在消费方验证配额、滥用检测与 step-up/审批控制。 |
 | API7 服务端请求伪造 | Scheduled HTTP、JWKS metadata/JWKS URI、OAuth provider 配置 | Scheduled HTTP 文档化了连接时地址固定与逐跳重定向校验；宿主 allowlist 与禁用不安全代理组合仍是部署决策。身份 metadata URL 保持可信且固定。 |
 | API8 安全配置错误 | `TrustAnyProxy`、转发头链、`ReadHeader`、`UseSystemProxy`、OpenAPI、`None` scheme | 高影响选项是公开的，其中一些明确标注在受限拓扑外不安全。验证生产生效配置而非仅源码默认值。R6 以代理拓扑为条件，已在基线后部分缓解。 |
-| API9 资产清单管理不当 | 逐包公共 API 台账、API 文档、Swagger/OpenAPI、包消费者 | 逐包台账与消费者冒烟项目有助于资产盘点。`scripts/sync-public-api.sh --check` 存在，但所评审 CI 工作流未显式调用；路由清单与外部 API 版本仍是宿主责任。 |
+| API9 资产清单管理不当 | 逐包公共 API 台账、API 文档、Swagger/OpenAPI、包消费者 | 逐包台账与消费者冒烟项目有助于资产盘点。`dotnet run --project tools/PubSoft.DocsTool -- --check` 存在，但所评审 CI 工作流未显式调用；路由清单与外部 API 版本仍是宿主责任。 |
 | API10 API 消费不安全 | OAuth provider 适配器、MQTT/Outbox、出站 HTTP、错误传播 | 校验上游 TLS/身份、响应模式与信任边界；清洗上游错误并使外部副作用幂等。MQTT README 记录了 MQTT 5 依赖与 at-least-once 语义。 |
 
 与发现最直接相关的外部建议：RFC 8725 要求应用选定 JWT 算法，并在 issuer/audience 声明用于区分接收方时校验之；Microsoft ASP.NET Core 指引要求转发头只来自可信代理/网段，且先于依赖它们的中间件处理；OWASP 多租户指引把客户端提供的租户标识视为需要服务端授权的选择器；OWASP 口令指引建议自适应散列并平衡工作因子与登录期拒绝服务风险。这些建议为宿主清单提供依据；它们本身不确立 PubSoft 缺陷。
 
 ## 证据方法与限制
 
-公共面发现使用各项目 `PublicAPI.Shipped.txt` / `PublicAPI.Unshipped.txt` 台账、包 README、实现与邻近测试。台账由 `Microsoft.CodeAnalysis.PublicApiAnalyzers` 维护；[打包指引](packaging.md) 记录了 `scripts/sync-public-api.sh --check` 作为可用的漂移检查，而所评审的 [CI 工作流](../.github/workflows/ci.yml) 未显式调用它。这是值得考虑的流程缺口，并非检入台账当前有误的证据。
+公共面发现使用各项目 `PublicAPI.Shipped.txt` / `PublicAPI.Unshipped.txt` 台账、包 README、实现与邻近测试。台账由 `Microsoft.CodeAnalysis.PublicApiAnalyzers` 维护；[打包指引](packaging.md) 记录了 `dotnet run --project tools/PubSoft.DocsTool -- --check` 作为可用的漂移检查，而所评审的 [CI 工作流](../.github/workflows/ci.yml) 未显式调用它。这是值得考虑的流程缺口，并非检入台账当前有误的证据。
 
-生成的[覆盖率矩阵](test-coverage-matrix.md)报告 2,195/2,608 成员（84%），并明确排除接口成员。未覆盖的具体实现包括 EF 权限/仓储/数据作用域 provider、审计 sink/留存、OAuth registry/provider 路径、Edge handler/会话存储与 Outbox/Inbox 组件。把它当作优先级辅助：未覆盖不等于有漏洞，聚合覆盖率也不度量安全断言。安全优先的后续应针对不变量，如跨租户拒绝、过滤器缺失行为、JWT 密钥移除、重定向重校验、跨副本重放与 secret/broker 失败关闭。
+覆盖率矩阵（`DocsTool --coverage`）报告 2,195/2,608 成员（84%），并明确排除接口成员。未覆盖的具体实现包括 EF 权限/仓储/数据作用域 provider、审计 sink/留存、OAuth registry/provider 路径、Edge handler/会话存储与 Outbox/Inbox 组件。把它当作优先级辅助：未覆盖不等于有漏洞，聚合覆盖率也不度量安全断言。安全优先的后续应针对不变量，如跨租户拒绝、过滤器缺失行为、JWT 密钥移除、重定向重校验、跨副本重放与 secret/broker 失败关闭。
 
 外部材料查阅于 2026-11-04。它们提供规范性或社区指引，而非消费方配置的证据。OWASP API Top 10 是风险分类法，OWASP Cheat Sheets 是实现指引，RFC 8725 是 IETF 最佳当前实践，Microsoft Learn 描述 ASP.NET Core 10 行为，NIST SSDF 是开发过程框架。未测试任何生产部署、运行时流量、云账号或消费方包集成。
 

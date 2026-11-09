@@ -48,3 +48,22 @@ await app.UsePubSoftModulesAsync();          // module init sees ctx.GetAppBuild
 ```
 
 `Add<T>` activates modules parameterless during `ConfigureServices` and via `ActivatorUtilities` once the provider exists (public ctors are trim-annotated, so no RUC warnings); `Add(descriptor, factory)` is the fully explicit path. Web modules read the pipeline through `WebModuleContext`/`ctx.GetAppBuilder()`; `ctx.GetEnv()` resolves `IHostEnvironment` from the provider.
+
+## API surface
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftModules` |
+| `StartPubSoftModulesAsync` |
+
+**(options & records)**
+
+`Configuration`, `Dependencies`, `Logger`, `ModuleType`, `Optional`, `ServiceProvider`, `Services`, `ShutdownToken`
+
+<!-- pubsoft:api-surface:end -->

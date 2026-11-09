@@ -27,10 +27,16 @@ public sealed class PricingService : ITransientDependency { }
 
 ## `AddPubSoftIdGenerator`
 
+<!-- pubsoft:snippet:AddPubSoftIdGenerator -->
 ```csharp
-services.AddPubSoftIdGenerator(workerId);          // explicit 0-31 shard
-services.AddPubSoftIdGenerator(o => o.WorkerId = w); // options delegate
-services.AddPubSoftIdGenerator(configuration);      // binds PubSoft:IdGenerator:WorkerId
+internal static void ExplicitWorkerId(IServiceCollection services, long workerId)
+    => services.AddPubSoftIdGenerator(workerId);
+
+internal static void OptionsDelegate(IServiceCollection services, long w)
+    => services.AddPubSoftIdGenerator(o => o.WorkerId = w);
+
+internal static void FromConfiguration(IServiceCollection services, IConfiguration configuration)
+    => services.AddPubSoftIdGenerator(configuration);
 ```
 
 Registers one shared `SnowflakeIdGenerator` as `IIdGenerator` — required by EF audit persistence and the messaging outbox (both fail closed when it is absent). `workerId` must be unique per live replica; the config overload throws when the key is missing rather than guessing a shard. `TryAdd` yields when the host registers its own `IIdGenerator` first.
@@ -47,3 +53,21 @@ services.AddConventionalServices(
 ```
 
 Only **visible, non-abstract classes** carrying a marker are registered (file-local types are skipped). Each type is registered under every non-marker public interface it implements, plus the concrete type itself. Classes without a marker are never registered — conventional registration is strictly opt-in and does not change visibility semantics.
+
+## API surface
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftIdGenerator` |
+
+**(options & records)**
+
+`WorkerId`
+
+<!-- pubsoft:api-surface:end -->

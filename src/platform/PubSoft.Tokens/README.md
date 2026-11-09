@@ -79,6 +79,23 @@ _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Tokens`: `HttpTokenProvider` `ITokenProvider` `TokenCredential` `TokenDelegatingHandler` `TokenHandlerOptions` `TokenManagerOptions` `TokenRequestOptions` `TokenServiceCollectionExtensions`
 
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftMachineTokens` |
+| `AddPubSoftTokens` |
+
+**(options & records)**
+
+`AllowInsecureUrl`, `Audience`, `Claims`, `Credentials`, `DefaultCredentialKey`, `DefaultHeaderName`, `DefaultHeaderPrefix`, `Expiry`, `ExpiryPath`, `Headers`, `InnerHandler`, `Issuer`, `KeyId`, `Lifetime`, `Method`, `RefreshBefore`, `SigningKey`, `Timeout`, `TokenPath`
+
+<!-- pubsoft:api-surface:end -->
+
 ## Verification
 
 ```bash

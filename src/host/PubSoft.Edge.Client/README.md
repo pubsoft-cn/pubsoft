@@ -24,3 +24,15 @@ var dto = await client.InvokeAsync<MyDto>("demo.ping", new { itemId = 1 });
 - `InvokeAsync<T>` / `InvokeVoidAsync` — throw `EdgeRpcException` on error envelopes
 - `LastRequestId` — correlation id sent with the last call (echoed as `requestId`)
 - `BuildRequest` / `GetSignPayload` — debugging helpers
+
+## API surface
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+`HelpLink`, `HResult`, `LastRequestId`, `Source`
+
+<!-- pubsoft:api-surface:end -->

@@ -52,3 +52,14 @@ A request/job adapter calls `Change(tenantId)` once from a trusted source; the r
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.MultiTenancy`: `CreateTenantInput` `ITenantAppService` `Tenant` `TenantDto` `UpdateTenantInput`
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+`CreationTime`, `Description`, `DisplayName`, `IsEnabled`
+
+<!-- pubsoft:api-surface:end -->
+

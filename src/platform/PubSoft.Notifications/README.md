@@ -80,9 +80,27 @@ _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Notifications`: `DingTalkWebhookChannel` `DingTalkWebhookOptions` `INotificationChannel` `NotificationChannelExtensions` `NotificationDispatchReport` `NotificationDispatcher` `NotificationMessage` `NotificationOptions` `NotificationResult` `NotificationServiceCollectionExtensions` `NotificationSeverity` `TeamsWebhookChannel` `TeamsWebhookOptions`
 
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftNotificationChannels` |
+| `AddPubSoftNotifications` |
+
+**(options & records)**
+
+`AllowInsecureUrl`, `DeduplicationWindow`, `MaximumDeduplicationEntries`, `Message`, `ProviderMessageId`, `Results`, `Secret`, `Success`, `WebhookUrl`
+
+<!-- pubsoft:api-surface:end -->
+
 ## Verification
 
 ```bash
 dotnet test tests/PubSoft.Core.Tests/PubSoft.Core.Tests.csproj -c Release --filter FullyQualifiedName~NotificationsTests
 bash scripts/verify-package-consumer.sh
 ```
+

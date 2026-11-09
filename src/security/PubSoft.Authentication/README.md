@@ -68,3 +68,14 @@ This registration also adds the principal snapshot accessor and a singleton reso
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Authentication`: `AuthenticatedSubject` `AuthenticatedSubjectResolver` `IAuthenticatedSubjectAccessor` `IPrincipalSnapshotAccessor` `PrincipalClaim` `PrincipalSnapshot` `CurrentSubject` `CurrentSubjectResolver` `SubjectClaimDialect` `ICurrentSubjectAccessor`
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+`ClientId`, `Email`, `Issuer`, `Roles`, `SubjectId`, `TenantId`, `Value`, `ValueType`
+
+<!-- pubsoft:api-surface:end -->
+

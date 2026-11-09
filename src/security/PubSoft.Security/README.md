@@ -42,4 +42,15 @@ Invalid input, exhausted capacity, or unavailable stores all fail closed. Keys a
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
-- `PubSoft.Security`: `DataMaskingService` `HmacSignatureValidator` `INonceStore` `MemoryNonceStore` `PasswordHasher` `PasswordVerification` `RateLimiter` `RateLimitOptions` `RateLimitResult`
+- `PubSoft.Security`: `DataMaskingService` `HmacSignatureValidator` `INonceStore` `MemoryNonceStore` `PasswordHasher` `PasswordVerification` `RateLimiter` `RateLimiterOptions` `RateLimitResult`
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+`ActiveIdentifiers`, `AppId`, `BankCardMaskChar`, `BankCardSuffixVisibleDigits`, `EmailMaskChar`, `EmailPrefixVisibleChars`, `Enabled`, `Error`, `GeneralMaskChar`, `IdCardMaskChar`, `IdCardPrefixVisibleDigits`, `IdCardSuffixVisibleDigits`, `IsAllowed`, `IsValid`, `LimitByIpAddress`, `LimitByUserId`, `MaxAppIdLength`, `MaxIdentifiers`, `MaxNonceLength`, `MaxTimestampSkewSeconds`, `PhoneMaskChar`, `PhoneSuffixVisibleDigits`, `RejectionReason`, `RemainingRequests`, `ReplacementHash`, `RequestsPerWindow`, `ResetTime`, `SignatureEncoding`, `Succeeded`, `TimestampUnit`, `TotalIdentifiers`, `TotalRequests`, `WindowSize`
+
+<!-- pubsoft:api-surface:end -->
+

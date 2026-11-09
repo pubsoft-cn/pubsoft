@@ -12,7 +12,7 @@ last-reviewed: 2026-10-13
 
 `PubSoft.AspNetCore` contains opt-in middleware and endpoint helpers that adapt the framework-neutral PubSoft packages to ASP.NET Core. Nothing is enabled automatically. The host remains responsible for authentication/authorization policy, trusted proxy configuration, secret storage, and middleware order.
 
-## ## Signed client credentials
+## Signed client credentials
 
 When `ClientCredentialOptions.SignatureHeader` (default `X-Signature`) is present, evaluation moves to the host-registered `IClientSignatureVerifier` — the verifier receives a `ClientSignatureRequest` (client id, signature, timestamp, nonce, method, path, query, body-stream) and owns the signing protocol end to end. Without a registered verifier signed requests fail closed with 401; unsigned requests keep the plaintext `IClientCredentialVerifier` path (403 when missing).
 
@@ -183,6 +183,48 @@ _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 - `PubSoft.AspNetCore.Authentication`: `ClientCredentialAuthorizationExtensions` `ClientCredentialEndpointFilter` `ClientCredentialMvcAuthorizationFilter` `ClientCredentialOptions` `ClientCredentialVerificationResult` `IClientCredentialVerifier` `PrincipalSnapshotServiceCollectionExtensions` `RequireClientCredentialAttribute`
 - `PubSoft.AspNetCore.Authorization`: `PermissionEndpointFilter` `PermissionEndpointFilterExtensions` `PermissionMvcAuthorizationExtensions` `PermissionMvcAuthorizationFilter`
 
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftClientCredential` |
+| `AddPubSoftClientCredentialAuthorization` |
+| `AddPubSoftDevelopmentOnlyControllerConvention` |
+| `AddPubSoftForwardedHeaders` |
+| `AddPubSoftGatewayRateLimiting` |
+| `AddPubSoftHmacValidation` |
+| `AddPubSoftPermissionAuthorization` |
+| `AddPubSoftRateLimiting` |
+| `AddPubSoftRateLimitPolicy` |
+| `AddPubSoftRateLimitRejection` |
+| `AddPubSoftRequestSaveChanges` |
+| `AddPubSoftSecurity` |
+| `AddPubSoftServiceDefaults` |
+| `AddPubSoftTenantContext` |
+| `MapPubSoftHealthEndpoint` |
+| `UsePubSoftAudit` |
+| `UsePubSoftCorrelationId` |
+| `UsePubSoftExceptionHandling` |
+| `UsePubSoftForwardedHeaders` |
+| `UsePubSoftGatewayRateLimiting` |
+| `UsePubSoftHmacValidation` |
+| `UsePubSoftModulesAsync` |
+| `UsePubSoftRateLimiting` |
+| `UsePubSoftRateLimitPolicies` |
+| `UsePubSoftRequestSaveChanges` |
+| `UsePubSoftSecurityHeaders` |
+| `UsePubSoftServiceDefaults` |
+
+**(options & records)**
+
+`AllowAuthenticatedUser`, `AppIdHeader`, `AppliesTo`, `ArgumentExceptionStatusCode`, `CallerTypeClaimType`, `CallerTypeMachine`, `CaptureActor`, `CaptureClientIp`, `CaptureUserAgent`, `ClaimNames`, `Claims`, `ClientId`, `ClientIdClaimType`, `ClientIdHeader`, `ClientIdWindowSeconds`, `ClientSecretHeader`, `Configuration`, `ContentSecurityPolicy`, `ControllerContext`, `CorrelationHeaderName`, `CountFailuresOnly`, `DefaultMessage`, `DefaultStatusCode`, `DomainExceptionStatusCode`, `EchoResponseHeader`, `Enabled`, `EnableHstsInDevelopment`, `Environment`, `ExcludedPathPrefixes`, `FailurePermitLimit`, `FailureRateLimitEnabled`, `FailureWindowSeconds`, `ForwardedFor`, `ForwardedProto`, `ForwardLimit`, `HeaderName`, `HealthPathPrefixes`, `HealthPermitLimit`, `HealthWindowSeconds`, `IdentifierSelector`, `InboundHeaderNames`, `InnerHandler`, `InvalidOperationExceptionStatusCode`, `IsFailureResponse`, `KeyNotFoundStatusCode`, `Logger`, `LoginPathPrefixes`, `LoginPermitLimit`, `LoginWindowSeconds`, `MaxClientIdsPerIp`, `MaxIdentifiers`, `MaximumBodyBytes`, `MaxTrackedIps`, `MetadataProvider`, `Method`, `ModelBinderFactory`, `Nonce`, `NonceHeader`, `NotFoundPermitLimit`, `NotFoundRateLimitEnabled`, `NotFoundWindowSeconds`, `OAuthFailureLimit`, `OAuthPathPrefixes`, `OAuthPerIpPermitLimit`, `OAuthPermitLimit`, `OAuthWindowSeconds`, `ObjectValidator`, `PerEndpoint`, `PermissionsPolicy`, `PermitLimit`, `ProblemDetailsFactory`, `QueryString`, `QueueLimit`, `ReadBody`, `ReadHeader`, `RealIp`, `ReferrerPolicy`, `RequestsPerWindow`, `RequireBodyHash`, `ResponseHeaderName`, `ServiceProvider`, `Services`, `ShutdownToken`, `Signature`, `SignatureHeader`, `StrictTransportSecurity`, `Success`, `TenantId`, `Timestamp`, `TimestampHeader`, `TrustAnyProxy`, `TrustedNetworks`, `TrustedProxies`, `UnauthorizedAccessStatusCode`, `UnauthorizedMessage`, `ValidateAnonymousPermitLimit`, `ValidateFailureLimit`, `ValidatePathPrefixes`, `ValidatePerIpPermitLimit`, `ValidatePermitLimit`, `ValidateWindowSeconds`, `WindowSeconds`, `WindowSize`, `XContentTypeOptions`, `XFrameOptions`
+
+<!-- pubsoft:api-surface:end -->
+
 ## Verification
 
 ```bash
@@ -190,3 +232,4 @@ dotnet test tests/PubSoft.Core.Tests/PubSoft.Core.Tests.csproj -c Release --filt
 dotnet test tests/PubSoft.Core.Tests/PubSoft.Core.Tests.csproj -c Release --filter FullyQualifiedName~RateLimitingMiddlewareTests
 dotnet test tests/PubSoft.Core.Tests/PubSoft.Core.Tests.csproj -c Release --filter FullyQualifiedName~RequestSaveChangesMiddlewareTests
 ```
+

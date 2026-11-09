@@ -42,4 +42,4 @@ PBKDF2-HMAC-SHA256，随机 16 字节盐、默认 600,000 迭代。`VerifyAndReh
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
-- `PubSoft.Security`: `DataMaskingService` `HmacSignatureValidator` `INonceStore` `MemoryNonceStore` `PasswordHasher` `PasswordVerification` `RateLimiter` `RateLimitOptions` `RateLimitResult`
+- `PubSoft.Security`: `DataMaskingService` `HmacSignatureValidator` `INonceStore` `MemoryNonceStore` `PasswordHasher` `PasswordVerification` `RateLimiter` `RateLimiterOptions` `RateLimitResult`

@@ -43,3 +43,15 @@ captured old/new values. Redaction needs `CaptureValues = true`.
 ## Boundaries
 
 The collector rejects the whole batch when full rather than silently truncating. Durable persistence (`EfCoreAuditSnapshotSink`, `AuditRetentionCleanup`, `ArchiveStartedBeforeAsync`) lives in `PubSoft.EntityFrameworkCore`; Outbox forwarding lives in `PubSoft.Auditing.Outbox`; HTTP capture middleware lives in `PubSoft.AspNetCore` (`UsePubSoftAudit`).
+
+## API surface
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+`Action`, `Actor`, `AuditGetRequests`, `Business`, `CaptureValues`, `Category`, `ChangedAt`, `Changes`, `ClientIp`, `Detail`, `DisplayName`, `Duration`, `Enabled`, `EntityId`, `EntityType`, `FailureCode`, `HttpMethod`, `IgnoredEntityTypes`, `IsAdministrator`, `MaxChangedPropertiesPerEntity`, `MaxChanges`, `MaxStringValueLength`, `Metrics`, `NewValue`, `OldValue`, `Properties`, `Request`, `RequestPath`, `SensitiveProperties`, `StartedAt`, `StatusCode`, `SubjectId`, `Success`, `TargetId`, `TargetName`, `TargetType`, `UserAgent`
+
+<!-- pubsoft:api-surface:end -->

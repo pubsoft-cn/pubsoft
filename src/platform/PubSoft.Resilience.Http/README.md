@@ -58,9 +58,26 @@ _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Resilience.Http`: `HttpResilienceOptions` `HttpResilienceServiceCollectionExtensions` `PubSoftHttpResilienceHandler`
 
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftHttpResilience` |
+
+**(options & records)**
+
+`CircuitBreaker`, `InnerHandler`, `PerAttemptTimeout`, `Retry`, `Timeout`
+
+<!-- pubsoft:api-surface:end -->
+
 ## Verification
 
 ```bash
 dotnet test tests/PubSoft.Core.Tests/PubSoft.Core.Tests.csproj -c Release --filter FullyQualifiedName~HttpResilienceHandlerTests
 bash scripts/verify-package-consumer.sh
 ```
+

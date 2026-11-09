@@ -48,3 +48,20 @@ services.AddPubSoftOAuthProviders<MyChannelConfigProvider>();
 Providers return raw vendor identity data — user creation, account binding, session/JWT issuance, relay-state machines, and login endpoints are host orchestration. Secrets never enter logs or exception messages. Native-AOT compatible.
 Authorization URLs encode all query values (`app_id`, `state`, `scope`, `redirect_uri`) per parameter. Provider response bodies are capped at 1 MiB of actual bytes — multi-byte UTF-8 payloads cannot bypass the limit.
 
+## API surface
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftOAuthProviders` |
+
+**(options & records)**
+
+`AccessToken`, `AppId`, `AppSecret`, `AuthorizeUrl`, `AvatarUrl`, `ChannelType`, `CodeChallenge`, `CountryCode`, `Email`, `ExtraJson`, `Gender`, `HelpLink`, `HResult`, `IsDefault`, `Message`, `NickName`, `OpenId`, `PhoneNumber`, `Provider`, `Province`, `PurePhoneNumber`, `RedirectUri`, `RefreshToken`, `Scope`, `SessionKey`, `Source`, `State`, `Success`, `UnionId`, `UserId`
+
+<!-- pubsoft:api-surface:end -->

@@ -95,6 +95,16 @@ _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Authentication.Jwt`: `JwtJwksDocument` `JwtJwksKey` `JwtSigning` `RefreshTokenGenerator` `IClientSigningKeyProvider` `RsaSigningKeyMaterial` `SymmetricSigningKeyMaterial`
 
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+``
+
+<!-- pubsoft:api-surface:end -->
+
 ## Verification
 
 Run the focused bearer tests with:

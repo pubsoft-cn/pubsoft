@@ -37,3 +37,14 @@ These fakes are intentionally minimal — they do **not** emulate AsyncLocal amb
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Testing`: `DelegateSaveParticipant` `FixedMemberScopeContext` `FixedTenantContext` `TestTimeProvider`
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+`IsMemberScoped`, `MemberId`, `TenantId`
+
+<!-- pubsoft:api-surface:end -->
+

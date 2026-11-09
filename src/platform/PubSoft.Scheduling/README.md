@@ -89,9 +89,26 @@ _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Scheduling`: `ExecutorRegistry` `IExecutorRegistry` `IJobExecutor` `IResultProcessor` `IResultProcessorRegistry` `IStateStore` `JobResult` `JobRetryPolicy` `LoggingResultProcessor` `MemoryStateStore` `ResultProcessorRegistry` `ScheduleMask` `ScheduleMasks` `ScheduledJob` `SchedulerEngine` `SchedulerHostedService` `SchedulerOptions` `SchedulerServiceCollectionExtensions`
 
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftScheduler` |
+
+**(options & records)**
+
+`BackoffFactor`, `DelayMs`, `DistributedLocking`, `DistributedLockLease`, `Enabled`, `ErrorDelay`, `ErrorMessage`, `ExecutedAt`, `ExecutorConfig`, `ExecutorType`, `InitialDelay`, `LoopInterval`, `MaxAttempts`, `MaxConcurrentJobs`, `MaxDelay`, `Metadata`, `PreventOverlap`, `ResultProcessorConfig`, `ResultProcessors`, `Retry`, `Retryable`, `Schedule`, `StatusCode`, `Success`, `Timeout`
+
+<!-- pubsoft:api-surface:end -->
+
 ## Verification
 
 ```bash
 dotnet test tests/PubSoft.Core.Tests/PubSoft.Core.Tests.csproj -c Release --filter FullyQualifiedName~SchedulingTests
 bash scripts/verify-package-consumer.sh
 ```
+

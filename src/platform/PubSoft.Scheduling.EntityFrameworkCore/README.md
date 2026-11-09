@@ -24,3 +24,22 @@ services.AddPubSoftEfCoreSchedulerStateStore<AppDbContext>();
 ## Boundaries
 
 This store gives durable single-writer semantics. It does **not** provide job leases, cluster-wide mutual exclusion, or misfire recovery — multi-node scheduling needs an external coordinator (e.g. `IDistributedLock`). See [PubSoft.Scheduling](../../platform/PubSoft.Scheduling/README.md).
+
+## API surface
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftEfCoreSchedulerStateStore` |
+| `ConfigurePubSoftSchedulerState` |
+
+**(options & records)**
+
+`ExpiresAt`, `KeyHash`, `TenantId`, `TenantScope`, `UpdatedAt`, `ValueJson`
+
+<!-- pubsoft:api-surface:end -->

@@ -64,3 +64,21 @@ services.AddHostedService(sp => new MqttInboxSubscriber(
 Delivery semantics: QoS1 at-least-once + `InboxReceipt` exactly-once-effective.
 No offset/replay — for durable event log with replay use a dedicated broker
 (Kafka / NATS JetStream).
+
+## API surface
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftMqttOutboxDispatcher` |
+
+**(options & records)**
+
+`BrokerUri`, `ClientId`, `ConsumerName`, `EventTypePrefix`, `MaxPayloadBytes`, `Password`, `PersistentSession`, `PublishTimeout`, `QualityOfService`, `ReconnectDelay`, `SessionExpirySeconds`, `ShareGroup`, `TopicFilter`, `TopicPrefix`, `Username`
+
+<!-- pubsoft:api-surface:end -->

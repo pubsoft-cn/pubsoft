@@ -125,6 +125,24 @@ _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Messaging.Outbox`: `EfCoreInboxMessageProcessor<TDbContext>` `EfCoreOutboxPublisher<TDbContext>` `EfCoreOutboxStore<TDbContext>` `IInboxMessageProcessor` `IOutboxDispatcher` `IOutboxPublisher` `IOutboxScopeProvider` `IOutboxStore` `InboxOutboxDispatcher` `InboxReceipt` `InboxRetentionCleanup<TDbContext>` `OutboxBackgroundService` `OutboxMessage` `OutboxMessageStatus` `OutboxModelBuilderExtensions` `OutboxOptions` `OutboxProcessor` `OutboxServiceCollectionExtensions`
 
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftOutbox` |
+| `AddPubSoftOutboxWorker` |
+| `ConfigurePubSoftOutbox` |
+
+**(options & records)**
+
+`AggregateKey`, `AttemptCount`, `BaseRetryDelay`, `BatchSize`, `ConsumerName`, `CorrelationId`, `DeliveredAt`, `EventType`, `LastErrorCode`, `LeaseDuration`, `LeaseExpiresAt`, `LeaseToken`, `MaxAttempts`, `MaximumPayloadCharacters`, `MaxRetryDelay`, `MessageId`, `NextAttemptAt`, `OccurredAt`, `PayloadJson`, `PollInterval`, `ProcessedAt`, `Status`, `TargetModule`, `TenantId`, `TenantKey`
+
+<!-- pubsoft:api-surface:end -->
+
 ## Verification
 
 ```bash
@@ -133,3 +151,4 @@ bash scripts/verify-package-consumer.sh
 ```
 
 The integration tests exercise SQLite behavior and opt-in MySQL 8.4 cases. They do not establish behavior for other database providers or make external side effects exactly-once.
+

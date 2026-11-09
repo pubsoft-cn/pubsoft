@@ -19,7 +19,7 @@ last-reviewed: 2026-10-13
 
 - All projects run `Microsoft.CodeAnalysis.PublicApiAnalyzers` (`src/Directory.Build.props`).
 - Per package: `PublicAPI.Shipped.txt` (released surface) + `PublicAPI.Unshipped.txt` (unreleased additions). New public symbols must be seeded or RS0016 warns.
-- `bash scripts/sync-public-api.sh` rebuilds and rewrites every `Unshipped.txt` from the analyzer output (handles RS0016 adds **and** RS0017 removals); `--check` verifies drift without writing — wire it into CI when the API surface should stay declared.
+- `dotnet run --project tools/PubSoft.DocsTool -c Release -- --sync` rebuilds and rewrites every `Unshipped.txt` from the analyzer output (handles RS0016 adds **and** RS0017 removals); `--check` verifies drift without writing — wire it into CI when the API surface should stay declared.
 - `RS0026` (overloads with optional parameters) is a deliberate API style and is suppressed project-wide.
 - On release, fold `Unshipped` into `Shipped` to establish the compatibility baseline.
 

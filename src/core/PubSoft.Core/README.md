@@ -59,3 +59,14 @@ DI registration goes through `AddPubSoftIdGenerator` (`PubSoft.DependencyInjecti
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Core`: `ApiResponse` `ApiResponse<T>` `DomainException` `Gender` `Guard` `ISpecification<T>` `Money` `PagedResultDto<T>` `Result<T>` `ResultError` `SnowflakeIdGenerator` `Specification<T>`
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+`Criteria`, `GroupBy`, `HelpLink`, `HResult`, `IsPagingEnabled`, `Items`, `Message`, `OrderBy`, `OrderByDescending`, `Source`, `StatusCode`, `TotalCount`, `TraceId`
+
+<!-- pubsoft:api-surface:end -->
+

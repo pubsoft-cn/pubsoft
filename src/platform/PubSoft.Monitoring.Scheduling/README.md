@@ -35,4 +35,21 @@ Probe contracts, the health aggregator, and bounded-parallelism options live in 
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
-- `PubSoft.Monitoring.Scheduling`: `MonitoringSchedulingOptions` `ProbeExecutionResult` `ProbeFailureState` `ProbeOutcome` `ProbeState` `ProbeStateService` `ScheduledProbeExecutor` `ProbeAlertRuleProcessor` `MonitoringSchedulingServiceCollectionExtensions`
+- `PubSoft.Monitoring.Scheduling`: `AlertProcessorOptions` `ProbeExecutionResult` `ProbeFailureState` `ProbeOutcome` `ProbeState` `ProbeStateService` `ScheduledProbeExecutor` `ProbeAlertRuleProcessor` `MonitoringSchedulingServiceCollectionExtensions`
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftMonitoringScheduling` |
+
+**(options & records)**
+
+`Channels`, `Condition`, `Current`, `DelayThresholdMs`, `FailureThreshold`, `FromState`, `ProbeHealth`, `Rules`, `Severity`, `Throttle`, `ToState`, `WasProbeUnreachable`
+
+<!-- pubsoft:api-surface:end -->
+

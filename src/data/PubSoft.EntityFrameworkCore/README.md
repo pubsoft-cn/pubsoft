@@ -107,8 +107,47 @@ _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 - `PubSoft.EntityFrameworkCore.Auditing`: `AuditEntityChangeRecord` `AuditLogRecord` `AuditPersistenceModelBuilderExtensions` `AuditPersistenceServiceCollectionExtensions` `AuditRetentionCleanup<TDbContext>` `EfCoreAuditSnapshotSink<TDbContext>`
 - `PubSoft.EntityFrameworkCore.Migrations`: `DatabaseMigrationService` `DatabaseMigrationServiceCollectionExtensions` `EfCoreDatabaseSchemaMigrator<TDbContext>` `IDataSeeder` `IDatabaseMigrationService` `IDatabaseSchemaMigrator`
 
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftAuditChangeCapture` |
+| `AddPubSoftDatabaseMigrationService` |
+| `AddPubSoftDbQueryDiagnostics` |
+| `AddPubSoftEfCoreAuditPersistence` |
+| `AddPubSoftEfCoreHealthCheck` |
+| `AddPubSoftEfCoreMigration` |
+| `AddPubSoftEfCorePermissionGrantManager` |
+| `AddPubSoftEfCorePermissionGrantProvider` |
+| `AddPubSoftEfCoreRoleDataScopeProvider` |
+| `AddPubSoftEfCoreServiceDefaults` |
+| `AddPubSoftRepository` |
+| `AddPubSoftRequestUnitOfWork` |
+| `AddPubSoftSaveChangesHook` |
+| `AddPubSoftSaveParticipant` |
+| `AddPubSoftUnitOfWork` |
+| `ConfigurePubSoftAuditPersistence` |
+| `ConfigurePubSoftIdentityUserLogins` |
+| `ConfigurePubSoftIdentityUsers` |
+| `ConfigurePubSoftLegacyIdMaps` |
+| `ConfigurePubSoftPermissionGrants` |
+| `ConfigurePubSoftRoleDataScopes` |
+| `ConfigurePubSoftTenants` |
+| `HasPubSoftEncryption` |
+
+**(options & records)**
+
+`Action`, `AuditLog`, `AuditLogId`, `AverageMs`, `Category`, `ChangedAt`, `ClientIp`, `Count`, `Detail`, `DurationMilliseconds`, `Enabled`, `EntityId`, `EntityType`, `ErrorCount`, `FailureCode`, `HttpMethod`, `IsAdministrator`, `MaxLatencySamplesPerTemplate`, `MaxMs`, `MaxQueryTemplates`, `Operation`, `P50Ms`, `P95Ms`, `P99Ms`, `PropertiesJson`, `QueryFingerprint`, `RequestPath`, `SampleRate`, `SlowQueryCount`, `SlowQueryThreshold`, `StartedAt`, `StatusCode`, `SubjectId`, `SubjectName`, `Success`, `TargetId`, `TargetName`, `TargetType`, `TenantId`, `TopQueries`, `TotalErrors`, `TotalMs`, `TotalQueries`, `UserAgent`
+
+<!-- pubsoft:api-surface:end -->
+
 ## Database health and Snowflake conventions
 
 `AddPubSoftEfCoreHealthCheck<TDbContext>(name = "db", probeSql = "SELECT 1")` registers an `IAppHealthCheck` that opens a scope, verifies `CanConnectAsync`, and runs the probe statement — drop-in for the usual per-host `MySqlHealthCheck` boilerplate.
 
 `builder.ApplySnowflakeIdConventions()` in `OnModelCreating` marks every `long` primary key `ValueGenerated.Never` — replaces the copy-pasted entity loop that pairs with `SnowflakeIdGenerator` (client assigns ids, the store never generates).
+

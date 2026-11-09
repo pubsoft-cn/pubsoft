@@ -63,3 +63,21 @@ Two key-source families, mutually exclusive per scheme: **asymmetric** (static J
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Authentication.Jwt.AspNetCore`: `DualJwtAuthenticationExtensions` `DualJwtOptions` `JwksKeyProvider` `JwksOptions` `JwtBearerAuthenticationExtensions` `PubSoftJwtBearerOptions`
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftDualJwtAuthentication` |
+| `AddPubSoftJwtBearer` |
+
+**(options & records)**
+
+`AllowInsecureJwksUri`, `Audience`, `BackchannelTimeout`, `CacheMinutes`, `ClientIdClaimType`, `ClockSkew`, `Issuer`, `JwksJson`, `JwksUri`, `MetadataAddress`, `NameClaimType`, `RequireHttpsMetadata`, `RoleClaimType`, `SecretKey`, `SymmetricKey`, `SymmetricKeyId`
+
+<!-- pubsoft:api-surface:end -->
+

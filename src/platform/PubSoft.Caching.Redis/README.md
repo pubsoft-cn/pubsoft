@@ -41,3 +41,23 @@ var fencing = ((IFencedLockHandle)lease).FencingToken; // pass to the protected 
 - The lease is a duration bound, not a correctness guarantee — downstream resources must validate the monotonically increasing fencing token
 
 For single-process coordination use the in-process lock in `PubSoft.Caching` instead — see [its README](../../platform/PubSoft.Caching/README.md).
+
+## API surface
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftRedisCache` |
+| `AddPubSoftRedisCheck` |
+| `AddPubSoftRedisDistributedLock` |
+
+**(options & records)**
+
+`Database`, `FenceRetention`, `KeyPrefix`, `MaxValueBytes`, `SerializerOptions`
+
+<!-- pubsoft:api-surface:end -->

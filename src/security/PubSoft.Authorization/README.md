@@ -83,3 +83,14 @@ Permission grant persistence/replacement transactions, role membership, anonymou
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Authorization`: `AutoPermissionOptions` `IPermissionDefinitionProvider` `IPermissionGrantProvider` `IPermissionModuleProvider` `PermissionAuthorizationService` `PermissionDefinition` `PermissionDefinitionRegistry` `PermissionExemptAttribute` `PermissionFlags` `PermissionGrant` `PermissionModuleAttribute` `PermissionModuleRegistry` `PermissionRequirementDeriver` `RequireCustomPermissionAttribute` `RequireExtPermissionAttribute` `RequirePermissionAttribute`
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+`ApiPaths`, `AvailableFlags`, `ClientCode`, `CustomPermissions`, `CustomPermissionsExtractor`, `Description`, `DisplayName`, `EnforceDerived`, `ExtFlag`, `Flags`, `FrontendRoutes`, `IsExtPermission`, `ModuleKey`, `ModuleKeyResolver`, `PinAvailableFlagsResolver`, `PinDescriptionResolver`, `PinDisplayNameResolver`, `PinSortOrderResolver`, `SortOrder`
+
+<!-- pubsoft:api-surface:end -->
+

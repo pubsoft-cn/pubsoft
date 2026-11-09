@@ -60,3 +60,15 @@ record used nonces (e.g. in a shared cache keyed by nonce, TTL = `NonceTtl`) and
 `NonceTtl` covers the timestamp window so an old signature cannot be replayed after expiry.
 
 Headers used by convention: `X-Client-Id`, `X-Timestamp`, `X-Nonce`, `X-Signature`.
+
+## API surface
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+`ActiveKeyId`, `Plaintext`, `ReplacementCiphertext`, `RequiresReEncryption`
+
+<!-- pubsoft:api-surface:end -->

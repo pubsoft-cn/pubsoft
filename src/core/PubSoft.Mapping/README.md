@@ -56,6 +56,12 @@ _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Mapping`: `MappingBuilder<TSource, TDestination>` `ObjectMapper`
 
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+<!-- pubsoft:api-surface:end -->
+
 ## Verification
 
 ```bash

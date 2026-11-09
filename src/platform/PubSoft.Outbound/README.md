@@ -45,3 +45,14 @@ Register the request assembly with `AddOutboundContracts(options => options.Asse
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Outbound`: `ContractJsonDeserializer` `ContractRequestBuilder` `ContractResponseMapper` `DictionaryResponseMapper` `ExternalOutboundSdk` `IOutboundContractRegistry` `JsonValueConverter` `OutboundContractMetadataResolver` `OutboundContractOptions` `OutboundContractRegistry` `OutboundEngine` `OutboundServiceCollectionExtensions` `RequiredFieldValidator`
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+`NamingPolicy`
+
+<!-- pubsoft:api-surface:end -->
+

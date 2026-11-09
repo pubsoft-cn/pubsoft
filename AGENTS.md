@@ -32,7 +32,7 @@ tests/          统一测试 + PackageConsumerSmoke/SecurityConsumerSmoke 消费
 dotnet build PubSoft.sln -c Release
 
 # 同步 API 基线（修 RS0016）
-bash scripts/sync-public-api.sh
+dotnet run --project tools/PubSoft.DocsTool -c Release -- --sync
 
 # 全部测试（含 Redis/MySQL 集成）
 dotnet test tests/PubSoft.Core.Tests -c Release

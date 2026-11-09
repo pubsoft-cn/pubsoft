@@ -103,3 +103,21 @@ catalog is DevelopmentOnly by default, generate against a dev host or pass
 
 - `PubSoft.AspNetCore.Docs`: `ApiDocExtraEndpoint` `ApiDocsCatalogService`
   `ApiDocsExtensions` `ApiDocsOptions`
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftApiDocs` |
+| `MapPubSoftApiDocs` |
+
+**(options & records)**
+
+`CatalogPath`, `DetectAuthMetadata`, `DevelopmentOnly`, `Example`, `Group`, `GroupBy`, `IncludeNonActionEndpoints`, `Method`, `OverlayPath`, `PagePath`, `RequireAuthorization`, `Summary`, `Title`
+
+<!-- pubsoft:api-surface:end -->
+

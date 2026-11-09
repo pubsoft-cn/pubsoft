@@ -56,3 +56,14 @@ var breaker = new CircuitBreaker(new CircuitBreakerOptions
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Resilience`: `CircuitBreaker` `CircuitBreakerOptions` `CircuitState` `RetryExecution` `RetryPolicy` `RetryResult`
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+`FailureThreshold`, `InitialDelay`, `MaxRetries`, `OpenTimeout`, `Options`, `RetryOn5xx`, `RetryOnConnectionFailure`, `RetryOnTimeout`
+
+<!-- pubsoft:api-surface:end -->
+

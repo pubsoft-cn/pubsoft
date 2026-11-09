@@ -61,3 +61,14 @@ The dimension snapshot and `RoleDataScope.IsAll` are descriptive data only. They
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Domain`: `AggregateRoot<TKey>` `AmbientMemberScopeContext` `AmbientTenantContext` `AuditedAggregateRoot` `AuditedEntity<TKey>` `CreationAuditedAggregateRoot` `CreationAuditedEntity<TKey>` `DataScopeAccessEvaluator` `DataScopeDimension` `DataScopeDimensionRegistry` `Entity<TKey>` `FullAuditedAggregateRoot` `FullAuditedEntity<TKey>` `IDataScopeDimensionRegistry` `IMemberScopeContext` `IMemberScoped` `IMultiTenant` `IPubSoftSaveParticipant` `IReadOnlyRepository<TEntity, TKey>` `IRepository<TEntity, TKey>` `IRoleDataScopeProvider` `ISoftDelete` `ITenantContext` `PermissionGrantRecord` `PermissionModule` `PermissionRole` `RoleDataScope` `SubjectPermissionRole`
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+`AvailableFlags`, `ClientCode`, `CreationTime`, `CreatorId`, `CustomPermissionName`, `CustomPermissionsJson`, `DeleterId`, `DeletionTime`, `Description`, `Dimension`, `DisplayName`, `EntityType`, `ExtensionFlags`, `Flags`, `IsAll`, `IsDeleted`, `IsEnabled`, `LastModificationTime`, `LastModifierId`, `LegacyId`, `MemberId`, `ModuleKey`, `NewId`, `RoleId`, `ScopeId`, `SortOrder`, `SubjectId`, `TenantId`, `UpdatedAt`
+
+<!-- pubsoft:api-surface:end -->
+

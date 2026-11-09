@@ -56,9 +56,27 @@ _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Events`: `DomainEvent` `DomainEventBackgroundService` `DomainEventDispatcher` `DomainEventOptions` `DomainEventServiceCollectionExtensions` `IDomainEvent` `IDomainEventDispatcher` `IDomainEventHandler<TEvent>`
 
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftDomainEventHandler` |
+| `AddPubSoftEvents` |
+
+**(options & records)**
+
+`Capacity`
+
+<!-- pubsoft:api-surface:end -->
+
 ## Verification
 
 ```bash
 dotnet test tests/PubSoft.Core.Tests/PubSoft.Core.Tests.csproj -c Release --filter FullyQualifiedName~DomainEventsTests
 bash scripts/verify-package-consumer.sh
 ```
+

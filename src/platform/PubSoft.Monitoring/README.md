@@ -66,6 +66,28 @@ _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Monitoring`: `AppHealthCheckResult` `AppHealthStatus` `CachedHealthCheckAggregator` `HealthCheckAggregator` `HttpProbeHealthCheck` `IAppHealthCheck` `IProbeHealthCheck` `MonitoringErrorCategory` `MonitoringMetrics` `MonitoringOptions` `MonitoringServiceCollectionExtensions` `ParallelHealthCheckAggregator` `ProbeHealth`
 
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftCachedHealthChecks` |
+| `AddPubSoftHealthCheck` |
+| `AddPubSoftHealthChecks` |
+| `AddPubSoftMonitoring` |
+| `AddPubSoftMonitoringMetrics` |
+| `AddPubSoftParallelHealthChecks` |
+| `AddPubSoftStartupDiagnostics` |
+
+**(options & records)**
+
+`Description`, `Detail`, `MinProbeSuccessRatio`, `ProbeTargets`, `ProbeTimeout`, `Status`
+
+<!-- pubsoft:api-surface:end -->
+
 ## Verification
 
 ```bash
@@ -73,3 +95,4 @@ dotnet test tests/PubSoft.Core.Tests/PubSoft.Core.Tests.csproj -c Release --filt
 dotnet test tests/PubSoft.Core.Tests/PubSoft.Core.Tests.csproj -c Release --filter FullyQualifiedName~ApplicationHealthChecksTests
 bash scripts/verify-package-consumer.sh
 ```
+

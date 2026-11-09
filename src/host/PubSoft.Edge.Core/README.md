@@ -47,3 +47,15 @@ Canonical payload (newline-separated): `method`, `timestamp`, `nonce`, `requestI
 Canonical JSON: recursive ordinal key sort, compact output, `null`/`undefined` excluded (0/false/"" still signed).
 
 `EdgeSigner` exposes `SignHmac`/`VerifyHmac`/`SignMd5`/`VerifyMd5`/`BuildSignPayload`/`CanonicalizeJson` and the unified `Verify(request, secretKey)` dispatcher.
+
+## API surface
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+`ClientId`, `Credential`, `ErrorMessage`, `Message`, `Method`, `Nonce`, `Params`, `RequestId`, `Scheme`, `SignPayload`, `SubCode`, `SubMessage`, `Success`, `Timestamp`, `TraceId`, `Version`
+
+<!-- pubsoft:api-surface:end -->

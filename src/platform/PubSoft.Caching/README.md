@@ -78,6 +78,23 @@ _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 - `PubSoft.Caching`: `CachingServiceCollectionExtensions` `ICache` `IDistributedLock` `InProcessDistributedLock` `MemoryCache`
 - `PubSoft.Caching.MemoryCache`: `CacheStatistics`
 
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftInProcessDistributedLock` |
+| `AddPubSoftMemoryCache` |
+
+**(options & records)**
+
+`ExpiredEntries`, `SizeLimit`, `TotalEntries`
+
+<!-- pubsoft:api-surface:end -->
+
 ## Verification
 
 ```bash
@@ -85,3 +102,4 @@ dotnet test tests/PubSoft.Core.Tests/PubSoft.Core.Tests.csproj -c Release --filt
 PUBSOFT_REDIS="localhost:6379,abortConnect=false" dotnet test tests/PubSoft.Core.Tests/PubSoft.Core.Tests.csproj -c Release --filter FullyQualifiedName~RedisCacheTests|FullyQualifiedName~RedisDistributedLockTests
 bash scripts/verify-package-consumer.sh
 ```
+

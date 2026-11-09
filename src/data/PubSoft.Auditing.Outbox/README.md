@@ -24,3 +24,21 @@ services.AddPubSoftAuditOutbox<AppDbContext>();
 ## Boundaries
 
 The host owns dispatcher registration, payload privacy/retention review, and consumer idempotency. The direct EF audit sink (`PubSoft.EntityFrameworkCore`) remains available independently — choose one per pipeline.
+
+## API surface
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftAuditOutbox` |
+
+**(options & records)**
+
+`SchemaVersion`, `Snapshot`
+
+<!-- pubsoft:api-surface:end -->

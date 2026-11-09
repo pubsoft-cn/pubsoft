@@ -60,6 +60,22 @@ Job registration, bitmask schedules, engine limits, and state stores live in [Pu
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
-- `PubSoft.Scheduling.Http`: `HttpExecutorOptions` `HttpProbeExecutor` `HttpResilientExecutor` `ScheduledHttpRequest` `ScheduledHttpResult` `SchedulingHttpServiceCollectionExtensions`
+- `PubSoft.Scheduling.Http`: `HttpExecutorOptions` `HttpProbeExecutor` `HttpResilientExecutor` `ScheduledHttpRequest` `ScheduledHttpResult` `HttpExecutorServiceCollectionExtensions`
 Redirects are followed manually with per-hop target re-validation. When a redirect changes origin (scheme, host, or port), job-configured headers and the token header are no longer forwarded — credentials never cross origins.
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftHttpExecutors` |
+
+**(options & records)**
+
+`AllowUnsafeRetries`, `BlockPrivateNetworks`, `CircuitFailureThreshold`, `CircuitOpenTimeout`, `CredentialKey`, `DefaultTimeout`, `ExpectStatusCodes`, `FollowRedirects`, `HeaderName`, `HeaderPrefix`, `Headers`, `MaxResponseBytes`, `Method`, `Retry`, `Timeout`, `Token`, `UseSystemProxy`
+
+<!-- pubsoft:api-surface:end -->
 

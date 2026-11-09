@@ -40,3 +40,14 @@ The metadata attributes do not perform transport serialization, routing, validat
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.Contracts`: `ApiContractMetadata` `ApiFieldAttribute` `ApiHttpVerb` `ApiOperationAttribute` `CamelCaseNamingPolicy` `EmitBehavior` `FieldSource` `Guard` `IApiRequest` `IApiRequest<TResponse>` `IContractNormalizer` `IContractValidator` `INamingPolicy` `IOutboundEngine` `IOutboundProvider` `IOutboundSdk` `OutboundProviderContext` `PascalCaseNamingPolicy` `SnakeCaseNamingPolicy`
+
+<!-- pubsoft:api-surface:start -->
+
+Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
+
+**(options & records)**
+
+`Aliases`, `Behavior`, `Flatten`, `IsEncrypted`, `IsRequired`, `NamingPolicy`, `OperationId`, `Order`, `ProfileId`, `RequestType`, `ResponseType`, `RouteAction`, `RoutePrefix`, `RouteSuffix`, `Source`, `TenantId`
+
+<!-- pubsoft:api-surface:end -->
+

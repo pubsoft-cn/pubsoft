@@ -18,7 +18,7 @@ echo "== [2] format check =="
 dotnet format PubSoft.sln --verify-no-changes --no-restore
 
 echo "== [3] public API ledger drift =="
-bash scripts/sync-public-api.sh --check
+dotnet format analyzers PubSoft.sln --verify-no-changes --diagnostics RS0016 RS0017 --severity warn
 
 echo "== [4] release build =="
 dotnet build PubSoft.sln -c Release --no-restore
@@ -28,6 +28,6 @@ export PUBSOFT_REDIS="${PUBSOFT_REDIS:-localhost:7000}"
 dotnet test PubSoft.sln -c Release --no-restore
 
 echo "== [6] doc drift (warn) =="
-bash scripts/check-doc-drift.sh || echo "  (drift warnings — see internal/doc-drift/report.txt)"
+dotnet run --project tools/PubSoft.DocsTool -c Release -- --check || echo "  (drift warnings — run: dotnet run --project tools/PubSoft.DocsTool -c Release -- --sync)"
 
 echo "ALL GREEN — safe to push"
