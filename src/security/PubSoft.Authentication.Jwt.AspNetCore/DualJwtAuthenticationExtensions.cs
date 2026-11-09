@@ -95,7 +95,7 @@ public static class DualJwtAuthenticationExtensions
                             && string.Equals(alg.GetString(), "RS256", System.StringComparison.Ordinal))
                             return AuthServerScheme;
                     }
-                    catch { }
+                    catch { /* pubsoft:exempt PUBSOFT041 "unparseable JWT header falls back to the default scheme" */ }
                     return JwtBearerDefaults.AuthenticationScheme;
                 };
             }

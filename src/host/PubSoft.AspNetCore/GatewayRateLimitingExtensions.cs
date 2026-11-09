@@ -11,8 +11,10 @@ using Microsoft.Extensions.Options;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Registration for the gateway rate-limit policy buckets.</summary>
 public static class GatewayRateLimitingExtensions
 {
+    /// <summary>Binds the Gateway:RateLimit section and wires the fixed-window limiter plus forwarded-header trust.</summary>
     public static IServiceCollection AddPubSoftGatewayRateLimiting(
         this IServiceCollection services, IConfiguration configuration)
     {
@@ -121,6 +123,7 @@ public static class GatewayRateLimitingExtensions
         return services;
     }
 
+    /// <summary>Adds the gateway rate-limiting middleware.</summary>
     public static IApplicationBuilder UsePubSoftGatewayRateLimiting(this IApplicationBuilder app)
     {
         var options = app.ApplicationServices
@@ -160,7 +163,7 @@ public static class GatewayRateLimitingExtensions
                 if (parts.Length > 0 && !string.IsNullOrWhiteSpace(parts[0]))
                     return parts[0].Trim();
             }
-            catch { }
+            catch { /* pubsoft:exempt PUBSOFT041 "header parse fallback — unparseable entries are skipped" */ }
         }
 
         return null;

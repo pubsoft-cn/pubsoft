@@ -97,7 +97,7 @@ public sealed class ParallelHealthCheckAggregator
         {
             await checkTask.ConfigureAwait(false);
         }
-        catch (Exception)
+        catch (Exception) // pubsoft:exempt PUBSOFT041 "check task failure is captured in its result entry, not rethrown here"
         {
         }
         finally

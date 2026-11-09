@@ -8,6 +8,7 @@ using PubSoft.Security;
 
 namespace PubSoft.AspNetCore;
 
+/// <summary>Fixed-window rate-limiting middleware partitioned by the configured identifier selector.</summary>
 public sealed class PubSoftRateLimitingMiddleware
 {
     private readonly TimeProvider _timeProvider = TimeProvider.System;
@@ -15,12 +16,14 @@ public sealed class PubSoftRateLimitingMiddleware
     private readonly RateLimiter _rateLimiter;
     private int _proxyWarningEmitted;
 
+    /// <summary>Creates the middleware.</summary>
     public PubSoftRateLimitingMiddleware(RequestDelegate next, RateLimiter rateLimiter)
     {
         _next = next ?? throw new ArgumentNullException(nameof(next));
         _rateLimiter = rateLimiter ?? throw new ArgumentNullException(nameof(rateLimiter));
     }
 
+    /// <summary>Applies the rate limit then forwards.</summary>
     public async Task InvokeAsync(HttpContext context)
     {
         WarnOnUnprocessedForwardedHeaders(context);
@@ -67,6 +70,6 @@ public sealed class PubSoftRateLimitingMiddleware
                 context.Connection.RemoteIpAddress);
     }
 
-    private static int GetSecondsUntilReset(DateTime resetTime)
-        => Math.Max(0, (int)Math.Ceiling((resetTime - TimeProvider.System.GetUtcNow().UtcDateTime).TotalSeconds));
+    private int GetSecondsUntilReset(DateTime resetTime)
+        => Math.Max(0, (int)Math.Ceiling((resetTime - _timeProvider.GetUtcNow().UtcDateTime).TotalSeconds));
 }

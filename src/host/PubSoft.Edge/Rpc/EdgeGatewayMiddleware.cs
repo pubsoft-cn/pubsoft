@@ -24,15 +24,17 @@ namespace PubSoft.Edge;
 public sealed class EdgeGatewayMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly TimeProvider _timeProvider;
     private readonly string _path;
     private readonly EdgeGatewayOptions _options;
 
     /// <summary>Creates the middleware.</summary>
-    public EdgeGatewayMiddleware(RequestDelegate next, string path, IOptions<EdgeGatewayOptions>? options = null)
+    public EdgeGatewayMiddleware(RequestDelegate next, string path, IOptions<EdgeGatewayOptions>? options = null, TimeProvider? timeProvider = null)
     {
         _next = next;
         _path = path.TrimEnd('/');
         _options = options?.Value ?? new EdgeGatewayOptions();
+        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
     /// <summary>Routes the request through the edge pipeline.</summary>
@@ -82,7 +84,7 @@ public sealed class EdgeGatewayMiddleware
         if (_options.TimestampToleranceSeconds > 0
             && request.Scheme is EdgeAuthScheme.Hmac or EdgeAuthScheme.Md5)
         {
-            var skew = Math.Abs(TimeProvider.System.GetUtcNow().ToUnixTimeMilliseconds() - request.Timestamp);
+            var skew = Math.Abs(_timeProvider.GetUtcNow().ToUnixTimeMilliseconds() - request.Timestamp);
             if (skew > _options.TimestampToleranceSeconds * 1000L)
             {
                 await WriteResponseAsync(context, request,

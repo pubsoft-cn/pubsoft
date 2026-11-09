@@ -9,21 +9,27 @@ using PubSoft.Security;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Middleware applying the registered declarative policies.</summary>
 public sealed class PubSoftRateLimitPolicyMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly TimeProvider _timeProvider;
     private readonly IReadOnlyList<PubSoftRateLimitPolicy> _policies;
     private int _proxyWarningEmitted;
 
+    /// <summary>Creates the middleware.</summary>
     public PubSoftRateLimitPolicyMiddleware(
         RequestDelegate next,
-        IEnumerable<PubSoftRateLimitPolicy> policies)
+        IEnumerable<PubSoftRateLimitPolicy> policies,
+        TimeProvider? timeProvider = null)
     {
         _next = next ?? throw new ArgumentNullException(nameof(next));
         ArgumentNullException.ThrowIfNull(policies);
         _policies = policies.ToArray();
+        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
+    /// <summary>Applies matching policies then forwards.</summary>
     public async Task InvokeAsync(HttpContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
@@ -101,7 +107,7 @@ public sealed class PubSoftRateLimitPolicyMiddleware
         }
     }
 
-    private static async Task WriteRateLimitResponseAsync(HttpContext context, DateTime resetTime)
+    private async Task WriteRateLimitResponseAsync(HttpContext context, DateTime resetTime)
     {
         var retryAfter = Math.Max(1, GetSecondsUntilReset(resetTime));
         context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
@@ -117,6 +123,6 @@ public sealed class PubSoftRateLimitPolicyMiddleware
             context.RequestAborted).ConfigureAwait(false);
     }
 
-    private static int GetSecondsUntilReset(DateTime resetTime)
-        => Math.Max(0, (int)Math.Ceiling((resetTime - TimeProvider.System.GetUtcNow().UtcDateTime).TotalSeconds));
+    private int GetSecondsUntilReset(DateTime resetTime)
+        => Math.Max(0, (int)Math.Ceiling((resetTime - _timeProvider.GetUtcNow().UtcDateTime).TotalSeconds));
 }

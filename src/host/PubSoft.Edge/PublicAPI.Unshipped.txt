@@ -28,7 +28,7 @@ PubSoft.Edge.EdgeException.SubCode.get -> string?
 PubSoft.Edge.EdgeException.SubMessage.get -> string?
 PubSoft.Edge.EdgeGatewayExtensions
 PubSoft.Edge.EdgeGatewayMiddleware
-PubSoft.Edge.EdgeGatewayMiddleware.EdgeGatewayMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, string! path, Microsoft.Extensions.Options.IOptions<PubSoft.Edge.EdgeGatewayOptions!>? options = null) -> void
+PubSoft.Edge.EdgeGatewayMiddleware.EdgeGatewayMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, string! path, Microsoft.Extensions.Options.IOptions<PubSoft.Edge.EdgeGatewayOptions!>? options = null, System.TimeProvider? timeProvider = null) -> void
 PubSoft.Edge.EdgeGatewayMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
 PubSoft.Edge.EdgeGatewayOptions
 PubSoft.Edge.EdgeGatewayOptions.EdgeGatewayOptions() -> void

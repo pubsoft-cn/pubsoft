@@ -35,7 +35,7 @@ public sealed record EdgeSession
 
     /// <summary>Whether the session is expired.</summary>
     [System.Text.Json.Serialization.JsonIgnore]
-    public bool IsExpired => TimeProvider.System.GetUtcNow().ToUnixTimeMilliseconds() > ExpiresAt;
+    public bool IsExpired => TimeProvider.System.GetUtcNow().ToUnixTimeMilliseconds() > ExpiresAt; // pubsoft:exempt PUBSOFT040 "DTO self-check convenience — store expiry is enforced server-side"
 }
 
 /// <summary>

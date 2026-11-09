@@ -96,7 +96,7 @@ public sealed class ApiDocsCatalogService
                     map.TryAdd(name[2..], new XmlMember(m.Element("summary")?.Value.Trim(), ps));
                 }
             }
-            catch { /* malformed xml doc file never blocks catalog generation */ }
+            catch { /* pubsoft:exempt PUBSOFT041 "malformed xml doc file never blocks catalog generation" */ }
         }
         return map;
     }
@@ -247,7 +247,7 @@ public sealed class ApiDocsCatalogService
                         Example = e.TryGetProperty("example", out var ex) ? ex.Clone() : null
                     });
         }
-        catch { /* corrupt overlay never blocks doc generation */ }
+        catch { /* pubsoft:exempt PUBSOFT041 "corrupt overlay never blocks doc generation" */ }
         return (map, extra);
     }
 

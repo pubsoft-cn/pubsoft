@@ -55,7 +55,7 @@ internal sealed class AppLoggerAdapter(string categoryName, AppLogger appLogger)
 
             appLogger.Log(MapLevel(logLevel), categoryName, message, exception?.ToString(), context: context);
         }
-        catch
+        catch // pubsoft:exempt PUBSOFT041 "logger must never crash the host application"
         {
         }
     }

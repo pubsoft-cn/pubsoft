@@ -19,7 +19,7 @@ public sealed class DomainEventBackgroundService(DomainEventDispatcher dispatche
             await foreach (var @event in dispatcher.Reader.ReadAllAsync(stoppingToken).ConfigureAwait(false))
                 await dispatcher.DispatchPublishedAsync(@event, stoppingToken).ConfigureAwait(false);
         }
-        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) // pubsoft:exempt PUBSOFT041 "graceful shutdown — cancellation is expected, not an error"
         {
         }
     }

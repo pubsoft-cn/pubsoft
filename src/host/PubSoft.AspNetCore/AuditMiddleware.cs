@@ -7,17 +7,22 @@ using PubSoft.Auditing;
 namespace PubSoft.AspNetCore;
 
 
+/// <summary>Captures request snapshots into the ambient audit scope and flushes to the sink.</summary>
 public sealed class AuditMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly AuditMiddlewareOptions _options;
+    private readonly TimeProvider _timeProvider;
 
-    public AuditMiddleware(RequestDelegate next, AuditMiddlewareOptions? options = null)
+    /// <summary>Creates the middleware.</summary>
+    public AuditMiddleware(RequestDelegate next, AuditMiddlewareOptions? options = null, TimeProvider? timeProvider = null)
     {
         _next = next ?? throw new ArgumentNullException(nameof(next));
         _options = options ?? new AuditMiddlewareOptions();
+        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
+    /// <summary>Runs the request then writes the audit snapshot (survives client disconnects).</summary>
     public async Task InvokeAsync(HttpContext context)
     {
         var services = context.RequestServices;
@@ -30,7 +35,7 @@ public sealed class AuditMiddleware
         }
 
         scope.Initialize(new AuditRequestContext(
-            TimeProvider.System.GetUtcNow(),
+            _timeProvider.GetUtcNow(),
             context.Request.Method,
             context.Request.Path.Value,
             _options.CaptureClientIp && context.Connection.RemoteIpAddress is { } remoteIp

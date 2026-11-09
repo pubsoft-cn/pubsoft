@@ -231,7 +231,7 @@ public static class EdgeOpenApiDocument
             // Property-level examples - shown in the Schema tab and merged into generated samples.
             ((JsonObject)envelopeProps["clientId"]!)["example"] = opts.ClientIdExample ?? "demo-app";
             ((JsonObject)envelopeProps["scheme"]!)["example"] = Camel.ConvertName(PreferredScheme(schemes).ToString()); // pubsoft:exempt PUBSOFT027 "enum name render during one-time OpenAPI document generation"
-            ((JsonObject)envelopeProps["timestamp"]!)["example"] = TimeProvider.System.GetUtcNow().ToUnixTimeMilliseconds();
+            ((JsonObject)envelopeProps["timestamp"]!)["example"] = TimeProvider.System.GetUtcNow().ToUnixTimeMilliseconds(); // pubsoft:exempt PUBSOFT040 "doc example value, not wall-clock logic"
             return new JsonObject
             {
                 ["type"] = "object",
@@ -280,7 +280,7 @@ public static class EdgeOpenApiDocument
                 EdgeAuthScheme.Hmac or EdgeAuthScheme.Md5 => "<signature>",
                 _ => "",
             };
-            body["timestamp"] = TimeProvider.System.GetUtcNow().ToUnixTimeMilliseconds();
+            body["timestamp"] = TimeProvider.System.GetUtcNow().ToUnixTimeMilliseconds(); // pubsoft:exempt PUBSOFT040 "doc example value, not wall-clock logic"
             body["nonce"] = "docs";
             body["params"] = ExampleForSchema(paramSchema, new HashSet<string>(System.StringComparer.Ordinal));
             return body;
@@ -512,9 +512,8 @@ public static class EdgeOpenApiDocument
                         .Where(m => m.Attribute("name") is not null)
                         .ToDictionary(m => m.Attribute("name")!.Value, m => m);
             }
-            catch
+            catch // pubsoft:exempt PUBSOFT041 "missing/corrupt xml doc — descriptions are optional, never block generation"
             {
-                // Missing/corrupt doc file - descriptions are optional.
             }
             _xmlCache[assembly] = docs;
             return docs;

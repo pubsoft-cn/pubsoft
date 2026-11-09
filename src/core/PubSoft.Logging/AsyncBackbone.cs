@@ -133,7 +133,7 @@ public abstract class AsyncBackbone<T> : IAsyncDisposable
                 }
             }
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) // pubsoft:exempt PUBSOFT041 "graceful shutdown — cancellation is expected, not an error"
         {
         }
     }
