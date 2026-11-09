@@ -315,7 +315,7 @@ public sealed partial class AlipayOAuthProvider : OAuthProviderBase
             charset = "GB18030";
         Encoding encoding;
         try { encoding = Encoding.GetEncoding(charset); }
-        catch { encoding = Encoding.UTF8; }
+        catch { encoding = Encoding.UTF8; } // pubsoft:exempt PUBSOFT045 "unknown charset falls back to UTF-8"
         var respText = encoding.GetString(respBytes);
 
         using var doc = JsonDocument.Parse(respText);

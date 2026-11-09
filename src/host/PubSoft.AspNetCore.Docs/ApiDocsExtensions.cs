@@ -13,7 +13,7 @@ namespace PubSoft.AspNetCore.Docs;
 public static class ApiDocsExtensions
 {
 
-    private static string? _page;
+    private static readonly Lazy<string> s_page = new(LoadPage);
     /// <summary>Register the catalog service. Call <see cref="MapPubSoftApiDocs"/> to expose it.</summary>
     public static IServiceCollection AddPubSoftApiDocs(
         this IServiceCollection services, Action<ApiDocsOptions>? configure = null)
@@ -49,7 +49,7 @@ public static class ApiDocsExtensions
             var catalogPath = System.Net.WebUtility.HtmlEncode(options.CatalogPath);
             var page = app.MapGet(pagePath, () =>
             {
-                var html = LoadPage().Replace("{{TITLE}}", title).Replace("{{CATALOG}}", catalogPath);
+                var html = s_page.Value.Replace("{{TITLE}}", title).Replace("{{CATALOG}}", catalogPath);
                 return Results.Content(html, "text/html; charset=utf-8");
             });
             if (options.RequireAuthorization) { catalog.RequireAuthorization(); page.RequireAuthorization(); }
@@ -63,10 +63,9 @@ public static class ApiDocsExtensions
 
     private static string LoadPage()
     {
-        if (_page != null) return _page;
         var asm = typeof(ApiDocsExtensions).Assembly;
         using var s = asm.GetManifestResourceStream("PubSoft.AspNetCore.Docs.Assets.docs.html")
             ?? throw new InvalidOperationException("Embedded docs page missing");
-        return _page = new StreamReader(s, Encoding.UTF8).ReadToEnd();
+        return new StreamReader(s, Encoding.UTF8).ReadToEnd();
     }
 }

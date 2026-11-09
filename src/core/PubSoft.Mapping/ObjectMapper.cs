@@ -39,7 +39,7 @@ public static class ObjectMapper
         where TDestination : new()
     {
         if (source is null)
-            return default!;
+            return default!; // pubsoft:exempt PUBSOFT046 "null-source maps to default by contract"
 
         var key = new TypePair(typeof(TSource), typeof(TDestination));
         var mapping = s_mappings.GetOrAdd(key, _ => new MappingBuilder<TSource, TDestination>().Compile());

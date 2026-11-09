@@ -96,7 +96,7 @@ public sealed class CachedHealthCheckAggregator
             }
         }
 
-        cached = null!;
+        cached = null!; // pubsoft:exempt PUBSOFT046 "out-param reset on the failure path"
         return false;
     }
 

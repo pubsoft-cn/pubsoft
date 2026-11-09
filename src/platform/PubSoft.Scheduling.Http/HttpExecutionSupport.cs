@@ -46,7 +46,7 @@ internal sealed class HttpExecutionSupport
         out HttpMethod method)
     {
         config = new HttpExecutorConfig();
-        uri = null!;
+        uri = null!; // pubsoft:exempt PUBSOFT046 "out-param reset on the failure path"
         method = HttpMethod.Get;
 
         try

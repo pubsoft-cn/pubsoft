@@ -29,5 +29,5 @@ public sealed class AuditEntityChangeRecord : IMultiTenant
     /// <summary>Changed property values (JSON array).</summary>
     public string PropertiesJson { get; set; } = "[]";
     /// <summary>Parent audit row.</summary>
-    public AuditLogRecord AuditLog { get; set; } = null!;
+    public AuditLogRecord AuditLog { get; set; } = null!; // pubsoft:exempt PUBSOFT046 "EF materializes the navigation"
 }

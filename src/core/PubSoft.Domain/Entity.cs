@@ -5,7 +5,7 @@ namespace PubSoft.Domain;
 public abstract class Entity<TKey>
 {
     /// <summary>The primary key.</summary>
-    public TKey Id { get; set; } = default!;
+    public TKey Id { get; set; } = default!; // pubsoft:exempt PUBSOFT046 "TKey cannot be initialized generically; ctor guards it"
 
     public override bool Equals(object? obj)
     {
@@ -15,8 +15,7 @@ public abstract class Entity<TKey>
             return true;
         if (GetType() != other.GetType())
             return false;
-        if (EqualityComparer<TKey>.Default.Equals(Id, default!)
-            || EqualityComparer<TKey>.Default.Equals(other.Id, default!))
+        if (EqualityComparer<TKey>.Default.Equals(Id, default!) || EqualityComparer<TKey>.Default.Equals(other.Id, default!)) // pubsoft:exempt PUBSOFT046 "transient-id comparison"
             return false;
         return EqualityComparer<TKey>.Default.Equals(Id, other.Id);
     }

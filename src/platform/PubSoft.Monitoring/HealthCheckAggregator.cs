@@ -31,7 +31,7 @@ public sealed class HealthCheckAggregator
             {
                 throw;
             }
-            catch (Exception)
+            catch (Exception) // pubsoft:exempt PUBSOFT045 "check failure is the Unhealthy result — never propagate"
             {
                 results.Add((check.Name, AppHealthCheckResult.Unhealthy("Health check failed.")));
             }

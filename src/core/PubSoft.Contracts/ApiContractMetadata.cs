@@ -14,9 +14,9 @@ public sealed class ApiContractMetadata
     /// <summary>HTTP verb for the operation.</summary>
     public ApiHttpVerb Verb { get; init; } = ApiHttpVerb.Post;
     /// <summary>CLR type of the request contract.</summary>
-    public Type RequestType { get; init; } = null!;
+    public Type RequestType { get; init; } = null!; // pubsoft:exempt PUBSOFT046 "populated via metadata generators; required cannot be satisfied there"
     /// <summary>CLR type of the response contract.</summary>
-    public Type ResponseType { get; init; } = null!;
+    public Type ResponseType { get; init; } = null!; // pubsoft:exempt PUBSOFT046 "populated via metadata generators; required cannot be satisfied there"
     /// <summary>Alternate operation ids accepted for the same operation.</summary>
     public IReadOnlyList<string> Aliases { get; init; } = [];
     /// <summary>Field-name policy for the wire format.</summary>

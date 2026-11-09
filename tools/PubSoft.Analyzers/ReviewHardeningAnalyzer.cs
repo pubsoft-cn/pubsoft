@@ -25,6 +25,26 @@ public sealed class ReviewHardeningAnalyzer : DiagnosticAnalyzer
     public const string UnguardedEntityCtorId = "PUBSOFT043";
     /// <summary>PUBSOFT044 rule id.</summary>
     public const string DuplicateSummaryId = "PUBSOFT044";
+    /// <summary>PUBSOFT045 rule id.</summary>
+    public const string BroadCatchSwallowId = "PUBSOFT045";
+    /// <summary>PUBSOFT046 rule id.</summary>
+    public const string NullForgivingId = "PUBSOFT046";
+    /// <summary>PUBSOFT047 rule id.</summary>
+    public const string NewRandomId = "PUBSOFT047";
+    /// <summary>PUBSOFT048 rule id.</summary>
+    public const string PragmaDisableId = "PUBSOFT048";
+    /// <summary>PUBSOFT049 rule id.</summary>
+    public const string UncheckedIndexOfId = "PUBSOFT049";
+    /// <summary>PUBSOFT050 rule id.</summary>
+    public const string AsyncVoidId = "PUBSOFT050";
+    /// <summary>PUBSOFT051 rule id.</summary>
+    public const string MutableStaticId = "PUBSOFT051";
+    /// <summary>PUBSOFT052 rule id.</summary>
+    public const string UnsafeCodeId = "PUBSOFT052";
+    /// <summary>PUBSOFT053 rule id.</summary>
+    public const string NotImplementedThrowId = "PUBSOFT053";
+    /// <summary>PUBSOFT054 rule id.</summary>
+    public const string PostfixReturnId = "PUBSOFT054";
 
     private static DiagnosticDescriptor Make(string id, string title, string message)
         => new DiagnosticDescriptor(id, title, message, "Hardening", DiagnosticSeverity.Warning, isEnabledByDefault: true);
@@ -41,6 +61,26 @@ public sealed class ReviewHardeningAnalyzer : DiagnosticAnalyzer
             "ctor '{0}' assigns an entity id without a positive-id guard — validate id > 0 like sibling entities"),
         Make(DuplicateSummaryId, "Duplicate /// <summary> element",
             "two consecutive <summary> elements — merge into one doc comment"),
+        Make(BroadCatchSwallowId, "Broad exception swallow",
+            "catch (Exception) discards the failure — log, wrap, or rethrow; if intentional, mark pubsoft:exempt {0}"),
+        Make(NullForgivingId, "Null-forgiving suppression",
+            "'!' / 'default!' hides a possible null dereference — prove non-null or restructure; if provable, mark pubsoft:exempt {0}"),
+        Make(NewRandomId, "new Random() is not thread-safe",
+            "use Random.Shared — per-instance Random can produce degenerate sequences under contention"),
+        Make(PragmaDisableId, "Pragma warning suppression without reason",
+            "#pragma warning disable needs an adjacent justification comment (// pubsoft:exempt or why-text)"),
+        Make(UncheckedIndexOfId, "IndexOf result used without a negative check",
+            "'{0}' is used to index without checking for -1 — guard the missing case"),
+        Make(AsyncVoidId, "async void method",
+            "async void '{0}' escapes the exception pipeline — use Task; only event handlers may be async void"),
+        Make(MutableStaticId, "Mutable static state",
+            "static field '{0}' is mutable shared state — prefer readonly/const or scoped state; if intentional, mark pubsoft:exempt {0}"),
+        Make(UnsafeCodeId, "unsafe code block",
+            "unsafe '{0}' bypasses managed safety — this library stays verifiably managed; if justified, mark pubsoft:exempt {0}"),
+        Make(NotImplementedThrowId, "NotImplementedException in shipped code",
+            "throw new NotImplementedException — either implement, or throw a meaningful fail-closed exception"),
+        Make(PostfixReturnId, "Postfix ++/-- inside return",
+            "return '{0}' yields the pre-increment value — increment first or return the plain variable"),
     };
 
     /// <inheritdoc />
@@ -56,6 +96,16 @@ public sealed class ReviewHardeningAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(CheckBlockingWait, SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.InvocationExpression);
         context.RegisterSyntaxNodeAction(CheckEntityCtor, SyntaxKind.ConstructorDeclaration);
         context.RegisterSyntaxTreeAction(CheckDuplicateSummary);
+        context.RegisterSyntaxNodeAction(CheckBroadCatch, SyntaxKind.CatchClause);
+        context.RegisterSyntaxNodeAction(CheckNullForgiving, SyntaxKind.SuppressNullableWarningExpression, SyntaxKind.DefaultExpression);
+        context.RegisterSyntaxNodeAction(CheckNewRandom, SyntaxKind.ObjectCreationExpression, SyntaxKind.ImplicitObjectCreationExpression);
+        context.RegisterSyntaxTreeAction(CheckPragmaDisable);
+        context.RegisterSyntaxNodeAction(CheckUncheckedIndexOf, SyntaxKind.VariableDeclaration);
+        context.RegisterSyntaxNodeAction(CheckAsyncVoid, SyntaxKind.MethodDeclaration);
+        context.RegisterSyntaxNodeAction(CheckMutableStatic, SyntaxKind.FieldDeclaration);
+        context.RegisterSyntaxNodeAction(CheckUnsafe, SyntaxKind.UnsafeStatement, SyntaxKind.MethodDeclaration, SyntaxKind.ClassDeclaration);
+        context.RegisterSyntaxNodeAction(CheckNotImplementedThrow, SyntaxKind.ThrowStatement, SyntaxKind.ThrowExpression);
+        context.RegisterSyntaxNodeAction(CheckPostfixReturn, SyntaxKind.ReturnStatement);
     }
 
     private static void CheckClockAccess(SyntaxNodeAnalysisContext context)
@@ -160,6 +210,140 @@ public sealed class ReviewHardeningAnalyzer : DiagnosticAnalyzer
                 return;
             }
             idx = after;
+        }
+    }
+    private static void CheckBroadCatch(SyntaxNodeAnalysisContext context)
+    {
+        // catch (Exception) / bare catch that neither rethrows nor touches the
+        // exception object — generic-exception-swallow pattern from the scans.
+        if (context.Node is not CatchClauseSyntax c || c.Block.Statements.Count == 0)
+            return;
+        var typeName = c.Declaration?.Type.ToString() ?? "Exception";
+        if (typeName is not ("Exception" or "System.Exception"))
+            return;
+        var body = c.Block.ToString();
+        var usesEx = c.Declaration?.Identifier.ValueText is { Length: > 0 } id && body.Contains(id);
+        var rethrows = c.Block.DescendantNodes().OfType<ThrowStatementSyntax>().Any()
+            || c.Block.DescendantNodes().OfType<ThrowExpressionSyntax>().Any();
+        var logged = body.Contains("Log") || body.Contains("Trace") || body.Contains("Debug.Write");
+        var hasReturn = c.Block.DescendantNodesAndSelf().OfType<ReturnStatementSyntax>().Any();
+        if (!usesEx && !rethrows && !logged && !hasReturn && !AnalyzerHelpers.IsExempt(c, BroadCatchSwallowId))
+            context.ReportDiagnostic(Diagnostic.Create(Rules[5], c.GetLocation(), BroadCatchSwallowId));
+    }
+
+    private static void CheckNullForgiving(SyntaxNodeAnalysisContext context)
+    {
+        if (context.Node.SyntaxTree.FilePath.Contains("/tests/", StringComparison.Ordinal))
+            return;
+        if (context.Node is PostfixUnaryExpressionSyntax postfix
+            && postfix.IsKind(SyntaxKind.SuppressNullableWarningExpression)
+            && postfix.Operand is LiteralExpressionSyntax operand
+            && (operand.IsKind(SyntaxKind.NullLiteralExpression) || operand.IsKind(SyntaxKind.DefaultLiteralExpression)))
+        {
+            if (!AnalyzerHelpers.IsExempt(postfix, NullForgivingId))
+                context.ReportDiagnostic(Diagnostic.Create(Rules[6], postfix.GetLocation(), NullForgivingId));
+        }
+    }
+
+    private static void CheckNewRandom(SyntaxNodeAnalysisContext context)
+    {
+        var name = context.Node is ObjectCreationExpressionSyntax o ? o.Type.ToString()
+            : context.Node is ImplicitObjectCreationExpressionSyntax i ? context.SemanticModel.GetTypeInfo(i).Type?.ToString() : null;
+        if (name is "System.Random" or "Random" or "global::System.Random"
+            && !AnalyzerHelpers.IsExempt(context.Node, NewRandomId))
+            context.ReportDiagnostic(Diagnostic.Create(Rules[7], context.Node.GetLocation()));
+    }
+
+    private static void CheckUncheckedIndexOf(SyntaxNodeAnalysisContext context)
+    {
+        // var i = xs.IndexOf(y); followed by xs[i] / RemoveAt(i) / Insert(i,..) in the
+        // same method without an intervening `i < 0` / `i >= 0` check.
+        if (context.Node is not VariableDeclarationSyntax decl) return;
+        var v = decl.Variables.FirstOrDefault();
+        var init = v?.Initializer?.Value;
+        if (init is not InvocationExpressionSyntax inv) return;
+        var callee = inv.Expression.ToString();
+        if (!callee.EndsWith(".IndexOf", StringComparison.Ordinal)) return;
+        var varName = v!.Identifier.ValueText;
+        var method = decl.Ancestors().OfType<BaseMethodDeclarationSyntax>().FirstOrDefault();
+        if (method is null) return;
+        var guarded = method.DescendantNodes().OfType<BinaryExpressionSyntax>()
+            .Any(b => b.Left.ToString() == varName && b.OperatorToken.ValueText is "<" or ">=" or "=="
+                || b.Right.ToString() == varName && b.OperatorToken.ValueText is ">" or "<=" or "!=" or "==");
+        if (guarded) return;
+        var usedAsIndex = method.DescendantNodes().OfType<ElementAccessExpressionSyntax>()
+            .Any(e => e.ArgumentList.Arguments.Any(a => a.Expression.ToString() == varName))
+            || method.DescendantNodes().OfType<InvocationExpressionSyntax>()
+                .Any(i => (i.Expression.ToString().EndsWith(".RemoveAt") || i.Expression.ToString().EndsWith(".Insert"))
+                    && i.ArgumentList.Arguments.Any(a => a.Expression.ToString() == varName));
+        if (usedAsIndex && !AnalyzerHelpers.IsExempt(decl, UncheckedIndexOfId))
+            context.ReportDiagnostic(Diagnostic.Create(Rules[9], decl.GetLocation(), varName));
+    }
+
+    private static void CheckAsyncVoid(SyntaxNodeAnalysisContext context)
+    {
+        if (context.Node is not MethodDeclarationSyntax m) return;
+        if (!m.Modifiers.Any(SyntaxKind.AsyncKeyword)) return;
+        if (m.ReturnType is not PredefinedTypeSyntax p || !p.Keyword.IsKind(SyntaxKind.VoidKeyword)) return;
+        // event-handler shape (object sender, TEventArgs e) is the only legal async void
+        var ps = m.ParameterList.Parameters;
+        var isEventHandler = ps.Count == 2
+            && ps[0].Type?.ToString() is "object" or "object?"
+            && ps[1].Type?.ToString().EndsWith("EventArgs", StringComparison.Ordinal) == true;
+        if (!isEventHandler && !AnalyzerHelpers.IsExempt(m, AsyncVoidId))
+            context.ReportDiagnostic(Diagnostic.Create(Rules[10], m.Identifier.GetLocation(), m.Identifier.ValueText));
+    }
+
+    private static void CheckMutableStatic(SyntaxNodeAnalysisContext context)
+    {
+        if (context.Node is not FieldDeclarationSyntax f) return;
+        if (!f.Modifiers.Any(SyntaxKind.StaticKeyword)) return;
+        if (f.Modifiers.Any(SyntaxKind.ReadOnlyKeyword) || f.Modifiers.Any(SyntaxKind.ConstKeyword)) return;
+        var name = f.Declaration.Variables.FirstOrDefault()?.Identifier.ValueText ?? "field";
+        if (!AnalyzerHelpers.IsExempt(f, MutableStaticId))
+            context.ReportDiagnostic(Diagnostic.Create(Rules[11], f.GetLocation(), name));
+    }
+
+    private static void CheckUnsafe(SyntaxNodeAnalysisContext context)
+    {
+        var isUnsafe = context.Node is UnsafeStatementSyntax
+            || context.Node is MemberDeclarationSyntax md && md.Modifiers.Any(SyntaxKind.UnsafeKeyword);
+        if (isUnsafe && !AnalyzerHelpers.IsExempt(context.Node, UnsafeCodeId))
+            context.ReportDiagnostic(Diagnostic.Create(Rules[12], context.Node.GetLocation(), context.Node.Kind().ToString()));
+    }
+
+    private static void CheckNotImplementedThrow(SyntaxNodeAnalysisContext context)
+    {
+        if (context.Node.SyntaxTree.FilePath.Contains("/tests/", StringComparison.Ordinal)) return;
+        var thrown = context.Node is ThrowStatementSyntax ts ? ts.Expression
+            : context.Node is ThrowExpressionSyntax te ? te.Expression : null;
+        if (thrown is ObjectCreationExpressionSyntax o && o.Type.ToString().EndsWith("NotImplementedException", StringComparison.Ordinal)
+            && !AnalyzerHelpers.IsExempt(context.Node, NotImplementedThrowId))
+            context.ReportDiagnostic(Diagnostic.Create(Rules[13], context.Node.GetLocation()));
+    }
+
+    private static void CheckPostfixReturn(SyntaxNodeAnalysisContext context)
+    {
+        if (context.Node is not ReturnStatementSyntax r) return;
+        if (r.Expression is PostfixUnaryExpressionSyntax post
+            && (post.IsKind(SyntaxKind.PostIncrementExpression) || post.IsKind(SyntaxKind.PostDecrementExpression))
+            && !AnalyzerHelpers.IsExempt(r, PostfixReturnId))
+            context.ReportDiagnostic(Diagnostic.Create(Rules[14], r.GetLocation(), post.Operand.ToString()));
+    }
+
+    private static void CheckPragmaDisable(SyntaxTreeAnalysisContext context)
+    {
+        var root = context.Tree.GetRoot(context.CancellationToken);
+        foreach (var trivia in root.DescendantTrivia(descendIntoTrivia: true))
+        {
+            if (!trivia.IsKind(SyntaxKind.PragmaWarningDirectiveTrivia))
+                continue;
+            var text = trivia.ToString();
+            var line = trivia.GetLocation().GetLineSpan().StartLinePosition.Line;
+            var source = context.Tree.GetText(context.CancellationToken).ToString().Split('\n');
+            var hasReason = line + 1 < source.Length && (source[line].Contains("pubsoft:exempt") || source[line].Contains("//"));
+            if (!hasReason)
+                context.ReportDiagnostic(Diagnostic.Create(Rules[8], trivia.GetLocation()));
         }
     }
 }

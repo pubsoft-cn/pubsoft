@@ -59,7 +59,7 @@ public sealed class MqttInboxSubscriber : BackgroundService
                     await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
-            catch (Exception) when (!stoppingToken.IsCancellationRequested)
+            catch (Exception) when (!stoppingToken.IsCancellationRequested) // pubsoft:exempt PUBSOFT045 "broker lost — backoff then the loop reconnects"
             {
                 await Task.Delay(_options.ReconnectDelay, stoppingToken).ConfigureAwait(false);
             }
