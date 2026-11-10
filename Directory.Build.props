@@ -9,7 +9,11 @@
     <!-- Internal-validation releases carry a prerelease suffix so they never
          collide with the eventual stable public version. Bump the counter per
          validation drop; drop the suffix entirely for the public stable release. -->
-    <PubSoftVersion>0.1.0-alpha.15</PubSoftVersion>
+    <!-- Two streams: external (alpha.*, nuget.org) and dev (internal feed).
+         -p:PubSoftStream=dev stamps a dated dev build; default builds the
+         external stream. -p:PubSoftDevSuffix=.2 disambiguates same-day drops. -->
+    <PubSoftVersion Condition="'$(PubSoftStream)' == 'dev'">0.1.0-dev.$([System.DateTime]::UtcNow.ToString(yyyyMMdd))$(PubSoftDevSuffix)</PubSoftVersion>
+    <PubSoftVersion Condition="'$(PubSoftStream)' != 'dev'">0.1.0-alpha.16</PubSoftVersion>
     <Version>$(PubSoftVersion)</Version>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/pubsoft-cn/pubsoft</RepositoryUrl>
