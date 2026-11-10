@@ -14,5 +14,7 @@ public static class AuditMiddlewareExtensions
     public static IApplicationBuilder UsePubSoftAudit(
         this IApplicationBuilder app,
         AuditMiddlewareOptions? options = null)
-        => app.UseMiddleware<AuditMiddleware>(options);
+        => options is null
+            ? app.UseMiddleware<AuditMiddleware>()
+            : app.UseMiddleware<AuditMiddleware>(options);
 }

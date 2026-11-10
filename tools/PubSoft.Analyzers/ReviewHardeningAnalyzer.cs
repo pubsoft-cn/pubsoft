@@ -45,6 +45,8 @@ public sealed class ReviewHardeningAnalyzer : DiagnosticAnalyzer
     public const string NotImplementedThrowId = "PUBSOFT053";
     /// <summary>PUBSOFT054 rule id.</summary>
     public const string PostfixReturnId = "PUBSOFT054";
+    /// <summary>PUBSOFT055 rule id.</summary>
+    public const string UseMiddlewareNullableId = "PUBSOFT055";
 
     private static DiagnosticDescriptor Make(string id, string title, string message)
         => new DiagnosticDescriptor(id, title, message, "Hardening", DiagnosticSeverity.Warning, isEnabledByDefault: true);
@@ -81,6 +83,8 @@ public sealed class ReviewHardeningAnalyzer : DiagnosticAnalyzer
             "throw new NotImplementedException — either implement, or throw a meaningful fail-closed exception"),
         Make(PostfixReturnId, "Postfix ++/-- inside return",
             "return '{0}' yields the pre-increment value — increment first or return the plain variable"),
+        Make(UseMiddlewareNullableId, "Nullable argument passed to UseMiddleware",
+            "'{0}' may be null - UseMiddleware forwards it to the ctor; null-guard the argument"),
     };
 
     /// <inheritdoc />
@@ -106,6 +110,7 @@ public sealed class ReviewHardeningAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(CheckUnsafe, SyntaxKind.UnsafeStatement, SyntaxKind.MethodDeclaration, SyntaxKind.ClassDeclaration);
         context.RegisterSyntaxNodeAction(CheckNotImplementedThrow, SyntaxKind.ThrowStatement, SyntaxKind.ThrowExpression);
         context.RegisterSyntaxNodeAction(CheckPostfixReturn, SyntaxKind.ReturnStatement);
+        context.RegisterSyntaxNodeAction(CheckUseMiddlewareNullable, SyntaxKind.InvocationExpression);
     }
 
     private static void CheckClockAccess(SyntaxNodeAnalysisContext context)
@@ -329,6 +334,28 @@ public sealed class ReviewHardeningAnalyzer : DiagnosticAnalyzer
             && (post.IsKind(SyntaxKind.PostIncrementExpression) || post.IsKind(SyntaxKind.PostDecrementExpression))
             && !AnalyzerHelpers.IsExempt(r, PostfixReturnId))
             context.ReportDiagnostic(Diagnostic.Create(Rules[14], r.GetLocation(), post.Operand.ToString()));
+    }
+
+    private static void CheckUseMiddlewareNullable(SyntaxNodeAnalysisContext context)
+    {
+        if (context.Node is not InvocationExpressionSyntax inv) return;
+        var callee = inv.Expression.ToString();
+        if (!callee.Contains("UseMiddleware", StringComparison.Ordinal)) return;
+        if (inv.ArgumentList.Arguments.Count == 0) return;
+        var arg = inv.ArgumentList.Arguments[0].Expression;
+        if (arg is not IdentifierNameSyntax ident) return;
+        var method = inv.Ancestors().OfType<MethodDeclarationSyntax>().FirstOrDefault();
+        if (method is null) return;
+        var param = method.ParameterList.Parameters.FirstOrDefault(p => p.Identifier.ValueText == ident.Identifier.ValueText);
+        var nullable = param?.Type is NullableTypeSyntax
+            || param?.Default?.Value.IsKind(SyntaxKind.NullLiteralExpression) == true;
+        if (!nullable) return;
+        // guarded call sites: inside the false-branch of "x is null ?" or the else of "if (x is null)"
+        var guarded = inv.Ancestors().OfType<ConditionalExpressionSyntax>()
+            .Any(c => c.Condition.ToString().Contains(ident.Identifier.ValueText + " is null")
+                && c.WhenFalse.Span.Contains(inv.Span));
+        if (!guarded && !AnalyzerHelpers.IsExempt(inv, UseMiddlewareNullableId))
+            context.ReportDiagnostic(Diagnostic.Create(Rules[15], inv.GetLocation(), ident.Identifier.ValueText));
     }
 
     private static void CheckPragmaDisable(SyntaxTreeAnalysisContext context)

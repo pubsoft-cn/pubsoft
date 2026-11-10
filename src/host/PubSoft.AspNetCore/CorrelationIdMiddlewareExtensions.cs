@@ -12,5 +12,7 @@ public static class CorrelationIdMiddlewareExtensions
     /// middleware/logging that should share the id.</summary>
     public static IApplicationBuilder UsePubSoftCorrelationId(
         this IApplicationBuilder app, CorrelationIdOptions? options = null)
-        => app.UseMiddleware<CorrelationIdMiddleware>(options);
+        => options is null
+            ? app.UseMiddleware<CorrelationIdMiddleware>()
+            : app.UseMiddleware<CorrelationIdMiddleware>(options);
 }
