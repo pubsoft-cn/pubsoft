@@ -67,8 +67,14 @@ Headers used by convention: `X-Client-Id`, `X-Timestamp`, `X-Nonce`, `X-Signatur
 
 Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
 
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftCredentialEncryption` |
+
 **(options & records)**
 
-`ActiveKeyId`, `Plaintext`, `ReplacementCiphertext`, `RequiresReEncryption`
+`ActiveKeyId`, `HelpLink`, `HResult`, `Plaintext`, `ReplacementCiphertext`, `RequiresReEncryption`, `Source`
 
 <!-- pubsoft:api-surface:end -->

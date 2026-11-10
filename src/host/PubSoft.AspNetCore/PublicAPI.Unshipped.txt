@@ -111,6 +111,13 @@ PubSoft.AspNetCore.DevelopmentOnlyControllerConvention
 PubSoft.AspNetCore.DevelopmentOnlyControllerConvention.Apply(Microsoft.AspNetCore.Mvc.ApplicationModels.ApplicationModel! application) -> void
 PubSoft.AspNetCore.DevelopmentOnlyControllerConvention.DevelopmentOnlyControllerConvention(Microsoft.Extensions.Hosting.IHostEnvironment! environment) -> void
 PubSoft.AspNetCore.DevelopmentOnlyControllerConventionExtensions
+PubSoft.AspNetCore.EncryptionDiagnosticsOptions
+PubSoft.AspNetCore.EncryptionDiagnosticsOptions.EncryptionDiagnosticsOptions() -> void
+PubSoft.AspNetCore.EncryptionDiagnosticsOptions.ProbeCiphertext.get -> string?
+PubSoft.AspNetCore.EncryptionDiagnosticsOptions.ProbeCiphertext.set -> void
+PubSoft.AspNetCore.EncryptionStartupDiagnostics
+PubSoft.AspNetCore.EncryptionStartupDiagnostics.Collect() -> System.Collections.Generic.IEnumerable<PubSoft.Monitoring.StartupDiagnosticsEntry>!
+PubSoft.AspNetCore.EncryptionStartupDiagnostics.EncryptionStartupDiagnostics(System.IServiceProvider! services, PubSoft.AspNetCore.EncryptionDiagnosticsOptions? options = null) -> void
 PubSoft.AspNetCore.ExceptionHandlingMiddleware
 PubSoft.AspNetCore.ExceptionHandlingMiddleware.ExceptionHandlingMiddleware(Microsoft.AspNetCore.Http.RequestDelegate! next, Microsoft.Extensions.Logging.ILogger<PubSoft.AspNetCore.ExceptionHandlingMiddleware!>! logger, Microsoft.Extensions.Hosting.IHostEnvironment! environment) -> void
 PubSoft.AspNetCore.ExceptionHandlingMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext! context) -> System.Threading.Tasks.Task!
@@ -404,3 +411,5 @@ static PubSoft.AspNetCore.ServiceDefaultsExtensions.UsePubSoftServiceDefaults(th
 static PubSoft.AspNetCore.StartupDiagnosticsRouteBuilderExtensions.MapPubSoftStartupDiagnostics(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder! endpoints, string! pattern = "/startup-diagnostics") -> Microsoft.AspNetCore.Builder.IEndpointConventionBuilder!
 static PubSoft.AspNetCore.TenantContextServiceCollectionExtensions.AddPubSoftTenantContext(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.AspNetCore.HttpContextTenantOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.WebModuleContextExtensions.GetAppBuilder(this PubSoft.Modularity.ModuleContext! context) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+PubSoft.AspNetCore.EncryptionDiagnosticsServiceCollectionExtensions
+static PubSoft.AspNetCore.EncryptionDiagnosticsServiceCollectionExtensions.AddPubSoftEncryptionDiagnostics(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! configuration, string! sectionName = "Encryption") -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

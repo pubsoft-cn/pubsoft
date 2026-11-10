@@ -49,7 +49,8 @@ public sealed class CredentialEncryptionServiceTests
     {
         var service = CreateService("legacy-key");
 
-        Assert.Throws<CryptographicException>(() => service.Decrypt("pubsoft:v2:legacy"));
+        var ex = Assert.Throws<PubSoftDecryptionException>(() => service.Decrypt("pubsoft:v2:legacy"));
+        Assert.Equal(DecryptionFailureReason.MalformedEnvelope, ex.Reason);
     }
 
     [Fact]

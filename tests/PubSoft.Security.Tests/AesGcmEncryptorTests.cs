@@ -44,13 +44,13 @@ public sealed class AesGcmEncryptorTests
         var encryptor = new AesGcmEncryptor(new TestKeyRing("key-1", ("key-1", RandomNumberGenerator.GetBytes(32))));
         var parts = encryptor.Encrypt("secret").Split(':');
         parts[4] = Convert.ToBase64String(new byte[] { 1, 2, 3, 4, 5, 6 });
-        Assert.Throws<CryptographicException>(() => encryptor.Decrypt(string.Join(':', parts)));
+        Assert.Throws<PubSoft.Cryptography.PubSoftDecryptionException>(() => encryptor.Decrypt(string.Join(':', parts)));
 
         parts = encryptor.Encrypt("secret").Split(':');
         var tag = Convert.FromBase64String(parts[5]);
         tag[0] ^= 0x01;
         parts[5] = Convert.ToBase64String(tag);
-        Assert.Throws<CryptographicException>(() => encryptor.Decrypt(string.Join(':', parts)));
+        Assert.Throws<PubSoft.Cryptography.PubSoftDecryptionException>(() => encryptor.Decrypt(string.Join(':', parts)));
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public sealed class AesGcmEncryptorTests
         var envelope = encryptor.Encrypt("secret", "tenant-1:credential-7"u8);
 
         Assert.Equal("secret", encryptor.Decrypt(envelope, "tenant-1:credential-7"u8));
-        Assert.Throws<CryptographicException>(() => encryptor.Decrypt(envelope, "tenant-2:credential-7"u8));
+        Assert.Throws<PubSoft.Cryptography.PubSoftDecryptionException>(() => encryptor.Decrypt(envelope, "tenant-2:credential-7"u8));
     }
 
     [Theory]
@@ -72,7 +72,7 @@ public sealed class AesGcmEncryptorTests
     {
         var encryptor = new AesGcmEncryptor(new TestKeyRing("key-1", ("key-1", RandomNumberGenerator.GetBytes(32))));
 
-        Assert.Throws<CryptographicException>(() => encryptor.Decrypt(envelope));
+        Assert.Throws<PubSoft.Cryptography.PubSoftDecryptionException>(() => encryptor.Decrypt(envelope));
     }
 
     [Fact]
@@ -80,9 +80,9 @@ public sealed class AesGcmEncryptorTests
     {
         var encryptor = new AesGcmEncryptor(new TestKeyRing("missing", ("other", RandomNumberGenerator.GetBytes(32))));
 
-        Assert.Throws<CryptographicException>(() => encryptor.Encrypt("secret"));
-        Assert.Throws<CryptographicException>(() => encryptor.Decrypt("pubsoft:v1:unknown:AAAAAAAAAAAAAAAA:AAAA:AAAAAAAAAAAAAAAAAAAAAA=="));
-        Assert.Throws<CryptographicException>(() => new AesGcmEncryptor(new TestKeyRing("short", ("short", new byte[16]))).Encrypt("secret"));
+        Assert.Throws<PubSoft.Cryptography.PubSoftDecryptionException>(() => encryptor.Encrypt("secret"));
+        Assert.Throws<PubSoft.Cryptography.PubSoftDecryptionException>(() => encryptor.Decrypt("pubsoft:v1:unknown:AAAAAAAAAAAAAAAA:AAAA:AAAAAAAAAAAAAAAAAAAAAA=="));
+        Assert.Throws<PubSoft.Cryptography.PubSoftDecryptionException>(() => new AesGcmEncryptor(new TestKeyRing("short", ("short", new byte[16]))).Encrypt("secret"));
     }
 
     private sealed class TestKeyRing(string activeKeyId, params (string Id, byte[] Key)[] keys) : IEncryptionKeyRing

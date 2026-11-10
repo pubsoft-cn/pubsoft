@@ -119,7 +119,9 @@ public sealed class AesGcmEncryptor
         }
         catch (CryptographicException)
         {
-            throw new CryptographicException("The encrypted value could not be authenticated.");
+            throw new PubSoftDecryptionException(
+                "The encrypted value could not be authenticated - the key material or the additional authenticated data does not match.",
+                DecryptionFailureReason.AuthenticationFailed, keyId);
         }
         catch (DecoderFallbackException)
         {
@@ -139,21 +141,27 @@ public sealed class AesGcmEncryptor
     private byte[] ResolveKey(string keyId)
     {
         if (!_keyRing.TryGetKey(keyId, out var key))
-            throw new CryptographicException($"Encryption key '{keyId}' is not available.");
+            throw new PubSoftDecryptionException(
+                $"Encryption key '{keyId}' is not available.",
+                DecryptionFailureReason.UnknownKeyId, keyId);
 
         var keyBytes = key.ToArray();
         if (keyBytes.Length == KeySize)
             return keyBytes;
 
         CryptographicOperations.ZeroMemory(keyBytes);
-        throw new CryptographicException("Encryption keys must contain exactly 32 bytes.");
+        throw new PubSoftDecryptionException(
+            "Encryption keys must contain exactly 32 bytes.",
+            DecryptionFailureReason.InvalidKeyLength, keyId);
     }
 
     private static void ValidateKeyId(string keyId)
     {
         if (string.IsNullOrEmpty(keyId) || keyId.Length > 64 ||
             keyId.Any(character => !(character is >= 'a' and <= 'z' or >= 'A' and <= 'Z' or >= '0' and <= '9' or '-' or '_')))
-            throw new CryptographicException("The encryption key identifier is invalid.");
+            throw new PubSoftDecryptionException(
+                "The encryption key identifier is invalid.",
+                DecryptionFailureReason.InvalidKeyId, keyId);
     }
 
     private static byte[] ParseBase64(string value)
@@ -184,5 +192,7 @@ public sealed class AesGcmEncryptor
             CryptographicOperations.ZeroMemory(bytes);
     }
 
-    private static CryptographicException InvalidEnvelope() => new("The encrypted value has an invalid format.");
+    private static PubSoftDecryptionException InvalidEnvelope() => new(
+        "The encrypted value has an invalid format.",
+        DecryptionFailureReason.MalformedEnvelope);
 }

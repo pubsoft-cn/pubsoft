@@ -52,6 +52,15 @@ public sealed class CredentialEncryptionService : IDisposable
         return new DecryptedCredential(plaintext, true, _encryptor.Encrypt(plaintext, additionalAuthenticatedData));
     }
 
+    /// <summary>Re-encrypts a stored value under the ring's current active key. Legacy CBC values
+    /// upgrade to the versioned envelope; envelopes under retired-but-present key ids re-encrypt
+    /// under <c>ActiveKeyId</c>. Unknown-key envelopes throw <see cref="PubSoftDecryptionException"/>.</summary>
+    public string Rotate(string ciphertext, ReadOnlySpan<byte> additionalAuthenticatedData = default)
+    {
+        var decrypted = Decrypt(ciphertext, additionalAuthenticatedData);
+        return decrypted.ReplacementCiphertext ?? _encryptor.Encrypt(decrypted.Plaintext, additionalAuthenticatedData);
+    }
+
     /// <inheritdoc />
     public void Dispose()
     {
