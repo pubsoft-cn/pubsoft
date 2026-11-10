@@ -7,6 +7,9 @@ namespace PubSoft.EntityFrameworkCore;
 /// <summary>EF value converters for encrypted columns.</summary>
 public static class EncryptionModelBuilderExtensions
 {
+    /// <summary>Annotation carrying the AAD bound to an encrypted column - the migration
+    /// toolchain reads the same convention, so writers and migrators cannot diverge.</summary>
+    public const string EncryptionAadAnnotation = "PubSoft:Encryption:Aad";
     /// <summary>
     /// Stores the string property as AEAD ciphertext via <see cref="CredentialEncryptionService"/>.
     /// Nulls pass through unconverted. Bind <paramref name="additionalAuthenticatedData"/> to a
@@ -26,6 +29,7 @@ public static class EncryptionModelBuilderExtensions
         ArgumentNullException.ThrowIfNull(property);
         ArgumentNullException.ThrowIfNull(encryption);
         var aad = additionalAuthenticatedData is null ? [] : Encoding.UTF8.GetBytes(additionalAuthenticatedData);
+        property.HasAnnotation(EncryptionAadAnnotation, additionalAuthenticatedData ?? string.Empty);
         return property.HasConversion(
             plaintext => encryption.Encrypt(plaintext!, aad),
             ciphertext => encryption.Decrypt(ciphertext, aad).Plaintext);

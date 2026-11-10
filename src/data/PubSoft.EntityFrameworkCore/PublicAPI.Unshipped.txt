@@ -270,3 +270,7 @@ virtual PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.Fallba
 virtual PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.FindFallbackInfo(string! key) -> TInfo?
 PubSoft.EntityFrameworkCore.LegacyIdMapModelBuilderExtensions
 static PubSoft.EntityFrameworkCore.LegacyIdMapModelBuilderExtensions.ConfigurePubSoftLegacyIdMaps(this Microsoft.EntityFrameworkCore.ModelBuilder! builder) -> Microsoft.EntityFrameworkCore.ModelBuilder!
+const PubSoft.EntityFrameworkCore.EncryptionModelBuilderExtensions.EncryptionAadAnnotation = "PubSoft:Encryption:Aad" -> string!
+PubSoft.EntityFrameworkCore.PubSoftEncryptionMigrator
+PubSoft.EntityFrameworkCore.PubSoftEncryptionMigrator.PubSoftEncryptionMigrator(PubSoft.Cryptography.CredentialEncryptionService! encryption) -> void
+PubSoft.EntityFrameworkCore.PubSoftEncryptionMigrator.MigrateAsync(Microsoft.EntityFrameworkCore.DbContext! context, int batchSize = 500, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>!
