@@ -141,7 +141,7 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
-`Action`, `AuditLog`, `AuditLogId`, `AverageMs`, `Category`, `ChangedAt`, `ClientIp`, `Count`, `Detail`, `DurationMilliseconds`, `Enabled`, `EntityId`, `EntityType`, `ErrorCount`, `FailureCode`, `HttpMethod`, `IsAdministrator`, `MaxLatencySamplesPerTemplate`, `MaxMs`, `MaxQueryTemplates`, `Operation`, `P50Ms`, `P95Ms`, `P99Ms`, `PropertiesJson`, `QueryFingerprint`, `RequestPath`, `SampleRate`, `SlowQueryCount`, `SlowQueryThreshold`, `StartedAt`, `StatusCode`, `SubjectId`, `SubjectName`, `Success`, `TargetId`, `TargetName`, `TargetType`, `TenantId`, `TopQueries`, `TotalErrors`, `TotalMs`, `TotalQueries`, `UserAgent`
+`Action`, `AuditLog`, `AuditLogId`, `AverageMs`, `Category`, `ChangedAt`, `ClientIp`, `Conflicts`, `Count`, `Detail`, `DurationMilliseconds`, `Enabled`, `EntityId`, `EntityType`, `ErrorCount`, `FailureCode`, `HttpMethod`, `IsAdministrator`, `MaxLatencySamplesPerTemplate`, `MaxMs`, `MaxQueryTemplates`, `Operation`, `P50Ms`, `P95Ms`, `P99Ms`, `PropertiesJson`, `QueryFingerprint`, `RequestPath`, `Rewritten`, `SampleRate`, `SkippedAmbiguous`, `SlowQueryCount`, `SlowQueryThreshold`, `StartedAt`, `StatusCode`, `SubjectId`, `SubjectName`, `Success`, `TargetId`, `TargetName`, `TargetType`, `TenantId`, `TopQueries`, `TotalErrors`, `TotalMs`, `TotalQueries`, `UserAgent`
 
 <!-- pubsoft:api-surface:end -->
 

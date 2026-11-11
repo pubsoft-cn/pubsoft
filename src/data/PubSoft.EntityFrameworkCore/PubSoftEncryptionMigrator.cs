@@ -75,20 +75,31 @@ public sealed class PubSoftEncryptionMigrator(CredentialEncryptionService encryp
         if (shouldClose) await connection.OpenAsync(ct).ConfigureAwait(false);
         try
         {
+            object? lastKey = null;
             while (true)
             {
                 var rows = new List<(object Key, string Value)>();
                 await using (var cmd = connection.CreateCommand())
                 {
+                    // keyset pagination: skipped/conflicted rows are passed-over via the
+                    // cursor so they cannot be re-selected into an infinite batch loop.
+                    var cursor = lastKey is null ? "" : $"AND {sql.DelimitIdentifier(pkColumn)} > @last ";
                     cmd.CommandText =
                         $"SELECT {sql.DelimitIdentifier(pkColumn)}, {sql.DelimitIdentifier(column)} FROM {target} " +
                         $"WHERE {sql.DelimitIdentifier(column)} IS NOT NULL AND {sql.DelimitIdentifier(column)} NOT LIKE 'pubsoft:%' " +
+                        cursor +
                         $"ORDER BY {sql.DelimitIdentifier(pkColumn)} LIMIT {batchSize}";
+                    if (lastKey is not null)
+                    {
+                        var lp = cmd.CreateParameter(); lp.ParameterName = "last"; lp.Value = lastKey;
+                        cmd.Parameters.Add(lp);
+                    }
                     await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
                     while (await reader.ReadAsync(ct).ConfigureAwait(false))
                         rows.Add((reader.GetValue(0), reader.GetString(1)));
                 }
                 if (rows.Count == 0) return;
+                lastKey = rows[^1].Key;
 
                 foreach (var (key, value) in rows)
                 {

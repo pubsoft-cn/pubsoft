@@ -19,5 +19,9 @@ public sealed class RedisConnectionStartupDiagnostics : IStartupDiagnostics
             yield return new StartupDiagnosticsEntry("redis-connection",
                 StartupDiagnosticsStatus.Warning,
                 "no IConnectionMultiplexer registered - cache, nonce and lock paths fall back to process-local state and diverge across replicas");
+        else
+            yield return new StartupDiagnosticsEntry("redis-connection",
+                StartupDiagnosticsStatus.Ok,
+                "IConnectionMultiplexer registered - shared cache/nonce/lock posture");
     }
 }
