@@ -425,6 +425,25 @@ public sealed class PubSoftDbContextTests
         }
     }
 
+
+    // R1: under member scope, deleting a null-MemberId record must be rejected —
+    // attach+delete bypasses the query filter the same way as foreign ids.
+    [Fact]
+    public async Task MemberScopeCannotDeleteNullMemberRecord()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<ScopeDbContext>().UseSqlite(connection).Options;
+
+        await using var scoped = CreateContext(options, tenantId: null, memberId: 10, isMemberScoped: true);
+        await scoped.Database.EnsureCreatedAsync();
+        var orphan = new ScopeRecord { Id = 99, MemberId = null };
+        scoped.Records.Attach(orphan);
+        scoped.Records.Remove(orphan);
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => scoped.SaveChangesAsync());
+        Assert.Contains("outside the current member scope", ex.Message);
+    }
+
     private static ScopeDbContext CreateContext(
         DbContextOptions<ScopeDbContext> options,
         long? tenantId,

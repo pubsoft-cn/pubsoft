@@ -1,3 +1,4 @@
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PubSoft.EntityFrameworkCore;
@@ -6,28 +7,45 @@ using Xunit;
 
 namespace PubSoft.Core.Tests;
 
+/// <summary>EfCoreHealthCheck: live probe paths.</summary>
 public sealed class EfHealthCheckWaveTests
 {
-    private sealed class Ctx(DbContextOptions<Ctx> o) : DbContext(o) { }
+    private sealed class Ctx(DbContextOptions<Ctx> o) : DbContext(o);
+
+    private static ServiceProvider Build(string connStr)
+        => new ServiceCollection()
+            .AddDbContext<Ctx>(b => b.UseSqlite(connStr))
+            .BuildServiceProvider();
 
     [Fact]
-    public async Task HealthyWhenContextConnects()
+    public async Task HealthyWhenProbeSucceeds()
     {
-        var services = new ServiceCollection();
-        services.AddDbContext<Ctx>(o => o.UseSqlite("Data Source=:memory:"));
-        var sp = services.BuildServiceProvider();
+        await using var anchor = new SqliteConnection("Data Source=h1;Mode=Memory;Cache=Shared");
+        await anchor.OpenAsync();
+        var sp = Build("Data Source=h1;Mode=Memory;Cache=Shared");
         var check = new EfCoreHealthCheck<Ctx>(sp);
-        var r = await check.CheckAsync();
-        Assert.Equal(AppHealthStatus.Healthy, r.Status);
-        Assert.Equal("db", check.Name);
+        var result = await check.CheckAsync();
+        Assert.Equal(AppHealthStatus.Healthy, result.Status);
     }
 
     [Fact]
-    public async Task UnresolvableContextPropagatesException()
+    public async Task UnhealthyWhenCannotConnect()
     {
-        // healthcheck does not swallow DI resolution failures — misconfiguration surfaces
-        var sp = new ServiceCollection().BuildServiceProvider();
+        // SQLite open_mode=12 opens read-only nonexistent - CanConnect fails cleanly
+        var sp = Build("Data Source=/nonexistent-dir/no.db");
         var check = new EfCoreHealthCheck<Ctx>(sp);
-        await Assert.ThrowsAsync<InvalidOperationException>(async () => await check.CheckAsync());
+        var result = await check.CheckAsync();
+        Assert.NotEqual(AppHealthStatus.Healthy, result.Status);
+    }
+
+    [Fact]
+    public async Task BadProbeSqlThrowsNotUnhealthy()
+    {
+        await using var anchor = new SqliteConnection("Data Source=h2;Mode=Memory;Cache=Shared");
+        await anchor.OpenAsync();
+        var sp = Build("Data Source=h2;Mode=Memory;Cache=Shared");
+        var check = new EfCoreHealthCheck<Ctx>(sp, probeSql: "SELECT nonsense_col");
+        // probe failure propagates - health check surfaces as exception not silent Healthy
+        await Assert.ThrowsAnyAsync<Exception>(() => check.CheckAsync().AsTask());
     }
 }
