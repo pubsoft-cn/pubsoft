@@ -29,6 +29,7 @@
     <ProjectReference Include="../../src/platform/PubSoft.Monitoring/PubSoft.Monitoring.csproj" />
     <ProjectReference Include="../../src/platform/PubSoft.Scheduling/PubSoft.Scheduling.csproj" />
     <ProjectReference Include="../../src/platform/PubSoft.Scheduling.EntityFrameworkCore/PubSoft.Scheduling.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="../../src/security/PubSoft.Security.EntityFrameworkCore/PubSoft.Security.EntityFrameworkCore.csproj" />
     <ProjectReference Include="../../src/platform/PubSoft.Tokens/PubSoft.Tokens.csproj" />
     <ProjectReference Include="../../src/security/PubSoft.Authorization/PubSoft.Authorization.csproj" />
     <ProjectReference Include="../../src/core/PubSoft.Core/PubSoft.Core.csproj" />

@@ -34,6 +34,8 @@ PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.Audience.get -> st
 PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.Audience.set -> void
 PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.BackchannelTimeout.get -> System.TimeSpan
 PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.BackchannelTimeout.set -> void
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.CheckDenylist.get -> bool
+PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.CheckDenylist.set -> void
 PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.ClockSkew.get -> System.TimeSpan
 PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.ClockSkew.set -> void
 PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.Issuer.get -> string!

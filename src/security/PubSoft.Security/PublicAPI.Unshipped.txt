@@ -1,4 +1,16 @@
 #nullable enable
+override PubSoft.Security.RefreshRotationResult.Equals(object? obj) -> bool
+override PubSoft.Security.RefreshRotationResult.GetHashCode() -> int
+override PubSoft.Security.RefreshRotationResult.ToString() -> string!
+override PubSoft.Security.RefreshTokenFamilyRecord.Equals(object? obj) -> bool
+override PubSoft.Security.RefreshTokenFamilyRecord.GetHashCode() -> int
+override PubSoft.Security.RefreshTokenFamilyRecord.ToString() -> string!
+override PubSoft.Security.RefreshTokenIssue.Equals(object? obj) -> bool
+override PubSoft.Security.RefreshTokenIssue.GetHashCode() -> int
+override PubSoft.Security.RefreshTokenIssue.ToString() -> string!
+override PubSoft.Security.TokenDenyEntry.Equals(object? obj) -> bool
+override PubSoft.Security.TokenDenyEntry.GetHashCode() -> int
+override PubSoft.Security.TokenDenyEntry.ToString() -> string!
 PubSoft.Security.DataMaskingOptions
 PubSoft.Security.DataMaskingOptions.BankCardMaskChar.get -> char
 PubSoft.Security.DataMaskingOptions.BankCardMaskChar.set -> void
@@ -63,9 +75,29 @@ PubSoft.Security.HmacTimestampUnit.Milliseconds = 1 -> PubSoft.Security.HmacTime
 PubSoft.Security.HmacTimestampUnit.Seconds = 0 -> PubSoft.Security.HmacTimestampUnit
 PubSoft.Security.INonceStore
 PubSoft.Security.INonceStore.TryUseAsync(string! scope, string! nonce, System.DateTimeOffset expiresAt, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<bool>
+PubSoft.Security.IRefreshTokenFamilyStore
+PubSoft.Security.IRefreshTokenFamilyStore.GetByHashAsync(string! tokenHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.Security.RefreshTokenFamilyRecord?>
+PubSoft.Security.IRefreshTokenFamilyStore.RevokeFamilyAsync(string! familyId, System.DateTimeOffset until, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+PubSoft.Security.IRefreshTokenFamilyStore.RevokeSubjectAsync(string! subject, System.DateTimeOffset until, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<int>
+PubSoft.Security.IRefreshTokenFamilyStore.SaveAsync(PubSoft.Security.RefreshTokenFamilyRecord! record, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+PubSoft.Security.IRefreshTokenFamilyStore.TryConsumeAsync(string! tokenHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.Security.RefreshConsumeResult>
+PubSoft.Security.ITokenDenylist
+PubSoft.Security.ITokenDenylist.DenyAsync(PubSoft.Security.TokenDenyEntry! entry, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+PubSoft.Security.ITokenDenylist.IsDeniedAsync(string! tokenId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<bool>
 PubSoft.Security.MemoryNonceStore
 PubSoft.Security.MemoryNonceStore.MemoryNonceStore(int maxEntries = 100000, System.TimeProvider? timeProvider = null) -> void
 PubSoft.Security.MemoryNonceStore.TryUseAsync(string! scope, string! nonce, System.DateTimeOffset expiresAt, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<bool>
+PubSoft.Security.MemoryRefreshTokenFamilyStore
+PubSoft.Security.MemoryRefreshTokenFamilyStore.GetByHashAsync(string! tokenHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.Security.RefreshTokenFamilyRecord?>
+PubSoft.Security.MemoryRefreshTokenFamilyStore.MemoryRefreshTokenFamilyStore(int maxEntries = 100000, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Security.MemoryRefreshTokenFamilyStore.RevokeFamilyAsync(string! familyId, System.DateTimeOffset until, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+PubSoft.Security.MemoryRefreshTokenFamilyStore.RevokeSubjectAsync(string! subject, System.DateTimeOffset until, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<int>
+PubSoft.Security.MemoryRefreshTokenFamilyStore.SaveAsync(PubSoft.Security.RefreshTokenFamilyRecord! record, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+PubSoft.Security.MemoryRefreshTokenFamilyStore.TryConsumeAsync(string! tokenHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.Security.RefreshConsumeResult>
+PubSoft.Security.MemoryTokenDenylist
+PubSoft.Security.MemoryTokenDenylist.DenyAsync(PubSoft.Security.TokenDenyEntry! entry, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+PubSoft.Security.MemoryTokenDenylist.IsDeniedAsync(string! tokenId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<bool>
+PubSoft.Security.MemoryTokenDenylist.MemoryTokenDenylist(int maxEntries = 100000, System.TimeProvider? timeProvider = null) -> void
 PubSoft.Security.PasswordHasher
 PubSoft.Security.PasswordVerificationResult
 PubSoft.Security.PasswordVerificationResult.Deconstruct(out bool Succeeded, out string? ReplacementHash) -> void
@@ -123,6 +155,89 @@ const PubSoft.Security.HmacSignatureHeaders.Signature = "X-Signature" -> string!
 const PubSoft.Security.HmacSignatureHeaders.Timestamp = "X-Timestamp" -> string!
 const PubSoft.Security.PasswordHasher.DefaultIterations = 600000 -> int
 override PubSoft.Security.PasswordVerificationResult.GetHashCode() -> int
+PubSoft.Security.RefreshConsumeResult
+PubSoft.Security.RefreshConsumeResult.AlreadyConsumed = 1 -> PubSoft.Security.RefreshConsumeResult
+PubSoft.Security.RefreshConsumeResult.Consumed = 0 -> PubSoft.Security.RefreshConsumeResult
+PubSoft.Security.RefreshConsumeResult.FamilyRevoked = 2 -> PubSoft.Security.RefreshConsumeResult
+PubSoft.Security.RefreshRotationResult
+PubSoft.Security.RefreshRotationResult.<Clone>$() -> PubSoft.Security.RefreshRotationResult!
+PubSoft.Security.RefreshRotationResult.Deconstruct(out PubSoft.Security.RefreshRotationVerdict Verdict, out string? NewToken, out string? FamilyId) -> void
+PubSoft.Security.RefreshRotationResult.Equals(PubSoft.Security.RefreshRotationResult? other) -> bool
+PubSoft.Security.RefreshRotationResult.FamilyId.get -> string?
+PubSoft.Security.RefreshRotationResult.FamilyId.init -> void
+PubSoft.Security.RefreshRotationResult.NewToken.get -> string?
+PubSoft.Security.RefreshRotationResult.NewToken.init -> void
+PubSoft.Security.RefreshRotationResult.RefreshRotationResult(PubSoft.Security.RefreshRotationVerdict Verdict, string? NewToken, string? FamilyId) -> void
+PubSoft.Security.RefreshRotationResult.Verdict.get -> PubSoft.Security.RefreshRotationVerdict
+PubSoft.Security.RefreshRotationResult.Verdict.init -> void
+PubSoft.Security.RefreshRotationVerdict
+PubSoft.Security.RefreshRotationVerdict.Expired = 3 -> PubSoft.Security.RefreshRotationVerdict
+PubSoft.Security.RefreshRotationVerdict.FamilyRevoked = 4 -> PubSoft.Security.RefreshRotationVerdict
+PubSoft.Security.RefreshRotationVerdict.ReuseDetected = 1 -> PubSoft.Security.RefreshRotationVerdict
+PubSoft.Security.RefreshRotationVerdict.Rotated = 0 -> PubSoft.Security.RefreshRotationVerdict
+PubSoft.Security.RefreshRotationVerdict.Unknown = 2 -> PubSoft.Security.RefreshRotationVerdict
+PubSoft.Security.RefreshTokenFamilyOptions
+PubSoft.Security.RefreshTokenFamilyOptions.FamilyMaxLifetime.get -> System.TimeSpan
+PubSoft.Security.RefreshTokenFamilyOptions.FamilyMaxLifetime.set -> void
+PubSoft.Security.RefreshTokenFamilyOptions.MaxSubjectLength.get -> int
+PubSoft.Security.RefreshTokenFamilyOptions.MaxSubjectLength.set -> void
+PubSoft.Security.RefreshTokenFamilyOptions.MaxTokenLength.get -> int
+PubSoft.Security.RefreshTokenFamilyOptions.MaxTokenLength.set -> void
+PubSoft.Security.RefreshTokenFamilyOptions.RefreshTokenFamilyOptions() -> void
+PubSoft.Security.RefreshTokenFamilyOptions.TokenLifetime.get -> System.TimeSpan
+PubSoft.Security.RefreshTokenFamilyOptions.TokenLifetime.set -> void
+PubSoft.Security.RefreshTokenFamilyRecord
+PubSoft.Security.RefreshTokenFamilyRecord.<Clone>$() -> PubSoft.Security.RefreshTokenFamilyRecord!
+PubSoft.Security.RefreshTokenFamilyRecord.Consumed.get -> bool
+PubSoft.Security.RefreshTokenFamilyRecord.Consumed.init -> void
+PubSoft.Security.RefreshTokenFamilyRecord.Deconstruct(out string! TokenHash, out string! FamilyId, out string! Subject, out System.DateTimeOffset IssuedAt, out System.DateTimeOffset TokenExpiresAt, out System.DateTimeOffset FamilyExpiresAt, out bool Consumed) -> void
+PubSoft.Security.RefreshTokenFamilyRecord.Equals(PubSoft.Security.RefreshTokenFamilyRecord? other) -> bool
+PubSoft.Security.RefreshTokenFamilyRecord.FamilyExpiresAt.get -> System.DateTimeOffset
+PubSoft.Security.RefreshTokenFamilyRecord.FamilyExpiresAt.init -> void
+PubSoft.Security.RefreshTokenFamilyRecord.FamilyId.get -> string!
+PubSoft.Security.RefreshTokenFamilyRecord.FamilyId.init -> void
+PubSoft.Security.RefreshTokenFamilyRecord.IssuedAt.get -> System.DateTimeOffset
+PubSoft.Security.RefreshTokenFamilyRecord.IssuedAt.init -> void
+PubSoft.Security.RefreshTokenFamilyRecord.RefreshTokenFamilyRecord(string! TokenHash, string! FamilyId, string! Subject, System.DateTimeOffset IssuedAt, System.DateTimeOffset TokenExpiresAt, System.DateTimeOffset FamilyExpiresAt, bool Consumed) -> void
+PubSoft.Security.RefreshTokenFamilyRecord.Subject.get -> string!
+PubSoft.Security.RefreshTokenFamilyRecord.Subject.init -> void
+PubSoft.Security.RefreshTokenFamilyRecord.TokenExpiresAt.get -> System.DateTimeOffset
+PubSoft.Security.RefreshTokenFamilyRecord.TokenExpiresAt.init -> void
+PubSoft.Security.RefreshTokenFamilyRecord.TokenHash.get -> string!
+PubSoft.Security.RefreshTokenFamilyRecord.TokenHash.init -> void
+PubSoft.Security.RefreshTokenFamilyService
+PubSoft.Security.RefreshTokenFamilyService.IssueAsync(string! subject, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.Security.RefreshTokenIssue!>
+PubSoft.Security.RefreshTokenFamilyService.RefreshTokenFamilyService(PubSoft.Security.IRefreshTokenFamilyStore! store, PubSoft.Security.RefreshTokenFamilyOptions? options = null, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Security.RefreshTokenFamilyService.RevokeFamilyAsync(string! familyId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+PubSoft.Security.RefreshTokenFamilyService.RevokeSubjectAsync(string! subject, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<int>
+PubSoft.Security.RefreshTokenFamilyService.RotateAsync(string! presentedToken, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.Security.RefreshRotationResult!>
+PubSoft.Security.RefreshTokenFamilyServiceCollectionExtensions
+PubSoft.Security.RefreshTokenIssue
+PubSoft.Security.RefreshTokenIssue.<Clone>$() -> PubSoft.Security.RefreshTokenIssue!
+PubSoft.Security.RefreshTokenIssue.Deconstruct(out string! Token, out string! FamilyId, out System.DateTimeOffset ExpiresAt) -> void
+PubSoft.Security.RefreshTokenIssue.Equals(PubSoft.Security.RefreshTokenIssue? other) -> bool
+PubSoft.Security.RefreshTokenIssue.ExpiresAt.get -> System.DateTimeOffset
+PubSoft.Security.RefreshTokenIssue.ExpiresAt.init -> void
+PubSoft.Security.RefreshTokenIssue.FamilyId.get -> string!
+PubSoft.Security.RefreshTokenIssue.FamilyId.init -> void
+PubSoft.Security.RefreshTokenIssue.RefreshTokenIssue(string! Token, string! FamilyId, System.DateTimeOffset ExpiresAt) -> void
+PubSoft.Security.RefreshTokenIssue.Token.get -> string!
+PubSoft.Security.RefreshTokenIssue.Token.init -> void
+PubSoft.Security.TokenDenyEntry
+PubSoft.Security.TokenDenyEntry.<Clone>$() -> PubSoft.Security.TokenDenyEntry!
+PubSoft.Security.TokenDenyEntry.Deconstruct(out string! TokenId, out string? Subject, out System.DateTimeOffset ExpiresAt, out string? Reason) -> void
+PubSoft.Security.TokenDenyEntry.Equals(PubSoft.Security.TokenDenyEntry? other) -> bool
+PubSoft.Security.TokenDenyEntry.ExpiresAt.get -> System.DateTimeOffset
+PubSoft.Security.TokenDenyEntry.ExpiresAt.init -> void
+PubSoft.Security.TokenDenyEntry.Reason.get -> string?
+PubSoft.Security.TokenDenyEntry.Reason.init -> void
+PubSoft.Security.TokenDenyEntry.Subject.get -> string?
+PubSoft.Security.TokenDenyEntry.Subject.init -> void
+PubSoft.Security.TokenDenyEntry.TokenDenyEntry(string! TokenId, string? Subject, System.DateTimeOffset ExpiresAt, string? Reason) -> void
+PubSoft.Security.TokenDenyEntry.TokenId.get -> string!
+PubSoft.Security.TokenDenyEntry.TokenId.init -> void
+PubSoft.Security.TokenDenyIds
+PubSoft.Security.TokenDenylistServiceCollectionExtensions
 static PubSoft.Security.HmacSignatureValidator.BuildSignature(string! secret, string! method, string! path, string! timestamp, string! nonce, string? queryString = null, string? bodyHash = null) -> string!
 static PubSoft.Security.HmacSignatureValidator.ComputeBodyHash(System.IO.Stream! body) -> string!
 static PubSoft.Security.HmacSignatureValidator.ComputeBodyHash(byte[]! body) -> string!
@@ -133,5 +248,17 @@ static PubSoft.Security.PasswordHasher.Verify(string! password, string? storedHa
 static PubSoft.Security.PasswordHasher.VerifyAndRehash(string! password, string? storedHash) -> PubSoft.Security.PasswordVerificationResult
 static PubSoft.Security.PasswordVerificationResult.operator !=(PubSoft.Security.PasswordVerificationResult left, PubSoft.Security.PasswordVerificationResult right) -> bool
 static PubSoft.Security.PasswordVerificationResult.operator ==(PubSoft.Security.PasswordVerificationResult left, PubSoft.Security.PasswordVerificationResult right) -> bool
+static PubSoft.Security.RefreshRotationResult.operator !=(PubSoft.Security.RefreshRotationResult? left, PubSoft.Security.RefreshRotationResult? right) -> bool
+static PubSoft.Security.RefreshRotationResult.operator ==(PubSoft.Security.RefreshRotationResult? left, PubSoft.Security.RefreshRotationResult? right) -> bool
+static PubSoft.Security.RefreshTokenFamilyRecord.operator !=(PubSoft.Security.RefreshTokenFamilyRecord? left, PubSoft.Security.RefreshTokenFamilyRecord? right) -> bool
+static PubSoft.Security.RefreshTokenFamilyRecord.operator ==(PubSoft.Security.RefreshTokenFamilyRecord? left, PubSoft.Security.RefreshTokenFamilyRecord? right) -> bool
+static PubSoft.Security.RefreshTokenFamilyServiceCollectionExtensions.AddPubSoftMemoryRefreshTokenFamily(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Security.RefreshTokenFamilyOptions!>? configure = null, int maxEntries = 100000) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Security.RefreshTokenFamilyServiceCollectionExtensions.AddPubSoftRefreshTokenFamilyService(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Security.RefreshTokenFamilyOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Security.RefreshTokenIssue.operator !=(PubSoft.Security.RefreshTokenIssue? left, PubSoft.Security.RefreshTokenIssue? right) -> bool
+static PubSoft.Security.RefreshTokenIssue.operator ==(PubSoft.Security.RefreshTokenIssue? left, PubSoft.Security.RefreshTokenIssue? right) -> bool
+static PubSoft.Security.TokenDenyEntry.operator !=(PubSoft.Security.TokenDenyEntry? left, PubSoft.Security.TokenDenyEntry? right) -> bool
+static PubSoft.Security.TokenDenyEntry.operator ==(PubSoft.Security.TokenDenyEntry? left, PubSoft.Security.TokenDenyEntry? right) -> bool
+static PubSoft.Security.TokenDenyIds.ForToken(string! token) -> string!
+static PubSoft.Security.TokenDenylistServiceCollectionExtensions.AddPubSoftMemoryTokenDenylist(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, int maxEntries = 100000) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 ~override PubSoft.Security.PasswordVerificationResult.Equals(object obj) -> bool
 ~override PubSoft.Security.PasswordVerificationResult.ToString() -> string

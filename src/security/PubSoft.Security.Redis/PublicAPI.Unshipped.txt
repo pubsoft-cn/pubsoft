@@ -13,4 +13,35 @@ PubSoft.Security.Redis.RedisNonceStoreOptions.MaxScopeLength.get -> int
 PubSoft.Security.Redis.RedisNonceStoreOptions.MaxScopeLength.set -> void
 PubSoft.Security.Redis.RedisNonceStoreOptions.RedisNonceStoreOptions() -> void
 PubSoft.Security.Redis.RedisNonceStoreServiceCollectionExtensions
+PubSoft.Security.Redis.RedisRefreshTokenFamilyStore
+PubSoft.Security.Redis.RedisRefreshTokenFamilyStore.GetByHashAsync(string! tokenHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.Security.RefreshTokenFamilyRecord?>
+PubSoft.Security.Redis.RedisRefreshTokenFamilyStore.RedisRefreshTokenFamilyStore(StackExchange.Redis.IConnectionMultiplexer! redis, PubSoft.Security.Redis.RedisRefreshTokenFamilyStoreOptions? options = null, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Security.Redis.RedisRefreshTokenFamilyStore.RevokeFamilyAsync(string! familyId, System.DateTimeOffset until, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+PubSoft.Security.Redis.RedisRefreshTokenFamilyStore.RevokeSubjectAsync(string! subject, System.DateTimeOffset until, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<int>
+PubSoft.Security.Redis.RedisRefreshTokenFamilyStore.SaveAsync(PubSoft.Security.RefreshTokenFamilyRecord! record, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+PubSoft.Security.Redis.RedisRefreshTokenFamilyStore.TryConsumeAsync(string! tokenHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.Security.RefreshConsumeResult>
+PubSoft.Security.Redis.RedisRefreshTokenFamilyStoreOptions
+PubSoft.Security.Redis.RedisRefreshTokenFamilyStoreOptions.Database.get -> int
+PubSoft.Security.Redis.RedisRefreshTokenFamilyStoreOptions.Database.set -> void
+PubSoft.Security.Redis.RedisRefreshTokenFamilyStoreOptions.KeyPrefix.get -> string!
+PubSoft.Security.Redis.RedisRefreshTokenFamilyStoreOptions.KeyPrefix.set -> void
+PubSoft.Security.Redis.RedisRefreshTokenFamilyStoreOptions.MaxSubjectLength.get -> int
+PubSoft.Security.Redis.RedisRefreshTokenFamilyStoreOptions.MaxSubjectLength.set -> void
+PubSoft.Security.Redis.RedisRefreshTokenFamilyStoreOptions.RedisRefreshTokenFamilyStoreOptions() -> void
+PubSoft.Security.Redis.RedisRefreshTokenFamilyStoreServiceCollectionExtensions
+PubSoft.Security.Redis.RedisTokenDenylist
+PubSoft.Security.Redis.RedisTokenDenylist.DenyAsync(PubSoft.Security.TokenDenyEntry! entry, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+PubSoft.Security.Redis.RedisTokenDenylist.IsDeniedAsync(string! tokenId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<bool>
+PubSoft.Security.Redis.RedisTokenDenylist.RedisTokenDenylist(StackExchange.Redis.IConnectionMultiplexer! redis, PubSoft.Security.Redis.RedisTokenDenylistOptions? options = null, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Security.Redis.RedisTokenDenylistOptions
+PubSoft.Security.Redis.RedisTokenDenylistOptions.Database.get -> int
+PubSoft.Security.Redis.RedisTokenDenylistOptions.Database.set -> void
+PubSoft.Security.Redis.RedisTokenDenylistOptions.KeyPrefix.get -> string!
+PubSoft.Security.Redis.RedisTokenDenylistOptions.KeyPrefix.set -> void
+PubSoft.Security.Redis.RedisTokenDenylistOptions.MaxTokenIdLength.get -> int
+PubSoft.Security.Redis.RedisTokenDenylistOptions.MaxTokenIdLength.set -> void
+PubSoft.Security.Redis.RedisTokenDenylistOptions.RedisTokenDenylistOptions() -> void
+PubSoft.Security.Redis.RedisTokenDenylistServiceCollectionExtensions
 static PubSoft.Security.Redis.RedisNonceStoreServiceCollectionExtensions.AddPubSoftRedisNonceStore(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, StackExchange.Redis.IConnectionMultiplexer! connection, System.Action<PubSoft.Security.Redis.RedisNonceStoreOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Security.Redis.RedisRefreshTokenFamilyStoreServiceCollectionExtensions.AddPubSoftRedisRefreshTokenFamilyStore(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, StackExchange.Redis.IConnectionMultiplexer! connection, System.Action<PubSoft.Security.Redis.RedisRefreshTokenFamilyStoreOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Security.Redis.RedisTokenDenylistServiceCollectionExtensions.AddPubSoftRedisTokenDenylist(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, StackExchange.Redis.IConnectionMultiplexer! connection, System.Action<PubSoft.Security.Redis.RedisTokenDenylistOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

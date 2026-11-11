@@ -39,6 +39,7 @@ app.UseAuthorization();
 | `BackchannelTimeout` | 15 秒 | 上限 2 分钟；远程拉取走 JwtBearer 缓存 + 未知 kid 刷新 |
 | `ClockSkew` | 5 秒 | 可配 0–5 分钟 |
 | `NameClaimType` / `RoleClaimType` | `sub` / `role` | 其余不做 claim 重映射 |
+| `CheckDenylist` | `false` | opt-in 吊销检查：每个验签通过的请求对原始 token 取 SHA-256 查已注册的 `ITokenDenylist`（`PubSoft.Security`）；要求 denylist 在 `AddPubSoftJwtBearer` **之前**注册——注册期与请求期 denylist 不可达均 fail-closed |
 
 ## 边界
 

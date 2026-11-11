@@ -1,0 +1,59 @@
+#nullable enable
+PubSoft.Security.EntityFrameworkCore.EfCoreRefreshTokenFamilyStore<TDbContext>
+PubSoft.Security.EntityFrameworkCore.EfCoreRefreshTokenFamilyStore<TDbContext>.EfCoreRefreshTokenFamilyStore(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory! scopeFactory, PubSoft.Core.IIdGenerator! idGenerator, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Security.EntityFrameworkCore.EfCoreRefreshTokenFamilyStore<TDbContext>.GetByHashAsync(string! tokenHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.Security.RefreshTokenFamilyRecord?>
+PubSoft.Security.EntityFrameworkCore.EfCoreRefreshTokenFamilyStore<TDbContext>.PruneExpiredAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<int>
+PubSoft.Security.EntityFrameworkCore.EfCoreRefreshTokenFamilyStore<TDbContext>.RevokeFamilyAsync(string! familyId, System.DateTimeOffset until, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+PubSoft.Security.EntityFrameworkCore.EfCoreRefreshTokenFamilyStore<TDbContext>.RevokeSubjectAsync(string! subject, System.DateTimeOffset until, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<int>
+PubSoft.Security.EntityFrameworkCore.EfCoreRefreshTokenFamilyStore<TDbContext>.SaveAsync(PubSoft.Security.RefreshTokenFamilyRecord! record, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+PubSoft.Security.EntityFrameworkCore.EfCoreRefreshTokenFamilyStore<TDbContext>.TryConsumeAsync(string! tokenHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.Security.RefreshConsumeResult>
+PubSoft.Security.EntityFrameworkCore.EfCoreTokenDenylist<TDbContext>
+PubSoft.Security.EntityFrameworkCore.EfCoreTokenDenylist<TDbContext>.DenyAsync(PubSoft.Security.TokenDenyEntry! entry, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+PubSoft.Security.EntityFrameworkCore.EfCoreTokenDenylist<TDbContext>.EfCoreTokenDenylist(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory! scopeFactory, PubSoft.Core.IIdGenerator! idGenerator, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Security.EntityFrameworkCore.EfCoreTokenDenylist<TDbContext>.IsDeniedAsync(string! tokenId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<bool>
+PubSoft.Security.EntityFrameworkCore.EfCoreTokenDenylist<TDbContext>.PruneExpiredAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<int>
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyRevocationRecord
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyRevocationRecord.ExpiresAt.get -> System.DateTimeOffset
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyRevocationRecord.ExpiresAt.set -> void
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyRevocationRecord.FamilyId.get -> string!
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyRevocationRecord.FamilyId.set -> void
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyRevocationRecord.Id.get -> long
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyRevocationRecord.Id.set -> void
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyRevocationRecord.RefreshTokenFamilyRevocationRecord() -> void
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.Consumed.get -> bool
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.Consumed.set -> void
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.FamilyExpiresAt.get -> System.DateTimeOffset
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.FamilyExpiresAt.set -> void
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.FamilyId.get -> string!
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.FamilyId.set -> void
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.Id.get -> long
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.Id.set -> void
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.IssuedAt.get -> System.DateTimeOffset
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.IssuedAt.set -> void
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.RefreshTokenFamilyStateRecord() -> void
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.Subject.get -> string!
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.Subject.set -> void
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.TokenExpiresAt.get -> System.DateTimeOffset
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.TokenExpiresAt.set -> void
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.TokenHash.get -> string!
+PubSoft.Security.EntityFrameworkCore.RefreshTokenFamilyStateRecord.TokenHash.set -> void
+PubSoft.Security.EntityFrameworkCore.SecurityEntityFrameworkCoreServiceCollectionExtensions
+PubSoft.Security.EntityFrameworkCore.SecurityStateModelBuilderExtensions
+PubSoft.Security.EntityFrameworkCore.TokenDenylistRecord
+PubSoft.Security.EntityFrameworkCore.TokenDenylistRecord.DeniedAt.get -> System.DateTimeOffset
+PubSoft.Security.EntityFrameworkCore.TokenDenylistRecord.DeniedAt.set -> void
+PubSoft.Security.EntityFrameworkCore.TokenDenylistRecord.ExpiresAt.get -> System.DateTimeOffset
+PubSoft.Security.EntityFrameworkCore.TokenDenylistRecord.ExpiresAt.set -> void
+PubSoft.Security.EntityFrameworkCore.TokenDenylistRecord.Id.get -> long
+PubSoft.Security.EntityFrameworkCore.TokenDenylistRecord.Id.set -> void
+PubSoft.Security.EntityFrameworkCore.TokenDenylistRecord.Reason.get -> string?
+PubSoft.Security.EntityFrameworkCore.TokenDenylistRecord.Reason.set -> void
+PubSoft.Security.EntityFrameworkCore.TokenDenylistRecord.Subject.get -> string?
+PubSoft.Security.EntityFrameworkCore.TokenDenylistRecord.Subject.set -> void
+PubSoft.Security.EntityFrameworkCore.TokenDenylistRecord.TokenDenylistRecord() -> void
+PubSoft.Security.EntityFrameworkCore.TokenDenylistRecord.TokenId.get -> string!
+PubSoft.Security.EntityFrameworkCore.TokenDenylistRecord.TokenId.set -> void
+static PubSoft.Security.EntityFrameworkCore.SecurityEntityFrameworkCoreServiceCollectionExtensions.AddPubSoftEfCoreRefreshTokenFamilyStore<TDbContext>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Security.EntityFrameworkCore.SecurityEntityFrameworkCoreServiceCollectionExtensions.AddPubSoftEfCoreTokenDenylist<TDbContext>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Security.EntityFrameworkCore.SecurityStateModelBuilderExtensions.ConfigurePubSoftSecurityState(this Microsoft.EntityFrameworkCore.ModelBuilder! modelBuilder) -> Microsoft.EntityFrameworkCore.ModelBuilder!

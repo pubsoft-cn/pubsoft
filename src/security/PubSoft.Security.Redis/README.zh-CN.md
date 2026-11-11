@@ -24,6 +24,14 @@ services.AddPubSoftRedisNonceStore(connection, options =>
 });
 ```
 
+## Refresh Token 族轮换
+
+`AddPubSoftRedisRefreshTokenFamilyStore` 注册多实例 refresh-token 轮换的共享 `IRefreshTokenFamilyStore`。token 记录是 `{KeyPrefix}{f:familyId}:tok:{sha256}` 下的 hash；族吊销标记与其 token 共享 `{f:familyId}` hash tag，consume 脚本在同槽单步内完成"查吊销标记 + 置 used"——Redis Cluster 下安全。`tokptr:` 指针 key 解析 hash → familyId，`sub:` set 索引 subject → familyIds 供 `RevokeSubjectAsync`。与 nonce 相同的持久化边界：Redis 故障切换丢失已确认写，可能复活已消费 token 或丢失吊销标记——按威胁模型调持久化/复制配置。配合 `PubSoft.Security` 的 `AddPubSoftRefreshTokenFamilyService` 使用。
+
+## Token 吊销名单
+
+`AddPubSoftRedisTokenDenylist` 注册共享 `ITokenDenylist`——多实例校验方的吊销真相源。每条 deny 条目是 `{KeyPrefix}{tokenId}` 下的 hash key，随被吊销 token 自身过期自动清除。持久化边界同样适用：Redis 故障切换丢失已确认写，已吊销 token 在剩余 TTL 内可能复活。配合 `PubSoft.Authentication.Jwt.AspNetCore` 的 `PubSoftJwtBearerOptions.CheckDenylist` 做逐请求检查。
+
 ## 运维边界
 
 Redis 位于请求授权路径上——连接错误直接传播，不回退 `MemoryNonceStore`。按部署配置 multiplexer 的认证、TLS、超时与网络策略。取消只停止等待 Redis 操作，无法回滚已发出的命令——被取消的占用可能仍消耗该 nonce 直至过期，对防重放而言这是 fail-closed。

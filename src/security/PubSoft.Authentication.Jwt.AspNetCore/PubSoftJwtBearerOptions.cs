@@ -32,4 +32,10 @@ public sealed class PubSoftJwtBearerOptions
     public string NameClaimType { get; set; } = JwtRegisteredClaimNames.Sub;
     /// <summary>Claim mapped to roles.</summary>
     public string RoleClaimType { get; set; } = "role";
+    /// <summary>
+    /// Opt-in revocation check: after signature validation, look up SHA-256 of the raw token in
+    /// the registered <c>ITokenDenylist</c> (PubSoft.Security). Requires a denylist registered
+    /// before this call - fails closed at registration and per-request when unavailable.
+    /// </summary>
+    public bool CheckDenylist { get; set; }
 }

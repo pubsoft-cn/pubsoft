@@ -33,6 +33,10 @@ public static class JwtBearerAuthenticationExtensions
                 "Configure exactly one of static JWKS, remote metadata address, or symmetric key.",
                 nameof(configure));
 
+        if (options.CheckDenylist && !builder.Services.Any(d => d.ServiceType == typeof(Security.ITokenDenylist)))
+            throw new InvalidOperationException(
+                "CheckDenylist requires a registered ITokenDenylist; register it (e.g. AddPubSoftMemoryTokenDenylist or AddPubSoftRedisTokenDenylist) before AddPubSoftJwtBearer.");
+
         JsonWebKey[] keys = useStaticJwks ? ParsePublicSigningKeys(options.JwksJson) : [];
         SymmetricSecurityKey? symmetricKey = null;
         if (useSymmetricKey)
@@ -47,6 +51,34 @@ public static class JwtBearerAuthenticationExtensions
 
         return builder.AddJwtBearer(scheme, bearerOptions =>
         {
+            if (options.CheckDenylist)
+            {
+                bearerOptions.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = async context =>
+                    {
+                        var rawToken = context.SecurityToken switch
+                        {
+                            Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jsonWebToken => jsonWebToken.EncodedToken,
+                            JwtSecurityToken legacyToken => legacyToken.RawData,
+                            _ => null
+                        };
+                        var denylist = context.HttpContext.RequestServices.GetService<Security.ITokenDenylist>();
+                        if (denylist is null || rawToken is not { Length: > 0 })
+                        {
+                            context.Fail("Token denylist is unavailable.");
+                            return;
+                        }
+
+                        var denied = await denylist.IsDeniedAsync(
+                            Security.TokenDenyIds.ForToken(rawToken),
+                            context.HttpContext.RequestAborted).ConfigureAwait(false);
+                        if (denied)
+                            context.Fail("Token is revoked.");
+                    }
+                };
+            }
+
             bearerOptions.MapInboundClaims = false;
             bearerOptions.RefreshOnIssuerKeyNotFound = true;
             bearerOptions.BackchannelTimeout = options.BackchannelTimeout;

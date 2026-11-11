@@ -39,6 +39,7 @@ app.UseAuthorization();
 | `BackchannelTimeout` | 15 s | bounded ≤ 2 min; remote fetch uses JwtBearer's cache + unknown-kid refresh |
 | `ClockSkew` | 5 s | configurable 0–5 min |
 | `NameClaimType` / `RoleClaimType` | `sub` / `role` | claim remapping is disabled otherwise |
+| `CheckDenylist` | `false` | opt-in revocation check: hashes the raw token (SHA-256) against the registered `ITokenDenylist` (`PubSoft.Security`) on every validated request; requires the denylist registered **before** `AddPubSoftJwtBearer` — fails closed at registration and when the denylist is unreachable per request |
 
 ## Boundaries
 
@@ -90,6 +91,7 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
+`AllowInsecureJwksUri`, `Audience`, `BackchannelTimeout`, `CacheMinutes`, `CheckDenylist`, `ClientIdClaimType`, `ClockSkew`, `Issuer`, `JwksJson`, `JwksUri`, `MetadataAddress`, `NameClaimType`, `RequireHttpsMetadata`, `RoleClaimType`, `SecretKey`, `SymmetricKey`, `SymmetricKeyId`
 
 <!-- pubsoft:api-surface:end -->
 

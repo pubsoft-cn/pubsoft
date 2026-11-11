@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
+    <PackageId>PubSoft.Security.EntityFrameworkCore</PackageId>
+    <Description>Optional EF Core persistence for PubSoft.Security refresh-rotation and revocation state.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../security/PubSoft.Security/PubSoft.Security.csproj" />
+    <ProjectReference Include="../../core/PubSoft.Core/PubSoft.Core.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+</Project>

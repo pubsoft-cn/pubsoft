@@ -25,6 +25,14 @@ services.AddPubSoftRedisNonceStore(connection, options =>
 });
 ```
 
+## Refresh Token Families
+
+`AddPubSoftRedisRefreshTokenFamilyStore` registers the shared `IRefreshTokenFamilyStore` for multi-instance refresh-token rotation. Token records are hashes under `{KeyPrefix}{f:familyId}:tok:{sha256}`; the family revocation marker shares the `{f:familyId}` hash tag, so the consume script checks revocation and flips `used` in one atomic single-slot step — safe on Redis Cluster. A `tokptr:` lookup key resolves hash → familyId, and `sub:` sets index subject → familyIds for `RevokeSubjectAsync`. The same durability caveat applies as for nonces: acknowledged writes lost to Redis failover can resurrect a consumed token or drop a revocation marker — tune persistence/replication to the threat model. Pair with `AddPubSoftRefreshTokenFamilyService` in `PubSoft.Security`.
+
+## Token Denylist
+
+`AddPubSoftRedisTokenDenylist` registers the shared `ITokenDenylist` — the revocation source of truth for multi-instance validators. Each deny entry is a hash key under `{KeyPrefix}{tokenId}` that expires at the denied token's own expiry, so the list self-cleans. The durability caveat applies again: a Redis failover that loses acknowledged writes can resurrect a revoked token until its TTL ends. Pair with `PubSoftJwtBearerOptions.CheckDenylist` in `PubSoft.Authentication.Jwt.AspNetCore` for the per-request check.
+
 ## Operational Boundaries
 
 Redis is part of the request authorization path. Connection errors propagate; the adapter does not fall back to `MemoryNonceStore`. Configure the multiplexer with the deployment's authentication, TLS, timeouts, and network policy. Cancellation stops waiting for the Redis operation but cannot roll back a command already sent; a canceled reservation may therefore consume that nonce until expiry, which is fail-closed for replay protection.
@@ -48,10 +56,12 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 | Method |
 |---|---|
 | `AddPubSoftRedisNonceStore` |
+| `AddPubSoftRedisRefreshTokenFamilyStore` |
+| `AddPubSoftRedisTokenDenylist` |
 
 **(options & records)**
 
-`Database`, `KeyPrefix`, `MaxNonceLength`, `MaxScopeLength`
+`Database`, `KeyPrefix`, `MaxNonceLength`, `MaxScopeLength`, `MaxSubjectLength`, `MaxTokenIdLength`
 
 <!-- pubsoft:api-surface:end -->
 
