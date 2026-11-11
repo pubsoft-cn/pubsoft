@@ -5,7 +5,7 @@
     <RootNamespace>PubSoft.Monitoring.Scheduling</RootNamespace>
     <PackageId>PubSoft.Monitoring.Scheduling</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
-    <Version>$(PubSoftVersion)</Version>
+    <Version>$(PubSoftPackageVersion)</Version>
     <Description>Optional scheduler alert rules and job health integration for PubSoft.Monitoring.</Description>
     <PackageTags>monitoring;scheduler;notifications;alerts</PackageTags>
   </PropertyGroup>

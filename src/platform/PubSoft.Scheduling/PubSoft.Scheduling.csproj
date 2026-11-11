@@ -5,7 +5,7 @@
     <RootNamespace>PubSoft.Scheduling</RootNamespace>
     <PackageId>PubSoft.Scheduling</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
-    <Version>$(PubSoftVersion)</Version>
+    <Version>$(PubSoftPackageVersion)</Version>
     <Description>Provider-neutral scheduled job engine with bounded concurrency and extensible executors.</Description>
     <PackageTags>scheduling;jobs;hosted-service;bitmask</PackageTags>
   </PropertyGroup>

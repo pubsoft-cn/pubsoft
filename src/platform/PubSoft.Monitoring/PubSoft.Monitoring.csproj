@@ -5,7 +5,7 @@
     <RootNamespace>PubSoft.Monitoring</RootNamespace>
     <PackageId>PubSoft.Monitoring</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
-    <Version>$(PubSoftVersion)</Version>
+    <Version>$(PubSoftPackageVersion)</Version>
     <Description>Provider-neutral monitoring contracts and bounded HTTP probe health checks.</Description>
     <PackageTags>monitoring;health-check;probe</PackageTags>
   </PropertyGroup>

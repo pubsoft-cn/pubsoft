@@ -5,7 +5,7 @@
     <RootNamespace>PubSoft.Scheduling.Http</RootNamespace>
     <PackageId>PubSoft.Scheduling.Http</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
-    <Version>$(PubSoftVersion)</Version>
+    <Version>$(PubSoftPackageVersion)</Version>
     <Description>Optional HTTP probe and resilient executors for PubSoft.Scheduling.</Description>
     <PackageTags>scheduler;http;probe;retry;circuit-breaker</PackageTags>
   </PropertyGroup>

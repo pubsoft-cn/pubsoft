@@ -10,11 +10,17 @@
          collide with the eventual stable public version. Bump the counter per
          validation drop; drop the suffix entirely for the public stable release. -->
     <!-- Two streams: external (alpha.*, nuget.org) and dev (internal feed).
-         -p:PubSoftStream=dev stamps a dated dev build; default builds the
-         external stream. -p:PubSoftDevSuffix=.2 disambiguates same-day drops. -->
-    <PubSoftVersion Condition="'$(PubSoftStream)' == 'dev'">0.1.0-dev.$([System.DateTime]::UtcNow.ToString(yyyyMMdd))$(PubSoftDevSuffix)</PubSoftVersion>
-    <PubSoftVersion Condition="'$(PubSoftStream)' != 'dev'">0.1.0-alpha.16</PubSoftVersion>
-    <Version>$(PubSoftVersion)</Version>
+         PubSoftVersion is the canonical release version - central package pins
+         and in-repo package references resolve it. Dev builds stamp artifacts
+         dev.yyyymmdd.<stamp>: -p:PubSoftDevStamp=... supplies a single stamp
+         for the whole wave (pack scripts use seconds-of-day); without it each
+         project falls back to its own tick stamp, so always pass the shared
+         stamp when packing the full solution. -->
+    <PubSoftVersion>0.1.0-alpha.16</PubSoftVersion>
+    <PubSoftPackageVersion Condition="'$(PubSoftStream)' == 'dev'">0.1.0-dev.$([System.DateTime]::UtcNow.ToString(yyyyMMdd)).$(PubSoftDevStamp)</PubSoftPackageVersion>
+    <PubSoftDevStamp Condition="'$(PubSoftDevStamp)' == ''">$([System.DateTime]::UtcNow.TimeOfDay.Ticks)</PubSoftDevStamp>
+    <PubSoftPackageVersion Condition="'$(PubSoftStream)' != 'dev'">$(PubSoftVersion)</PubSoftPackageVersion>
+    <Version>$(PubSoftPackageVersion)</Version>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/pubsoft-cn/pubsoft</RepositoryUrl>
     <Authors>PubSoft Contributors</Authors>

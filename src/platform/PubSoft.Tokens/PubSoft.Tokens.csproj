@@ -5,7 +5,7 @@
     <RootNamespace>PubSoft.Tokens</RootNamespace>
     <PackageId>PubSoft.Tokens</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
-    <Version>$(PubSoftVersion)</Version>
+    <Version>$(PubSoftPackageVersion)</Version>
     <Description>Configurable OAuth token acquisition, caching, and replay-safe bearer injection.</Description>
     <PackageTags>oauth;token;bearer;delegating-handler</PackageTags>
   </PropertyGroup>

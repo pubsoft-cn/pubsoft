@@ -5,7 +5,7 @@
     <RootNamespace>PubSoft.Modularity</RootNamespace>
     <PackageId>PubSoft.Modularity</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
-    <Version>$(PubSoftVersion)</Version>
+    <Version>$(PubSoftPackageVersion)</Version>
     <Description>Declarative module orchestration — dependency-ordered service configuration, initialization, and reverse-order shutdown with optional-module degradation.</Description>
     <PackageTags>modules;modularity;bootstrap;lifecycle</PackageTags>
   </PropertyGroup>

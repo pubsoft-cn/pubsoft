@@ -4,7 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>PubSoft.AspNetCore.Docs</RootNamespace>
     <PackageId>PubSoft.AspNetCore.Docs</PackageId>
-    <Version>$(PubSoftVersion)</Version>
+    <Version>$(PubSoftPackageVersion)</Version>
     <Description>Self-hosted API doc catalog generated from EndpointDataSource + XML comments, with a semantic overlay and an embedded docs page. Not an OpenAPI/codegen replacement.</Description>
     <PackageTags>api;docs;catalog;openapi-alternative</PackageTags>
   </PropertyGroup>

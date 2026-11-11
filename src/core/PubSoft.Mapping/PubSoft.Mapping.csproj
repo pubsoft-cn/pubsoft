@@ -5,7 +5,7 @@
     <RootNamespace>PubSoft.Mapping</RootNamespace>
     <PackageId>PubSoft.Mapping</PackageId>
     <IsAotCompatible>true</IsAotCompatible>
-    <Version>$(PubSoftVersion)</Version>
+    <Version>$(PubSoftPackageVersion)</Version>
     <Description>Lightweight expression-compiled object mapping with no external dependencies.</Description>
     <PackageTags>mapping;object-mapper;expression-tree</PackageTags>
   </PropertyGroup>
