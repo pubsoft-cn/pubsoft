@@ -1,6 +1,7 @@
 #nullable enable
 const PubSoft.Authentication.Jwt.AspNetCore.DualJwtAuthenticationExtensions.AuthServerScheme = "AuthServerJwks" -> string!
 const PubSoft.Authentication.Jwt.AspNetCore.DualJwtOptions.SectionName = "Jwt" -> string!
+const PubSoft.Authentication.Jwt.AspNetCore.JwksEndpointRouteBuilderExtensions.DefaultPath = "/.well-known/jwks.json" -> string!
 const PubSoft.Authentication.Jwt.AspNetCore.JwksOptions.SectionName = "AuthServer" -> string!
 PubSoft.Authentication.Jwt.AspNetCore.DualJwtAuthenticationExtensions
 PubSoft.Authentication.Jwt.AspNetCore.DualJwtOptions
@@ -11,6 +12,7 @@ PubSoft.Authentication.Jwt.AspNetCore.DualJwtOptions.Issuer.get -> string!
 PubSoft.Authentication.Jwt.AspNetCore.DualJwtOptions.Issuer.set -> void
 PubSoft.Authentication.Jwt.AspNetCore.DualJwtOptions.SecretKey.get -> string!
 PubSoft.Authentication.Jwt.AspNetCore.DualJwtOptions.SecretKey.set -> void
+PubSoft.Authentication.Jwt.AspNetCore.JwksEndpointRouteBuilderExtensions
 PubSoft.Authentication.Jwt.AspNetCore.JwksKeyProvider
 PubSoft.Authentication.Jwt.AspNetCore.JwksKeyProvider.JwksKeyProvider(Microsoft.Extensions.Options.IOptions<PubSoft.Authentication.Jwt.AspNetCore.JwksOptions!>! options, Microsoft.Extensions.Caching.Memory.IMemoryCache! cache, Microsoft.Extensions.Logging.ILogger<PubSoft.Authentication.Jwt.AspNetCore.JwksKeyProvider!>! logger, System.Net.Http.HttpClient! httpClient) -> void
 PubSoft.Authentication.Jwt.AspNetCore.JwksKeyProvider.ResolveSigningKeyAsync(string! keyId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.SecurityKey?>!
@@ -52,6 +54,7 @@ PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.SymmetricKey.set -
 PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.SymmetricKeyId.get -> string!
 PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions.SymmetricKeyId.set -> void
 static PubSoft.Authentication.Jwt.AspNetCore.DualJwtAuthenticationExtensions.AddPubSoftDualJwtAuthentication(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! configuration) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Authentication.Jwt.AspNetCore.JwksEndpointRouteBuilderExtensions.MapPubSoftJwks(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder! endpoints, string! pattern = "/.well-known/jwks.json", int cacheMaxAgeSeconds = 60) -> Microsoft.AspNetCore.Builder.IEndpointConventionBuilder!
 static PubSoft.Authentication.Jwt.AspNetCore.JwtBearerAuthenticationExtensions.AddPubSoftJwtBearer(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! builder, System.Action<PubSoft.Authentication.Jwt.AspNetCore.PubSoftJwtBearerOptions!>! configure, string! scheme = "Bearer") -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!
 PubSoft.Authentication.Jwt.AspNetCore.DualJwtOptions.ClientIdClaimType.get -> string!
 PubSoft.Authentication.Jwt.AspNetCore.DualJwtOptions.ClientIdClaimType.set -> void

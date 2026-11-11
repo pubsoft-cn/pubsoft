@@ -58,8 +58,20 @@ app.UseAuthorization();
 - `AuthServer:` 的 `Audience` 可选——配置后 scheme 校验 `aud`；为空则跳过。issuer 为多个 API 签发 token 时应配置。
 - `JwksKeyProvider` 在创建 `JwtBearerOptions` 时经宿主容器解析——singleton、缓存与释放生命周期遵循常规 DI 规则。
 
+## 托管 JWKS 端点
+
+签发方宿主一行映射即可发布 key ring 的公钥参数：
+
+```csharp
+builder.Services.AddPubSoftJwtIssuerKeyRing(builder.Configuration);
+var app = builder.Build();
+app.MapPubSoftJwks(); // 服务 GET /.well-known/jwks.json
+```
+
+文档在映射时序列化一次——密钥轮换在 ring 配置重新部署后生效。未注册 `IJwtIssuerKeyRing` 时映射在启动期抛错。端点设计上匿名可达，且绝不输出 JWK 私钥参数。`cacheMaxAgeSeconds`（默认 60，范围 0–86400）设置响应 `Cache-Control` max-age；保持足够短以便消费方及时感知轮换。
+
 ## Public API surface
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
-- `PubSoft.Authentication.Jwt.AspNetCore`: `DualJwtAuthenticationExtensions` `DualJwtOptions` `JwksKeyProvider` `JwksOptions` `JwtBearerAuthenticationExtensions` `PubSoftJwtBearerOptions`
+- `PubSoft.Authentication.Jwt.AspNetCore`: `DualJwtAuthenticationExtensions` `DualJwtOptions` `JwksEndpointRouteBuilderExtensions` `JwksKeyProvider` `JwksOptions` `JwtBearerAuthenticationExtensions` `PubSoftJwtBearerOptions`

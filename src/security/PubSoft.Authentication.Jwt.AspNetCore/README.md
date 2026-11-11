@@ -58,11 +58,23 @@ Two key-source families, mutually exclusive per scheme: **asymmetric** (static J
 - `Audience` is optional on `AuthServer:` — when set, the scheme validates `aud`; when empty it is skipped. Configure it whenever the issuer mints tokens for more than one API.
 - `JwksKeyProvider` resolves through the host container when `JwtBearerOptions` are created — singleton, cache and disposal lifetimes follow normal DI rules.
 
+## Hosted JWKS Endpoint
+
+Issuer hosts publish their key ring's public parameters with one mapping:
+
+```csharp
+builder.Services.AddPubSoftJwtIssuerKeyRing(builder.Configuration);
+var app = builder.Build();
+app.MapPubSoftJwks(); // serves GET /.well-known/jwks.json
+```
+
+The document is serialized once at map time — rollover takes effect on redeploy of the ring configuration. Mapping without a registered `IJwtIssuerKeyRing` throws at startup. The endpoint is anonymous by design and never emits private JWK parameters. `cacheMaxAgeSeconds` (default 60, range 0–86400) sets the response `Cache-Control` max-age; keep it short enough that consumers pick up rotated keys promptly.
+
 ## Public API surface
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
-- `PubSoft.Authentication.Jwt.AspNetCore`: `DualJwtAuthenticationExtensions` `DualJwtOptions` `JwksKeyProvider` `JwksOptions` `JwtBearerAuthenticationExtensions` `PubSoftJwtBearerOptions`
+- `PubSoft.Authentication.Jwt.AspNetCore`: `DualJwtAuthenticationExtensions` `DualJwtOptions` `JwksEndpointRouteBuilderExtensions` `JwksKeyProvider` `JwksOptions` `JwtBearerAuthenticationExtensions` `PubSoftJwtBearerOptions`
 
 <!-- pubsoft:api-surface:start -->
 
@@ -74,10 +86,10 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 |---|---|
 | `AddPubSoftDualJwtAuthentication` |
 | `AddPubSoftJwtBearer` |
+| `MapPubSoftJwks` |
 
 **(options & records)**
 
-`AllowInsecureJwksUri`, `Audience`, `BackchannelTimeout`, `CacheMinutes`, `ClientIdClaimType`, `ClockSkew`, `Issuer`, `JwksJson`, `JwksUri`, `MetadataAddress`, `NameClaimType`, `RequireHttpsMetadata`, `RoleClaimType`, `SecretKey`, `SymmetricKey`, `SymmetricKeyId`
 
 <!-- pubsoft:api-surface:end -->
 

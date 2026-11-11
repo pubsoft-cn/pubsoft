@@ -1,4 +1,20 @@
 #nullable enable
+const PubSoft.Authentication.Jwt.JwtIssuerKeyRingOptions.SectionName = "Jwt:IssuerKeys" -> string!
+PubSoft.Authentication.Jwt.ConfigJwtIssuerKeyRing
+PubSoft.Authentication.Jwt.ConfigJwtIssuerKeyRing.ActiveKey.get -> PubSoft.Authentication.Jwt.RsaSigningKeyMaterial!
+PubSoft.Authentication.Jwt.ConfigJwtIssuerKeyRing.ConfigJwtIssuerKeyRing(PubSoft.Authentication.Jwt.JwtIssuerKeyRingOptions! options) -> void
+PubSoft.Authentication.Jwt.ConfigJwtIssuerKeyRing.Dispose() -> void
+PubSoft.Authentication.Jwt.ConfigJwtIssuerKeyRing.PublishedKeys.get -> System.Collections.Generic.IReadOnlyCollection<PubSoft.Authentication.Jwt.RsaSigningKeyMaterial!>!
+PubSoft.Authentication.Jwt.IJwtIssuerKeyRing
+PubSoft.Authentication.Jwt.IJwtIssuerKeyRing.ActiveKey.get -> PubSoft.Authentication.Jwt.RsaSigningKeyMaterial!
+PubSoft.Authentication.Jwt.IJwtIssuerKeyRing.PublishedKeys.get -> System.Collections.Generic.IReadOnlyCollection<PubSoft.Authentication.Jwt.RsaSigningKeyMaterial!>!
+PubSoft.Authentication.Jwt.JwtIssuerKeyRingOptions
+PubSoft.Authentication.Jwt.JwtIssuerKeyRingOptions.ActiveKeyId.get -> string!
+PubSoft.Authentication.Jwt.JwtIssuerKeyRingOptions.ActiveKeyId.set -> void
+PubSoft.Authentication.Jwt.JwtIssuerKeyRingOptions.JwtIssuerKeyRingOptions() -> void
+PubSoft.Authentication.Jwt.JwtIssuerKeyRingOptions.Keys.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+PubSoft.Authentication.Jwt.JwtIssuerKeyRingOptions.Keys.set -> void
+PubSoft.Authentication.Jwt.JwtIssuerKeyRingServiceCollectionExtensions
 PubSoft.Authentication.Jwt.JwtJwksDocument
 PubSoft.Authentication.Jwt.JwtJwksDocument.JwtJwksDocument() -> void
 PubSoft.Authentication.Jwt.JwtJwksDocument.Keys.get -> System.Collections.Generic.List<PubSoft.Authentication.Jwt.JwtJwksKey!>!
@@ -28,6 +44,7 @@ PubSoft.Authentication.Jwt.SymmetricSigningKeyMaterial
 PubSoft.Authentication.Jwt.SymmetricSigningKeyMaterial.Dispose() -> void
 PubSoft.Authentication.Jwt.SymmetricSigningKeyMaterial.KeyId.get -> string!
 PubSoft.Authentication.Jwt.SymmetricSigningKeyMaterial.SecurityKey.get -> Microsoft.IdentityModel.Tokens.SymmetricSecurityKey!
+static PubSoft.Authentication.Jwt.JwtIssuerKeyRingServiceCollectionExtensions.AddPubSoftJwtIssuerKeyRing(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! configuration, string! sectionName = "Jwt:IssuerKeys") -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Authentication.Jwt.JwtSigning.CreateAccessToken(PubSoft.Authentication.Jwt.RsaSigningKeyMaterial! keyMaterial, string! issuer, string! audience, System.Collections.Generic.IReadOnlyDictionary<string!, string!>! claims, System.TimeSpan lifetime, System.TimeProvider? timeProvider = null) -> string!
 static PubSoft.Authentication.Jwt.JwtSigning.CreateAccessToken(PubSoft.Authentication.Jwt.SymmetricSigningKeyMaterial! keyMaterial, string! issuer, string! audience, System.Collections.Generic.IReadOnlyDictionary<string!, string!>! claims, System.TimeSpan lifetime, System.TimeProvider? timeProvider = null) -> string!
 static PubSoft.Authentication.Jwt.JwtSigning.CreateRsaKey(string! keyId, int keySize = 2048) -> PubSoft.Authentication.Jwt.RsaSigningKeyMaterial!

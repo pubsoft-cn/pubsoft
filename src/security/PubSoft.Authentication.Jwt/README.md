@@ -69,7 +69,7 @@ Remote metadata requires HTTPS by default. Disabling `RequireHttpsMetadata` perm
 using var key = JwtSigning.CreateRsaKey("key-1");
 var token = JwtSigning.CreateAccessToken(key, issuer, audience, claims, TimeSpan.FromMinutes(30));
 var parsed = JwtSigning.ValidateAccessToken(token, issuer, audience, key);
-var jwks = JwtSigning.CreatePublicJwks(key);
+var jwks = JwtSigning.ExportJwks(key);
 
 // Symmetric (HS256) — explicit choice, never a fallback
 using var sym = JwtSigning.CreateSymmetricKey("sym-1");
@@ -80,6 +80,18 @@ var hsParsed = JwtSigning.ValidateAccessToken(hsToken, issuer, audience, sym);
 ```
 
 `SymmetricSigningKeyMaterial` requires at least 256 bits of key material (`CreateSymmetricKey` generates a random 256–1024-bit key; `ImportSymmetricKey` accepts bytes or text). The signing algorithm is fixed per overload family — the RSA overloads emit and accept only RS256, the symmetric overloads only HS256 — so an RS256-validated endpoint cannot be downgraded to an HS256 token or vice versa. Validation enforces exact issuer, audience, lifetime, and `kid`; there is no automatic algorithm fallback and no key rollover guessing. Derivation of shared secrets (master/client key hierarchies) is a host responsibility.
+
+### Issuer Key Ring
+
+Hosts that issue tokens register a configuration-bound ring instead of passing key material around:
+
+```csharp
+builder.Services.AddPubSoftJwtIssuerKeyRing(builder.Configuration);
+// Jwt:IssuerKeys:ActiveKeyId = "key-2"
+// Jwt:IssuerKeys:Keys:key-1 / Keys:key-2 -> RSA private key PEM values
+```
+
+`IJwtIssuerKeyRing` exposes `ActiveKey` for issuance (`JwtSigning.CreateAccessToken(ring.ActiveKey, ...)`) and `PublishedKeys` for `JwtSigning.ExportJwks` and multi-key validation. Registration fails closed on an empty ring, a missing active key id, malformed PEM, or keys below 2048 bits. Every configured key is published — keep retiring keys until their issued tokens expire, then remove them. The ring performs no scheduled rotation; generating and rolling PEM material is a host operations concern.
 
 ## Validation and Claims
 
@@ -93,15 +105,21 @@ The default clock skew is five seconds and can be configured from zero through f
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
-- `PubSoft.Authentication.Jwt`: `JwtJwksDocument` `JwtJwksKey` `JwtSigning` `RefreshTokenGenerator` `IClientSigningKeyProvider` `RsaSigningKeyMaterial` `SymmetricSigningKeyMaterial`
+- `PubSoft.Authentication.Jwt`: `ConfigJwtIssuerKeyRing` `IJwtIssuerKeyRing` `JwtIssuerKeyRingOptions` `JwtIssuerKeyRingServiceCollectionExtensions` `JwtJwksDocument` `JwtJwksKey` `JwtSigning` `RefreshTokenGenerator` `IClientSigningKeyProvider` `RsaSigningKeyMaterial` `SymmetricSigningKeyMaterial`
 
 <!-- pubsoft:api-surface:start -->
 
 Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSoft.DocsTool -- --sync`).
 
+**Registration**
+
+| Method |
+|---|---|
+| `AddPubSoftJwtIssuerKeyRing` |
+
 **(options & records)**
 
-``
+`ActiveKeyId`
 
 <!-- pubsoft:api-surface:end -->
 

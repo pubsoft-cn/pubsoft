@@ -68,7 +68,7 @@ builder.Services
 using var key = JwtSigning.CreateRsaKey("key-1");
 var token = JwtSigning.CreateAccessToken(key, issuer, audience, claims, TimeSpan.FromMinutes(30));
 var parsed = JwtSigning.ValidateAccessToken(token, issuer, audience, key);
-var jwks = JwtSigning.CreatePublicJwks(key);
+var jwks = JwtSigning.ExportJwks(key);
 
 // 对称（HS256）——显式选择，绝非回退
 using var sym = JwtSigning.CreateSymmetricKey("sym-1");
@@ -79,6 +79,18 @@ var hsParsed = JwtSigning.ValidateAccessToken(hsToken, issuer, audience, sym);
 ```
 
 `SymmetricSigningKeyMaterial` 要求至少 256-bit 密钥材料（`CreateSymmetricKey` 生成 256–1024-bit 随机密钥；`ImportSymmetricKey` 接受字节或文本）。签名算法按重载族固定——RSA 重载只收发 RS256，对称重载只收发 HS256——RS256 验证的端点不能被降级成 HS256 token，反之亦然。验证强制精确 issuer/audience/有效期/`kid`；无自动算法回退、无密钥轮换猜测。共享密钥的派生（master/client 密钥层级）归宿主职责。
+
+### 签发侧 Key Ring
+
+签发 token 的宿主注册配置绑定的 key ring，而不是到处传递密钥材料：
+
+```csharp
+builder.Services.AddPubSoftJwtIssuerKeyRing(builder.Configuration);
+// Jwt:IssuerKeys:ActiveKeyId = "key-2"
+// Jwt:IssuerKeys:Keys:key-1 / Keys:key-2 -> RSA 私钥 PEM
+```
+
+`IJwtIssuerKeyRing` 暴露 `ActiveKey`（签发用，`JwtSigning.CreateAccessToken(ring.ActiveKey, ...)`）与 `PublishedKeys`（全部在环密钥，供 `JwtSigning.ExportJwks` 与多密钥验证）。注册即 fail-closed：空环、active key 缺失、PEM 无法解析或低于 2048 位都会抛错。所有在环密钥都会发布——退役密钥保留到其签发的 token 过期后再移除。ring 不做定时轮换；生成与滚动 PEM 是宿主运维职责。
 
 ## 验证与 Claims
 
@@ -92,7 +104,7 @@ var hsParsed = JwtSigning.ValidateAccessToken(hsToken, issuer, audience, sym);
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
-- `PubSoft.Authentication.Jwt`: `JwtJwksDocument` `JwtJwksKey` `JwtSigning` `RefreshTokenGenerator` `IClientSigningKeyProvider` `RsaSigningKeyMaterial` `SymmetricSigningKeyMaterial`
+- `PubSoft.Authentication.Jwt`: `ConfigJwtIssuerKeyRing` `IJwtIssuerKeyRing` `JwtIssuerKeyRingOptions` `JwtIssuerKeyRingServiceCollectionExtensions` `JwtJwksDocument` `JwtJwksKey` `JwtSigning` `RefreshTokenGenerator` `IClientSigningKeyProvider` `RsaSigningKeyMaterial` `SymmetricSigningKeyMaterial`
 ## 验证
 
 ```bash
