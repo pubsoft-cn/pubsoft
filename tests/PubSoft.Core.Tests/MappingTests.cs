@@ -4,6 +4,7 @@ using Xunit;
 
 namespace PubSoft.Core.Tests;
 
+[Collection("object-mapper-static")]
 public sealed class MappingTests
 {
     [Fact]

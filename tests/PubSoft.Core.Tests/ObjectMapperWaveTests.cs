@@ -3,6 +3,7 @@ using Xunit;
 
 namespace PubSoft.Core.Tests;
 
+[Collection("object-mapper-static")]
 public sealed class ObjectMapperWaveTests
 {
     private sealed class Src { public string Name { get; set; } = ""; public int Age { get; set; } public string? Skip { get; set; } }
