@@ -81,7 +81,7 @@ PubSoft.Monitoring.StartupDiagnosticsEntry.Status.get -> PubSoft.Monitoring.Star
 PubSoft.Monitoring.StartupDiagnosticsEntry.Status.init -> void
 PubSoft.Monitoring.StartupDiagnosticsHostedService
 PubSoft.Monitoring.StartupDiagnosticsHostedService.StartAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
-PubSoft.Monitoring.StartupDiagnosticsHostedService.StartupDiagnosticsHostedService(PubSoft.Monitoring.StartupDiagnosticsCollector! collector, Microsoft.Extensions.Logging.ILogger<PubSoft.Monitoring.StartupDiagnosticsHostedService!>! logger) -> void
+PubSoft.Monitoring.StartupDiagnosticsHostedService.StartupDiagnosticsHostedService(System.Collections.Generic.IEnumerable<PubSoft.Monitoring.IStartupDiagnostics!>! providers, Microsoft.Extensions.Logging.ILogger<PubSoft.Monitoring.StartupDiagnosticsHostedService!>! logger) -> void
 PubSoft.Monitoring.StartupDiagnosticsHostedService.StopAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 PubSoft.Monitoring.StartupDiagnosticsServiceCollectionExtensions
 PubSoft.Monitoring.StartupDiagnosticsStatus

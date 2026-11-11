@@ -114,10 +114,9 @@ public abstract class PubSoftDbContext : DbContext, IPubSoftSaveParticipant
                     $"outside the current tenant scope {scoped}.");
             else if (entry.State == EntityState.Deleted
                      && CurrentTenantId is { } delScoped
-                     && entry.Entity.TenantId is { } delTenant
-                     && delTenant != delScoped)
+                     && entry.Entity.TenantId != delScoped)
                 throw new InvalidOperationException(
-                    $"Cannot delete {entry.Entity.GetType().Name} with TenantId {delTenant} " +
+                    $"Cannot delete {entry.Entity.GetType().Name} with TenantId {entry.Entity.TenantId?.ToString() ?? "null"} " +
                     $"outside the current tenant scope {delScoped}.");
         }
 
@@ -131,10 +130,9 @@ public abstract class PubSoftDbContext : DbContext, IPubSoftSaveParticipant
                     "outside the current member scope.");
             if (entry.State == EntityState.Deleted
                 && IsMemberScoped
-                && entry.Entity.MemberId is { } delMember
-                && delMember != CurrentMemberId)
+                && entry.Entity.MemberId != CurrentMemberId)
                 throw new InvalidOperationException(
-                    $"Cannot delete {entry.Entity.GetType().Name} with MemberId {delMember} " +
+                    $"Cannot delete {entry.Entity.GetType().Name} with MemberId {entry.Entity.MemberId?.ToString() ?? "null"} " +
                     "outside the current member scope.");
         }
 

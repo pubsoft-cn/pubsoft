@@ -76,6 +76,14 @@ public sealed class EncryptionStartupDiagnostics : IStartupDiagnostics
                 StartupDiagnosticsStatus.Error,
                 $"configured key ring cannot decrypt existing ciphertext ({ex.Reason}, keyId={ex.KeyId ?? "?"}) - verify the deployed key material against the data source");
         }
+        catch (Exception)
+        {
+            // Legacy-path or malformed-probe failures must surface as an Error entry,
+            // never escape Collect() and break the host at startup.
+            return new StartupDiagnosticsEntry("credential-encryption-existing-data",
+                StartupDiagnosticsStatus.Error,
+                "existing-ciphertext probe failed to decrypt - probe may be malformed or encrypted under a key absent from the ring");
+        }
     }
 }
 

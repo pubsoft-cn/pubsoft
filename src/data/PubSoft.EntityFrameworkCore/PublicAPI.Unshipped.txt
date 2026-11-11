@@ -24,7 +24,7 @@ PubSoft.EntityFrameworkCore.Auditing.AuditEntityChangeRecord.TenantId.get -> lon
 PubSoft.EntityFrameworkCore.Auditing.AuditEntityChangeRecord.TenantId.set -> void
 PubSoft.EntityFrameworkCore.Auditing.AuditLogQueryService<TDbContext>
 PubSoft.EntityFrameworkCore.Auditing.AuditLogQueryService<TDbContext>.AuditLogQueryService(TDbContext! dbContext) -> void
-PubSoft.EntityFrameworkCore.Auditing.AuditLogQueryService<TDbContext>.GetListAsync(string? entityType = null, string? subjectId = null, bool? success = null, System.DateTimeOffset? startedAfter = null, System.DateTimeOffset? startedBefore = null, string? category = null, string? action = null, string? targetType = null, string? keyword = null, int skip = 0, int take = 20, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Core.PagedResultDto<PubSoft.EntityFrameworkCore.Auditing.AuditLogRecord!>!>!
+PubSoft.EntityFrameworkCore.Auditing.AuditLogQueryService<TDbContext>.GetListAsync(string? entityType = null, string? subjectId = null, bool? success = null, System.DateTimeOffset? startedAfter = null, System.DateTimeOffset? startedBefore = null, string? category = null, string? action = null, string? targetType = null, string? keyword = null, int skip = 0, int take = 20, bool includeAllTenants = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Core.PagedResultDto<PubSoft.EntityFrameworkCore.Auditing.AuditLogRecord!>!>!
 PubSoft.EntityFrameworkCore.Auditing.AuditLogRecord
 PubSoft.EntityFrameworkCore.Auditing.AuditLogRecord.Action.get -> string?
 PubSoft.EntityFrameworkCore.Auditing.AuditLogRecord.Action.set -> void
@@ -273,4 +273,9 @@ static PubSoft.EntityFrameworkCore.LegacyIdMapModelBuilderExtensions.ConfigurePu
 const PubSoft.EntityFrameworkCore.EncryptionModelBuilderExtensions.EncryptionAadAnnotation = "PubSoft:Encryption:Aad" -> string!
 PubSoft.EntityFrameworkCore.PubSoftEncryptionMigrator
 PubSoft.EntityFrameworkCore.PubSoftEncryptionMigrator.PubSoftEncryptionMigrator(PubSoft.Cryptography.CredentialEncryptionService! encryption) -> void
-PubSoft.EntityFrameworkCore.PubSoftEncryptionMigrator.MigrateAsync(Microsoft.EntityFrameworkCore.DbContext! context, int batchSize = 500, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>!
+PubSoft.EntityFrameworkCore.EncryptionMigrationReport
+PubSoft.EntityFrameworkCore.EncryptionMigrationReport.EncryptionMigrationReport() -> void
+PubSoft.EntityFrameworkCore.EncryptionMigrationReport.Conflicts.get -> int
+PubSoft.EntityFrameworkCore.EncryptionMigrationReport.Rewritten.get -> int
+PubSoft.EntityFrameworkCore.EncryptionMigrationReport.SkippedAmbiguous.get -> int
+PubSoft.EntityFrameworkCore.PubSoftEncryptionMigrator.MigrateAsync(Microsoft.EntityFrameworkCore.DbContext! context, int batchSize = 500, bool treatUndecryptableAsPlaintext = false, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.EntityFrameworkCore.EncryptionMigrationReport!>!

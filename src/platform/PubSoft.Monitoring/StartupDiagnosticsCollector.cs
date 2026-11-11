@@ -28,25 +28,37 @@ public sealed class StartupDiagnosticsCollector
         return entries;
     }
 
-    /// <summary>JSON report: <c>{"overall":"ok|warning|error","entries":[...]}</c>.</summary>
+    /// <summary>JSON report: <c>{"overall":"ok|warning|error","entries":[...]}</c>.
+    /// Serialized via System.Text.Json so provider details with control characters,
+    /// quotes or unicode stay parseable.</summary>
     public string ToJson()
     {
         var entries = Collect();
         var overall = entries.Any(e => e.Status == StartupDiagnosticsStatus.Error) ? "error"
             : entries.Any(e => e.Status == StartupDiagnosticsStatus.Warning) ? "warning" : "ok";
-        var sb = new StringBuilder(128 + entries.Count * 80);
-        sb.Append("{\"overall\":\"").Append(overall).Append("\",\"entries\":[");
-        for (var i = 0; i < entries.Count; i++)
+        // Utf8JsonWriter: correct escaping, zero reflection - AOT-safe.
+        using var stream = new MemoryStream();
+        using (var writer = new System.Text.Json.Utf8JsonWriter(stream))
         {
-            if (i > 0) sb.Append(',');
-            var e = entries[i];
-            sb.Append("{\"area\":\"").Append(Esc(e.Area))
-              .Append("\",\"status\":\"").Append(e.Status.ToString().ToLowerInvariant()) // pubsoft:exempt PUBSOFT027 "enum name render on non-hot path (doc-gen/startup/log line)"
-              .Append("\",\"detail\":\"").Append(Esc(e.Detail)).Append("\"}");
+            writer.WriteStartObject();
+            writer.WriteString("overall", overall);
+            writer.WriteStartArray("entries");
+            foreach (var e in entries)
+            {
+                writer.WriteStartObject();
+                writer.WriteString("area", e.Area);
+                writer.WriteString("status", e.Status switch
+                {
+                    StartupDiagnosticsStatus.Warning => "warning",
+                    StartupDiagnosticsStatus.Error => "error",
+                    _ => "ok"
+                });
+                writer.WriteString("detail", e.Detail);
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
+            writer.WriteEndObject();
         }
-        return sb.Append(']').Append('}').ToString();
+        return Encoding.UTF8.GetString(stream.ToArray());
     }
-
-    private static string Esc(string s)
-        => s.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n"); // pubsoft:exempt PUBSOFT022 "char overload cannot do 1-to-N replacement"
 }

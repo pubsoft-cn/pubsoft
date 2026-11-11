@@ -6,7 +6,9 @@ namespace PubSoft.EntityFrameworkCore.Auditing;
 /// <summary>Read-side query service over persisted <see cref="AuditLogRecord"/> rows -- migration surface for the legacy AuditLogAppService.</summary>
 public class AuditLogQueryService<TDbContext>(TDbContext dbContext) where TDbContext : PubSoftDbContext
 {
-    /// <summary>Paged audit-log query; tenant-scoped to the ambient context (host sees all tenants).</summary>
+    /// <summary>Paged audit-log query; tenant-scoped to the ambient context. When no tenant
+    /// context is present the query returns empty unless the caller explicitly opts into the
+    /// platform-level cross-tenant read.</summary>
     public async Task<PagedResultDto<AuditLogRecord>> GetListAsync(
         string? entityType = null,
         string? subjectId = null,
@@ -19,6 +21,7 @@ public class AuditLogQueryService<TDbContext>(TDbContext dbContext) where TDbCon
         string? keyword = null,
         int skip = 0,
         int take = 20,
+        bool includeAllTenants = false,
         CancellationToken cancellationToken = default)
     {
         take = Math.Clamp(take, 1, 100);
@@ -26,9 +29,11 @@ public class AuditLogQueryService<TDbContext>(TDbContext dbContext) where TDbCon
 
         var q = dbContext.Set<AuditLogRecord>().AsNoTracking();
         var tid = dbContext.CurrentTenantId;
-        // Host context (tid=null, platform admin) lifts the tenant filter - sees every tenant's rows.
+        // Fail-closed: a missing tenant context is NOT proof of platform-admin rights.
+        // Cross-tenant reads require the explicit includeAllTenants opt-in.
         if (tid.HasValue) q = q.Where(a => a.TenantId == tid);
-        else q = q.IgnoreScopeFilters();
+        else if (includeAllTenants) q = q.IgnoreScopeFilters();
+        else return new PagedResultDto<AuditLogRecord> { Items = [], TotalCount = 0 };
 
         if (!string.IsNullOrWhiteSpace(entityType))
             q = q.Where(a => a.EntityChanges.Any(e => e.EntityType == entityType.Trim())); // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison - == is the translatable form"

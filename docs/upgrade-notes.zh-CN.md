@@ -18,6 +18,20 @@ last-reviewed: 2026-11-09
 
 刚推送后的 NU1102 还可能是缓存抖动：`dotnet restore --no-cache` 重试先行，再排查其他。
 
+## post-alpha.16 加固（外部审计波次）
+
+- **作用域删除收紧（R1）。** 租户/成员作用域下，删除 `TenantId`/`MemberId` 为空的实体现在与其他越权写一样抛错——此前空作用域 ID 绕过删除保护，作用域调用方可触及宿主共享记录。
+- **审计查询 fail-closed（R2）。** `AuditLogQueryService.GetListAsync` 不再把缺失的租户上下文当作平台管理员：跨租户读取须显式传 `includeAllTenants: true`（新增可选参数——签名兼容、语义变更）。
+- **加密迁移加固（R5/R6）。** `MigrateAsync` 返回 `EncryptionMigrationReport`（原 `Task<int>`）；无法解密的值跳过计数，不再静默当明文覆盖——`treatUndecryptableAsPlaintext` 保留为危险 opt-in；更新按原值 compare-and-swap，并发写入者被跳过。
+- **诊断不再炸启动（R7）。** `EncryptionStartupDiagnostics` 把所有探针失败转为 Error 条目；`StartupDiagnosticsHostedService` 隔离提供者异常为逐条 Error 项。
+- `StartupDiagnosticsCollector.ToJson()` 改用 System.Text.Json（R3）——detail 中的控制字符不再破坏 JSON 解析。
+
+## alpha.15 -> alpha.16
+
+- **破坏性（静默）：`AuditMiddlewareOptions` 采集开关默认关。** alpha.15 新增的 `CaptureClientIp`/`CaptureUserAgent`/`CaptureActor` 为隐私优先 opt-in，默认 `false`。`new AuditMiddlewareOptions()` 因此写出的审计行缺 ClientIp/UserAgent/Subject——升级消费方静默丢失取证字段。`UsePubSoftAudit` 现于三开关全关时在启动输出警告；显式开启可恢复采集。
+- `UsePubSoftCorrelationId()`/`UsePubSoftAudit()` 向 `UseMiddleware` 传可空 options 对象致宿主启动崩溃（alpha.15）。alpha.16 已按 SecurityHeaders null-guard 范式修复；PUBSOFT055 收录该模式。
+- `AesGcmEncryptor.Decrypt` 现抛 `PubSoftDecryptionException`（`CryptographicException` 子类，携带 `Reason`/`KeyId`）。`catch (CryptographicException)` 兼容；`Assert.Throws<CryptographicException>` 等精确类型断言不兼容。
+
 ## alpha.13 -> 当前
 
 - `System.IdentityModel.Tokens.Jwt` 下限抬至 **8.23.0**。CPM 钉低版本的消费方会遇到 NU1109，抬升钉值即可。

@@ -14,14 +14,30 @@ namespace PubSoft.EntityFrameworkCore;
 /// a mismatched AAD. Rows already under the current scheme (pubsoft: prefix) are skipped;
 /// in-ring key-id rotation uses <see cref="CredentialEncryptionService.Rotate"/>.
 /// </summary>
-/// <remarks>Provider note: uses LIMIT batching (MySQL/PostgreSQL/SQLite).</remarks>
+/// <remarks>
+/// Fail-closed on ambiguity: a value the service cannot decrypt is counted in
+/// <see cref="EncryptionMigrationReport.SkippedAmbiguous"/> and left untouched - it may be
+/// plaintext or legacy ciphertext under an unavailable key, and writing over an undecryptable
+/// value destroys the original. Pass <c>treatUndecryptableAsPlaintext: true</c> only with a
+/// verified backup. Updates compare-and-swap on the original value so a concurrent writer is
+/// skipped, not clobbered. Run in a maintenance window; provider note: LIMIT batching
+/// (MySQL/PostgreSQL/SQLite).
+/// </remarks>
 public sealed class PubSoftEncryptionMigrator(CredentialEncryptionService encryption)
 {
-    /// <summary>Rewrites non-GCM values in every annotated column; returns rows rewritten.</summary>
-    public async Task<int> MigrateAsync(DbContext context, int batchSize = 500, CancellationToken ct = default)
+    /// <summary>Rewrites non-GCM values in every annotated column.</summary>
+    /// <param name="context">The context whose model carries the encryption AAD annotations.</param>
+    /// <param name="batchSize">Rows read per batch; must be positive.</param>
+    /// <param name="treatUndecryptableAsPlaintext">DANGEROUS opt-in: values that fail decryption
+    /// are re-encrypted as plaintext. Only use after verifying they really are plaintext.</param>
+    /// <param name="ct">Cancellation token.</param>
+    public async Task<EncryptionMigrationReport> MigrateAsync(
+        DbContext context, int batchSize = 500, bool treatUndecryptableAsPlaintext = false,
+        CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(context);
-        var rewritten = 0;
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(batchSize);
+        var report = new EncryptionMigrationReport();
         foreach (var entityType in context.Model.GetEntityTypes())
         {
             var table = entityType.GetTableName();
@@ -37,15 +53,17 @@ public sealed class PubSoftEncryptionMigrator(CredentialEncryptionService encryp
                 if (aadText is null) continue;
                 var column = property.GetColumnName(StoreObjectIdentifier.Table(table, schema));
                 if (column is null) continue;
-                rewritten += await MigrateColumnAsync(context, table, schema, pk[0], column,
-                    Encoding.UTF8.GetBytes(aadText), batchSize, ct).ConfigureAwait(false);
+                await MigrateColumnAsync(context, table, schema, pk[0], column,
+                    Encoding.UTF8.GetBytes(aadText), batchSize, treatUndecryptableAsPlaintext,
+                    report, ct).ConfigureAwait(false);
             }
         }
-        return rewritten;
+        return report;
     }
 
-    private async Task<int> MigrateColumnAsync(DbContext context, string table, string? schema,
-        IProperty pk, string column, byte[] aad, int batchSize, CancellationToken ct)
+    private async Task MigrateColumnAsync(DbContext context, string table, string? schema,
+        IProperty pk, string column, byte[] aad, int batchSize, bool asPlaintext,
+        EncryptionMigrationReport report, CancellationToken ct)
     {
         var sql = context.GetService<ISqlGenerationHelper>();
         var pkColumn = pk.GetColumnName(StoreObjectIdentifier.Table(table, schema))
@@ -55,7 +73,6 @@ public sealed class PubSoftEncryptionMigrator(CredentialEncryptionService encryp
         var connection = context.Database.GetDbConnection();
         var shouldClose = connection.State != System.Data.ConnectionState.Open;
         if (shouldClose) await connection.OpenAsync(ct).ConfigureAwait(false);
-        var rewritten = 0;
         try
         {
             while (true)
@@ -71,22 +88,30 @@ public sealed class PubSoftEncryptionMigrator(CredentialEncryptionService encryp
                     while (await reader.ReadAsync(ct).ConfigureAwait(false))
                         rows.Add((reader.GetValue(0), reader.GetString(1)));
                 }
-                if (rows.Count == 0) return rewritten;
+                if (rows.Count == 0) return;
 
                 foreach (var (key, value) in rows)
                 {
                     ct.ThrowIfCancellationRequested();
-                    var replacement = RewriteValue(value, aad);
+                    var (replacement, skipped) = RewriteValue(value, aad, asPlaintext);
+                    if (skipped) { report.SkippedAmbiguous++; continue; }
                     if (replacement is null) continue;
                     await using var update = connection.CreateCommand();
                     update.CommandText =
-                        $"UPDATE {target} SET {sql.DelimitIdentifier(column)} = @v WHERE {sql.DelimitIdentifier(pkColumn)} = @k";
+                        $"UPDATE {target} SET {sql.DelimitIdentifier(column)} = @v " +
+                        $"WHERE {sql.DelimitIdentifier(pkColumn)} = @k AND {sql.DelimitIdentifier(column)} = @o";
                     var vp = update.CreateParameter(); vp.ParameterName = "v"; vp.Value = replacement;
                     var kp = update.CreateParameter(); kp.ParameterName = "k"; kp.Value = key;
+                    var op = update.CreateParameter(); op.ParameterName = "o"; op.Value = value;
                     update.Parameters.Add(vp);
                     update.Parameters.Add(kp);
-                    await update.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
-                    rewritten++;
+                    update.Parameters.Add(op);
+                    // CAS on the original value - a concurrent writer wins; we skip instead
+                    // of clobbering the newer value.
+                    if (await update.ExecuteNonQueryAsync(ct).ConfigureAwait(false) == 1)
+                        report.Rewritten++;
+                    else
+                        report.Conflicts++;
                 }
             }
         }
@@ -96,27 +121,41 @@ public sealed class PubSoftEncryptionMigrator(CredentialEncryptionService encryp
         }
     }
 
-    private string? RewriteValue(string value, byte[] aad)
+    private (string? Replacement, bool Skipped) RewriteValue(string value, byte[] aad, bool asPlaintext)
     {
-        if (value.StartsWith("pubsoft:", StringComparison.Ordinal))
-            return null;
         try
         {
             var decrypted = encryption.Decrypt(value, aad);
-            return decrypted.ReplacementCiphertext;
+            return (decrypted.ReplacementCiphertext, false);
         }
         catch (PubSoftDecryptionException)
         {
-            return null;
+            return (null, false);
         }
-        catch (FormatException)
+        catch (Exception) when (asPlaintext)
         {
-            // Not decryptable at all - treat as plaintext and encrypt under the active key.
-            return encryption.Encrypt(value, aad);
+            // Opt-in: caller asserts these values are plaintext.
+            return (encryption.Encrypt(value, aad), false);
         }
-        catch (System.Security.Cryptography.CryptographicException)
+        catch (Exception)
         {
-            return encryption.Encrypt(value, aad);
+            // Undecryptable and NOT provably plaintext: could be legacy ciphertext under an
+            // unavailable key or corrupted data. Never overwrite - report and leave it.
+            return (null, true);
         }
     }
+}
+
+/// <summary>Per-run outcome of <see cref="PubSoftEncryptionMigrator.MigrateAsync"/>.</summary>
+public sealed class EncryptionMigrationReport
+{
+    /// <summary>Rows successfully re-encrypted and persisted.</summary>
+    public int Rewritten { get; internal set; }
+
+    /// <summary>Values that failed decryption and were left untouched (ambiguous plaintext vs
+    /// undecryptable ciphertext). Investigate before opting into plaintext rewriting.</summary>
+    public int SkippedAmbiguous { get; internal set; }
+
+    /// <summary>Rows skipped because a concurrent writer changed the value between read and update.</summary>
+    public int Conflicts { get; internal set; }
 }

@@ -9,7 +9,7 @@ last-reviewed: 2026-10-13
 
 [English](README.md) | **简体中文**
 
-带密钥轮换支持的版本化 AEAD 加密——无包依赖。
+带密钥轮换支持的版本化 AEAD 加密——仅依赖 Microsoft.Extensions.Configuration/DI 抽象。
 
 ## Envelope 加密
 
@@ -26,6 +26,26 @@ var plaintext = encryptor.Decrypt(ciphertext, context);
 - key id 支持轮换：用当前 ring key 加密，解密按 envelope `keyId` 解析
 - context 不匹配、密文/tag 被篡改、包封格式错误、密钥非 32 字节——全部 fail closed
 - 内置 `ConfigEncryptionKeyRing` 解析 `EncryptionKeyRingOptions`（`ActiveKeyId` + `Keys:{id}=base64`）兜底；`IEncryptionKeyRing` 仍是集成契约——用你的 KMS/secret manager 实现；无内置默认密钥
+
+## 密钥轮换与标准注册
+
+```csharp
+// 标准注册（Encryption:Keys / Encryption:ActiveKeyId / Encryption:LegacyKeyMaterial）
+services.AddPubSoftCredentialEncryption(configuration);
+
+// 单值轮换：legacy CBC 升级为版本化 envelope，ring 内旧 keyId 转为 ActiveKeyId
+var rotated = service.Rotate(ciphertext, aad);
+```
+
+`Decrypt` 抛 `PubSoftDecryptionException`（`CryptographicException` 子类）——`Reason` 区分
+`MalformedEnvelope`/`InvalidKeyId`/`UnknownKeyId`/`InvalidKeyLength`/`AuthenticationFailed`，
+`KeyId` 携带信封内 keyId：key 漂移、tag 错配与格式损坏可直接分型，不再排障盲猜。
+
+存量列迁移用 `PubSoftEncryptionMigrator.MigrateAsync(db)`（在 `PubSoft.EntityFrameworkCore`）——
+AAD 从 `HasPubSoftEncryption` 写入的模型注解读，写入/迁移共用同一约定。无法解密的值默认
+**跳过并计数**（`EncryptionMigrationReport.SkippedAmbiguous`），仅当确认确为明文才可用
+`treatUndecryptableAsPlaintext` opt-in；更新按原值 compare-and-swap，并发写入者被跳过而非覆盖。
+请在维护窗口运行，先验证备份。
 
 ## 旧凭据迁移
 
