@@ -13,6 +13,15 @@ PubSoft.AspNetCore.AuditMiddlewareOptions.CaptureClientIp.set -> void
 PubSoft.AspNetCore.AuditMiddlewareOptions.CaptureUserAgent.get -> bool
 PubSoft.AspNetCore.AuditMiddlewareOptions.CaptureUserAgent.set -> void
 PubSoft.AspNetCore.Auditing.AuditActorServiceCollectionExtensions
+PubSoft.AspNetCore.Authentication.ClientAssertionOptions
+PubSoft.AspNetCore.Authentication.ClientAssertionOptions.Audience.get -> string?
+PubSoft.AspNetCore.Authentication.ClientAssertionOptions.Audience.set -> void
+PubSoft.AspNetCore.Authentication.ClientAssertionOptions.ClientAssertionOptions() -> void
+PubSoft.AspNetCore.Authentication.ClientAssertionOptions.ClockSkew.get -> System.TimeSpan
+PubSoft.AspNetCore.Authentication.ClientAssertionOptions.ClockSkew.set -> void
+PubSoft.AspNetCore.Authentication.ClientAssertionOptions.MaxAssertionLifetime.get -> System.TimeSpan
+PubSoft.AspNetCore.Authentication.ClientAssertionOptions.MaxAssertionLifetime.set -> void
+PubSoft.AspNetCore.Authentication.ClientAssertionServiceCollectionExtensions
 PubSoft.AspNetCore.Authentication.ClientCredentialAuthorizationExtensions
 PubSoft.AspNetCore.Authentication.ClientCredentialEndpointFilter
 PubSoft.AspNetCore.Authentication.ClientCredentialEndpointFilter.ClientCredentialEndpointFilter() -> void
@@ -25,6 +34,8 @@ PubSoft.AspNetCore.Authentication.ClientCredentialOptions.CallerTypeClaimType.ge
 PubSoft.AspNetCore.Authentication.ClientCredentialOptions.CallerTypeClaimType.set -> void
 PubSoft.AspNetCore.Authentication.ClientCredentialOptions.CallerTypeMachine.get -> string!
 PubSoft.AspNetCore.Authentication.ClientCredentialOptions.CallerTypeMachine.set -> void
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.ClientAssertionHeader.get -> string!
+PubSoft.AspNetCore.Authentication.ClientCredentialOptions.ClientAssertionHeader.set -> void
 PubSoft.AspNetCore.Authentication.ClientCredentialOptions.ClientCredentialOptions() -> void
 PubSoft.AspNetCore.Authentication.ClientCredentialOptions.ClientIdClaimType.get -> string!
 PubSoft.AspNetCore.Authentication.ClientCredentialOptions.ClientIdClaimType.set -> void
@@ -69,11 +80,30 @@ PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Signature.get -> string
 PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Signature.init -> void
 PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Timestamp.get -> string!
 PubSoft.AspNetCore.Authentication.ClientSignatureRequest.Timestamp.init -> void
+PubSoft.AspNetCore.Authentication.IClientAssertionVerifier
+PubSoft.AspNetCore.Authentication.IClientAssertionVerifier.VerifyAsync(string! clientId, string! assertion, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult!>
 PubSoft.AspNetCore.Authentication.IClientCredentialVerifier
 PubSoft.AspNetCore.Authentication.IClientCredentialVerifier.VerifyAsync(string! clientId, string! clientSecret, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult!>!
 PubSoft.AspNetCore.Authentication.IClientSignatureVerifier
 PubSoft.AspNetCore.Authentication.IClientSignatureVerifier.VerifyAsync(PubSoft.AspNetCore.Authentication.ClientSignatureRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult!>
+PubSoft.AspNetCore.Authentication.JwtClientAssertionVerifier
+PubSoft.AspNetCore.Authentication.JwtClientAssertionVerifier.JwtClientAssertionVerifier(PubSoft.Authentication.Jwt.IClientAssertionKeyProvider! keyProvider, PubSoft.AspNetCore.Authentication.ClientAssertionOptions! options, PubSoft.Security.INonceStore! nonceStore) -> void
+PubSoft.AspNetCore.Authentication.JwtClientAssertionVerifier.VerifyAsync(string! clientId, string! assertion, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult!>
 PubSoft.AspNetCore.Authentication.PrincipalSnapshotServiceCollectionExtensions
+PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions
+PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.AllowInsecureEndpoint.get -> bool
+PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.AllowInsecureEndpoint.set -> void
+PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.CacheMinutes.get -> int
+PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.CacheMinutes.set -> void
+PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.Endpoint.get -> System.Uri?
+PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.Endpoint.set -> void
+PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.RemoteClientCredentialOptions() -> void
+PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.Timeout.get -> System.TimeSpan
+PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.Timeout.set -> void
+PubSoft.AspNetCore.Authentication.RemoteClientCredentialServiceCollectionExtensions
+PubSoft.AspNetCore.Authentication.RemoteClientCredentialVerifier
+PubSoft.AspNetCore.Authentication.RemoteClientCredentialVerifier.RemoteClientCredentialVerifier(System.Net.Http.HttpClient! httpClient, PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions! options, Microsoft.Extensions.Caching.Memory.IMemoryCache? cache = null, Microsoft.Extensions.Logging.ILogger<PubSoft.AspNetCore.Authentication.RemoteClientCredentialVerifier!>? logger = null) -> void
+PubSoft.AspNetCore.Authentication.RemoteClientCredentialVerifier.VerifyAsync(string! clientId, string! clientSecret, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.AspNetCore.Authentication.ClientCredentialVerificationResult!>!
 PubSoft.AspNetCore.Authentication.RequireClientCredentialAttribute
 PubSoft.AspNetCore.Authentication.RequireClientCredentialAttribute.AllowAuthenticatedUser.get -> bool
 PubSoft.AspNetCore.Authentication.RequireClientCredentialAttribute.AllowAuthenticatedUser.set -> void
@@ -366,6 +396,7 @@ override PubSoft.AspNetCore.Authentication.ClientSignatureRequest.GetHashCode() 
 override PubSoft.AspNetCore.Authentication.ClientSignatureRequest.ToString() -> string!
 static PubSoft.AspNetCore.AuditMiddlewareExtensions.UsePubSoftAudit(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, PubSoft.AspNetCore.AuditMiddlewareOptions? options = null) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
 static PubSoft.AspNetCore.Auditing.AuditActorServiceCollectionExtensions.AddCurrentSubjectAuditActor(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.AspNetCore.Authentication.ClientAssertionServiceCollectionExtensions.AddPubSoftJwtClientAssertionVerifier(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.AspNetCore.Authentication.ClientAssertionOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.Authentication.ClientCredentialAuthorizationExtensions.AddPubSoftClientCredential(this Microsoft.AspNetCore.Builder.RouteHandlerBuilder! endpoint) -> Microsoft.AspNetCore.Builder.RouteHandlerBuilder!
 static PubSoft.AspNetCore.Authentication.ClientCredentialAuthorizationExtensions.AddPubSoftClientCredential(this Microsoft.AspNetCore.Routing.RouteGroupBuilder! group) -> Microsoft.AspNetCore.Routing.RouteGroupBuilder!
 static PubSoft.AspNetCore.Authentication.ClientCredentialAuthorizationExtensions.AddPubSoftClientCredentialAuthorization(this Microsoft.Extensions.DependencyInjection.IMvcBuilder! mvcBuilder) -> Microsoft.Extensions.DependencyInjection.IMvcBuilder!
@@ -376,6 +407,7 @@ static PubSoft.AspNetCore.Authentication.ClientSignatureRequest.operator ==(PubS
 static PubSoft.AspNetCore.Authentication.PrincipalSnapshotServiceCollectionExtensions.AddAuthenticatedSubjectAccessor(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! subjectClaimType, string! trustedIssuer, string? tenantClaimType = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.Authentication.PrincipalSnapshotServiceCollectionExtensions.AddCurrentSubjectAccessor(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, PubSoft.Authentication.SubjectClaimDialect! dialect, string! trustedIssuer) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.Authentication.PrincipalSnapshotServiceCollectionExtensions.AddPrincipalSnapshotAccessor(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.AspNetCore.Authentication.RemoteClientCredentialServiceCollectionExtensions.AddPubSoftRemoteClientCredentialVerifier(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.AspNetCore.Authorization.PermissionEndpointFilterExtensions.AddPubSoftPermissionAuthorization(this Microsoft.AspNetCore.Builder.RouteHandlerBuilder! endpoint) -> Microsoft.AspNetCore.Builder.RouteHandlerBuilder!
 static PubSoft.AspNetCore.Authorization.PermissionEndpointFilterExtensions.AddPubSoftPermissionAuthorization(this Microsoft.AspNetCore.Routing.RouteGroupBuilder! group) -> Microsoft.AspNetCore.Routing.RouteGroupBuilder!
 static PubSoft.AspNetCore.Authorization.PermissionMvcAuthorizationExtensions.AddPubSoftPermissionAuthorization(this Microsoft.Extensions.DependencyInjection.IMvcBuilder! mvcBuilder) -> Microsoft.Extensions.DependencyInjection.IMvcBuilder!

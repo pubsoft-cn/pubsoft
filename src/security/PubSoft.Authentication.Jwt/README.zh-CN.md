@@ -80,6 +80,10 @@ var hsParsed = JwtSigning.ValidateAccessToken(hsToken, issuer, audience, sym);
 
 `SymmetricSigningKeyMaterial` 要求至少 256-bit 密钥材料（`CreateSymmetricKey` 生成 256–1024-bit 随机密钥；`ImportSymmetricKey` 接受字节或文本）。签名算法按重载族固定——RSA 重载只收发 RS256，对称重载只收发 HS256——RS256 验证的端点不能被降级成 HS256 token，反之亦然。验证强制精确 issuer/audience/有效期/`kid`；无自动算法回退、无密钥轮换猜测。共享密钥的派生（master/client 密钥层级）归宿主职责。
 
+### Client Assertion
+
+`ClientAssertion.Sign` 签发 `private_key_jwt` 形态的 RS256 JWT（`iss`=`sub`=client id、绑定 audience、唯一 `jti`、寿命 ≤5 分钟），供调用方向校验 assertion 的服务认证。服务端经 `IClientAssertionKeyProvider` 按 clientId 解析**公钥**——注册表只存公钥，泄露也无法伪造 assertion。用 `JwtSigning.ImportRsaPublicKey` 构造纯公钥材料；服务端 verifier 见 `PubSoft.AspNetCore`。
+
 ### 签发侧 Key Ring
 
 签发 token 的宿主注册配置绑定的 key ring，而不是到处传递密钥材料：
@@ -104,7 +108,7 @@ builder.Services.AddPubSoftJwtIssuerKeyRing(builder.Configuration);
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
-- `PubSoft.Authentication.Jwt`: `ConfigJwtIssuerKeyRing` `IJwtIssuerKeyRing` `JwtIssuerKeyRingOptions` `JwtIssuerKeyRingServiceCollectionExtensions` `JwtJwksDocument` `JwtJwksKey` `JwtSigning` `RefreshTokenGenerator` `IClientSigningKeyProvider` `RsaSigningKeyMaterial` `SymmetricSigningKeyMaterial`
+- `PubSoft.Authentication.Jwt`: `ClientAssertion` `ConfigJwtIssuerKeyRing` `IClientAssertionKeyProvider` `IJwtIssuerKeyRing` `JwtIssuerKeyRingOptions` `JwtIssuerKeyRingServiceCollectionExtensions` `JwtJwksDocument` `JwtJwksKey` `JwtSigning` `RefreshTokenGenerator` `IClientSigningKeyProvider` `RsaSigningKeyMaterial` `SymmetricSigningKeyMaterial`
 ## 验证
 
 ```bash

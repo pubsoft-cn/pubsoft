@@ -75,6 +75,30 @@ public static class JwtSigning
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    /// <summary>Imports an RSA public key (public parameters only) for token validation.</summary>
+    public static RsaSigningKeyMaterial ImportRsaPublicKey(string keyId, RSA publicKey)
+    {
+        ValidateKeyId(keyId);
+        ArgumentNullException.ThrowIfNull(publicKey);
+        var parameters = publicKey.ExportParameters(false);
+        if (parameters.Modulus is null || parameters.Exponent is null)
+            throw new CryptographicException("An RSA public key with modulus and exponent is required.");
+
+        var rsa = RSA.Create();
+        try
+        {
+            rsa.ImportParameters(parameters);
+            if (rsa.KeySize < 2048)
+                throw new CryptographicException("RSA signing keys must be at least 2048 bits.");
+            return new RsaSigningKeyMaterial(keyId, rsa);
+        }
+        catch
+        {
+            rsa.Dispose();
+            throw;
+        }
+    }
+
     /// <summary>Generates a fresh symmetric (HS256) signing key of at least 256 bits - Generates a symmetric signing key.</summary>
     public static SymmetricSigningKeyMaterial CreateSymmetricKey(string keyId, int keySizeBits = 256)
     {

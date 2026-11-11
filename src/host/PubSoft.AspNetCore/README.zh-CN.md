@@ -54,6 +54,8 @@ IP/User-Agent/Actor 采集默认关闭——评审隐私、代理、身份与保
 
 ## 签名客户端凭证
 
+`ClientCredentialOptions.ClientAssertionHeader`（默认 `X-Client-Assertion`）存在时，评估走 bearer-assertion 模式——优先级高于签名与明文两种模式。注册的 `IClientAssertionVerifier` 收到 `(clientId, assertion)`；未注册时携带该头的请求一律 401 fail-closed。`AddPubSoftJwtClientAssertionVerifier` 接入内置 RS256 `private_key_jwt` 校验：`iss`=`sub`=client id、精确 `Audience`、寿命有界（≤15 分钟）、`jti` 经 `INonceStore` 防重放（默认进程内实现——多实例部署须注册共享 store）。客户端公钥经宿主的 `IClientAssertionKeyProvider` 解析；注册表只存公钥，泄露也无法伪造凭证。assertion 是 bearer 凭证——不绑请求体，必须 TLS。
+
 `ClientCredentialOptions.SignatureHeader`（默认 `X-Signature`）存在时，评估交给宿主注册的 `IClientSignatureVerifier`——委托收到 `ClientSignatureRequest`（clientId、signature、timestamp、nonce、method、path、query、body 流），签名协议完全由宿主定义。未注册 verifier 时签名请求一律 401 fail-closed；无签名头仍走明文 `IClientCredentialVerifier`（未注册则 403）。
 
 ## HMAC 请求验证
@@ -173,12 +175,23 @@ services.AddControllers().AddPubSoftClientCredentialAuthorization();  // MVC
 
 header 名与 claim 类型经 `ClientCredentialOptions` 可配。租户 scope 包裹端点执行并在之后还原。
 
+### 远程校验
+
+凭证注册表在其他服务时，用 `AddPubSoftRemoteClientCredentialVerifier` 经 HTTP 转发凭证对，替代本地存储解析：
+
+```csharp
+services.AddPubSoftRemoteClientCredentialVerifier(options =>
+    options.Endpoint = new Uri("https://registry.example/validate-secret"));
+```
+
+线上契约：`POST { "clientId", "clientSecret" }`；2xx 返回 `{ "success": true, "clientId", "tenantId"?, "claims"? }` 即验证通过。任何非 2xx、畸形载荷、超时（上限 15 秒）或传输错误一律 fail-closed。端点必须 https——loopback 明文仅限开发，其他明文须 `AllowInsecureEndpoint`。`CacheMinutes`（0–60，默认关）按凭证缓存正负结果；开启后注册表侧吊销/轮换的传播延迟等于该 TTL。secret 仍要上线送达远端——优先用签名/assertion 模式；本件用于把各服务收敛到单一凭证真相源。
+
 ## Public API surface
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
 - `PubSoft.AspNetCore`: `AuditMiddleware` `AuditMiddlewareExtensions` `AuditMiddlewareOptions` `ClientCredentialAuthorizationExtensions` `ClientCredentialEndpointFilter` `ClientCredentialMvcAuthorizationFilter` `ClientCredentialOptions` `ClientCredentialVerificationResult` `CorrelationAmbient` `CorrelationIdMiddleware` `CorrelationIdMiddlewareExtensions` `CorrelationIdOptions` `CorrelationPropagationHandler` `DevelopmentOnlyAttribute` `DevelopmentOnlyControllerConvention` `DevelopmentOnlyControllerConventionExtensions` `ExceptionHandlingMiddleware` `ExceptionHandlingMiddlewareExtensions` `GatewayRateLimitOptions` `GatewayRateLimitingExtensions` `GlobalExceptionHandler` `GlobalExceptionHandlerOptions` `HealthEndpointRouteBuilderExtensions` `HmacValidationMiddleware` `HmacValidationOptions` `HmacValidationServiceCollectionExtensions` `HttpContextTenantContext` `HttpContextTenantOptions` `IAppSecretResolver` `IClientCredentialVerifier` `IpNormalizer` `PermissionEndpointFilter` `PermissionEndpointFilterExtensions` `PermissionMvcAuthorizationExtensions` `PermissionMvcAuthorizationFilter` `PrincipalSnapshotServiceCollectionExtensions` `ProxyDeploymentDiagnostics` `PubSoftApplicationService` `PubSoftController` `PubSoftControllerBase` `PubSoftForwardedHeadersExtensions` `PubSoftForwardedHeadersOptions` `PubSoftModuleAspNetCoreExtensions` `PubSoftRateLimitPolicy` `PubSoftRateLimitPolicyExtensions` `PubSoftRateLimitPolicyMiddleware` `PubSoftRateLimitPolicyOptions` `PubSoftRateLimitRejection` `PubSoftRateLimitRejectionExtensions` `PubSoftRateLimitingExtensions` `PubSoftRateLimitingMiddleware` `PubSoftRequestSaveChanges` `PubSoftRequestSaveChangesExtensions` `PubSoftRequestSaveChangesMiddleware` `PubSoftSecurityExtensions` `RequireClientCredentialAttribute` `SecurityHeadersMiddleware` `SecurityHeadersMiddlewareExtensions` `SecurityHeadersOptions` `ServiceDefaultsExtensions` `TenantContextServiceCollectionExtensions` `WebModuleContext` `WebModuleContextExtensions`
-- `PubSoft.AspNetCore.Authentication`: `ClientCredentialAuthorizationExtensions` `ClientCredentialEndpointFilter` `ClientCredentialMvcAuthorizationFilter` `ClientCredentialOptions` `ClientCredentialVerificationResult` `IClientCredentialVerifier` `PrincipalSnapshotServiceCollectionExtensions` `RequireClientCredentialAttribute`
+- `PubSoft.AspNetCore.Authentication`: `ClientAssertionOptions` `ClientAssertionServiceCollectionExtensions` `ClientCredentialAuthorizationExtensions` `ClientCredentialEndpointFilter` `ClientCredentialMvcAuthorizationFilter` `ClientCredentialOptions` `ClientCredentialVerificationResult` `ClientSignatureRequest` `IClientAssertionVerifier` `IClientCredentialVerifier` `IClientSignatureVerifier` `JwtClientAssertionVerifier` `PrincipalSnapshotServiceCollectionExtensions` `RemoteClientCredentialOptions` `RemoteClientCredentialServiceCollectionExtensions` `RemoteClientCredentialVerifier` `RequireClientCredentialAttribute`
 - `PubSoft.AspNetCore.Authorization`: `PermissionEndpointFilter` `PermissionEndpointFilterExtensions` `PermissionMvcAuthorizationExtensions` `PermissionMvcAuthorizationFilter`
 ## 验证
 

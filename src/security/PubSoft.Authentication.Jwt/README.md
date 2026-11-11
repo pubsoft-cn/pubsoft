@@ -81,6 +81,10 @@ var hsParsed = JwtSigning.ValidateAccessToken(hsToken, issuer, audience, sym);
 
 `SymmetricSigningKeyMaterial` requires at least 256 bits of key material (`CreateSymmetricKey` generates a random 256–1024-bit key; `ImportSymmetricKey` accepts bytes or text). The signing algorithm is fixed per overload family — the RSA overloads emit and accept only RS256, the symmetric overloads only HS256 — so an RS256-validated endpoint cannot be downgraded to an HS256 token or vice versa. Validation enforces exact issuer, audience, lifetime, and `kid`; there is no automatic algorithm fallback and no key rollover guessing. Derivation of shared secrets (master/client key hierarchies) is a host responsibility.
 
+### Client Assertions
+
+`ClientAssertion.Sign` mints a `private_key_jwt`-shape RS256 JWT (`iss`=`sub`=client id, audience-bound, unique `jti`, lifetime ≤ 5 minutes) for callers authenticating to services that verify assertions. Server-side, the host resolves each client's **public** key through `IClientAssertionKeyProvider` — the registry stores public keys only, so a leaked registry cannot mint assertions. Build public-only material with `JwtSigning.ImportRsaPublicKey`. See `PubSoft.AspNetCore` for the verifier.
+
 ### Issuer Key Ring
 
 Hosts that issue tokens register a configuration-bound ring instead of passing key material around:
@@ -105,7 +109,7 @@ The default clock skew is five seconds and can be configured from zero through f
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
-- `PubSoft.Authentication.Jwt`: `ConfigJwtIssuerKeyRing` `IJwtIssuerKeyRing` `JwtIssuerKeyRingOptions` `JwtIssuerKeyRingServiceCollectionExtensions` `JwtJwksDocument` `JwtJwksKey` `JwtSigning` `RefreshTokenGenerator` `IClientSigningKeyProvider` `RsaSigningKeyMaterial` `SymmetricSigningKeyMaterial`
+- `PubSoft.Authentication.Jwt`: `ClientAssertion` `ConfigJwtIssuerKeyRing` `IClientAssertionKeyProvider` `IJwtIssuerKeyRing` `JwtIssuerKeyRingOptions` `JwtIssuerKeyRingServiceCollectionExtensions` `JwtJwksDocument` `JwtJwksKey` `JwtSigning` `RefreshTokenGenerator` `IClientSigningKeyProvider` `RsaSigningKeyMaterial` `SymmetricSigningKeyMaterial`
 
 <!-- pubsoft:api-surface:start -->
 

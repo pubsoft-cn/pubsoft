@@ -25,6 +25,9 @@ public sealed class ClientCredentialOptions
     /// <summary>Caller-type value for machine callers.</summary>
     public string CallerTypeMachine { get; set; } = "Machine";
 
+    /// <summary>Header carrying the client assertion -- presence switches to bearer-assertion mode (highest precedence).</summary>
+    public string ClientAssertionHeader { get; set; } = "X-Client-Assertion";
+
     /// <summary>Header carrying the request signature -- presence switches to signed-credential mode.</summary>
     public string SignatureHeader { get; set; } = "X-Signature";
     /// <summary>Header carrying the signing timestamp.</summary>

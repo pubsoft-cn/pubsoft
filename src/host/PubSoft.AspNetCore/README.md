@@ -12,6 +12,10 @@ last-reviewed: 2026-10-13
 
 `PubSoft.AspNetCore` contains opt-in middleware and endpoint helpers that adapt the framework-neutral PubSoft packages to ASP.NET Core. Nothing is enabled automatically. The host remains responsible for authentication/authorization policy, trusted proxy configuration, secret storage, and middleware order.
 
+## Client assertions
+
+When `ClientCredentialOptions.ClientAssertionHeader` (default `X-Client-Assertion`) is present, evaluation takes the bearer-assertion path — highest precedence over signed and plaintext modes. The registered `IClientAssertionVerifier` receives `(clientId, assertion)`; without one, requests carrying the header fail closed with 401. `AddPubSoftJwtClientAssertionVerifier` wires the built-in RS256 `private_key_jwt`-shape verifier: `iss`=`sub`=client id, exact `Audience`, bounded lifetime (≤15 min), and `jti` replay rejection through `INonceStore` (process-local fallback — register a shared store for multi-instance). Client public keys resolve via the host's `IClientAssertionKeyProvider`; the registry stores public keys only, so a leaked registry cannot mint credentials. The assertion is a bearer credential — it does not bind the request body, so TLS is required.
+
 ## Signed client credentials
 
 When `ClientCredentialOptions.SignatureHeader` (default `X-Signature`) is present, evaluation moves to the host-registered `IClientSignatureVerifier` — the verifier receives a `ClientSignatureRequest` (client id, signature, timestamp, nonce, method, path, query, body-stream) and owns the signing protocol end to end. Without a registered verifier signed requests fail closed with 401; unsigned requests keep the plaintext `IClientCredentialVerifier` path (403 when missing).
@@ -175,12 +179,23 @@ services.AddControllers().AddPubSoftClientCredentialAuthorization();  // MVC
 
 Header names and claim types are configurable via `ClientCredentialOptions`. The tenant scope wraps the endpoint execution and is reverted afterward.
 
+### Remote Verification
+
+When the credential registry lives in another service, `AddPubSoftRemoteClientCredentialVerifier` forwards the pair over HTTP instead of resolving a local store:
+
+```csharp
+services.AddPubSoftRemoteClientCredentialVerifier(options =>
+    options.Endpoint = new Uri("https://registry.example/validate-secret"));
+```
+
+Wire contract: `POST { "clientId", "clientSecret" }`; a 2xx body of `{ "success": true, "clientId", "tenantId"?, "claims"? }` verifies the pair. Any non-2xx response, malformed payload, timeout (bounded ≤ 15 s), or transport error fails closed. The endpoint must be https — loopback plaintext is permitted for development, other plaintext requires `AllowInsecureEndpoint`. `CacheMinutes` (0–60, default off) caches positive and negative results per credential; enabling it delays propagation of registry-side revocations and rotations. The secret still crosses the wire — prefer signed-credential or assertion modes where supported; this verifier exists to converge services onto a single credential source of truth.
+
 ## Public API surface
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
 - `PubSoft.AspNetCore`: `AuditMiddleware` `AuditMiddlewareExtensions` `AuditMiddlewareOptions` `ClientCredentialAuthorizationExtensions` `ClientCredentialEndpointFilter` `ClientCredentialMvcAuthorizationFilter` `ClientCredentialOptions` `ClientCredentialVerificationResult` `CorrelationAmbient` `CorrelationIdMiddleware` `CorrelationIdMiddlewareExtensions` `CorrelationIdOptions` `CorrelationPropagationHandler` `DevelopmentOnlyAttribute` `DevelopmentOnlyControllerConvention` `DevelopmentOnlyControllerConventionExtensions` `ExceptionHandlingMiddleware` `ExceptionHandlingMiddlewareExtensions` `GatewayRateLimitOptions` `GatewayRateLimitingExtensions` `GlobalExceptionHandler` `GlobalExceptionHandlerOptions` `HealthEndpointRouteBuilderExtensions` `HmacValidationMiddleware` `HmacValidationOptions` `HmacValidationServiceCollectionExtensions` `HttpContextTenantContext` `HttpContextTenantOptions` `IAppSecretResolver` `IClientCredentialVerifier` `IpNormalizer` `PermissionEndpointFilter` `PermissionEndpointFilterExtensions` `PermissionMvcAuthorizationExtensions` `PermissionMvcAuthorizationFilter` `PrincipalSnapshotServiceCollectionExtensions` `ProxyDeploymentDiagnostics` `PubSoftApplicationService` `PubSoftController` `PubSoftControllerBase` `PubSoftForwardedHeadersExtensions` `PubSoftForwardedHeadersOptions` `PubSoftModuleAspNetCoreExtensions` `PubSoftRateLimitPolicy` `PubSoftRateLimitPolicyExtensions` `PubSoftRateLimitPolicyMiddleware` `PubSoftRateLimitPolicyOptions` `PubSoftRateLimitRejection` `PubSoftRateLimitRejectionExtensions` `PubSoftRateLimitingExtensions` `PubSoftRateLimitingMiddleware` `PubSoftRequestSaveChanges` `PubSoftRequestSaveChangesExtensions` `PubSoftRequestSaveChangesMiddleware` `PubSoftSecurityExtensions` `RequireClientCredentialAttribute` `SecurityHeadersMiddleware` `SecurityHeadersMiddlewareExtensions` `SecurityHeadersOptions` `ServiceDefaultsExtensions` `TenantContextServiceCollectionExtensions` `WebModuleContext` `WebModuleContextExtensions`
-- `PubSoft.AspNetCore.Authentication`: `ClientCredentialAuthorizationExtensions` `ClientCredentialEndpointFilter` `ClientCredentialMvcAuthorizationFilter` `ClientCredentialOptions` `ClientCredentialVerificationResult` `IClientCredentialVerifier` `PrincipalSnapshotServiceCollectionExtensions` `RequireClientCredentialAttribute`
+- `PubSoft.AspNetCore.Authentication`: `ClientAssertionOptions` `ClientAssertionServiceCollectionExtensions` `ClientCredentialAuthorizationExtensions` `ClientCredentialEndpointFilter` `ClientCredentialMvcAuthorizationFilter` `ClientCredentialOptions` `ClientCredentialVerificationResult` `ClientSignatureRequest` `IClientAssertionVerifier` `IClientCredentialVerifier` `IClientSignatureVerifier` `JwtClientAssertionVerifier` `PrincipalSnapshotServiceCollectionExtensions` `RemoteClientCredentialOptions` `RemoteClientCredentialServiceCollectionExtensions` `RemoteClientCredentialVerifier` `RequireClientCredentialAttribute`
 - `PubSoft.AspNetCore.Authorization`: `PermissionEndpointFilter` `PermissionEndpointFilterExtensions` `PermissionMvcAuthorizationExtensions` `PermissionMvcAuthorizationFilter`
 
 <!-- pubsoft:api-surface:start -->
@@ -198,10 +213,12 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 | `AddPubSoftForwardedHeaders` |
 | `AddPubSoftGatewayRateLimiting` |
 | `AddPubSoftHmacValidation` |
+| `AddPubSoftJwtClientAssertionVerifier` |
 | `AddPubSoftPermissionAuthorization` |
 | `AddPubSoftRateLimiting` |
 | `AddPubSoftRateLimitPolicy` |
 | `AddPubSoftRateLimitRejection` |
+| `AddPubSoftRemoteClientCredentialVerifier` |
 | `AddPubSoftRequestSaveChanges` |
 | `AddPubSoftSecurity` |
 | `AddPubSoftServiceDefaults` |
@@ -223,7 +240,7 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
-`AllowAuthenticatedUser`, `AppIdHeader`, `AppliesTo`, `ArgumentExceptionStatusCode`, `CallerTypeClaimType`, `CallerTypeMachine`, `CaptureActor`, `CaptureClientIp`, `CaptureUserAgent`, `ClaimNames`, `Claims`, `ClientId`, `ClientIdClaimType`, `ClientIdHeader`, `ClientIdWindowSeconds`, `ClientSecretHeader`, `Configuration`, `ContentSecurityPolicy`, `ControllerContext`, `CorrelationHeaderName`, `CountFailuresOnly`, `DefaultMessage`, `DefaultStatusCode`, `DomainExceptionStatusCode`, `EchoResponseHeader`, `Enabled`, `EnableHstsInDevelopment`, `Environment`, `ExcludedPathPrefixes`, `FailurePermitLimit`, `FailureRateLimitEnabled`, `FailureWindowSeconds`, `ForwardedFor`, `ForwardedProto`, `ForwardLimit`, `HeaderName`, `HealthPathPrefixes`, `HealthPermitLimit`, `HealthWindowSeconds`, `IdentifierSelector`, `InboundHeaderNames`, `InnerHandler`, `InvalidOperationExceptionStatusCode`, `IsFailureResponse`, `KeyNotFoundStatusCode`, `Logger`, `LoginPathPrefixes`, `LoginPermitLimit`, `LoginWindowSeconds`, `MaxClientIdsPerIp`, `MaxIdentifiers`, `MaximumBodyBytes`, `MaxTrackedIps`, `MetadataProvider`, `Method`, `ModelBinderFactory`, `Nonce`, `NonceHeader`, `NotFoundPermitLimit`, `NotFoundRateLimitEnabled`, `NotFoundWindowSeconds`, `OAuthFailureLimit`, `OAuthPathPrefixes`, `OAuthPerIpPermitLimit`, `OAuthPermitLimit`, `OAuthWindowSeconds`, `ObjectValidator`, `PerEndpoint`, `PermissionsPolicy`, `PermitLimit`, `ProbeCiphertext`, `ProblemDetailsFactory`, `QueryString`, `QueueLimit`, `ReadBody`, `ReadHeader`, `RealIp`, `ReferrerPolicy`, `RequestsPerWindow`, `RequireBodyHash`, `ResponseHeaderName`, `ServiceProvider`, `Services`, `ShutdownToken`, `Signature`, `SignatureHeader`, `StrictTransportSecurity`, `Success`, `TenantId`, `Timestamp`, `TimestampHeader`, `TrustAnyProxy`, `TrustedNetworks`, `TrustedProxies`, `UnauthorizedAccessStatusCode`, `UnauthorizedMessage`, `ValidateAnonymousPermitLimit`, `ValidateFailureLimit`, `ValidatePathPrefixes`, `ValidatePerIpPermitLimit`, `ValidatePermitLimit`, `ValidateWindowSeconds`, `WindowSeconds`, `WindowSize`, `XContentTypeOptions`, `XFrameOptions`
+`AllowAuthenticatedUser`, `AllowInsecureEndpoint`, `AppIdHeader`, `AppliesTo`, `ArgumentExceptionStatusCode`, `Audience`, `CacheMinutes`, `CallerTypeClaimType`, `CallerTypeMachine`, `CaptureActor`, `CaptureClientIp`, `CaptureUserAgent`, `ClaimNames`, `Claims`, `ClientAssertionHeader`, `ClientId`, `ClientIdClaimType`, `ClientIdHeader`, `ClientIdWindowSeconds`, `ClientSecretHeader`, `ClockSkew`, `Configuration`, `ContentSecurityPolicy`, `ControllerContext`, `CorrelationHeaderName`, `CountFailuresOnly`, `DefaultMessage`, `DefaultStatusCode`, `DomainExceptionStatusCode`, `EchoResponseHeader`, `Enabled`, `EnableHstsInDevelopment`, `Endpoint`, `Environment`, `ExcludedPathPrefixes`, `FailurePermitLimit`, `FailureRateLimitEnabled`, `FailureWindowSeconds`, `ForwardedFor`, `ForwardedProto`, `ForwardLimit`, `HeaderName`, `HealthPathPrefixes`, `HealthPermitLimit`, `HealthWindowSeconds`, `IdentifierSelector`, `InboundHeaderNames`, `InnerHandler`, `InvalidOperationExceptionStatusCode`, `IsFailureResponse`, `KeyNotFoundStatusCode`, `Logger`, `LoginPathPrefixes`, `LoginPermitLimit`, `LoginWindowSeconds`, `MaxAssertionLifetime`, `MaxClientIdsPerIp`, `MaxIdentifiers`, `MaximumBodyBytes`, `MaxTrackedIps`, `MetadataProvider`, `Method`, `ModelBinderFactory`, `Nonce`, `NonceHeader`, `NotFoundPermitLimit`, `NotFoundRateLimitEnabled`, `NotFoundWindowSeconds`, `OAuthFailureLimit`, `OAuthPathPrefixes`, `OAuthPerIpPermitLimit`, `OAuthPermitLimit`, `OAuthWindowSeconds`, `ObjectValidator`, `PerEndpoint`, `PermissionsPolicy`, `PermitLimit`, `ProbeCiphertext`, `ProblemDetailsFactory`, `QueryString`, `QueueLimit`, `ReadBody`, `ReadHeader`, `RealIp`, `ReferrerPolicy`, `RequestsPerWindow`, `RequireBodyHash`, `ResponseHeaderName`, `ServiceProvider`, `Services`, `ShutdownToken`, `Signature`, `SignatureHeader`, `StrictTransportSecurity`, `Success`, `TenantId`, `Timeout`, `Timestamp`, `TimestampHeader`, `TrustAnyProxy`, `TrustedNetworks`, `TrustedProxies`, `UnauthorizedAccessStatusCode`, `UnauthorizedMessage`, `ValidateAnonymousPermitLimit`, `ValidateFailureLimit`, `ValidatePathPrefixes`, `ValidatePerIpPermitLimit`, `ValidatePermitLimit`, `ValidateWindowSeconds`, `WindowSeconds`, `WindowSize`, `XContentTypeOptions`, `XFrameOptions`
 
 <!-- pubsoft:api-surface:end -->
 

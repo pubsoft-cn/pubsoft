@@ -29,10 +29,21 @@ internal static class ClientCredentialEvaluator
             return new Evaluation(null, null, null);
 
         var clientId = httpContext.Request.Headers[options.ClientIdHeader].FirstOrDefault();
+        var assertion = httpContext.Request.Headers[options.ClientAssertionHeader].FirstOrDefault();
         var signature = httpContext.Request.Headers[options.SignatureHeader].FirstOrDefault();
 
         ClientCredentialVerificationResult result;
-        if (!string.IsNullOrWhiteSpace(signature))
+        if (!string.IsNullOrWhiteSpace(assertion))
+        {
+            // Bearer-assertion mode: self-contained signed credential (e.g. RS256 JWT).
+            var assertionVerifier = httpContext.RequestServices.GetService<IClientAssertionVerifier>();
+            if (assertionVerifier is null || string.IsNullOrWhiteSpace(clientId))
+                return new Evaluation(StatusCodes.Status401Unauthorized, null, null);
+
+            result = await assertionVerifier.VerifyAsync(clientId, assertion, httpContext.RequestAborted)
+                .ConfigureAwait(false);
+        }
+        else if (!string.IsNullOrWhiteSpace(signature))
         {
             // Signed-credential mode: the verifier owns the wire protocol; we only hand over material.
             var signatureVerifier = httpContext.RequestServices.GetService<IClientSignatureVerifier>();
