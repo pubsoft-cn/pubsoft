@@ -74,6 +74,7 @@
     <PackageVersion Include="PubSoft.Scheduling.EntityFrameworkCore" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.Scheduling.Http" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.Scheduling" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Security.EntityFrameworkCore" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.Security.Redis" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.Security" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.Testing" Version="$(PubSoftVersion)" />

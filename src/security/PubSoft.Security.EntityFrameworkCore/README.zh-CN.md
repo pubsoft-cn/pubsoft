@@ -35,7 +35,7 @@ services.AddPubSoftRefreshTokenFamilyService();
 
 ## 选项
 
-无独立 options——边界在各契约自身 options 内（`RefreshTokenFamilyOptions`）。实体列长：`TokenHash`/`FamilyId` 64、`TokenId` 128、`Subject`/`Reason` 256。
+无独立 options——边界在各契约自身 options 内（`RefreshTokenFamilyOptions`）。实体列长：`TokenHash`/`FamilyId` 64、`TokenId` 128、`Subject`/`Reason` 256。时间戳以 UTC ticks（`bigint`）落库，使过期比较在任何 provider 上都可翻译，包括 SQLite 这类无原生时间排序能力的 provider。
 
 ## 宿主侧剩余职责
 

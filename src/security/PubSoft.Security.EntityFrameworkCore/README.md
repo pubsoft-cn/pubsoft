@@ -35,7 +35,7 @@ services.AddPubSoftRefreshTokenFamilyService();
 
 ## Options
 
-No options types — bounds live on the contracts' own options (`RefreshTokenFamilyOptions`, `RedisTokenDenylistOptions`-style limits are enforced inside the stores). Entity column lengths: `TokenHash`/`FamilyId` 64, `TokenId` 128, `Subject`/`Reason` 256.
+No options types — bounds live on the contracts' own options (`RefreshTokenFamilyOptions`, `RedisTokenDenylistOptions`-style limits are enforced inside the stores). Entity column lengths: `TokenHash`/`FamilyId` 64, `TokenId` 128, `Subject`/`Reason` 256. Timestamps persist as UTC ticks (`bigint`) so expiry comparisons translate on every provider, including providers without native temporal ordering such as SQLite.
 
 ## Residual Host Responsibilities
 

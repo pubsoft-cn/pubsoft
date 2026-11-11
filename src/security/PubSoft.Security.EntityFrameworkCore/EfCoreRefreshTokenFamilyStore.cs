@@ -86,11 +86,14 @@ public sealed class EfCoreRefreshTokenFamilyStore<TDbContext> : IRefreshTokenFam
         await using var scope = _scopeFactory.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<TDbContext>();
         var revocations = context.Set<RefreshTokenFamilyRevocationRecord>();
+        var revokedFamilies = revocations
+            .Where(revocation => revocation.ExpiresAt > now)
+            .Select(revocation => revocation.FamilyId);
 
         var updated = await context.Set<RefreshTokenFamilyStateRecord>()
             .Where(record => record.TokenHash == tokenHash // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison - == is the translatable form"
                 && !record.Consumed
-                && !revocations.Any(revocation => revocation.FamilyId == record.FamilyId && revocation.ExpiresAt > now)) // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison - == is the translatable form"
+                && !revokedFamilies.Contains(record.FamilyId))
             .ExecuteUpdateAsync(setters => setters.SetProperty(record => record.Consumed, true), cancellationToken)
             .ConfigureAwait(false);
         if (updated == 1)
