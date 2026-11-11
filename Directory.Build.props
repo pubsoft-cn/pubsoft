@@ -16,7 +16,7 @@
          for the whole wave (pack scripts use seconds-of-day); without it each
          project falls back to its own tick stamp, so always pass the shared
          stamp when packing the full solution. -->
-    <PubSoftVersion>0.1.0-alpha.16</PubSoftVersion>
+    <PubSoftVersion>0.1.0-alpha.17</PubSoftVersion>
     <PubSoftPackageVersion Condition="'$(PubSoftStream)' == 'dev'">0.1.0-dev.$([System.DateTime]::UtcNow.ToString(yyyyMMdd)).$(PubSoftDevStamp)</PubSoftPackageVersion>
     <PubSoftDevStamp Condition="'$(PubSoftDevStamp)' == ''">$([System.DateTime]::UtcNow.TimeOfDay.Ticks)</PubSoftDevStamp>
     <PubSoftPackageVersion Condition="'$(PubSoftStream)' != 'dev'">$(PubSoftVersion)</PubSoftPackageVersion>
