@@ -5,6 +5,7 @@
     <Description>Optional EF Core persistence for PubSoft scope, permissions, soft-delete, and auditing contracts.</Description>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http" />
     <ProjectReference Include="../../data/PubSoft.Auditing/PubSoft.Auditing.csproj" />
     <ProjectReference Include="../../core/PubSoft.Core/PubSoft.Core.csproj" />
     <ProjectReference Include="../../core/PubSoft.Cryptography/PubSoft.Cryptography.csproj" />
