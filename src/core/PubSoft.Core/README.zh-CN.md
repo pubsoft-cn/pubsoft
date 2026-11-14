@@ -45,6 +45,10 @@ decimal yuan = amount.ToYuan();
 
 继承 `Specification<T>` 收集条件、include、排序、分组与可选分页供仓储/查询适配器消费。`ApplyPaging` 在改变分页状态前拒绝负 skip/take（零有效）；specification 只记录表达式，不执行或翻译——provider 翻译与查询上限归消费适配器。
 
+## 允许名单闸
+
+`IpAllowList` 按单 IP 与 CIDR 条目匹配（`new IpAllowList(["10.0.0.5", "192.168.0.0/16"])`），IPv4-mapped IPv6 自动归一化，畸形条目构造期即抛。`JsonAllowList` 按 ordinal 匹配 JSON 字符串数组列（`["app-1","app-2"]`）——注册表既有存储形态，畸形 JSON 抛错。两者都要求显式 `GateEmptyPolicy`（`Allow`/`Deny`，默认 deny）——空表语义绝不隐式，因为现存部署语义相反：凭证白名单历史上"空=放行"兼容，渠道策略则是"空=全禁"。`GateResult` 承载单个闸的结果（`Allowed`+拒绝 `Reason`），供串行管线"首个拒绝生效"使用。
+
 ## ID 与响应形状
 
 `SnowflakeIdGenerator` 生成 JS 安全 53-bit ID：2024-01-01 UTC epoch + 5-bit worker ID（0–31）+ 7-bit 每毫秒序列。注入 `TimeProvider` 可做确定性测试。时钟不得回拨，时间戳不得超出支持窗口。共享同一 ID 空间的并发生成器须分配不同 worker ID——实例内锁只协调单实例调用。最后一个支持毫秒耗尽序列号空间（每毫秒 128）时抛异常而非回绕。

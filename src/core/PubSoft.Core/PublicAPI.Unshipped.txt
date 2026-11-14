@@ -1,5 +1,8 @@
 #nullable enable
 const PubSoft.Core.SnowflakeIdGenerator.MaxWorkerId = 31 -> long
+override PubSoft.Core.GateResult.Equals(object? obj) -> bool
+override PubSoft.Core.GateResult.GetHashCode() -> int
+override PubSoft.Core.GateResult.ToString() -> string!
 PubSoft.Core.ApiResponse
 PubSoft.Core.ApiResponse.ApiResponse() -> void
 PubSoft.Core.ApiResponse<T>
@@ -20,6 +23,18 @@ PubSoft.Core.DomainException.DomainException(string! message) -> void
 PubSoft.Core.DomainException.DomainException(string! message, System.Exception! innerException) -> void
 PubSoft.Core.DomainException.StatusCode.get -> int
 PubSoft.Core.DomainException.StatusCode.init -> void
+PubSoft.Core.GateEmptyPolicy
+PubSoft.Core.GateEmptyPolicy.Allow = 0 -> PubSoft.Core.GateEmptyPolicy
+PubSoft.Core.GateEmptyPolicy.Deny = 1 -> PubSoft.Core.GateEmptyPolicy
+PubSoft.Core.GateResult
+PubSoft.Core.GateResult.<Clone>$() -> PubSoft.Core.GateResult!
+PubSoft.Core.GateResult.Allowed.get -> bool
+PubSoft.Core.GateResult.Allowed.init -> void
+PubSoft.Core.GateResult.Deconstruct(out bool Allowed, out string? Reason) -> void
+PubSoft.Core.GateResult.Equals(PubSoft.Core.GateResult? other) -> bool
+PubSoft.Core.GateResult.GateResult(bool Allowed, string? Reason = null) -> void
+PubSoft.Core.GateResult.Reason.get -> string?
+PubSoft.Core.GateResult.Reason.init -> void
 PubSoft.Core.Gender
 PubSoft.Core.Gender.Female = 2 -> PubSoft.Core.Gender
 PubSoft.Core.Gender.Male = 1 -> PubSoft.Core.Gender
@@ -27,6 +42,11 @@ PubSoft.Core.Gender.Unknown = 0 -> PubSoft.Core.Gender
 PubSoft.Core.Guard
 PubSoft.Core.IIdGenerator
 PubSoft.Core.IIdGenerator.NextId() -> long
+PubSoft.Core.IpAllowList
+PubSoft.Core.IpAllowList.IpAllowList(System.Collections.Generic.IEnumerable<string!>? entries, PubSoft.Core.GateEmptyPolicy emptyPolicy = PubSoft.Core.GateEmptyPolicy.Deny) -> void
+PubSoft.Core.IpAllowList.IsAllowed(string? address) -> bool
+PubSoft.Core.IpAllowList.IsAllowed(System.Net.IPAddress? address) -> bool
+PubSoft.Core.IpAllowList.IsEmpty.get -> bool
 PubSoft.Core.ISpecification<T>
 PubSoft.Core.ISpecification<T>.Criteria.get -> System.Linq.Expressions.Expression<System.Func<T, bool>!>?
 PubSoft.Core.ISpecification<T>.GroupBy.get -> System.Linq.Expressions.Expression<System.Func<T, object!>!>?
@@ -37,6 +57,10 @@ PubSoft.Core.ISpecification<T>.OrderBy.get -> System.Linq.Expressions.Expression
 PubSoft.Core.ISpecification<T>.OrderByDescending.get -> System.Linq.Expressions.Expression<System.Func<T, object!>!>?
 PubSoft.Core.ISpecification<T>.Skip.get -> int
 PubSoft.Core.ISpecification<T>.Take.get -> int
+PubSoft.Core.JsonAllowList
+PubSoft.Core.JsonAllowList.IsAllowed(string? value) -> bool
+PubSoft.Core.JsonAllowList.IsEmpty.get -> bool
+PubSoft.Core.JsonAllowList.JsonAllowList(string? json, PubSoft.Core.GateEmptyPolicy emptyPolicy = PubSoft.Core.GateEmptyPolicy.Deny) -> void
 PubSoft.Core.Money
 PubSoft.Core.Money.AllocateBps(int bps) -> PubSoft.Core.Money
 PubSoft.Core.Money.AllocatePercent(decimal percent) -> PubSoft.Core.Money
@@ -102,6 +126,10 @@ static PubSoft.Core.ApiResponse.Fail(int code, string! message, string? traceId 
 static PubSoft.Core.ApiResponse.Success(string? traceId = null) -> PubSoft.Core.ApiResponse!
 static PubSoft.Core.ApiResponse<T>.Fail(int code, string! message, string? traceId = null) -> PubSoft.Core.ApiResponse<T>!
 static PubSoft.Core.ApiResponse<T>.Success(T data, string? traceId = null) -> PubSoft.Core.ApiResponse<T>!
+static PubSoft.Core.GateResult.Allow() -> PubSoft.Core.GateResult!
+static PubSoft.Core.GateResult.Deny(string! reason) -> PubSoft.Core.GateResult!
+static PubSoft.Core.GateResult.operator !=(PubSoft.Core.GateResult? left, PubSoft.Core.GateResult? right) -> bool
+static PubSoft.Core.GateResult.operator ==(PubSoft.Core.GateResult? left, PubSoft.Core.GateResult? right) -> bool
 static PubSoft.Core.Guard.EnumDefined<T>(T value, string? name = null) -> T
 static PubSoft.Core.Guard.FlagsDefined<T>(T value, string? name = null) -> T
 static PubSoft.Core.Guard.MaxLength(string! value, int maxLength, string? name = null) -> string!

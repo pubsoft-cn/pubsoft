@@ -46,6 +46,10 @@ decimal yuan = amount.ToYuan();
 
 Derive `Specification<T>` to collect criteria, includes, ordering, grouping, and optional paging for a repository or query adapter. `ApplyPaging` rejects negative skip/take before changing the paging state; zero is valid. The specification records expressions but does not execute or translate them. The consuming adapter owns provider translation and query limits.
 
+## Allow-List Gates
+
+`IpAllowList` matches IPs against single-address and CIDR entries (`new IpAllowList(["10.0.0.5", "192.168.0.0/16"])`); IPv4-mapped IPv6 is normalized, malformed entries throw at construction. `JsonAllowList` matches strings ordinally against a JSON array column (`["app-1","app-2"]`) — the storage shape registries already use; malformed JSON throws. Both take an explicit `GateEmptyPolicy` (`Allow`/`Deny`, default deny) — empty-list semantics are never implicit, because precedent deployments disagree: a credential allow-list historically meant "empty = allow all" for compatibility, while channel policies mean "empty = all denied". `GateResult` carries one gate's outcome (`Allowed` + denial `Reason`) for serial pipelines where the first denial wins.
+
 ## IDs and Response Shapes
 
 `SnowflakeIdGenerator` generates JavaScript-safe 53-bit IDs using a 2024-01-01 UTC epoch, a 5-bit worker ID (0–31), and a 7-bit per-millisecond sequence. Inject a `TimeProvider` for deterministic tests. The clock must not move backwards, and the timestamp must remain within the generator's supported window. Assign worker IDs uniquely to concurrently active generators sharing an ID space; the generator's lock only coordinates calls on that one instance. Exhausting all 128 sequence values in the final supported millisecond throws instead of wrapping.
