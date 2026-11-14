@@ -36,6 +36,29 @@ public sealed class RemoteClientCredentialVerifierTests
         Assert.Equal("https://registry.example/validate-secret", captured.RequestUri!.ToString());
     }
 
+    [Fact]
+    public async Task ConfigureRequestIsAppliedBeforeSend()
+    {
+        HttpRequestMessage? captured = null;
+        var options = DefaultOptions();
+        options.ConfigureRequest = request =>
+        {
+            request.Headers.TryAddWithoutValidation("X-Client-Id", "svc-caller");
+            request.Headers.TryAddWithoutValidation("X-Client-Secret", "caller-secret");
+        };
+        var verifier = Verifier(request =>
+        {
+            captured = request;
+            return Json(HttpStatusCode.OK, new { success = true, clientId = "svc-billing" });
+        }, options);
+
+        var result = await verifier.VerifyAsync("svc-billing", "secret-1");
+
+        Assert.True(result.Success);
+        Assert.Equal("svc-caller", captured!.Headers.GetValues("X-Client-Id").Single());
+        Assert.Equal("caller-secret", captured.Headers.GetValues("X-Client-Secret").Single());
+    }
+
     [Theory]
     [InlineData(HttpStatusCode.Unauthorized)]
     [InlineData(HttpStatusCode.InternalServerError)]

@@ -95,6 +95,8 @@ PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.AllowInsecureEnd
 PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.AllowInsecureEndpoint.set -> void
 PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.CacheMinutes.get -> int
 PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.CacheMinutes.set -> void
+PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.ConfigureRequest.get -> System.Action<System.Net.Http.HttpRequestMessage!>?
+PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.ConfigureRequest.set -> void
 PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.Endpoint.get -> System.Uri?
 PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.Endpoint.set -> void
 PubSoft.AspNetCore.Authentication.RemoteClientCredentialOptions.RemoteClientCredentialOptions() -> void

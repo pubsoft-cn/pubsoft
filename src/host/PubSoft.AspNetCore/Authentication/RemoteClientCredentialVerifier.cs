@@ -1,17 +1,9 @@
 using System.Net.Http.Json;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using PubSoft.Domain;
 
 namespace PubSoft.AspNetCore.Authentication;
 
@@ -69,8 +61,12 @@ public sealed class RemoteClientCredentialVerifier : IClientCredentialVerifier
     {
         try
         {
-            using var response = await _httpClient.PostAsJsonAsync(
-                _options.Endpoint, new VerifyRequest(clientId, clientSecret), cancellationToken).ConfigureAwait(false);
+            var request = new HttpRequestMessage(HttpMethod.Post, _options.Endpoint)
+            {
+                Content = JsonContent.Create(new VerifyRequest(clientId, clientSecret)),
+            };
+            _options.ConfigureRequest?.Invoke(request);
+            using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
                 return ClientCredentialVerificationResult.Fail();
 

@@ -1,13 +1,3 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using PubSoft.Domain;
-
 namespace PubSoft.AspNetCore.Authentication;
 
 
@@ -29,6 +19,14 @@ public sealed class RemoteClientCredentialOptions
 
     /// <summary>Per-request timeout (1-15 seconds, default 5). A timed-out verification fails closed.</summary>
     public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// Optional hook applied to the outbound verification request before it is sent -
+    /// attach the caller's own credential material (e.g. <c>X-Client-Id</c>/<c>X-Client-Secret</c>
+    /// headers or an <c>Authorization</c> scheme) required by registries that authenticate the
+    /// introspection call itself (RFC 7662 section 2.1: the endpoint must be protected).
+    /// </summary>
+    public Action<HttpRequestMessage>? ConfigureRequest { get; set; }
 
     /// <summary>
     /// Result cache minutes (0-60, default 0 = disabled). Positive and negative results share the
