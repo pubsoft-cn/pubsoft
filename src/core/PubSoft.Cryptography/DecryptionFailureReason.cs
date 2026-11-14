@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-
 namespace PubSoft.Cryptography;
 
 /// <summary>Machine-readable cause of a failed <see cref="AesGcmEncryptor.Decrypt"/> call.</summary>

@@ -5,7 +5,6 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
 using PubSoft.AspNetCore;
-using PubSoft.Core;
 using Xunit;
 
 namespace PubSoft.Core.Tests;

@@ -1,11 +1,9 @@
-using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PubSoft.Domain;
-using PubSoft.Scheduling;
 
 namespace PubSoft.Scheduling.EntityFrameworkCore;
 

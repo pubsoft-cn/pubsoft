@@ -1,10 +1,3 @@
-using System.Text;
-using MQTTnet;
-using MQTTnet.Packets;
-using MQTTnet.Protocol;
-using Microsoft.Extensions.DependencyInjection;
-using PubSoft.Messaging.Outbox;
-
 namespace PubSoft.Messaging.Mqtt;
 
 /// <summary>Options for the MQTT outbox dispatcher.</summary>

@@ -2,7 +2,6 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PubSoft.Resilience;
-using PubSoft.Scheduling;
 using PubSoft.Tokens;
 
 namespace PubSoft.Scheduling.Http;

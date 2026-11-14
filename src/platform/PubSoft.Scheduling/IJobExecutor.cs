@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace PubSoft.Scheduling;
 
 /// <summary>Runs one scheduled job type.</summary>

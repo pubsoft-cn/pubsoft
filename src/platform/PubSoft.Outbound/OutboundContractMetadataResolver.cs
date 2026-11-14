@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using PubSoft.Contracts;
-using PubSoft.Core;
 
 namespace PubSoft.Outbound;
 

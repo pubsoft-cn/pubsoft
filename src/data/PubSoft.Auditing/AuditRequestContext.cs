@@ -1,5 +1,3 @@
-using System.Collections.ObjectModel;
-
 namespace PubSoft.Auditing;
 
 /// <summary>HTTP request facts captured at request start.</summary>

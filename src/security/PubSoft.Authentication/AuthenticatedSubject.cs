@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace PubSoft.Authentication;
 
 /// <summary>Minimal resolved subject: id + tenant.</summary>

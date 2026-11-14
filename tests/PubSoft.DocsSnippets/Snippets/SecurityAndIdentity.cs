@@ -1,6 +1,4 @@
 // README anchors: Cryptography keyring + JwtSigning quick start + AspNetCore signed creds
-using System.Text;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using PubSoft.AspNetCore.Authentication;
 using PubSoft.Authentication.Jwt;

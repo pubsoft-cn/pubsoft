@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using PubSoft.Authentication.Jwt.AspNetCore;
-using PubSoft.Security;
 using Xunit;
 
 namespace PubSoft.Security.Tests;

@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using PubSoft.AspNetCore;
 using PubSoft.AspNetCore.Authentication;
 using PubSoft.AspNetCore.Authorization;

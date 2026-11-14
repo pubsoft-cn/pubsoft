@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using PubSoft.Scheduling;
 using PubSoft.Tokens;
 
 namespace PubSoft.Scheduling.Http;

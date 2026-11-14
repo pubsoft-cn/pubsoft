@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace PubSoft.Contracts;
 
 /// <summary>Provider that executes a family of outbound operations.</summary>

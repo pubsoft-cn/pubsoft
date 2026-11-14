@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using PubSoft.Core;
-using PubSoft.AspNetCore;
 using PubSoft.AspNetCore.Auditing;
 using PubSoft.AspNetCore.Authentication;
 using PubSoft.Monitoring;

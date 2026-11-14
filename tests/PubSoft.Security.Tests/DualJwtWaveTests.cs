@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Caching.Memory;

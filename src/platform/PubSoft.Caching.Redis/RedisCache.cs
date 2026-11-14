@@ -1,7 +1,5 @@
 using System.Text;
 using System.Text.Json;
-using PubSoft.Caching;
-using PubSoft.Core;
 using StackExchange.Redis;
 
 namespace PubSoft.Caching.Redis;

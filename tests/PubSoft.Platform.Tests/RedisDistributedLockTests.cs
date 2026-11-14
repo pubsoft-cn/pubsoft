@@ -1,5 +1,3 @@
-using PubSoft.Caching;
-using System.Collections.Generic;
 using PubSoft.Caching.Redis;
 using StackExchange.Redis;
 using Xunit;

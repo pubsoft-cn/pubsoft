@@ -1,13 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
-using System.Text.Json;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
-
 namespace PubSoft.Authentication.Jwt.AspNetCore;
 
 /// <summary>Local-issuer JWT options for the dual-scheme setup.</summary>

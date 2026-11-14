@@ -1,6 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
-
 namespace PubSoft.Cryptography;
 
 /// <summary>Result of a decrypt: the plaintext plus re-encryption guidance when the value used the legacy key.</summary>

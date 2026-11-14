@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Primitives;
-
 namespace PubSoft.AspNetCore.Authentication;
 
 /// <summary>

@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-
 namespace PubSoft.AspNetCore;
 
 /// <summary>Response security-header values emitted by the middleware.</summary>

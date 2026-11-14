@@ -37,3 +37,14 @@ dotnet_diagnostic.PUBSOFT026.severity = warning   # string += in loop → String
 dotnet_diagnostic.PUBSOFT027.severity = warning   # enum.ToString() allocates
 dotnet_diagnostic.PUBSOFT028.severity = warning   # public param concrete collections
 dotnet_diagnostic.PUBSOFT029.severity = warning   # .Keys.Contains → ContainsKey
+
+# ── review-hardening wave-2 (PUBSOFT056-058) ──────────────────────
+dotnet_diagnostic.PUBSOFT056.severity = warning   # mutate collection during its own foreach
+dotnet_diagnostic.PUBSOFT057.severity = warning   # dispose IHttpClientFactory-created client
+dotnet_diagnostic.PUBSOFT058.severity = warning   # GetExportedTypes/GetTypes unguarded
+
+# ── built-in code-style / quality rules (EnforceCodeStyleInBuild) ──
+dotnet_diagnostic.IDE0005.severity = warning      # unused usings
+dotnet_diagnostic.CA5350.severity = warning       # weak cryptographic algorithms
+dotnet_diagnostic.CA5351.severity = warning       # broken cryptographic algorithms (MD5/SHA1)
+dotnet_diagnostic.CA5379.severity = warning       # weak key-derivation iterations

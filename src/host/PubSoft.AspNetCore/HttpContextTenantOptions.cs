@@ -1,7 +1,3 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using PubSoft.Domain;
-
 namespace PubSoft.AspNetCore;
 
 /// <summary>Tenant-resolution options for <see cref="HttpContextTenantContext"/>.</summary>

@@ -1,5 +1,3 @@
-using System.Text.RegularExpressions;
-
 namespace PubSoft.Contracts;
 
 /// <summary>camelCase naming policy.</summary>

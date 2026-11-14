@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Options;
 using PubSoft.Monitoring.Scheduling;
 using PubSoft.Security.Redis;
 using StackExchange.Redis;

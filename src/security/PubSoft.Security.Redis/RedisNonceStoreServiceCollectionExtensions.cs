@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using PubSoft.Security;
 using StackExchange.Redis;
 
 namespace PubSoft.Security.Redis;

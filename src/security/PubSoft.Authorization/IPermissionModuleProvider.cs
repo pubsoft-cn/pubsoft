@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace PubSoft.Authorization;
 
 /// <summary>Supplies permission module metadata for discovery.</summary>

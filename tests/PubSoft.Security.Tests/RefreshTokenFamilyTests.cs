@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using PubSoft.Security;
 using Xunit;
 
 namespace PubSoft.Security.Tests;

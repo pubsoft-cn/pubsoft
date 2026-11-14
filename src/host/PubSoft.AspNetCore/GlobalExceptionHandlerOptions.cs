@@ -1,9 +1,3 @@
-using System.Text.Json;
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using PubSoft.Core;
-
 namespace PubSoft.AspNetCore;
 
 /// <summary>Exception-type to status-code mapping for the global exception handler.</summary>

@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace PubSoft.Authentication;
 
 /// <summary>A subject resolved from a claims snapshot -- the richer sibling of <see cref="AuthenticatedSubject"/>.</summary>

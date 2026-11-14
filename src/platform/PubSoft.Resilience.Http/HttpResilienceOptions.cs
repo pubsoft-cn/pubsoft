@@ -1,5 +1,3 @@
-using PubSoft.Resilience;
-
 namespace PubSoft.Resilience.Http;
 
 /// <summary>Per-request resilience policy for the HTTP resilience handler.</summary>

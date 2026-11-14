@@ -3,10 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using PubSoft.Authentication.Jwt;
 using PubSoft.EntityFrameworkCore;
 using PubSoft.Monitoring;
-using PubSoft.MultiTenancy;
 using PubSoft.Tokens;
 using Xunit;
 

@@ -1,7 +1,4 @@
 using System.Security.Cryptography;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using PubSoft.Caching;
 using StackExchange.Redis;
 
 namespace PubSoft.Caching.Redis;

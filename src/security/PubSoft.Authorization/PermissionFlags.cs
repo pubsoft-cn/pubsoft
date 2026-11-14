@@ -1,4 +1,3 @@
-using PubSoft.Core;
 namespace PubSoft.Authorization;
 
 /// <summary>Standard permission bitmask (module-scoped; named permissions live outside the bit space).</summary>

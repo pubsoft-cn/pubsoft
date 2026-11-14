@@ -1,16 +1,6 @@
 using System.Collections.Frozen;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.IdentityModel.Tokens;
 using PubSoft.Authentication.Jwt;
-using PubSoft.Domain;
 using PubSoft.Security;
 
 namespace PubSoft.AspNetCore.Authentication;

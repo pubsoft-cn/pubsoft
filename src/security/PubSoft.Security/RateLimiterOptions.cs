@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-
 namespace PubSoft.Security;
 
 /// <summary>Configures the sliding-window rate limiter.</summary>

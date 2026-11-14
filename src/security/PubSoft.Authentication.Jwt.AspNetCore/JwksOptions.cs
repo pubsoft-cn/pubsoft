@@ -1,10 +1,3 @@
-using System.Net.Http.Json;
-using System.Text.Json;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-
 namespace PubSoft.Authentication.Jwt.AspNetCore;
 
 /// <summary>JWKS endpoint validation settings for the AuthServer scheme.</summary>

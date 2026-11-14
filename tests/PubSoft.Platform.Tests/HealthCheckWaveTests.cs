@@ -1,6 +1,4 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using PubSoft.Monitoring;
 using PubSoft.Outbound;
 using PubSoft.Scheduling;
 using Xunit;

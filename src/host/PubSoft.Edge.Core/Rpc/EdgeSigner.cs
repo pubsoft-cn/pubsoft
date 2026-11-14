@@ -205,6 +205,8 @@ public static class EdgeSigner
         return Convert.ToBase64String(hash);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5351:Do Not Use Broken Cryptographic Algorithms",
+        Justification = "Legacy device-signing scheme (EdgeAuthScheme.Md5) for clients that cannot use HMAC — protocol compatibility boundary, not credential storage.")]
     private static string ComputeMd5Hex(string payload)
     {
         var hash = MD5.HashData(Encoding.UTF8.GetBytes(payload));
