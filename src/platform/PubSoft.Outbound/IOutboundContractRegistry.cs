@@ -77,7 +77,16 @@ public sealed class OutboundContractRegistry : IOutboundContractRegistry
     public void ScanAssembly(Assembly assembly)
     {
         ArgumentNullException.ThrowIfNull(assembly);
-        var discovered = assembly.GetExportedTypes()
+        Type[] exported;
+        try
+        {
+            exported = assembly.GetExportedTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            exported = ex.Types.Where(t => t is not null).Cast<Type>().ToArray();
+        }
+        var discovered = exported
             .Where(type => !type.IsAbstract && !type.IsInterface && type.IsDefined(typeof(ApiOperationAttribute), inherit: false))
             .Select(type => OutboundContractMetadataResolver.Resolve(type, _namingPolicy))
             .ToArray();

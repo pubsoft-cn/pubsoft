@@ -85,7 +85,7 @@ public sealed class RedisRefreshTokenFamilyStore : IRefreshTokenFamilyStore
             FromMs(fields.GetValueOrDefault("iat")),
             FromMs(fields.GetValueOrDefault("texp")),
             FromMs(fields.GetValueOrDefault("fexp")),
-            fields.GetValueOrDefault("used") == "1");
+            string.Equals(fields.GetValueOrDefault("used"), "1", StringComparison.Ordinal));
     }
 
     /// <inheritdoc />

@@ -1,11 +1,9 @@
 using System.Diagnostics;
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using PubSoft.Scheduling;
 using PubSoft.Tokens;
 
 namespace PubSoft.Scheduling.Http;
@@ -194,7 +192,7 @@ internal sealed class HttpExecutionSupport
 
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(config.Timeout ?? _options.DefaultTimeout);
-            using var client = _httpClientFactory.CreateClient(HttpClientName);
+            var client = _httpClientFactory.CreateClient(HttpClientName);
             using var response = await client.SendAsync(
                 request,
                 HttpCompletionOption.ResponseHeadersRead,

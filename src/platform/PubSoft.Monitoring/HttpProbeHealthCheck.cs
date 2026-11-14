@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -40,7 +39,7 @@ public sealed class HttpProbeHealthCheck : IProbeHealthCheck
         if (_targets.Length == 0)
             return ProbeHealth.Healthy;
 
-        using var httpClient = _httpClientFactory.CreateClient(MonitoringOptions.HttpClientName);
+        var httpClient = _httpClientFactory.CreateClient(MonitoringOptions.HttpClientName);
         var successfulTargets = 0;
 
         foreach (var target in _targets)
