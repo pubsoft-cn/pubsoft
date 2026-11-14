@@ -369,6 +369,20 @@ public sealed class TokenTests
     }
 
     [Fact]
+    public async Task ConfigureRequestRunsBeforeSend()
+    {
+        var handler = new CapturingHandler();
+        var provider = CreateProvider(handler, new RecordingCache(), new TokenCredential
+        {
+            Url = "https://auth.test/token",
+            ConfigureRequest = request => request.Headers.TryAddWithoutValidation("X-Client-Assertion", "signed-jwt"),
+        });
+
+        Assert.Equal("tok", await provider.GetTokenAsync("primary"));
+        Assert.Equal("signed-jwt", handler.LastRequest!.Headers.GetValues("X-Client-Assertion").Single());
+    }
+
+    [Fact]
     public async Task OversizedTokenEndpointResponseIsRejected()
     {
         var huge = "{\"token\":\"tok\",\"pad\":\"" + new string('x', 70 * 1024) + "\"}";
@@ -418,6 +432,17 @@ public sealed class TokenTests
     private sealed class TestHttpClientFactory(HttpMessageHandler handler) : IHttpClientFactory
     {
         public HttpClient CreateClient(string name) => new(handler, disposeHandler: false);
+    }
+
+    private sealed class CapturingHandler : HttpMessageHandler
+    {
+        public HttpRequestMessage? LastRequest { get; private set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            LastRequest = request;
+            return Task.FromResult(JsonResponse("{\"token\":\"tok\"}"));
+        }
     }
 
     private sealed class QueueHandler(Func<CancellationToken, Task<HttpResponseMessage>> responseFactory) : HttpMessageHandler

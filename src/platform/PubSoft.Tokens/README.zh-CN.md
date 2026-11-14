@@ -48,6 +48,8 @@ services.AddHttpClient("billing-api")
 
 POST body 以 JSON 发送。`TokenPath`/`ExpiryPath` 为点分 JSON 路径；动态过期按秒读取且不超出配置的 `Expiry`。token 端点调用有独立 `Timeout`。凭据发往 `Url`，故非 loopback 的 `http` 端点在 options 校验期即被拒绝；loopback 为本地开发豁免，确需例外的端点可逐凭据 `AllowInsecureUrl` 显式放行。凭证与 token 响应不进日志，URL user-info/query 不放密钥。provider 只记录固定失败事件/状态码，不附 transport/JSON 异常——异常细节可能含端点 URI 或响应派生数据。
 
+需要调用方自身认证的 token 端点（client assertion、注册表特定头）由 `TokenCredential.ConfigureRequest` 覆盖——可选钩子，在 `Headers` 应用后、发送前执行。该钩子需编程设置（配置绑定无法生成委托）；`private_key_jwt` 形态认证在钩子内用 `PubSoft.Authentication.Jwt` 的 `ClientAssertion.Sign` 签发。
+
 宿主须先注册 `ICache` 再解析 token provider。缓存键由 credential key 派生，与 URL 或 client 身份无关。每个应用/缓存命名空间用不同的 credential key；更换某 key 代表的身份时，版本化该 key 或移除旧缓存 token。内置刷新 single-flight 为进程内——多实例可能并发调 token 端点；共享缓存不引入分布式锁。
 
 已选凭证但取不到非空 token 时，`TokenDelegatingHandler` 抛 `HttpRequestException`、不发出受保护请求；完全未选凭证时原样放行——依赖认证才能工作的端点不要依赖该行为。

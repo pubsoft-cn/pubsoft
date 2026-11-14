@@ -41,6 +41,8 @@ PubSoft.Tokens.TokenCredential.AllowInsecureUrl.get -> bool
 PubSoft.Tokens.TokenCredential.AllowInsecureUrl.set -> void
 PubSoft.Tokens.TokenCredential.Body.get -> string!
 PubSoft.Tokens.TokenCredential.Body.set -> void
+PubSoft.Tokens.TokenCredential.ConfigureRequest.get -> System.Action<System.Net.Http.HttpRequestMessage!>?
+PubSoft.Tokens.TokenCredential.ConfigureRequest.set -> void
 PubSoft.Tokens.TokenCredential.Expiry.get -> System.TimeSpan
 PubSoft.Tokens.TokenCredential.Expiry.set -> void
 PubSoft.Tokens.TokenCredential.ExpiryPath.get -> string?

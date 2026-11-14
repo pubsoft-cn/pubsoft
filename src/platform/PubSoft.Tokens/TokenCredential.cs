@@ -16,6 +16,14 @@ public sealed class TokenCredential
     public bool AllowInsecureUrl { get; set; }
     /// <summary>Extra request headers.</summary>
     public Dictionary<string, string> Headers { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Optional hook applied to the token request after <see cref="Headers"/> are set and before
+    /// it is sent - attach caller authentication the endpoint requires (e.g. a signed client
+    /// assertion via <c>ClientAssertion.Sign</c>, or registry-specific headers). Set
+    /// programmatically; configuration binding cannot produce delegates.
+    /// </summary>
+    public Action<HttpRequestMessage>? ConfigureRequest { get; set; }
     /// <summary>Request body.</summary>
     public string Body { get; set; } = "";
     /// <summary>JSON path to the token in the response.</summary>

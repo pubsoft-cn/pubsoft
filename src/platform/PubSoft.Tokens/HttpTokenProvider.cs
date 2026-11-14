@@ -1,6 +1,4 @@
 using System.Collections.Concurrent;
-using System.Globalization;
-using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
@@ -152,11 +150,13 @@ public sealed class HttpTokenProvider : ITokenProvider
             }
         }
 
+        credential.ConfigureRequest?.Invoke(request);
+
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(credential.Timeout);
         try
         {
-            using var client = _httpClientFactory.CreateClient(HttpClientName);
+            var client = _httpClientFactory.CreateClient(HttpClientName);
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeout.Token)
                 .ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
