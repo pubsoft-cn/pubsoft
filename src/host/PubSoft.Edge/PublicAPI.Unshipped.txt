@@ -1,4 +1,7 @@
 #nullable enable
+override PubSoft.Edge.EdgeSignKeyEntry.Equals(object? obj) -> bool
+override PubSoft.Edge.EdgeSignKeyEntry.GetHashCode() -> int
+override PubSoft.Edge.EdgeSignKeyEntry.ToString() -> string!
 PubSoft.Edge.EdgeContext
 PubSoft.Edge.EdgeContext.<Clone>$() -> PubSoft.Edge.EdgeContext!
 PubSoft.Edge.EdgeContext.ClientId.get -> string!
@@ -127,6 +130,17 @@ PubSoft.Edge.EdgeSessionManager.CreateAsync(string! clientId, string! appId, str
 PubSoft.Edge.EdgeSessionManager.EdgeSessionManager(PubSoft.Edge.IEdgeSessionStore! store, System.TimeSpan? defaultExpiry = null) -> void
 PubSoft.Edge.EdgeSessionManager.RevokeAsync(string! sessionKey, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 PubSoft.Edge.EdgeSessionManager.ValidateAsync(string! sessionKey, bool autoRenew = true, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Edge.EdgeSession?>!
+PubSoft.Edge.EdgeSignKeyEntry
+PubSoft.Edge.EdgeSignKeyEntry.<Clone>$() -> PubSoft.Edge.EdgeSignKeyEntry!
+PubSoft.Edge.EdgeSignKeyEntry.ClientId.get -> string!
+PubSoft.Edge.EdgeSignKeyEntry.ClientId.init -> void
+PubSoft.Edge.EdgeSignKeyEntry.Deconstruct(out string! ClientId, out string! SecretKey, out string? Scheme) -> void
+PubSoft.Edge.EdgeSignKeyEntry.EdgeSignKeyEntry(string! ClientId, string! SecretKey, string? Scheme = null) -> void
+PubSoft.Edge.EdgeSignKeyEntry.Equals(PubSoft.Edge.EdgeSignKeyEntry? other) -> bool
+PubSoft.Edge.EdgeSignKeyEntry.Scheme.get -> string?
+PubSoft.Edge.EdgeSignKeyEntry.Scheme.init -> void
+PubSoft.Edge.EdgeSignKeyEntry.SecretKey.get -> string!
+PubSoft.Edge.EdgeSignKeyEntry.SecretKey.init -> void
 PubSoft.Edge.IEdgeHandler
 PubSoft.Edge.IEdgeHandler.ExecuteAsync(PubSoft.Edge.EdgeRpcRequest! request, PubSoft.Edge.EdgeContext! context, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<PubSoft.Edge.EdgeRpcResponse!>!
 PubSoft.Edge.IEdgeHandler.Method.get -> string!
@@ -159,6 +173,25 @@ override PubSoft.Edge.EdgeContext.ToString() -> string!
 override PubSoft.Edge.EdgeSession.Equals(object? obj) -> bool
 override PubSoft.Edge.EdgeSession.GetHashCode() -> int
 override PubSoft.Edge.EdgeSession.ToString() -> string!
+PubSoft.Edge.RemoteEdgeSignKeyOptions
+PubSoft.Edge.RemoteEdgeSignKeyOptions.FetchKeys.get -> System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<PubSoft.Edge.EdgeSignKeyEntry!>?>!>?
+PubSoft.Edge.RemoteEdgeSignKeyOptions.FetchKeys.set -> void
+PubSoft.Edge.RemoteEdgeSignKeyOptions.LocalKeys.get -> System.Collections.Generic.IDictionary<string!, string!>?
+PubSoft.Edge.RemoteEdgeSignKeyOptions.LocalKeys.set -> void
+PubSoft.Edge.RemoteEdgeSignKeyOptions.RefreshInterval.get -> System.TimeSpan
+PubSoft.Edge.RemoteEdgeSignKeyOptions.RefreshInterval.set -> void
+PubSoft.Edge.RemoteEdgeSignKeyOptions.RefreshOnMiss.get -> bool
+PubSoft.Edge.RemoteEdgeSignKeyOptions.RefreshOnMiss.set -> void
+PubSoft.Edge.RemoteEdgeSignKeyOptions.RefreshOnMissTimeout.get -> System.TimeSpan
+PubSoft.Edge.RemoteEdgeSignKeyOptions.RefreshOnMissTimeout.set -> void
+PubSoft.Edge.RemoteEdgeSignKeyOptions.RemoteEdgeSignKeyOptions() -> void
+PubSoft.Edge.RemoteEdgeSignKeyProvider
+PubSoft.Edge.RemoteEdgeSignKeyProvider.Dispose() -> void
+PubSoft.Edge.RemoteEdgeSignKeyProvider.GetAllowedScheme(string! clientId) -> PubSoft.Edge.EdgeAuthScheme?
+PubSoft.Edge.RemoteEdgeSignKeyProvider.GetSecretKey(string! clientId) -> string?
+PubSoft.Edge.RemoteEdgeSignKeyProvider.RemoteEdgeSignKeyProvider(PubSoft.Edge.RemoteEdgeSignKeyOptions! options, Microsoft.Extensions.Logging.ILogger<PubSoft.Edge.RemoteEdgeSignKeyProvider!>? logger = null) -> void
+PubSoft.Edge.RemoteEdgeSignKeyProvider.ShowSignDebug.get -> bool
+PubSoft.Edge.RemoteEdgeSignKeyServiceCollectionExtensions
 static PubSoft.Edge.EdgeContext.operator !=(PubSoft.Edge.EdgeContext? left, PubSoft.Edge.EdgeContext? right) -> bool
 static PubSoft.Edge.EdgeContext.operator ==(PubSoft.Edge.EdgeContext? left, PubSoft.Edge.EdgeContext? right) -> bool
 static PubSoft.Edge.EdgeGatewayExtensions.AddEdgeGateway(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
@@ -180,4 +213,7 @@ static PubSoft.Edge.EdgeSession.operator ==(PubSoft.Edge.EdgeSession? left, PubS
 static PubSoft.Edge.EdgeSessionExtensions.AddEdgeInMemorySession(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.TimeSpan? defaultExpiry = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Edge.EdgeSessionExtensions.AddEdgeSession<TStore>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.TimeSpan? defaultExpiry = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Edge.EdgeSessionManager.GenerateSessionKey(string! clientId, string! appId) -> string!
+static PubSoft.Edge.EdgeSignKeyEntry.operator !=(PubSoft.Edge.EdgeSignKeyEntry? left, PubSoft.Edge.EdgeSignKeyEntry? right) -> bool
+static PubSoft.Edge.EdgeSignKeyEntry.operator ==(PubSoft.Edge.EdgeSignKeyEntry? left, PubSoft.Edge.EdgeSignKeyEntry? right) -> bool
+static PubSoft.Edge.RemoteEdgeSignKeyServiceCollectionExtensions.AddRemoteEdgeSignKeys(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Edge.RemoteEdgeSignKeyOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 virtual PubSoft.Edge.EdgeHandlerBase<TParams>.Schemes.get -> PubSoft.Edge.EdgeAuthScheme[]!

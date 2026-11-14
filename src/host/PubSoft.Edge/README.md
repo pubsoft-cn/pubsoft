@@ -54,6 +54,25 @@ public class PingHandler : EdgeHandlerBase<PingParams>
 
 `EdgeSessionManager` issues `{clientId}:{appId}:{guid}` keys; `IEdgeSessionStore` is the pluggable store (in-memory default — use a distributed store for multi-instance).
 
+## Remote sign keys
+
+`AddRemoteEdgeSignKeys` registers a singleton `RemoteEdgeSignKeyProvider` implementing both `IEdgeSignKeyProvider` and `IEdgeSchemePolicy` — for hosts that hold edge sign keys in a remote credential registry instead of static configuration:
+
+```csharp
+builder.Services.AddRemoteEdgeSignKeys(o =>
+{
+    o.FetchKeys = ct => registry.GetMyEdgeCredentialsAsync(ct); // host-injected; return null on outage
+    o.LocalKeys = builder.Configuration.GetSection("Edge:SignKeys")
+        .Get<Dictionary<string, string>>();                      // optional fallback
+});
+```
+
+- `FetchKeys` (required) — pulls this service's `EdgeSignKeyEntry` bundle (`ClientId`/`SecretKey`/optional `Scheme` pin). The registry call typically authenticates the caller itself (self-scoped); supply that credential inside the delegate — PubSoft does not bind to a registry SDK.
+- Refresh: once at startup, then every `RefreshInterval` (default 5 min). A failed or null fetch keeps the last good pool. Registry entries win over `LocalKeys` on conflict.
+- Until the first successful fetch, a key miss triggers a synchronous pull (bounded by `RefreshOnMissTimeout`, default 10 s; disable via `RefreshOnMiss=false`) — prevents cold-start rejections.
+- `Scheme` pins map to `IEdgeSchemePolicy` (`hmac`/`md5`/`session`/`none`; unknown values leave the scheme unconstrained). Unknown clientIds return null and the gateway fails closed.
+- Note: entries hold plaintext symmetric keys — this is key *escrow* for third-party signing protocols, not service-to-service authentication. Key rotation propagates within one `RefreshInterval`.
+
 ## OpenAPI (opt-in)
 
 A single method-dispatch endpoint is invisible to Swashbuckle, so the gateway can emit its own document — generated from the registered `IEdgeHandler` set plus XML doc comments on handlers/params:
@@ -86,6 +105,6 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
-`ClientId`, `ClientIdExample`, `ClientPermitLimit`, `Description`, `DevelopmentOnly`, `DocumentPath`, `Enabled`, `EnablePseudoPaths`, `ExpiresAt`, `FailurePermitLimit`, `FailureRateLimitEnabled`, `FailureWindowSeconds`, `HelpLink`, `HmacPermitLimit`, `HResult`, `HttpContext`, `IsVerified`, `Md5PermitLimit`, `MemberId`, `NoneFailurePermitLimit`, `NonePermitLimit`, `OpenId`, `QueueLimit`, `RequestId`, `Roles`, `Scheme`, `Session`, `SessionKey`, `SessionPermitLimit`, `Source`, `SwaggerUiBundleUrl`, `SwaggerUiCssUrl`, `TenantId`, `TimestampToleranceSeconds`, `Title`, `Token`, `UiEnabled`, `UiPath`, `UserId`, `Version`, `WindowSeconds`
+`ClientId`, `ClientIdExample`, `ClientPermitLimit`, `Description`, `DevelopmentOnly`, `DocumentPath`, `Enabled`, `EnablePseudoPaths`, `ExpiresAt`, `FailurePermitLimit`, `FailureRateLimitEnabled`, `FailureWindowSeconds`, `FetchKeys`, `HelpLink`, `HmacPermitLimit`, `HResult`, `HttpContext`, `IsVerified`, `LocalKeys`, `Md5PermitLimit`, `MemberId`, `NoneFailurePermitLimit`, `NonePermitLimit`, `OpenId`, `QueueLimit`, `RefreshInterval`, `RefreshOnMiss`, `RefreshOnMissTimeout`, `RequestId`, `Roles`, `Scheme`, `SecretKey`, `Session`, `SessionKey`, `SessionPermitLimit`, `Source`, `SwaggerUiBundleUrl`, `SwaggerUiCssUrl`, `TenantId`, `TimestampToleranceSeconds`, `Title`, `Token`, `UiEnabled`, `UiPath`, `UserId`, `Version`, `WindowSeconds`
 
 <!-- pubsoft:api-surface:end -->

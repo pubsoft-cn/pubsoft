@@ -54,6 +54,25 @@ public class PingHandler : EdgeHandlerBase<PingParams>
 
 `EdgeSessionManager` 签发 `{clientId}:{appId}:{guid}`；`IEdgeSessionStore` 可插拔（默认内存——多实例请接分布式存储）。
 
+## 远端签名密钥
+
+`AddRemoteEdgeSignKeys` 注册单例 `RemoteEdgeSignKeyProvider`（同时实现 `IEdgeSignKeyProvider` 与 `IEdgeSchemePolicy`）——适用于签名密钥托管在远端凭证注册表而非静态配置的场景：
+
+```csharp
+builder.Services.AddRemoteEdgeSignKeys(o =>
+{
+    o.FetchKeys = ct => registry.GetMyEdgeCredentialsAsync(ct); // 宿主注入；故障时返回 null
+    o.LocalKeys = builder.Configuration.GetSection("Edge:SignKeys")
+        .Get<Dictionary<string, string>>();                      // 可选本地兜底
+});
+```
+
+- `FetchKeys`（必填）——拉取本服务的 `EdgeSignKeyEntry` 列表（`ClientId`/`SecretKey`/可选 `Scheme` 约束）。注册表调用通常需要调用方自身凭证（自域收窄），凭证在委托内提供——PubSoft 不绑定具体注册表 SDK。
+- 刷新：启动时一次，之后每 `RefreshInterval`（默认 5 分钟）。拉取失败或返回 null 时保留上次可用密钥池。冲突时注册表条目覆盖 `LocalKeys`。
+- 首次成功拉取前，密钥 miss 会触发一次同步拉取（上限 `RefreshOnMissTimeout`，默认 10 秒；可用 `RefreshOnMiss=false` 关闭）——避免冷启动拒绝。
+- `Scheme` 映射到 `IEdgeSchemePolicy`（`hmac`/`md5`/`session`/`none`；未知值不约束方案）。未知 clientId 返回 null，网关 fail-closed。
+- 注意：条目持明文对称密钥——这是第三方签名协议的密钥托管，不是服务间认证。密钥轮换在一个 `RefreshInterval` 内传播到验签方。
+
 ## OpenAPI（opt-in）
 
 单端点 method 分发对 Swashbuckle 不可见，网关因此自产文档——由已注册的 `IEdgeHandler` 集合 + handler/params 的 XML 注释反射生成：
