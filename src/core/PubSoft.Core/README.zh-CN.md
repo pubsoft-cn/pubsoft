@@ -47,7 +47,7 @@ decimal yuan = amount.ToYuan();
 
 ## 允许名单闸
 
-`IpAllowList` 按单 IP 与 CIDR 条目匹配（`new IpAllowList(["10.0.0.5", "192.168.0.0/16"])`），IPv4-mapped IPv6 自动归一化，畸形条目构造期即抛。`JsonAllowList` 按 ordinal 匹配 JSON 字符串数组列（`["app-1","app-2"]`）——注册表既有存储形态，畸形 JSON 抛错。两者都要求显式 `GateEmptyPolicy`（`Allow`/`Deny`，默认 deny）——空表语义绝不隐式，因为现存部署语义相反：凭证白名单历史上"空=放行"兼容，渠道策略则是"空=全禁"。`GateResult` 承载单个闸的结果（`Allowed`+拒绝 `Reason`），供串行管线"首个拒绝生效"使用。
+`IpAllowList` 按单 IP 与 CIDR 条目匹配（`new IpAllowList(["203.0.113.10", "198.51.100.0/24"])`——TEST-NET 文档网段示例），IPv4-mapped IPv6 自动归一化，畸形条目构造期即抛。`JsonAllowList` 按 ordinal 匹配 JSON 字符串数组列（`["app-1","app-2"]`）——注册表既有存储形态，畸形 JSON 抛错。两者都要求显式 `GateEmptyPolicy`（`Allow`/`Deny`，默认 deny）——空表语义绝不隐式，因为现存部署语义相反：凭证白名单历史上"空=放行"兼容，渠道策略则是"空=全禁"。`GateResult` 承载单个闸的结果（`Allowed`+拒绝 `Reason`），供串行管线"首个拒绝生效"使用。
 
 ## ID 与响应形状
 

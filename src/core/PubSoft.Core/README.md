@@ -48,7 +48,7 @@ Derive `Specification<T>` to collect criteria, includes, ordering, grouping, and
 
 ## Allow-List Gates
 
-`IpAllowList` matches IPs against single-address and CIDR entries (`new IpAllowList(["10.0.0.5", "192.168.0.0/16"])`); IPv4-mapped IPv6 is normalized, malformed entries throw at construction. `JsonAllowList` matches strings ordinally against a JSON array column (`["app-1","app-2"]`) — the storage shape registries already use; malformed JSON throws. Both take an explicit `GateEmptyPolicy` (`Allow`/`Deny`, default deny) — empty-list semantics are never implicit, because precedent deployments disagree: a credential allow-list historically meant "empty = allow all" for compatibility, while channel policies mean "empty = all denied". `GateResult` carries one gate's outcome (`Allowed` + denial `Reason`) for serial pipelines where the first denial wins.
+`IpAllowList` matches IPs against single-address and CIDR entries (`new IpAllowList(["203.0.113.10", "198.51.100.0/24"])` — TEST-NET examples); IPv4-mapped IPv6 is normalized, malformed entries throw at construction. `JsonAllowList` matches strings ordinally against a JSON array column (`["app-1","app-2"]`) — the storage shape registries already use; malformed JSON throws. Both take an explicit `GateEmptyPolicy` (`Allow`/`Deny`, default deny) — empty-list semantics are never implicit, because precedent deployments disagree: a credential allow-list historically meant "empty = allow all" for compatibility, while channel policies mean "empty = all denied". `GateResult` carries one gate's outcome (`Allowed` + denial `Reason`) for serial pipelines where the first denial wins.
 
 ## IDs and Response Shapes
 
