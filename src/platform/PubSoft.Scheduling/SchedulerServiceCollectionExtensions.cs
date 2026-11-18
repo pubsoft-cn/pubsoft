@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using PubSoft.DependencyInjection;
 
 namespace PubSoft.Scheduling;
 
@@ -22,7 +23,7 @@ public static class SchedulerServiceCollectionExtensions
 
         services.AddOptions<SchedulerOptions>()
             .Configure(options => configure?.Invoke(options))
-            .Validate(options => options.IsValid(out _), "Scheduler options are invalid.")
+            .ValidateDetail(options => options.IsValid(out var error) ? null : error)
             .ValidateOnStart();
         services.TryAddSingleton<IExecutorRegistry, ExecutorRegistry>();
         services.TryAddSingleton<IResultProcessorRegistry, ResultProcessorRegistry>();

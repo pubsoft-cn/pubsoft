@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="../../core/PubSoft.Core/PubSoft.Core.csproj" />
     <ProjectReference Include="../PubSoft.Caching/PubSoft.Caching.csproj" />
+    <ProjectReference Include="../../core/PubSoft.DependencyInjection/PubSoft.DependencyInjection.csproj" />
   </ItemGroup>
 
 </Project>

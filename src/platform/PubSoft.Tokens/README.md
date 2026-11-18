@@ -51,7 +51,7 @@ POST bodies are sent as JSON. `TokenPath` and `ExpiryPath` are dot-separated JSO
 
 Token endpoints that authenticate the caller itself (client assertions, registry-specific headers) are covered by `TokenCredential.ConfigureRequest` — an optional hook applied after `Headers` are set and before the request is sent. It is set programmatically (configuration binding cannot produce delegates); for `private_key_jwt`-style auth, sign inside the hook with `PubSoft.Authentication.Jwt`'s `ClientAssertion.Sign`.
 
-The host must register `ICache` before resolving the token provider. Cache keys derive from the credential key, not the URL or client identity. Give each application/cache namespace a distinct credential key; when changing the identity represented by a key, version the key or remove its old cached token. The built-in refresh single-flight is process-local, so multiple instances may call the token endpoint concurrently. A shared cache does not add distributed locking.
+The host must register `ICache` before resolving the token provider. `AddTokenHandler`'s dependencies resolve lazily at first request; the handler registers a `StartupCheck` so hosts that opt into `AddPubSoftStartupValidation` (from `PubSoft.DependencyInjection`) surface a missing `ITokenProvider` at startup instead. Cache keys derive from the credential key, not the URL or client identity. Give each application/cache namespace a distinct credential key; when changing the identity represented by a key, version the key or remove its old cached token. The built-in refresh single-flight is process-local, so multiple instances may call the token endpoint concurrently. A shared cache does not add distributed locking.
 
 If a credential is selected but no non-empty token can be obtained, `TokenDelegatingHandler` throws `HttpRequestException` without sending the protected request. With no credential selected at all, the handler passes the request through unchanged; do not rely on that behavior for an endpoint that requires authentication.
 
@@ -94,7 +94,7 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
-`AllowInsecureUrl`, `Audience`, `Claims`, `Credentials`, `DefaultCredentialKey`, `DefaultHeaderName`, `DefaultHeaderPrefix`, `Expiry`, `ExpiryPath`, `Headers`, `InnerHandler`, `Issuer`, `KeyId`, `Lifetime`, `Method`, `RefreshBefore`, `SigningKey`, `Timeout`, `TokenPath`
+`AllowInsecureUrl`, `Audience`, `Claims`, `ConfigureRequest`, `Credentials`, `DefaultCredentialKey`, `DefaultHeaderName`, `DefaultHeaderPrefix`, `Expiry`, `ExpiryPath`, `Headers`, `InnerHandler`, `Issuer`, `KeyId`, `Lifetime`, `Method`, `RefreshBefore`, `SigningKey`, `Timeout`, `TokenPath`
 
 <!-- pubsoft:api-surface:end -->
 

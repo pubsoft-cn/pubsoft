@@ -54,6 +54,20 @@ services.AddConventionalServices(
 
 Only **visible, non-abstract classes** carrying a marker are registered (file-local types are skipped). Each type is registered under every non-marker public interface it implements, plus the concrete type itself. Classes without a marker are never registered — conventional registration is strictly opt-in and does not change visibility semantics.
 
+## Startup validation
+
+Factory-lambda registrations (for example `AddHttpMessageHandler(services => ...)`) resolve their dependencies lazily at first use, so `ValidateOnBuild` never reaches them — a missing registration fails on the first request instead of at startup. `AddPubSoftStartupCheck` names an eager check; `AddPubSoftStartupValidation` runs every registered check inside a service scope once at host start:
+
+```csharp
+services.AddPubSoftStartupCheck("my-client",
+    sp => _ = sp.GetRequiredService<IMyDependency>());
+services.AddPubSoftStartupValidation();
+```
+
+Failed checks are aggregated and abort startup by default (`StartupValidationFailureMode.Fail`); set `FailureMode = Warn` to log and continue during staged rollouts. PubSoft's own `AddTokenHandler` registers its check automatically — the validator is inert until `AddPubSoftStartupValidation` is called. `ValidateDetail` (an `OptionsBuilder` extension) accepts a `Func<TOptions, string?>` so validators that know *why* they failed put the field-level reason into `OptionsValidationException` instead of a static "options are invalid" message.
+
+`GetNonEmpty(key)` reads an `IConfiguration` value treating absent, empty and whitespace as missing — `config["key"] ?? fallback` silently accepts `""`, which later passes "configured" checks and fails at first use.
+
 ## API surface
 
 <!-- pubsoft:api-surface:start -->
@@ -65,9 +79,11 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 | Method |
 |---|---|
 | `AddPubSoftIdGenerator` |
+| `AddPubSoftStartupCheck` |
+| `AddPubSoftStartupValidation` |
 
 **(options & records)**
 
-`WorkerId`
+`FailureMode`, `WorkerId`
 
 <!-- pubsoft:api-surface:end -->

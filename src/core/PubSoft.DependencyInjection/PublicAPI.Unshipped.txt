@@ -1,11 +1,33 @@
 #nullable enable
+PubSoft.DependencyInjection.ConfigurationExtensions
 PubSoft.DependencyInjection.ConventionalServiceCollectionExtensions
+PubSoft.DependencyInjection.DelegateValidateOptions<TOptions>
+PubSoft.DependencyInjection.DelegateValidateOptions<TOptions>.DelegateValidateOptions(System.Func<TOptions!, string?>! validate) -> void
+PubSoft.DependencyInjection.DelegateValidateOptions<TOptions>.Validate(string? name, TOptions! options) -> Microsoft.Extensions.Options.ValidateOptionsResult!
 PubSoft.DependencyInjection.ExposeServicesAttribute
 PubSoft.DependencyInjection.ExposeServicesAttribute.ExposeServicesAttribute(params System.Type![]! serviceTypes) -> void
 PubSoft.DependencyInjection.ExposeServicesAttribute.ServiceTypes.get -> System.Type![]!
 PubSoft.DependencyInjection.IScopedDependency
 PubSoft.DependencyInjection.ISingletonDependency
 PubSoft.DependencyInjection.ITransientDependency
+PubSoft.DependencyInjection.OptionsBuilderValidationExtensions
+PubSoft.DependencyInjection.StartupCheck
+PubSoft.DependencyInjection.StartupCheck.Check.get -> System.Action<System.IServiceProvider!>!
+PubSoft.DependencyInjection.StartupCheck.Name.get -> string!
+PubSoft.DependencyInjection.StartupCheck.StartupCheck(string! name, System.Action<System.IServiceProvider!>! check) -> void
+PubSoft.DependencyInjection.StartupValidationFailureMode
+PubSoft.DependencyInjection.StartupValidationFailureMode.Fail = 0 -> PubSoft.DependencyInjection.StartupValidationFailureMode
+PubSoft.DependencyInjection.StartupValidationFailureMode.Warn = 1 -> PubSoft.DependencyInjection.StartupValidationFailureMode
+PubSoft.DependencyInjection.StartupValidationHostedService
+PubSoft.DependencyInjection.StartupValidationHostedService.StartAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+PubSoft.DependencyInjection.StartupValidationHostedService.StartupValidationHostedService(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory! scopeFactory, System.Collections.Generic.IEnumerable<PubSoft.DependencyInjection.StartupCheck!>! checks, PubSoft.DependencyInjection.StartupValidationOptions! options, Microsoft.Extensions.Logging.ILogger<PubSoft.DependencyInjection.StartupValidationHostedService!>? logger = null) -> void
+PubSoft.DependencyInjection.StartupValidationHostedService.StopAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+PubSoft.DependencyInjection.StartupValidationOptions
+PubSoft.DependencyInjection.StartupValidationOptions.FailureMode.get -> PubSoft.DependencyInjection.StartupValidationFailureMode
+PubSoft.DependencyInjection.StartupValidationOptions.FailureMode.set -> void
+PubSoft.DependencyInjection.StartupValidationOptions.StartupValidationOptions() -> void
+PubSoft.DependencyInjection.StartupValidationServiceCollectionExtensions
+static PubSoft.DependencyInjection.ConfigurationExtensions.GetNonEmpty(this Microsoft.Extensions.Configuration.IConfiguration! configuration, string! key) -> string?
 static PubSoft.DependencyInjection.ConventionalServiceCollectionExtensions.AddConventionalServices(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Func<System.Type!, bool>? predicate, params System.Reflection.Assembly![]! assemblies) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.DependencyInjection.ConventionalServiceCollectionExtensions.AddConventionalServices(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, params System.Reflection.Assembly![]! assemblies) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 PubSoft.DependencyInjection.IdGeneratorServiceCollectionExtensions
@@ -17,3 +39,6 @@ PubSoft.DependencyInjection.IdGeneratorOptions.WorkerId.set -> void
 const PubSoft.DependencyInjection.IdGeneratorOptions.SectionName = "PubSoft:IdGenerator" -> string!
 static PubSoft.DependencyInjection.IdGeneratorServiceCollectionExtensions.AddPubSoftIdGenerator(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.DependencyInjection.IdGeneratorOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.DependencyInjection.IdGeneratorServiceCollectionExtensions.AddPubSoftIdGenerator(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! configuration) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.DependencyInjection.OptionsBuilderValidationExtensions.ValidateDetail<TOptions>(this Microsoft.Extensions.Options.OptionsBuilder<TOptions!>! builder, System.Func<TOptions!, string?>! validate) -> Microsoft.Extensions.Options.OptionsBuilder<TOptions!>!
+static PubSoft.DependencyInjection.StartupValidationServiceCollectionExtensions.AddPubSoftStartupCheck(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! name, System.Action<System.IServiceProvider!>! check) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.DependencyInjection.StartupValidationServiceCollectionExtensions.AddPubSoftStartupValidation(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.DependencyInjection.StartupValidationOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

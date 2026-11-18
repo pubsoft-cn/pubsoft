@@ -47,3 +47,17 @@ services.AddConventionalServices(
 ```
 
 只有**可见的非抽象类**且带标记接口才会被注册（`file` 局部类型会被跳过）。每个类型注册到它实现的所有非标记 public 接口以及自身类型。无标记的类一律不注册——约定注册严格 opt-in，不改变可见性语义。
+
+## 启动校验
+
+工厂 lambda 注册的依赖（如 `AddHttpMessageHandler(services => ...)`）在首次使用时才解析，`ValidateOnBuild` 够不到——注册缺失会在首个请求而非启动期爆炸。`AddPubSoftStartupCheck` 登记一条具名预检查；`AddPubSoftStartupValidation` 在宿主启动时于服务作用域内运行全部检查：
+
+```csharp
+services.AddPubSoftStartupCheck("my-client",
+    sp => _ = sp.GetRequiredService<IMyDependency>());
+services.AddPubSoftStartupValidation();
+```
+
+失败检查聚合后默认中止启动（`StartupValidationFailureMode.Fail`）；灰度期可设 `FailureMode = Warn` 改记录日志放行。PubSoft 自带 `AddTokenHandler` 会自动登记检查——未调用 `AddPubSoftStartupValidation` 时检查处于惰性。`ValidateDetail`（`OptionsBuilder` 扩展）接受 `Func<TOptions, string?>`，让能说清原因的校验器把字段级错误带进 `OptionsValidationException`，而不是静态的"options are invalid"。
+
+`GetNonEmpty(key)` 读取 `IConfiguration` 值，缺失/空串/空白一律视为缺失——`config["key"] ?? fallback` 会静默接受 `""`，使其通过"已配置"检查后在使用期才失败。

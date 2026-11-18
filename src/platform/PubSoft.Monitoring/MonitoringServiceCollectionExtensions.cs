@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using PubSoft.DependencyInjection;
 
 namespace PubSoft.Monitoring;
 
@@ -16,7 +17,7 @@ public static class MonitoringServiceCollectionExtensions
 
         services.AddOptions<MonitoringOptions>()
             .Configure(options => configure?.Invoke(options))
-            .Validate(options => options.IsValid(out _), "Monitoring probe options are invalid.")
+            .ValidateDetail(options => options.IsValid(out var error) ? null : error)
             .ValidateOnStart();
         services.AddHttpClient(MonitoringOptions.HttpClientName);
         services.TryAddSingleton<IProbeHealthCheck, HttpProbeHealthCheck>();

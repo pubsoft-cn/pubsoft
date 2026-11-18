@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PubSoft.Caching;
+using PubSoft.DependencyInjection;
 using PubSoft.Tokens;
 using Xunit;
 
@@ -316,6 +317,23 @@ public sealed class TokenTests
     }
 
     [Fact]
+    public async Task AddTokenHandlerRegistersStartupCheckForLazyHandlerDeps()
+    {
+        var services = new ServiceCollection();
+        services.AddHttpClient("api").AddTokenHandler("key-1");
+        services.AddPubSoftStartupValidation();
+        using var provider = services.BuildServiceProvider();
+
+        var check = Assert.Single(provider.GetServices<PubSoft.DependencyInjection.StartupCheck>());
+        Assert.Equal("PubSoft.Tokens.TokenDelegatingHandler", check.Name);
+        var validator = Assert.IsType<PubSoft.DependencyInjection.StartupValidationHostedService>(
+            provider.GetServices<Microsoft.Extensions.Hosting.IHostedService>().Single());
+        // No ITokenProvider registered -> the lazy handler deps fail at startup, not first request.
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => validator.StartAsync(CancellationToken.None));
+    }
+
+    [Fact]
     public void OptionsRejectUnsafeOrInvalidCredentialConfiguration()
     {
         var services = new ServiceCollection();
@@ -325,7 +343,11 @@ public sealed class TokenTests
         });
         using var provider = services.BuildServiceProvider();
 
-        Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IOptions<TokenManagerOptions>>().Value);
+        var ex = Assert.Throws<OptionsValidationException>(
+            () => provider.GetRequiredService<IOptions<TokenManagerOptions>>().Value);
+        // The field-level reason must reach the exception - a bare "options are
+        // invalid" message gives operators nothing to act on.
+        Assert.Contains("Each token credential requires", ex.Message);
     }
 
     [Fact]

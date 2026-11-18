@@ -2,6 +2,7 @@ using System.Globalization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using PubSoft.DependencyInjection;
 
 namespace PubSoft.Tokens;
 
@@ -18,7 +19,7 @@ public static class TokenServiceCollectionExtensions
 
         services.AddOptions<TokenManagerOptions>()
             .Configure(options => configure?.Invoke(options))
-            .Validate(options => options.IsValid(out _), "Token manager options are invalid.")
+            .ValidateDetail(options => options.IsValid(out var error) ? null : error)
             .ValidateOnStart();
         services.AddOptions<TokenHandlerOptions>()
             .Configure(options => configureHandler?.Invoke(options));
@@ -39,7 +40,7 @@ public static class TokenServiceCollectionExtensions
 
         services.AddOptions<MachineTokenOptions>()
             .Configure(configure)
-            .Validate(options => options.IsValid(out _), "Machine token options are invalid.")
+            .ValidateDetail(options => options.IsValid(out var error) ? null : error)
             .ValidateOnStart();
         services.TryAddSingleton<MachineTokenProvider>();
         services.TryAddSingleton<ITokenProvider>(provider => provider.GetRequiredService<MachineTokenProvider>());
@@ -65,6 +66,13 @@ public static class TokenServiceCollectionExtensions
     }
 
     /// <summary>Adds the token-injecting delegating handler to a typed client.</summary>
+    /// <remarks>
+    /// The handler pipeline builds lazily on first request, so a missing
+    /// <see cref="ITokenProvider"/> registration surfaces only at request time. A
+    /// matching startup check is registered; hosts that call
+    /// <see cref="DependencyInjection.StartupValidationServiceCollectionExtensions.AddPubSoftStartupValidation"/>
+    /// resolve these dependencies once at startup and fail fast instead.
+    /// </remarks>
     public static IHttpClientBuilder AddTokenHandler(
         this IHttpClientBuilder builder,
         string credentialKey,
@@ -73,6 +81,13 @@ public static class TokenServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentException.ThrowIfNullOrWhiteSpace(credentialKey);
+        builder.Services.AddPubSoftStartupCheck(
+            "PubSoft.Tokens.TokenDelegatingHandler",
+            services =>
+            {
+                _ = services.GetRequiredService<ITokenProvider>();
+                _ = services.GetRequiredService<Microsoft.Extensions.Options.IOptions<TokenHandlerOptions>>();
+            });
         return builder.AddHttpMessageHandler(services => new TokenDelegatingHandler(
             services.GetRequiredService<ITokenProvider>(),
             services.GetRequiredService<Microsoft.Extensions.Options.IOptions<TokenHandlerOptions>>(),
