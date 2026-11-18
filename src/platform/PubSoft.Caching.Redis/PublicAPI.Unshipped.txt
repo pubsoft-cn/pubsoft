@@ -1,4 +1,5 @@
 #nullable enable
+PubSoft.Caching.Redis.CacheConfigurationServiceCollectionExtensions
 PubSoft.Caching.Redis.CachingRedisServiceCollectionExtensions
 PubSoft.Caching.Redis.IFencedLockHandle
 PubSoft.Caching.Redis.IFencedLockHandle.ExtendAsync(System.TimeSpan expiry, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
@@ -37,6 +38,7 @@ PubSoft.Caching.Redis.RedisDistributedLockOptions.KeyPrefix.get -> string!
 PubSoft.Caching.Redis.RedisDistributedLockOptions.KeyPrefix.set -> void
 PubSoft.Caching.Redis.RedisDistributedLockOptions.RedisDistributedLockOptions() -> void
 PubSoft.Caching.Redis.RedisDistributedLockServiceCollectionExtensions
+static PubSoft.Caching.Redis.CacheConfigurationServiceCollectionExtensions.AddPubSoftCache(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! configuration) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Caching.Redis.CachingRedisServiceCollectionExtensions.AddPubSoftRedisCache(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, StackExchange.Redis.IConnectionMultiplexer! connection, System.Action<PubSoft.Caching.Redis.RedisCacheOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Caching.Redis.RedisDistributedLockServiceCollectionExtensions.AddPubSoftRedisDistributedLock(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, StackExchange.Redis.IConnectionMultiplexer! connection, System.Action<PubSoft.Caching.Redis.RedisDistributedLockOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 PubSoft.Caching.Redis.RedisHealthCheck

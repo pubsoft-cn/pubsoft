@@ -14,11 +14,20 @@ last-reviewed: 2026-10-13
 ## 缓存
 
 ```csharp
-services.AddPubSoftRedisCache(options =>
+services.AddPubSoftRedisCache(multiplexer, options =>
 {
     options.KeyPrefix = "myapp:";          // key 命名空间
     options.SerializerOptions = ctx;        // 宿主 source-gen STJ context
 });
+```
+
+也可由配置选择 provider——一次调用替代每个宿主的 `if (redis) ... else ...` 分支：
+
+```csharp
+services.AddPubSoftCache(configuration);   // 读取 Caching 节
+// Caching:Provider = "memory" | "redis"  （缺失或未知值 fail-closed）
+// Caching:Redis:ConnectionString         （redis 必填；另有 Database/KeyPrefix/MaxValueBytes）
+// Caching:Memory:MaxSize, Caching:Memory:CleanupIntervalSeconds
 ```
 
 `GetOrSetAsync` miss 时执行 factory 再写入——并发调用方与多进程都可能执行；防重复只能靠应用幂等或分布式锁。`RemoveByPatternAsync` 扫描已连接 primary 端点分批删除——日常失效优先显式 key 列表。批量 API 非事务。
@@ -26,7 +35,7 @@ services.AddPubSoftRedisCache(options =>
 ## 分布式锁
 
 ```csharp
-services.AddPubSoftRedisDistributedLock(options => options.KeyPrefix = "myapp:locks:");
+services.AddPubSoftRedisDistributedLock(multiplexer, options => options.KeyPrefix = "myapp:locks:");
 
 `AddPubSoftRedisCheck()` 为 `IHealthChecksBuilder` 加 `redis` 健康检查（PING + 延迟）——EF 健康检查的 Redis 对应件，用于 `/health` 端点。
 

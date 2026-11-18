@@ -14,11 +14,21 @@ StackExchange.Redis-backed implementations of the `PubSoft.Caching` contracts. R
 ## Cache
 
 ```csharp
-services.AddPubSoftRedisCache(options =>
+services.AddPubSoftRedisCache(multiplexer, options =>
 {
     options.KeyPrefix = "myapp:";          // key namespace
     options.SerializerOptions = ctx;        // host source-gen STJ context
 });
+```
+
+Or let configuration pick the provider — one call replaces a per-host
+`if (redis) ... else ...` branch:
+
+```csharp
+services.AddPubSoftCache(configuration);   // reads the Caching section
+// Caching:Provider = "memory" | "redis"  (missing or unknown values fail closed)
+// Caching:Redis:ConnectionString         (required for redis; also Database/KeyPrefix/MaxValueBytes)
+// Caching:Memory:MaxSize, Caching:Memory:CleanupIntervalSeconds
 ```
 
 `GetOrSetAsync` on a miss runs the factory then writes — concurrent callers and processes can all run it; duplicate work is prevented only by application idempotency or a distributed lock. `RemoveByPatternAsync` scans connected primary endpoints in batches — prefer explicit key lists for routine invalidation. Batch APIs are not transactional.
@@ -26,7 +36,7 @@ services.AddPubSoftRedisCache(options =>
 ## Distributed lock
 
 ```csharp
-services.AddPubSoftRedisDistributedLock(options => options.KeyPrefix = "myapp:locks:");
+services.AddPubSoftRedisDistributedLock(multiplexer, options => options.KeyPrefix = "myapp:locks:");
 
 `AddPubSoftRedisCheck()` adds a `redis` health check (PING + latency) via `IHealthChecksBuilder` — the Redis counterpart of the EF health check, for `/health` endpoints.
 
@@ -52,6 +62,7 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 | Method |
 |---|---|
+| `AddPubSoftCache` |
 | `AddPubSoftRedisCache` |
 | `AddPubSoftRedisCheck` |
 | `AddPubSoftRedisDistributedLock` |
