@@ -57,15 +57,10 @@ public sealed class MachineTokenOptions
     {
         if (string.IsNullOrWhiteSpace(key))
             return false;
-        byte[] decoded;
-        try
-        {
-            decoded = Convert.FromBase64String(key);
-        }
-        catch (FormatException)
-        {
-            return false;
-        }
-        return decoded.Length is >= 32 and <= 128;
+        // Match JwtSigning.ImportSymmetricKey(keyId, string) semantics: both signer and
+        // verifier consume the string as UTF8 bytes, so validation must measure the same
+        // unit - a base64 decode check rejects keys the signer can actually use.
+        var length = System.Text.Encoding.UTF8.GetByteCount(key);
+        return length is >= 32 and <= 128;
     }
 }
