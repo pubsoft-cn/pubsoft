@@ -23,9 +23,10 @@ public static class RemoteEdgeSignKeyServiceCollectionExtensions
         options.Validate();
 
         services.TryAddSingleton(sp =>
-            new RemoteEdgeSignKeyProvider(options, sp.GetService<ILogger<RemoteEdgeSignKeyProvider>>()));
+            new RemoteEdgeSignKeyProvider(options, sp.GetService<ILogger<RemoteEdgeSignKeyProvider>>(), sp.GetService<TimeProvider>()));
         services.TryAddSingleton<IEdgeSignKeyProvider>(sp => sp.GetRequiredService<RemoteEdgeSignKeyProvider>());
         services.TryAddSingleton<IEdgeSchemePolicy>(sp => sp.GetRequiredService<RemoteEdgeSignKeyProvider>());
+        services.TryAddSingleton<IEdgeSignKeyPoolStatus>(sp => sp.GetRequiredService<RemoteEdgeSignKeyProvider>());
         return services;
     }
 }

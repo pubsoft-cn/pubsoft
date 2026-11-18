@@ -71,6 +71,7 @@ builder.Services.AddRemoteEdgeSignKeys(o =>
 - Refresh: once at startup, then every `RefreshInterval` (default 5 min). A failed or null fetch keeps the last good pool. Registry entries win over `LocalKeys` on conflict.
 - Until the first successful fetch, a key miss triggers a synchronous pull (bounded by `RefreshOnMissTimeout`, default 10 s; disable via `RefreshOnMiss=false`) — prevents cold-start rejections.
 - `Scheme` pins map to `IEdgeSchemePolicy` (`hmac`/`md5`/`session`/`none`; unknown values leave the scheme unconstrained). Unknown clientIds return null and the gateway fails closed.
+- Degradation is observable: the provider also implements `IEdgeSignKeyPoolStatus` (`Source` = `LocalFallback`/`Remote`/`Degraded`, `LastFetchSucceededUtc`, `LastFetchError`). A persistent registry outage keeps serving the last good pool by design, so wire the status into readiness checks to make the degraded state visible instead of relying on a warning log.
 - Note: entries hold plaintext symmetric keys — this is key *escrow* for third-party signing protocols, not service-to-service authentication. Key rotation propagates within one `RefreshInterval`.
 
 ## OpenAPI (opt-in)
@@ -105,6 +106,6 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
-`ClientId`, `ClientIdExample`, `ClientPermitLimit`, `Description`, `DevelopmentOnly`, `DocumentPath`, `Enabled`, `EnablePseudoPaths`, `ExpiresAt`, `FailurePermitLimit`, `FailureRateLimitEnabled`, `FailureWindowSeconds`, `FetchKeys`, `HelpLink`, `HmacPermitLimit`, `HResult`, `HttpContext`, `IsVerified`, `LocalKeys`, `Md5PermitLimit`, `MemberId`, `NoneFailurePermitLimit`, `NonePermitLimit`, `OpenId`, `QueueLimit`, `RefreshInterval`, `RefreshOnMiss`, `RefreshOnMissTimeout`, `RequestId`, `Roles`, `Scheme`, `SecretKey`, `Session`, `SessionKey`, `SessionPermitLimit`, `Source`, `SwaggerUiBundleUrl`, `SwaggerUiCssUrl`, `TenantId`, `TimestampToleranceSeconds`, `Title`, `Token`, `UiEnabled`, `UiPath`, `UserId`, `Version`, `WindowSeconds`
+`ClientId`, `ClientIdExample`, `ClientPermitLimit`, `Description`, `DevelopmentOnly`, `DocumentPath`, `Enabled`, `EnablePseudoPaths`, `ExpiresAt`, `FailurePermitLimit`, `FailureRateLimitEnabled`, `FailureWindowSeconds`, `FetchKeys`, `HelpLink`, `HmacPermitLimit`, `HResult`, `HttpContext`, `IsVerified`, `LastFetchSucceededUtc`, `LocalKeys`, `Md5PermitLimit`, `MemberId`, `NoneFailurePermitLimit`, `NonePermitLimit`, `OpenId`, `QueueLimit`, `RefreshInterval`, `RefreshOnMiss`, `RefreshOnMissTimeout`, `RequestId`, `Roles`, `Scheme`, `SecretKey`, `Session`, `SessionKey`, `SessionPermitLimit`, `Source`, `SwaggerUiBundleUrl`, `SwaggerUiCssUrl`, `TenantId`, `TimestampToleranceSeconds`, `Title`, `Token`, `UiEnabled`, `UiPath`, `UserId`, `Version`, `WindowSeconds`
 
 <!-- pubsoft:api-surface:end -->

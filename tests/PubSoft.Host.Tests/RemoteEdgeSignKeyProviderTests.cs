@@ -104,8 +104,58 @@ public sealed class RemoteEdgeSignKeyProviderTests
         using var provider = services.BuildServiceProvider();
         Assert.IsType<RemoteEdgeSignKeyProvider>(provider.GetRequiredService<IEdgeSignKeyProvider>());
         Assert.IsType<RemoteEdgeSignKeyProvider>(provider.GetRequiredService<IEdgeSchemePolicy>());
+        Assert.IsType<RemoteEdgeSignKeyProvider>(provider.GetRequiredService<IEdgeSignKeyPoolStatus>());
 
         Assert.Throws<ArgumentNullException>(() => new ServiceCollection().AddRemoteEdgeSignKeys(_ => { }));
+    }
+
+    [Fact]
+    public void PoolStatusReportsLocalFallbackBeforeRemoteLoad()
+    {
+        var provider = Provider(ct => Task.FromException<IReadOnlyList<EdgeSignKeyEntry>?>(
+                new HttpRequestException("registry down")),
+            localKeys: new Dictionary<string, string> { ["app-1"] = "local-key" });
+        for (var i = 0; i < 50 && provider.LastFetchError is null; i++)
+            Thread.Sleep(10);
+
+        Assert.Equal(EdgeSignKeyPoolSource.LocalFallback, provider.Source);
+        Assert.Null(provider.LastFetchSucceededUtc);
+        Assert.Equal("registry down", provider.LastFetchError);
+        provider.Dispose();
+    }
+
+    [Fact]
+    public void PoolStatusReportsRemoteAfterSuccessfulFetch()
+    {
+        var provider = Provider(ct => Task.FromResult<IReadOnlyList<EdgeSignKeyEntry>?>(
+            [new("app-1", "key-1")]));
+        WaitLoaded(provider);
+
+        Assert.Equal(EdgeSignKeyPoolSource.Remote, provider.Source);
+        Assert.NotNull(provider.LastFetchSucceededUtc);
+        Assert.Null(provider.LastFetchError);
+        provider.Dispose();
+    }
+
+    [Fact]
+    public void PoolStatusReportsDegradedWhenLoadedPoolStales()
+    {
+        var calls = 0;
+        var provider = Provider(ct =>
+        {
+            Interlocked.Increment(ref calls);
+            return Task.FromResult<IReadOnlyList<EdgeSignKeyEntry>?>(
+                calls == 1 ? [new("app-1", "key-1")] : null);
+        }, refreshInterval: TimeSpan.FromMilliseconds(50));
+        WaitLoaded(provider);
+        for (var i = 0; i < 50 && Volatile.Read(ref calls) < 2; i++)
+            Thread.Sleep(20);
+
+        Assert.Equal(EdgeSignKeyPoolSource.Degraded, provider.Source);
+        Assert.NotNull(provider.LastFetchSucceededUtc);
+        Assert.Equal("fetch returned no entries", provider.LastFetchError);
+        Assert.Equal("key-1", provider.GetSecretKey("app-1"));
+        provider.Dispose();
     }
 
     private static RemoteEdgeSignKeyProvider Provider(

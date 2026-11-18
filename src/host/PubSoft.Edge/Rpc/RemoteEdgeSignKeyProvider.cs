@@ -14,7 +14,7 @@ namespace PubSoft.Edge;
 /// <see cref="RemoteEdgeSignKeyOptions.RefreshOnMiss"/> is enabled. Unknown clientIds return
 /// null - the gateway then fails closed.
 /// </remarks>
-public sealed class RemoteEdgeSignKeyProvider : IEdgeSignKeyProvider, IEdgeSchemePolicy, IDisposable
+public sealed class RemoteEdgeSignKeyProvider : IEdgeSignKeyProvider, IEdgeSchemePolicy, IEdgeSignKeyPoolStatus, IDisposable
 {
     private readonly RemoteEdgeSignKeyOptions _options;
     private readonly ILogger<RemoteEdgeSignKeyProvider>? _logger;
@@ -23,19 +23,35 @@ public sealed class RemoteEdgeSignKeyProvider : IEdgeSignKeyProvider, IEdgeSchem
 
     private volatile Dictionary<string, (string Key, string? Scheme)> _keys;
     private volatile bool _remoteLoaded;
+    private volatile bool _lastFetchFailed;
+    private volatile string? _lastFetchError;
+    private readonly TimeProvider _timeProvider;
 
     /// <summary>Creates the provider, seeds local fallback keys, and starts the refresh loop.</summary>
-    public RemoteEdgeSignKeyProvider(RemoteEdgeSignKeyOptions options, ILogger<RemoteEdgeSignKeyProvider>? logger = null)
+    public RemoteEdgeSignKeyProvider(RemoteEdgeSignKeyOptions options, ILogger<RemoteEdgeSignKeyProvider>? logger = null, TimeProvider? timeProvider = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         options.Validate();
         _options = options;
         _logger = logger;
+        _timeProvider = timeProvider ?? TimeProvider.System;
 
         _keys = LocalKeyMap();
         _ = RefreshAsync();
         _refreshTimer = new Timer(_ => _ = RefreshAsync(), null, _options.RefreshInterval, _options.RefreshInterval);
     }
+
+    /// <inheritdoc />
+    public EdgeSignKeyPoolSource Source =>
+        !_remoteLoaded ? EdgeSignKeyPoolSource.LocalFallback
+        : _lastFetchFailed ? EdgeSignKeyPoolSource.Degraded
+        : EdgeSignKeyPoolSource.Remote;
+
+    /// <inheritdoc />
+    public DateTimeOffset? LastFetchSucceededUtc { get; private set; }
+
+    /// <inheritdoc />
+    public string? LastFetchError => _lastFetchError;
 
     /// <inheritdoc />
     public bool ShowSignDebug => false;
@@ -87,7 +103,11 @@ public sealed class RemoteEdgeSignKeyProvider : IEdgeSignKeyProvider, IEdgeSchem
         {
             var entries = await _options.FetchKeys!(CancellationToken.None).ConfigureAwait(false);
             if (entries is null)
+            {
+                _lastFetchFailed = true;
+                _lastFetchError = "fetch returned no entries";
                 return;
+            }
 
             var merged = LocalKeyMap();
             foreach (var entry in entries)
@@ -96,9 +116,14 @@ public sealed class RemoteEdgeSignKeyProvider : IEdgeSignKeyProvider, IEdgeSchem
 
             _keys = merged;
             _remoteLoaded = true;
+            _lastFetchFailed = false;
+            _lastFetchError = null;
+            LastFetchSucceededUtc = _timeProvider.GetUtcNow();
         }
         catch (Exception ex)
         {
+            _lastFetchFailed = true;
+            _lastFetchError = ex.Message;
             _logger?.LogWarning(ex, "Failed to pull the edge sign-key bundle - keeping the last good pool");
         }
         finally

@@ -141,6 +141,10 @@ PubSoft.Edge.EdgeSignKeyEntry.Scheme.get -> string?
 PubSoft.Edge.EdgeSignKeyEntry.Scheme.init -> void
 PubSoft.Edge.EdgeSignKeyEntry.SecretKey.get -> string!
 PubSoft.Edge.EdgeSignKeyEntry.SecretKey.init -> void
+PubSoft.Edge.EdgeSignKeyPoolSource
+PubSoft.Edge.EdgeSignKeyPoolSource.Degraded = 2 -> PubSoft.Edge.EdgeSignKeyPoolSource
+PubSoft.Edge.EdgeSignKeyPoolSource.LocalFallback = 0 -> PubSoft.Edge.EdgeSignKeyPoolSource
+PubSoft.Edge.EdgeSignKeyPoolSource.Remote = 1 -> PubSoft.Edge.EdgeSignKeyPoolSource
 PubSoft.Edge.IEdgeHandler
 PubSoft.Edge.IEdgeHandler.ExecuteAsync(PubSoft.Edge.EdgeRpcRequest! request, PubSoft.Edge.EdgeContext! context, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<PubSoft.Edge.EdgeRpcResponse!>!
 PubSoft.Edge.IEdgeHandler.Method.get -> string!
@@ -152,6 +156,10 @@ PubSoft.Edge.IEdgeSessionStore.GetAsync(string! sessionKey, System.Threading.Can
 PubSoft.Edge.IEdgeSessionStore.RemoveAsync(string! sessionKey, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 PubSoft.Edge.IEdgeSessionStore.RenewAsync(string! sessionKey, System.TimeSpan extendBy, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 PubSoft.Edge.IEdgeSessionStore.SaveAsync(PubSoft.Edge.EdgeSession! session, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Edge.IEdgeSignKeyPoolStatus
+PubSoft.Edge.IEdgeSignKeyPoolStatus.LastFetchError.get -> string?
+PubSoft.Edge.IEdgeSignKeyPoolStatus.LastFetchSucceededUtc.get -> System.DateTimeOffset?
+PubSoft.Edge.IEdgeSignKeyPoolStatus.Source.get -> PubSoft.Edge.EdgeSignKeyPoolSource
 PubSoft.Edge.IEdgeSignKeyProvider
 PubSoft.Edge.IEdgeSignKeyProvider.GetSecretKey(string! clientId) -> string?
 PubSoft.Edge.IEdgeSignKeyProvider.ShowSignDebug.get -> bool
@@ -189,8 +197,11 @@ PubSoft.Edge.RemoteEdgeSignKeyProvider
 PubSoft.Edge.RemoteEdgeSignKeyProvider.Dispose() -> void
 PubSoft.Edge.RemoteEdgeSignKeyProvider.GetAllowedScheme(string! clientId) -> PubSoft.Edge.EdgeAuthScheme?
 PubSoft.Edge.RemoteEdgeSignKeyProvider.GetSecretKey(string! clientId) -> string?
-PubSoft.Edge.RemoteEdgeSignKeyProvider.RemoteEdgeSignKeyProvider(PubSoft.Edge.RemoteEdgeSignKeyOptions! options, Microsoft.Extensions.Logging.ILogger<PubSoft.Edge.RemoteEdgeSignKeyProvider!>? logger = null) -> void
+PubSoft.Edge.RemoteEdgeSignKeyProvider.LastFetchError.get -> string?
+PubSoft.Edge.RemoteEdgeSignKeyProvider.LastFetchSucceededUtc.get -> System.DateTimeOffset?
+PubSoft.Edge.RemoteEdgeSignKeyProvider.RemoteEdgeSignKeyProvider(PubSoft.Edge.RemoteEdgeSignKeyOptions! options, Microsoft.Extensions.Logging.ILogger<PubSoft.Edge.RemoteEdgeSignKeyProvider!>? logger = null, System.TimeProvider? timeProvider = null) -> void
 PubSoft.Edge.RemoteEdgeSignKeyProvider.ShowSignDebug.get -> bool
+PubSoft.Edge.RemoteEdgeSignKeyProvider.Source.get -> PubSoft.Edge.EdgeSignKeyPoolSource
 PubSoft.Edge.RemoteEdgeSignKeyServiceCollectionExtensions
 static PubSoft.Edge.EdgeContext.operator !=(PubSoft.Edge.EdgeContext? left, PubSoft.Edge.EdgeContext? right) -> bool
 static PubSoft.Edge.EdgeContext.operator ==(PubSoft.Edge.EdgeContext? left, PubSoft.Edge.EdgeContext? right) -> bool

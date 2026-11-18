@@ -71,6 +71,7 @@ builder.Services.AddRemoteEdgeSignKeys(o =>
 - 刷新：启动时一次，之后每 `RefreshInterval`（默认 5 分钟）。拉取失败或返回 null 时保留上次可用密钥池。冲突时注册表条目覆盖 `LocalKeys`。
 - 首次成功拉取前，密钥 miss 会触发一次同步拉取（上限 `RefreshOnMissTimeout`，默认 10 秒；可用 `RefreshOnMiss=false` 关闭）——避免冷启动拒绝。
 - `Scheme` 映射到 `IEdgeSchemePolicy`（`hmac`/`md5`/`session`/`none`；未知值不约束方案）。未知 clientId 返回 null，网关 fail-closed。
+- 降级状态可观测：provider 同时实现 `IEdgeSignKeyPoolStatus`（`Source` = `LocalFallback`/`Remote`/`Degraded`、`LastFetchSucceededUtc`、`LastFetchError`）。注册表持续故障时按设计继续服务上次可用池——把状态接入 readiness，让降级显形而非只剩一条 warning 日志。
 - 注意：条目持明文对称密钥——这是第三方签名协议的密钥托管，不是服务间认证。密钥轮换在一个 `RefreshInterval` 内传播到验签方。
 
 ## OpenAPI（opt-in）
