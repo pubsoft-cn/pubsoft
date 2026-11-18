@@ -73,6 +73,8 @@ worker 只处理当前 scoped `ITenantContext` 可见的行。无 `IOutboxScopeP
 
 `EfCoreInboxMessageProcessor<TDbContext>` 以 `(tenant, consumerName, messageId)` 为 receipt 键。调用时要求干净 DbContext。receipt 插入、handler 的数据库变更与最终保存共享一个事务；handler 失败整体回滚，同一消息可重试。跨部署用稳定 consumer 名。`InboxOutboxDispatcher` 自动把 consumer 名绑定到 Outbox 消息 ID。
 
+各 dispatcher 传输实现为每条外发消息附上 `OutboxHeaders`（`x-outbox-id`、`x-outbox-aggkey`、`x-outbox-correlation-id`）——`PubSoft.Messaging.Mqtt`、`PubSoft.Messaging.Amqp` 及自定义 `IOutboxDispatcher` 共享的传输无关去重/关联契约。
+
 Outbox worker 以 lease 领取、分发、再标记已投递。进程可能在外部副作用成功后、记录投递前失败——消息会被再次投递。Inbox 保护其事务内的数据库写入；不能包含邮件、HTTP 调用或其他系统的提交——这些副作用须有自己的幂等键或持久协调策略。
 
 重试用有界指数退避 + 尝试上限；耗尽进 dead letter。lease token 阻止迟到 worker，但不能让慢外部操作可逆。监控 dead-letter 与重试计数并提供运维排查/重放流程。receipt 不会按任何计划删除：

@@ -104,6 +104,8 @@ The example's catalog and initializer are host contracts, not PubSoft APIs. Ensu
 
 `EfCoreInboxMessageProcessor<TDbContext>` uses `(tenant, consumerName, messageId)` as its receipt key. It requires a clean DbContext when called. The receipt insert, handler's database changes, and final save share a transaction; handler failure rolls them all back, so the same message can be retried. Use a stable consumer name across deployments. `InboxOutboxDispatcher` binds that consumer name to the Outbox message ID automatically.
 
+Dispatcher transports attach `OutboxHeaders` (`x-outbox-id`, `x-outbox-aggkey`, `x-outbox-correlation-id`) to every published message — the transport-agnostic dedup/correlation contract shared by `PubSoft.Messaging.Mqtt`, `PubSoft.Messaging.Amqp`, and any custom `IOutboxDispatcher`.
+
 The Outbox worker claims with a lease, dispatches, then marks the row delivered. A process can fail after an external side effect succeeds but before delivery is recorded, so the message may be delivered again. Inbox protects database writes in its transaction; it cannot include an email, HTTP call, or another system's commit. Give those effects their own idempotency key or durable coordination strategy.
 
 Retries use bounded exponential delay and an attempt limit; exhausted messages move to dead letter. Lease tokens fence late workers, but do not make a slow external operation reversible. Monitor dead-letter and retry counts and provide an operator process for investigation/replay. Receipts are not deleted on any schedule. `InboxRetentionCleanup<TDbContext>` performs explicit bounded-batch deletion:

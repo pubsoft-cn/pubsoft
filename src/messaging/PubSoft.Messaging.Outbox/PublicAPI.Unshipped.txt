@@ -1,4 +1,7 @@
 #nullable enable
+const PubSoft.Messaging.Outbox.OutboxHeaders.OutboxAggregateKey = "x-outbox-aggkey" -> string!
+const PubSoft.Messaging.Outbox.OutboxHeaders.OutboxCorrelationId = "x-outbox-correlation-id" -> string!
+const PubSoft.Messaging.Outbox.OutboxHeaders.OutboxMessageId = "x-outbox-id" -> string!
 PubSoft.Messaging.Outbox.EfCoreInboxMessageProcessor<TDbContext>
 PubSoft.Messaging.Outbox.EfCoreInboxMessageProcessor<TDbContext>.EfCoreInboxMessageProcessor(TDbContext! dbContext, System.TimeProvider? timeProvider = null) -> void
 PubSoft.Messaging.Outbox.EfCoreInboxMessageProcessor<TDbContext>.ProcessOnceAsync(string! consumerName, long messageId, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task!>! handler, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
@@ -37,6 +40,7 @@ PubSoft.Messaging.Outbox.InboxRetentionCleanup<TDbContext>.DeleteProcessedBefore
 PubSoft.Messaging.Outbox.InboxRetentionCleanup<TDbContext>.InboxRetentionCleanup(TDbContext! dbContext, System.TimeProvider? timeProvider = null) -> void
 PubSoft.Messaging.Outbox.OutboxBackgroundService
 PubSoft.Messaging.Outbox.OutboxBackgroundService.OutboxBackgroundService(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory! scopeFactory, PubSoft.Messaging.Outbox.OutboxOptions! options, Microsoft.Extensions.Logging.ILogger<PubSoft.Messaging.Outbox.OutboxBackgroundService!>? logger = null, PubSoft.Messaging.Outbox.IOutboxScopeProvider? outboxScopeProvider = null) -> void
+PubSoft.Messaging.Outbox.OutboxHeaders
 PubSoft.Messaging.Outbox.OutboxMessage
 PubSoft.Messaging.Outbox.OutboxMessage.AggregateKey.get -> string?
 PubSoft.Messaging.Outbox.OutboxMessage.AttemptCount.get -> int

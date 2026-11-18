@@ -1,0 +1,23 @@
+#nullable enable
+PubSoft.Messaging.Amqp.AmqpOutboxDispatcher
+PubSoft.Messaging.Amqp.AmqpOutboxDispatcher.AmqpOutboxDispatcher(PubSoft.Messaging.Amqp.AmqpOutboxOptions! options, Microsoft.Extensions.Logging.ILogger<PubSoft.Messaging.Amqp.AmqpOutboxDispatcher!>? logger = null) -> void
+PubSoft.Messaging.Amqp.AmqpOutboxDispatcher.DispatchAsync(PubSoft.Messaging.Outbox.OutboxMessage! message, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Messaging.Amqp.AmqpOutboxDispatcher.DisposeAsync() -> System.Threading.Tasks.ValueTask
+PubSoft.Messaging.Amqp.AmqpOutboxOptions
+PubSoft.Messaging.Amqp.AmqpOutboxOptions.AmqpOutboxOptions() -> void
+PubSoft.Messaging.Amqp.AmqpOutboxOptions.BrokerUri.get -> string!
+PubSoft.Messaging.Amqp.AmqpOutboxOptions.BrokerUri.set -> void
+PubSoft.Messaging.Amqp.AmqpOutboxOptions.Exchange.get -> string!
+PubSoft.Messaging.Amqp.AmqpOutboxOptions.Exchange.set -> void
+PubSoft.Messaging.Amqp.AmqpOutboxOptions.ExchangeType.get -> string!
+PubSoft.Messaging.Amqp.AmqpOutboxOptions.ExchangeType.set -> void
+PubSoft.Messaging.Amqp.AmqpOutboxOptions.Mandatory.get -> bool
+PubSoft.Messaging.Amqp.AmqpOutboxOptions.Mandatory.set -> void
+PubSoft.Messaging.Amqp.AmqpOutboxOptions.MaxPayloadBytes.get -> int
+PubSoft.Messaging.Amqp.AmqpOutboxOptions.MaxPayloadBytes.set -> void
+PubSoft.Messaging.Amqp.AmqpOutboxOptions.PublishTimeout.get -> System.TimeSpan
+PubSoft.Messaging.Amqp.AmqpOutboxOptions.PublishTimeout.set -> void
+PubSoft.Messaging.Amqp.AmqpOutboxOptions.RoutingKeyPrefix.get -> string!
+PubSoft.Messaging.Amqp.AmqpOutboxOptions.RoutingKeyPrefix.set -> void
+PubSoft.Messaging.Amqp.AmqpOutboxServiceCollectionExtensions
+static PubSoft.Messaging.Amqp.AmqpOutboxServiceCollectionExtensions.AddPubSoftAmqpOutboxDispatcher(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Messaging.Amqp.AmqpOutboxOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

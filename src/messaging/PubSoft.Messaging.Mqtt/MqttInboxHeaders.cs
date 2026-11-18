@@ -1,3 +1,5 @@
+using PubSoft.Messaging.Outbox;
+
 namespace PubSoft.Messaging.Mqtt;
 
 
@@ -5,7 +7,7 @@ namespace PubSoft.Messaging.Mqtt;
 public static class MqttInboxHeaders
 {
     /// <summary>OutboxMessage.Id -- consumer-side dedup key (InboxReceipt.MessageId).</summary>
-    public const string OutboxMessageId = "x-outbox-id";
+    public const string OutboxMessageId = OutboxHeaders.OutboxMessageId;
     /// <summary>OutboxMessage.AggregateKey -- optional ordering/ownership hint.</summary>
-    public const string OutboxAggregateKey = "x-outbox-aggkey";
+    public const string OutboxAggregateKey = OutboxHeaders.OutboxAggregateKey;
 }
