@@ -1,3 +1,4 @@
+using PubSoft.Caching;
 using PubSoft.Caching.Redis;
 using StackExchange.Redis;
 using Xunit;

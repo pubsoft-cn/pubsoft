@@ -83,6 +83,30 @@ Retries add latency inside a single due tick; they do not replace idempotent job
 
 The default `MemoryStateStore` is process-local and volatile. It keeps last results for seven days and supports custom state with optional expiry. It is suitable for development or a single-process deployment where losing state on restart is acceptable. For persistence, use the separate `PubSoft.Scheduling.EntityFrameworkCore` package and validate its provider behavior for the production database. Persistence alone does not add a distributed lease, atomic read-modify-write, cluster exclusion, or misfire recovery.
 
+## Fenced Workers
+
+`AddPubSoftFencedWorker` collapses the "periodic sweep takes the distributed lock
+first" pattern into one registration — each tick acquires a named `IDistributedLock`
+and runs the delegate only when the lock is held:
+
+```csharp
+services.AddPubSoftFencedWorker("reconcile-sweep", async (ctx, ct) =>
+{
+    // ctx.FencingToken is non-null on fencing-capable locks (Redis) --
+    // pass it to the protected resource so stale writers are rejected.
+    await SweepAsync(ctx.FencingToken, ct);
+}, o =>
+{
+    o.Interval = TimeSpan.FromMinutes(5);
+    o.LockExpiry = TimeSpan.FromMinutes(10); // must outlive the slowest tick
+});
+```
+
+- `WaitTimeout` defaults to zero — a held lock **skips the tick** (correct sweep semantics); it never queues work behind another instance.
+- Tick failures are logged and the loop continues; `MaxExecutionTime` cancels an over-running tick.
+- `IFencedExecutor` is registered alongside and can be injected directly for lock-guarded work inside scheduled jobs or ad-hoc call sites. Direct `TryExecuteAsync` calls default to no-wait as well — pass a finite `waitTimeout` or `Timeout.InfiniteTimeSpan` to opt into blocking instead of skipping.
+- Requires an `IDistributedLock` registration (in-process for single hosts, `PubSoft.Caching.Redis` for multi-instance).
+
 ## Public API surface
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
@@ -97,11 +121,13 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 | Method |
 |---|---|
+| `AddPubSoftFencedExecutor` |
+| `AddPubSoftFencedWorker` |
 | `AddPubSoftScheduler` |
 
 **(options & records)**
 
-`BackoffFactor`, `DelayMs`, `DistributedLocking`, `DistributedLockLease`, `Enabled`, `ErrorDelay`, `ErrorMessage`, `ExecutedAt`, `ExecutorConfig`, `ExecutorType`, `InitialDelay`, `LoopInterval`, `MaxAttempts`, `MaxConcurrentJobs`, `MaxDelay`, `Metadata`, `PreventOverlap`, `ResultProcessorConfig`, `ResultProcessors`, `Retry`, `Retryable`, `Schedule`, `StatusCode`, `Success`, `Timeout`
+`BackoffFactor`, `DelayMs`, `DistributedLocking`, `DistributedLockLease`, `Enabled`, `ErrorDelay`, `ErrorMessage`, `ExecutedAt`, `ExecutorConfig`, `ExecutorType`, `FencingToken`, `InitialDelay`, `Interval`, `LockExpiry`, `LockKey`, `LoopInterval`, `MaxAttempts`, `MaxConcurrentJobs`, `MaxDelay`, `MaxExecutionTime`, `Metadata`, `PreventOverlap`, `ResultProcessorConfig`, `ResultProcessors`, `Retry`, `Retryable`, `RunOnStartup`, `Schedule`, `StartedAtUtc`, `StatusCode`, `Success`, `Timeout`, `WaitTimeout`
 
 <!-- pubsoft:api-surface:end -->
 

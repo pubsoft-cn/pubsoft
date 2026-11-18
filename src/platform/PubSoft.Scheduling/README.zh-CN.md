@@ -77,6 +77,27 @@ options.Jobs.Add(new ScheduledJob
 
 默认 `MemoryStateStore` 进程内且易失——last result 保留 7 天，custom state 支持可选过期。适合开发或可接受重启丢状态的单进程部署。持久化用 `PubSoft.Scheduling.EntityFrameworkCore` 并按生产 provider 验证。持久化本身不提供分布式 lease、原子读改写、集群互斥或 misfire 恢复。
 
+## 护栏 Worker（Fenced Worker）
+
+`AddPubSoftFencedWorker` 把"定时件先拿分布式锁再跑"的样板收口为一次注册——每个 tick 先获取具名 `IDistributedLock`，拿到锁才执行委托：
+
+```csharp
+services.AddPubSoftFencedWorker("reconcile-sweep", async (ctx, ct) =>
+{
+    // Redis 锁下 ctx.FencingToken 非空——传给被保护资源以拒绝过期写者
+    await SweepAsync(ctx.FencingToken, ct);
+}, o =>
+{
+    o.Interval = TimeSpan.FromMinutes(5);
+    o.LockExpiry = TimeSpan.FromMinutes(10); // 必须长于最慢一次 tick
+});
+```
+
+- `WaitTimeout` 默认为零——锁被占用即**跳过本 tick**（sweep 语义正确态），不会在别的实例后排队。
+- tick 异常记日志后循环继续；`MaxExecutionTime` 会取消超时 tick。
+- `IFencedExecutor` 同步注册，可直接注入用于调度 job 内或临时调用点的锁保护执行。直接调 `TryExecuteAsync` 同样默认不等待——要阻塞需显式传 `waitTimeout` 或 `Timeout.InfiniteTimeSpan`。
+- 需先注册 `IDistributedLock`（单实例用进程内锁，多实例用 `PubSoft.Caching.Redis`）。
+
 ## Public API surface
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_

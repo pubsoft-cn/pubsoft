@@ -12,6 +12,10 @@ PubSoft.Caching.ICache.SetAsync<T>(string! key, T! value, System.TimeSpan? expir
 PubSoft.Caching.ICache.SetManyAsync<T>(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, T!>>! items, System.TimeSpan? expiry = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 PubSoft.Caching.IDistributedLock
 PubSoft.Caching.IDistributedLock.AcquireAsync(string! key, System.TimeSpan expiry, System.TimeSpan? waitTimeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.IAsyncDisposable?>!
+PubSoft.Caching.IFencedLockHandle
+PubSoft.Caching.IFencedLockHandle.ExtendAsync(System.TimeSpan expiry, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Caching.IFencedLockHandle.FencingToken.get -> long
+PubSoft.Caching.IFencedLockHandle.Key.get -> string!
 PubSoft.Caching.InProcessDistributedLock
 PubSoft.Caching.InProcessDistributedLock.AcquireAsync(string! key, System.TimeSpan expiry, System.TimeSpan? waitTimeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.IAsyncDisposable?>!
 PubSoft.Caching.InProcessDistributedLock.Dispose() -> void

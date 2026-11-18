@@ -1,10 +1,6 @@
 #nullable enable
 PubSoft.Caching.Redis.CacheConfigurationServiceCollectionExtensions
 PubSoft.Caching.Redis.CachingRedisServiceCollectionExtensions
-PubSoft.Caching.Redis.IFencedLockHandle
-PubSoft.Caching.Redis.IFencedLockHandle.ExtendAsync(System.TimeSpan expiry, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
-PubSoft.Caching.Redis.IFencedLockHandle.FencingToken.get -> long
-PubSoft.Caching.Redis.IFencedLockHandle.Key.get -> string!
 PubSoft.Caching.Redis.RedisCache
 PubSoft.Caching.Redis.RedisCache.ExistsAsync(string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
 PubSoft.Caching.Redis.RedisCache.GetAsync<T>(string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<T?>!

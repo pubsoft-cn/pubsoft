@@ -1,11 +1,47 @@
 #nullable enable
+override PubSoft.Scheduling.FencedWorkContext.Equals(object? obj) -> bool
+override PubSoft.Scheduling.FencedWorkContext.GetHashCode() -> int
+override PubSoft.Scheduling.FencedWorkContext.ToString() -> string!
 PubSoft.Scheduling.ExecutorRegistry
 PubSoft.Scheduling.ExecutorRegistry.ExecutorRegistry(System.Collections.Generic.IEnumerable<PubSoft.Scheduling.IJobExecutor!>! executors) -> void
 PubSoft.Scheduling.ExecutorRegistry.Register(PubSoft.Scheduling.IJobExecutor! executor) -> void
 PubSoft.Scheduling.ExecutorRegistry.Resolve(string! executorType) -> PubSoft.Scheduling.IJobExecutor?
+PubSoft.Scheduling.FencedExecutor
+PubSoft.Scheduling.FencedExecutor.FencedExecutor(PubSoft.Caching.IDistributedLock! distributedLock, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Scheduling.FencedExecutor.TryExecuteAsync(string! lockKey, System.TimeSpan lockExpiry, System.Func<PubSoft.Scheduling.FencedWorkContext!, System.Threading.CancellationToken, System.Threading.Tasks.Task!>! work, System.TimeSpan waitTimeout = default(System.TimeSpan), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+PubSoft.Scheduling.FencedWorkContext
+PubSoft.Scheduling.FencedWorkContext.<Clone>$() -> PubSoft.Scheduling.FencedWorkContext!
+PubSoft.Scheduling.FencedWorkContext.Deconstruct(out string! LockKey, out long? FencingToken, out System.DateTimeOffset StartedAtUtc) -> void
+PubSoft.Scheduling.FencedWorkContext.Equals(PubSoft.Scheduling.FencedWorkContext? other) -> bool
+PubSoft.Scheduling.FencedWorkContext.FencedWorkContext(string! LockKey, long? FencingToken, System.DateTimeOffset StartedAtUtc) -> void
+PubSoft.Scheduling.FencedWorkContext.FencingToken.get -> long?
+PubSoft.Scheduling.FencedWorkContext.FencingToken.init -> void
+PubSoft.Scheduling.FencedWorkContext.LockKey.get -> string!
+PubSoft.Scheduling.FencedWorkContext.LockKey.init -> void
+PubSoft.Scheduling.FencedWorkContext.StartedAtUtc.get -> System.DateTimeOffset
+PubSoft.Scheduling.FencedWorkContext.StartedAtUtc.init -> void
+PubSoft.Scheduling.FencedWorkerHostedService
+PubSoft.Scheduling.FencedWorkerHostedService.FencedWorkerHostedService(string! workerName, PubSoft.Scheduling.FencedWorkerOptions! options, System.Func<PubSoft.Scheduling.FencedWorkContext!, System.Threading.CancellationToken, System.Threading.Tasks.Task!>! work, PubSoft.Scheduling.IFencedExecutor! executor, Microsoft.Extensions.Logging.ILogger<PubSoft.Scheduling.FencedWorkerHostedService!>? logger = null) -> void
+PubSoft.Scheduling.FencedWorkerOptions
+PubSoft.Scheduling.FencedWorkerOptions.FencedWorkerOptions() -> void
+PubSoft.Scheduling.FencedWorkerOptions.Interval.get -> System.TimeSpan
+PubSoft.Scheduling.FencedWorkerOptions.Interval.set -> void
+PubSoft.Scheduling.FencedWorkerOptions.LockExpiry.get -> System.TimeSpan
+PubSoft.Scheduling.FencedWorkerOptions.LockExpiry.set -> void
+PubSoft.Scheduling.FencedWorkerOptions.LockKey.get -> string?
+PubSoft.Scheduling.FencedWorkerOptions.LockKey.set -> void
+PubSoft.Scheduling.FencedWorkerOptions.MaxExecutionTime.get -> System.TimeSpan
+PubSoft.Scheduling.FencedWorkerOptions.MaxExecutionTime.set -> void
+PubSoft.Scheduling.FencedWorkerOptions.RunOnStartup.get -> bool
+PubSoft.Scheduling.FencedWorkerOptions.RunOnStartup.set -> void
+PubSoft.Scheduling.FencedWorkerOptions.WaitTimeout.get -> System.TimeSpan
+PubSoft.Scheduling.FencedWorkerOptions.WaitTimeout.set -> void
+PubSoft.Scheduling.FencedWorkerServiceCollectionExtensions
 PubSoft.Scheduling.IExecutorRegistry
 PubSoft.Scheduling.IExecutorRegistry.Register(PubSoft.Scheduling.IJobExecutor! executor) -> void
 PubSoft.Scheduling.IExecutorRegistry.Resolve(string! executorType) -> PubSoft.Scheduling.IJobExecutor?
+PubSoft.Scheduling.IFencedExecutor
+PubSoft.Scheduling.IFencedExecutor.TryExecuteAsync(string! lockKey, System.TimeSpan lockExpiry, System.Func<PubSoft.Scheduling.FencedWorkContext!, System.Threading.CancellationToken, System.Threading.Tasks.Task!>! work, System.TimeSpan waitTimeout = default(System.TimeSpan), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
 PubSoft.Scheduling.IJobExecutor
 PubSoft.Scheduling.IJobExecutor.ExecuteAsync(PubSoft.Scheduling.ScheduledJob! job, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<PubSoft.Scheduling.JobResult!>!
 PubSoft.Scheduling.IJobExecutor.Type.get -> string!
@@ -117,6 +153,10 @@ PubSoft.Scheduling.SchedulerOptions.MaxConcurrentJobs.get -> int
 PubSoft.Scheduling.SchedulerOptions.MaxConcurrentJobs.set -> void
 PubSoft.Scheduling.SchedulerOptions.SchedulerOptions() -> void
 PubSoft.Scheduling.SchedulerServiceCollectionExtensions
+static PubSoft.Scheduling.FencedWorkContext.operator !=(PubSoft.Scheduling.FencedWorkContext? left, PubSoft.Scheduling.FencedWorkContext? right) -> bool
+static PubSoft.Scheduling.FencedWorkContext.operator ==(PubSoft.Scheduling.FencedWorkContext? left, PubSoft.Scheduling.FencedWorkContext? right) -> bool
+static PubSoft.Scheduling.FencedWorkerServiceCollectionExtensions.AddPubSoftFencedExecutor(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Scheduling.FencedWorkerServiceCollectionExtensions.AddPubSoftFencedWorker(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! name, System.Func<PubSoft.Scheduling.FencedWorkContext!, System.Threading.CancellationToken, System.Threading.Tasks.Task!>! work, System.Action<PubSoft.Scheduling.FencedWorkerOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Scheduling.ScheduleMask.EveryDay.get -> PubSoft.Scheduling.ScheduleMask
 static PubSoft.Scheduling.ScheduleMask.EveryHour.get -> PubSoft.Scheduling.ScheduleMask
 static PubSoft.Scheduling.ScheduleMask.EveryMinute.get -> PubSoft.Scheduling.ScheduleMask
