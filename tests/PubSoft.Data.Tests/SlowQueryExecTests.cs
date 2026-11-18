@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PubSoft.EntityFrameworkCore;
 using Xunit;
@@ -40,12 +41,11 @@ public sealed class SlowQueryExecTests
     }
 
     [Fact]
-    public void SyncPathBypassesInterceptor()
+    public void SyncPathLogsSlowQuery()
     {
-        // interceptor only overrides *ExecutedAsync — sync ExecuteSqlRaw never logs (documented gap)
         var (ctx, log) = Setup(TimeSpan.FromTicks(-1));
         ctx.Database.ExecuteSqlRaw("SELECT 1");
-        Assert.Empty(log.Messages);
+        Assert.Contains(log.Messages, m => m.Contains("SLOW QUERY"));
     }
 
     [Fact]
@@ -63,5 +63,35 @@ public sealed class SlowQueryExecTests
         var sql = "SELECT " + new string(' ', 600) + "1"; // valid SQL > 500 chars
         await ctx.Database.ExecuteSqlRawAsync(sql);
         Assert.Contains(log.Messages, m => m.Contains("...(truncated)"));
+    }
+
+    [Fact]
+    public void RegistrationResolvesInterceptorWithConfiguredThreshold()
+    {
+        var services = new ServiceCollection();
+        services.AddPubSoftDbQueryDiagnostics(o => o.SlowQueryThreshold = TimeSpan.FromSeconds(2));
+        var provider = services.BuildServiceProvider();
+        Assert.IsType<SlowQueryInterceptor>(provider.GetRequiredService<SlowQueryInterceptor>());
+        Assert.IsType<DbQueryDiagnostics>(provider.GetRequiredService<DbQueryDiagnostics>());
+    }
+
+    [Fact]
+    public void DisabledDiagnosticsSkipsInterceptor()
+    {
+        var services = new ServiceCollection();
+        services.AddPubSoftDbQueryDiagnostics(o => o.Enabled = false);
+        var provider = services.BuildServiceProvider();
+        Assert.Null(provider.GetService<SlowQueryInterceptor>());
+        Assert.NotNull(provider.GetService<DbQueryDiagnostics>());
+    }
+
+    [Fact]
+    public void UsePubSoftQueryDiagnosticsThrowsWhenNotRegistered()
+    {
+        var builder = new DbContextOptionsBuilder<Ctx>();
+        var empty = new ServiceCollection().BuildServiceProvider();
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            builder.UsePubSoftQueryDiagnostics(empty));
+        Assert.Contains("AddPubSoftDbQueryDiagnostics", ex.Message);
     }
 }

@@ -18,6 +18,30 @@ public class SlowQueryInterceptor : DbCommandInterceptor
     }
 
     /// <inheritdoc />
+    public override DbDataReader ReaderExecuted(
+        DbCommand command, CommandExecutedEventData eventData, DbDataReader result)
+    {
+        LogIfSlow(command, eventData.Duration);
+        return base.ReaderExecuted(command, eventData, result);
+    }
+
+    /// <inheritdoc />
+    public override int NonQueryExecuted(
+        DbCommand command, CommandExecutedEventData eventData, int result)
+    {
+        LogIfSlow(command, eventData.Duration);
+        return base.NonQueryExecuted(command, eventData, result);
+    }
+
+    /// <inheritdoc />
+    public override object? ScalarExecuted(
+        DbCommand command, CommandExecutedEventData eventData, object? result)
+    {
+        LogIfSlow(command, eventData.Duration);
+        return base.ScalarExecuted(command, eventData, result);
+    }
+
+    /// <inheritdoc />
     public override ValueTask<DbDataReader> ReaderExecutedAsync(
         DbCommand command, CommandExecutedEventData eventData, DbDataReader result,
         CancellationToken cancellationToken = default)

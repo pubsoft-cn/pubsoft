@@ -59,7 +59,21 @@ Actor 归因经 `AuditMiddlewareOptions.CaptureActor` + 宿主实现的 `IAuditA
 
 ## 查询诊断
 
-`DbQueryDiagnostics` 是显式执行包装器，非自动安装的 EF 命令拦截器。注册 `AddPubSoftDbQueryDiagnostics()` 并用 `ExecuteAsync`/`ExecuteNonQueryAsync` 包裹待测操作。校验采样/阈值/容量选项，跟踪的查询模板与延迟样本池各自有界（上限 100,000），计数器原子。日志与快照只含校验过的操作名与 SHA-256 SQL 指纹——原始 SQL、参数值、异常消息永不保留或记录；计算指纹用的 SQL 字节缓冲用后清零。
+互补两件，均由 `AddPubSoftDbQueryDiagnostics()` 注册：
+
+- `DbQueryDiagnostics` 是显式执行包装器——用 `ExecuteAsync`/`ExecuteNonQueryAsync` 包裹待测操作。校验采样/阈值/容量选项，跟踪的查询模板与延迟样本池各自有界（上限 100,000），计数器原子。日志与快照只含校验过的操作名与 SHA-256 SQL 指纹——原始 SQL、参数值、异常消息永不保留或记录；计算指纹用的 SQL 字节缓冲用后清零。
+- `SlowQueryInterceptor` 是 `DbCommandInterceptor`，覆盖自动 EF 路径——context 执行的每条命令，包括无人包裹的 repository/`GetQueryable` 调用。在 AddDbContext lambda 内逐 context 挂载：
+
+```csharp
+services.AddDbContext<MyDbContext>((sp, o) =>
+    o.UseMySql(cs, version).UsePubSoftQueryDiagnostics(sp));
+```
+
+达到/超过 `SlowQueryThreshold` 的命令以 warning 记录耗时与截断 SQL；`Enabled=false` 时跳过拦截器注册。未先注册诊断服务时 `UsePubSoftQueryDiagnostics` 抛错——静默空转只会复刻它要消除的半成品接线。
+
+## 分页
+
+`IQueryable<T>.ToPagedResultAsync(pageIndex, pageSize, maxPageSize = 200, ct)` 执行统一分页约定——`pageIndex` 下限 1、`pageSize` 收敛到 [1, `maxPageSize`]——返回 `PagedResultDto<T>`（`LongCountAsync` + `Skip`/`Take` + `ToListAsync`）。调用前必须先 `OrderBy`，无序 `Skip`/`Take` 结果不确定。需要不同上限的调用方传 `maxPageSize`；clamp 策略本身不可配。
 
 ## 审计保留与归档
 

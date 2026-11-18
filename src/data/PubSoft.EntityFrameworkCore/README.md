@@ -63,11 +63,21 @@ The SQLite relational tests exercise context changes against one cached EF model
 
 ## Query Diagnostics
 
-`DbQueryDiagnostics` is an explicit execution wrapper, not an automatically installed EF command interceptor. Register it with `AddPubSoftDbQueryDiagnostics()` and call `ExecuteAsync` or `ExecuteNonQueryAsync` around the operation to measure. It validates sampling/threshold/capacity options, bounds tracked query templates and latency reservoirs (each capacity is capped at 100,000), and uses atomic counters for concurrent operations. Logs and snapshots contain only a validated operation name and a SHA-256 SQL fingerprint; raw SQL, parameter values, and exception messages are never retained or logged. The SQL byte buffer used to compute the fingerprint is cleared after hashing.
+Two complementary pieces, both registered by `AddPubSoftDbQueryDiagnostics()`:
 
-## Query Diagnostics
+- `DbQueryDiagnostics` is an explicit execution wrapper - call `ExecuteAsync` or `ExecuteNonQueryAsync` around the operation to measure. It validates sampling/threshold/capacity options, bounds tracked query templates and latency reservoirs (each capacity is capped at 100,000), and uses atomic counters for concurrent operations. Logs and snapshots contain only a validated operation name and a SHA-256 SQL fingerprint; raw SQL, parameter values, and exception messages are never retained or logged. The SQL byte buffer used to compute the fingerprint is cleared after hashing.
+- `SlowQueryInterceptor` is a `DbCommandInterceptor` covering the automatic EF path - every command a context executes, including repository/`GetQueryable` calls nothing wraps. Attach it per context inside the AddDbContext lambda:
 
-`DbQueryDiagnostics` is an explicit execution wrapper, not an automatically installed EF command interceptor. Register it with `AddPubSoftDbQueryDiagnostics()` and call `ExecuteAsync` or `ExecuteNonQueryAsync` around the operation to measure. It validates sampling/threshold/capacity options, bounds tracked query templates and latency reservoirs, and uses atomic counters for concurrent operations. Logs and snapshots contain only a validated operation name and a SHA-256 SQL fingerprint; raw SQL, parameter values, and exception messages are never retained or logged. The SQL byte buffer used to compute the fingerprint is cleared after hashing.
+```csharp
+services.AddDbContext<MyDbContext>((sp, o) =>
+    o.UseMySql(cs, version).UsePubSoftQueryDiagnostics(sp));
+```
+
+Commands at or above `SlowQueryThreshold` log a warning with elapsed time and truncated SQL; `Enabled=false` skips the interceptor registration. `UsePubSoftQueryDiagnostics` throws when the diagnostics services were not registered - a silent no-op would hide the same half-wiring it prevents.
+
+## Paging
+
+`IQueryable<T>.ToPagedResultAsync(pageIndex, pageSize, maxPageSize = 200, ct)` runs the shared paging convention - `pageIndex` floors at 1, `pageSize` clamps to [1, `maxPageSize`] - and returns `PagedResultDto<T>` (`LongCountAsync` + `Skip`/`Take` + `ToListAsync`). Apply `OrderBy` before calling; unordered `Skip`/`Take` is not deterministic. Callers needing a different ceiling pass `maxPageSize`; the clamp policy itself is not configurable.
 
 ## Audit Retention and Archival
 
@@ -138,6 +148,7 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 | `ConfigurePubSoftRoleDataScopes` |
 | `ConfigurePubSoftTenants` |
 | `HasPubSoftEncryption` |
+| `UsePubSoftQueryDiagnostics` |
 
 **(options & records)**
 

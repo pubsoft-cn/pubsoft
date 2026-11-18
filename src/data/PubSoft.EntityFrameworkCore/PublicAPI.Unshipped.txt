@@ -1,4 +1,8 @@
 #nullable enable
+const PubSoft.EntityFrameworkCore.EfCorePagingExtensions.DefaultMaxPageSize = 200 -> int
+override PubSoft.EntityFrameworkCore.SlowQueryInterceptor.NonQueryExecuted(System.Data.Common.DbCommand! command, Microsoft.EntityFrameworkCore.Diagnostics.CommandExecutedEventData! eventData, int result) -> int
+override PubSoft.EntityFrameworkCore.SlowQueryInterceptor.ReaderExecuted(System.Data.Common.DbCommand! command, Microsoft.EntityFrameworkCore.Diagnostics.CommandExecutedEventData! eventData, System.Data.Common.DbDataReader! result) -> System.Data.Common.DbDataReader!
+override PubSoft.EntityFrameworkCore.SlowQueryInterceptor.ScalarExecuted(System.Data.Common.DbCommand! command, Microsoft.EntityFrameworkCore.Diagnostics.CommandExecutedEventData! eventData, object? result) -> object?
 PubSoft.EntityFrameworkCore.AuditChangeCaptureHook
 PubSoft.EntityFrameworkCore.AuditChangeCaptureHook.AuditChangeCaptureHook(PubSoft.Auditing.IAuditChangeCollector! collector, PubSoft.Auditing.AuditChangeCollectorOptions? options = null, System.TimeProvider? timeProvider = null) -> void
 PubSoft.EntityFrameworkCore.AuditChangeCaptureHook.BeforeSaveChanges(Microsoft.EntityFrameworkCore.DbContext! context) -> void
@@ -79,6 +83,7 @@ PubSoft.EntityFrameworkCore.Auditing.AuditRetentionCleanup<TDbContext>.DeleteSta
 PubSoft.EntityFrameworkCore.Auditing.EfCoreAuditSnapshotSink<TDbContext>
 PubSoft.EntityFrameworkCore.Auditing.EfCoreAuditSnapshotSink<TDbContext>.EfCoreAuditSnapshotSink(TDbContext! dbContext, PubSoft.Core.IIdGenerator! idGenerator) -> void
 PubSoft.EntityFrameworkCore.Auditing.EfCoreAuditSnapshotSink<TDbContext>.WriteAsync(PubSoft.Auditing.AuditRequestSnapshot! snapshot, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+PubSoft.EntityFrameworkCore.DbContextOptionsBuilderDiagnosticsExtensions
 PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>
 PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.DbFirstConfigProvider(System.IServiceProvider! serviceProvider, Microsoft.Extensions.Configuration.IConfiguration! configuration, Microsoft.Extensions.Caching.Memory.IMemoryCache! cache, Microsoft.Extensions.Logging.ILogger? logger = null) -> void
 PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.GetAllConfigsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TInfo!>!>!
@@ -121,6 +126,7 @@ PubSoft.EntityFrameworkCore.EfCoreHealthCheck<TDbContext>.CheckAsync(System.Thre
 PubSoft.EntityFrameworkCore.EfCoreHealthCheck<TDbContext>.EfCoreHealthCheck(System.IServiceProvider! serviceProvider, string! name = "db", string! probeSql = "SELECT 1") -> void
 PubSoft.EntityFrameworkCore.EfCoreHealthCheck<TDbContext>.Name.get -> string!
 PubSoft.EntityFrameworkCore.EfCoreHealthCheckExtensions
+PubSoft.EntityFrameworkCore.EfCorePagingExtensions
 PubSoft.EntityFrameworkCore.EfCorePermissionGrantManager<TDbContext>
 PubSoft.EntityFrameworkCore.EfCorePermissionGrantManager<TDbContext>.AssignSubjectRolesAsync(long subjectId, long? tenantId, System.Collections.Generic.IEnumerable<long>! roleIds, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 PubSoft.EntityFrameworkCore.EfCorePermissionGrantManager<TDbContext>.AssignSubjectRolesAsync(long subjectId, long? tenantId, string! clientCode, System.Collections.Generic.IEnumerable<long>! roleIds, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
@@ -238,10 +244,12 @@ readonly PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.Logge
 readonly PubSoft.EntityFrameworkCore.DbFirstConfigProvider<TEntity, TInfo>.ServiceProvider -> System.IServiceProvider!
 static PubSoft.EntityFrameworkCore.Auditing.AuditPersistenceModelBuilderExtensions.ConfigurePubSoftAuditPersistence(this Microsoft.EntityFrameworkCore.ModelBuilder! modelBuilder) -> Microsoft.EntityFrameworkCore.ModelBuilder!
 static PubSoft.EntityFrameworkCore.Auditing.AuditPersistenceServiceCollectionExtensions.AddPubSoftEfCoreAuditPersistence<TDbContext>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.EntityFrameworkCore.DbContextOptionsBuilderDiagnosticsExtensions.UsePubSoftQueryDiagnostics(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder! builder, System.IServiceProvider! serviceProvider) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder!
 static PubSoft.EntityFrameworkCore.DbQueryDiagnosticsServiceCollectionExtensions.AddPubSoftDbQueryDiagnostics(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.EntityFrameworkCore.DbQueryDiagnosticsOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.EntityFrameworkCore.DiagnosticSnapshot.operator !=(PubSoft.EntityFrameworkCore.DiagnosticSnapshot? left, PubSoft.EntityFrameworkCore.DiagnosticSnapshot? right) -> bool
 static PubSoft.EntityFrameworkCore.DiagnosticSnapshot.operator ==(PubSoft.EntityFrameworkCore.DiagnosticSnapshot? left, PubSoft.EntityFrameworkCore.DiagnosticSnapshot? right) -> bool
 static PubSoft.EntityFrameworkCore.EfCoreHealthCheckExtensions.AddPubSoftEfCoreHealthCheck<TDbContext>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! name = "db", string! probeSql = "SELECT 1") -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.EntityFrameworkCore.EfCorePagingExtensions.ToPagedResultAsync<T>(this System.Linq.IQueryable<T>! source, int pageIndex, int pageSize, int maxPageSize = 200, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Core.PagedResultDto<T>!>!
 static PubSoft.EntityFrameworkCore.EfCoreQueryExtensions.IgnoreScopeFilters<TEntity>(this System.Linq.IQueryable<TEntity!>! source) -> System.Linq.IQueryable<TEntity!>!
 static PubSoft.EntityFrameworkCore.EfCoreServiceCollectionExtensions.AddPubSoftAuditChangeCapture(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Auditing.AuditChangeCollectorOptions!>? configure = null, System.Action<PubSoft.Auditing.AuditScopeOptions!>? configureScope = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.EntityFrameworkCore.EfCoreServiceCollectionExtensions.AddPubSoftEfCorePermissionGrantManager<TDbContext>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
