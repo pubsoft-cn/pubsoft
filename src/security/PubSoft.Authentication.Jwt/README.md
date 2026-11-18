@@ -121,11 +121,12 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 | Method |
 |---|---|
+| `AddPubSoftJwksClientAssertionKeyProvider` |
 | `AddPubSoftJwtIssuerKeyRing` |
 
 **(options & records)**
 
-`ActiveKeyId`
+`ActiveKeyId`, `CacheDuration`, `FetchJwks`, `MissCacheDuration`
 
 <!-- pubsoft:api-surface:end -->
 

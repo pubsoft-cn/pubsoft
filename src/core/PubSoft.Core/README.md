@@ -70,7 +70,7 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
-`Criteria`, `GroupBy`, `HelpLink`, `HResult`, `IsPagingEnabled`, `Items`, `Message`, `OrderBy`, `OrderByDescending`, `Source`, `StatusCode`, `TotalCount`, `TraceId`
+`Allowed`, `Criteria`, `GroupBy`, `HelpLink`, `HResult`, `IsPagingEnabled`, `Items`, `Message`, `OrderBy`, `OrderByDescending`, `Reason`, `Source`, `StatusCode`, `TotalCount`, `TraceId`
 
 <!-- pubsoft:api-surface:end -->
 
