@@ -36,6 +36,8 @@
       <!-- NuGet audit hard gate: high/critical advisories fail restore. -->
     <NuGetAudit>true</NuGetAudit>
     <NuGetAuditMode>all</NuGetAuditMode>
-    <WarningsAsErrors>$(WarningsAsErrors);NU1903;NU1904</WarningsAsErrors>
+    <!-- CS9057 = analyzer assembly skipped for compiler-version mismatch:
+         never let the repo analyzers go silently unloaded. -->
+    <WarningsAsErrors>$(WarningsAsErrors);NU1903;NU1904;CS9057</WarningsAsErrors>
   </PropertyGroup>
 </Project>
