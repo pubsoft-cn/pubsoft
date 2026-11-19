@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PubSoft.Caching;
 using PubSoft.Caching.Redis;
+using StackExchange.Redis;
 using Xunit;
 
 namespace PubSoft.Platform.Tests;
@@ -68,5 +69,34 @@ public sealed class CacheConfigurationTests
             ("Caching:Redis:KeyPrefix", "cfg-test:")));
         await using var sp = services.BuildServiceProvider();
         Assert.IsType<RedisCache>(sp.GetRequiredService<ICache>());
+    }
+
+    [Fact]
+    public void RedisProviderDefersConnectUntilResolution()
+    {
+        var services = new ServiceCollection();
+        // An unreachable broker must not block or fail the composition root.
+        services.AddPubSoftCache(Config(
+            ("Caching:Provider", "redis"),
+            ("Caching:Redis:ConnectionString", "invalid-host.invalid:6379,connectTimeout=1")));
+        Assert.NotNull(services);
+    }
+
+    [RedisFact]
+    public async Task RedisMultiplexerIsContainerOwned()
+    {
+        var connection = Environment.GetEnvironmentVariable("PUBSOFT_REDIS")!;
+        var services = new ServiceCollection();
+        services.AddPubSoftCache(Config(
+            ("Caching:Provider", "redis"),
+            ("Caching:Redis:ConnectionString", connection)));
+
+        IConnectionMultiplexer mux;
+        await using (var sp = services.BuildServiceProvider())
+        {
+            mux = sp.GetRequiredService<IConnectionMultiplexer>();
+            Assert.True(mux.IsConnected);
+        }
+        Assert.False(mux.IsConnected); // the container owned - and disposed - the connection
     }
 }

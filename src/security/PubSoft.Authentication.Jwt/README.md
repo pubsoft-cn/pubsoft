@@ -85,7 +85,7 @@ var hsParsed = JwtSigning.ValidateAccessToken(hsToken, issuer, audience, sym);
 
 `ClientAssertion.Sign` mints a `private_key_jwt`-shape RS256 JWT (`iss`=`sub`=client id, audience-bound, unique `jti`, lifetime ≤ 5 minutes) for callers authenticating to services that verify assertions. Server-side, the host resolves each client's **public** key through `IClientAssertionKeyProvider` — the registry stores public keys only, so a leaked registry cannot mint assertions. Build public-only material with `JwtSigning.ImportRsaPublicKey`. See `PubSoft.AspNetCore` for the verifier.
 
-`AddPubSoftJwksClientAssertionKeyProvider` is the built-in `IClientAssertionKeyProvider` implementation: a host-injected `FetchJwks` delegate returns each client's JWKS document (RFC 7517), RSA signing keys are cached per client id (`CacheDuration`, default 5 min), misses are negatively cached (`MissCacheDuration`, default 1 min), and expired sets are never served stale — a rotated-out key must stop verifying.
+`AddPubSoftJwksClientAssertionKeyProvider` is the built-in `IClientAssertionKeyProvider` implementation: a host-injected `FetchJwks` delegate returns each client's JWKS document (RFC 7517), RSA signing keys are cached per client id (`CacheDuration`, default 5 min), misses are negatively cached (`MissCacheDuration`, default 1 min), and expired sets are never served stale — a rotated-out key must stop verifying. Cached sets are immutable public-parameter snapshots materialized per lookup (a refresh can never dispose a key mid-verification), and the cache is bounded by `MaxCacheEntries` (default 1024) so probing unique client ids cannot grow memory without limit.
 
 ### Issuer Key Ring
 
@@ -126,7 +126,7 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
-`ActiveKeyId`, `CacheDuration`, `FetchJwks`, `MissCacheDuration`
+`ActiveKeyId`, `CacheDuration`, `FetchJwks`, `MaxCacheEntries`, `MissCacheDuration`
 
 <!-- pubsoft:api-surface:end -->
 

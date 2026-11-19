@@ -96,4 +96,12 @@ public sealed class EfCorePagingTests : IDisposable
     public async Task NonPositiveMaxPageSizeThrows()
         => await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
             () => Ordered().ToPagedResultAsync(1, 10, maxPageSize: 0));
+
+    [Fact]
+    public async Task OffsetBeyondIntRangeReturnsEmptyWithTotal()
+    {
+        var result = await Ordered().ToPagedResultAsync(int.MaxValue, 200);
+        Assert.Equal(25, result.TotalCount);
+        Assert.Empty(result.Items);
+    }
 }

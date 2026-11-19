@@ -8,6 +8,9 @@ namespace PubSoft.Security;
 /// <param name="timeProvider">Clock; UTC real time when null.</param>
 public sealed class MemoryRefreshTokenFamilyStore(int maxEntries = 100_000, TimeProvider? timeProvider = null) : IRefreshTokenFamilyStore
 {
+    private readonly int _maxEntries = maxEntries is >= 1 and <= 1_000_000
+        ? maxEntries
+        : throw new ArgumentOutOfRangeException(nameof(maxEntries), "maxEntries must be within 1-1_000_000.");
     private readonly Dictionary<string, RefreshTokenFamilyRecord> _tokens = new(StringComparer.Ordinal);
     private readonly Dictionary<string, DateTimeOffset> _revokedFamilies = new(StringComparer.Ordinal);
     private readonly Dictionary<string, HashSet<string>> _subjectFamilies = new(StringComparer.Ordinal);
@@ -28,11 +31,11 @@ public sealed class MemoryRefreshTokenFamilyStore(int maxEntries = 100_000, Time
         ArgumentNullException.ThrowIfNull(record);
         lock (_tokens)
         {
-            if (!_tokens.TryGetValue(record.TokenHash, out _) && _tokens.Count >= maxEntries)
+            if (!_tokens.TryGetValue(record.TokenHash, out _) && _tokens.Count >= _maxEntries)
             {
                 SweepExpired();
-                if (_tokens.Count >= maxEntries)
-                    throw new InvalidOperationException($"MemoryRefreshTokenFamilyStore is at capacity ({maxEntries}).");
+                if (_tokens.Count >= _maxEntries)
+                    throw new InvalidOperationException($"MemoryRefreshTokenFamilyStore is at capacity ({_maxEntries}).");
             }
 
             _tokens[record.TokenHash] = record;
@@ -128,5 +131,18 @@ public sealed class MemoryRefreshTokenFamilyStore(int maxEntries = 100_000, Time
         foreach (var key in _expiredFamilyKeys)
             _revokedFamilies.Remove(key);
         _expiredFamilyKeys.Clear();
+
+        // Rebuild the subject index from surviving tokens so expired family ids and
+        // empty subject sets do not outlive the records they point at.
+        _subjectFamilies.Clear();
+        foreach (var record in _tokens.Values)
+        {
+            if (!_subjectFamilies.TryGetValue(record.Subject, out var families))
+            {
+                families = new HashSet<string>(StringComparer.Ordinal);
+                _subjectFamilies[record.Subject] = families;
+            }
+            families.Add(record.FamilyId);
+        }
     }
 }

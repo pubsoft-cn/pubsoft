@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using StackExchange.Redis;
 
 namespace PubSoft.Caching.Redis;
@@ -14,10 +15,14 @@ namespace PubSoft.Caching.Redis;
 /// <list type="bullet">
 /// <item><c>Provider</c> -- <c>memory</c> or <c>redis</c> (required; missing or unknown fails closed).</item>
 /// <item><c>Memory:MaxSize</c>, <c>Memory:CleanupIntervalSeconds</c> -- in-memory cache bounds.</item>
-/// <item><c>Redis:ConnectionString</c> -- required when Provider=redis; creates the multiplexer.</item>
+/// <item><c>Redis:ConnectionString</c> -- required when Provider=redis; creates a DI-owned multiplexer.</item>
 /// <item><c>Redis:Database</c>, <c>Redis:KeyPrefix</c>, <c>Redis:MaxValueBytes</c> -- <see cref="RedisCacheOptions"/> values.</item>
 /// </list>
-/// Bound manually (no reflection binder) so registration stays AOT-safe.
+/// Bound manually (no reflection binder) so registration stays AOT-safe. In the redis lane the
+/// multiplexer is registered through a factory: connecting is deferred to first resolution
+/// instead of blocking the composition root, and the container owns disposal. To keep a
+/// host-owned multiplexer, register <c>IConnectionMultiplexer</c> first - this path then reuses
+/// it instead of connecting again.
 /// </remarks>
 public static class CacheConfigurationServiceCollectionExtensions
 {
@@ -53,13 +58,17 @@ public static class CacheConfigurationServiceCollectionExtensions
                     "Caching:Redis:ConnectionString is required when Caching:Provider is 'redis'; " +
                     "register an IConnectionMultiplexer and call AddPubSoftRedisCache for advanced setups.");
 
-            var connection = ConnectionMultiplexer.Connect(connectionString);
-            return services.AddPubSoftRedisCache(connection, options =>
+            var options = new RedisCacheOptions
             {
-                options.Database = ReadInt(configuration, "Caching:Redis:Database", -1);
-                options.KeyPrefix = configuration["Caching:Redis:KeyPrefix"] ?? string.Empty;
-                options.MaxValueBytes = ReadInt(configuration, "Caching:Redis:MaxValueBytes", 4_194_304);
-            });
+                Database = ReadInt(configuration, "Caching:Redis:Database", -1),
+                KeyPrefix = configuration["Caching:Redis:KeyPrefix"] ?? string.Empty,
+                MaxValueBytes = ReadInt(configuration, "Caching:Redis:MaxValueBytes", 4_194_304)
+            };
+            services.TryAddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(connectionString));
+            services.Replace(ServiceDescriptor.Singleton<ICache>(
+                sp => new RedisCache(sp.GetRequiredService<IConnectionMultiplexer>(), options)));
+            services.AddSingleton<PubSoft.Monitoring.IStartupDiagnostics, RedisConnectionStartupDiagnostics>();
+            return services;
         }
 
         throw new InvalidOperationException(

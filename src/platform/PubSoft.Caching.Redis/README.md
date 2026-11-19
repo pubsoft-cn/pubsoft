@@ -31,6 +31,8 @@ services.AddPubSoftCache(configuration);   // reads the Caching section
 // Caching:Memory:MaxSize, Caching:Memory:CleanupIntervalSeconds
 ```
 
+In the redis lane the multiplexer is DI-owned: connecting is deferred to first resolution and the container disposes it. Register your own `IConnectionMultiplexer` first to keep host ownership — the cache then reuses it.
+
 `GetOrSetAsync` on a miss runs the factory then writes — concurrent callers and processes can all run it; duplicate work is prevented only by application idempotency or a distributed lock. `RemoveByPatternAsync` scans connected primary endpoints in batches — prefer explicit key lists for routine invalidation. Batch APIs are not transactional.
 
 ## Distributed lock
@@ -49,6 +51,7 @@ var fencing = ((IFencedLockHandle)lease).FencingToken; // pass to the protected 
 - Release is owner-token compare-and-delete — a stale holder cannot delete a re-acquired lock
 - `ExtendAsync` is explicit; **no automatic renewal**. Pick a lease that covers the operation
 - The lease is a duration bound, not a correctness guarantee — downstream resources must validate the monotonically increasing fencing token
+- The fencing counter persists by default (`FenceRetention = Timeout.InfiniteTimeSpan`) so tokens never regress; setting a finite retention bounds counter memory for high-cardinality lock keyspaces at the cost of possible reset after idle gaps
 
 For single-process coordination use the in-process lock in `PubSoft.Caching` instead — see [its README](../../platform/PubSoft.Caching/README.md).
 

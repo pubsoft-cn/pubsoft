@@ -15,6 +15,8 @@ PubSoft.Authentication.Jwt.JwksClientAssertionKeyOptions.CacheDuration.set -> vo
 PubSoft.Authentication.Jwt.JwksClientAssertionKeyOptions.FetchJwks.get -> System.Func<string!, System.Threading.CancellationToken, System.Threading.Tasks.Task<string?>!>?
 PubSoft.Authentication.Jwt.JwksClientAssertionKeyOptions.FetchJwks.set -> void
 PubSoft.Authentication.Jwt.JwksClientAssertionKeyOptions.JwksClientAssertionKeyOptions() -> void
+PubSoft.Authentication.Jwt.JwksClientAssertionKeyOptions.MaxCacheEntries.get -> int
+PubSoft.Authentication.Jwt.JwksClientAssertionKeyOptions.MaxCacheEntries.set -> void
 PubSoft.Authentication.Jwt.JwksClientAssertionKeyOptions.MissCacheDuration.get -> System.TimeSpan
 PubSoft.Authentication.Jwt.JwksClientAssertionKeyOptions.MissCacheDuration.set -> void
 PubSoft.Authentication.Jwt.JwksClientAssertionKeyProvider

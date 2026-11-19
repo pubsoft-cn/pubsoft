@@ -10,8 +10,15 @@ public sealed class RedisDistributedLockOptions
     /// <summary>Prefix applied to all lock keys.</summary>
     public string KeyPrefix { get; set; } = "pubsoft:lock:";
 
-    /// <summary>How long a fencing counter outlives its lock lease.</summary>
-    public TimeSpan FenceRetention { get; set; } = TimeSpan.FromHours(1);
+    /// <summary>
+    /// How long a fencing counter outlives its lock lease. Defaults to
+    /// <see cref="Timeout.InfiniteTimeSpan"/>: the counter persists so fencing tokens stay
+    /// strictly monotonic per lock key. A finite value bounds counter memory for very
+    /// high-cardinality lock keyspaces, but tokens may regress to 1 after the key idles
+    /// past the retention window - opt in only when the protected resource does not
+    /// rely on strict monotonicity across idle gaps.
+    /// </summary>
+    public TimeSpan FenceRetention { get; set; } = Timeout.InfiniteTimeSpan;
 
     internal void Validate()
     {
@@ -20,7 +27,8 @@ public sealed class RedisDistributedLockOptions
         ArgumentNullException.ThrowIfNull(KeyPrefix);
         if (KeyPrefix.Length >= 480)
             throw new ArgumentOutOfRangeException(nameof(KeyPrefix), "Key prefix must leave room for a lock key.");
-        if (FenceRetention <= TimeSpan.Zero || FenceRetention > TimeSpan.FromDays(30))
+        if (FenceRetention != Timeout.InfiniteTimeSpan
+            && (FenceRetention <= TimeSpan.Zero || FenceRetention > TimeSpan.FromDays(30)))
             throw new ArgumentOutOfRangeException(nameof(FenceRetention));
     }
 }

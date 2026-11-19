@@ -6,9 +6,16 @@ namespace PubSoft.EntityFrameworkCore.Auditing;
 /// <summary>Read-side query service over persisted <see cref="AuditLogRecord"/> rows -- migration surface for the legacy AuditLogAppService.</summary>
 public class AuditLogQueryService<TDbContext>(TDbContext dbContext) where TDbContext : PubSoftDbContext
 {
+    /// <summary>Upper bound for <c>skip</c> - deep offset paging is clamped rather than served.</summary>
+    public const int MaxSkip = 10_000;
+
     /// <summary>Paged audit-log query; tenant-scoped to the ambient context. When no tenant
     /// context is present the query returns empty unless the caller explicitly opts into the
-    /// platform-level cross-tenant read.</summary>
+    /// platform-level cross-tenant read. Ordering is stable: <c>StartedAt</c> descending with
+    /// <c>Id</c> as the tiebreak. Pass <paramref name="includeTotalCount"/> false to skip the
+    /// exact count - <see cref="PagedResultDto{T}.TotalCount"/> then reports -1; the
+    /// <paramref name="keyword"/> filter is an unindexable substring match, so high-volume
+    /// deployments should prefer the exact filters and drop the count.</summary>
     public async Task<PagedResultDto<AuditLogRecord>> GetListAsync(
         string? entityType = null,
         string? subjectId = null,
@@ -22,10 +29,11 @@ public class AuditLogQueryService<TDbContext>(TDbContext dbContext) where TDbCon
         int skip = 0,
         int take = 20,
         bool includeAllTenants = false,
+        bool includeTotalCount = true,
         CancellationToken cancellationToken = default)
     {
         take = Math.Clamp(take, 1, 100);
-        skip = Math.Max(0, skip);
+        skip = Math.Clamp(skip, 0, MaxSkip);
 
         var q = dbContext.Set<AuditLogRecord>().AsNoTracking();
         var tid = dbContext.CurrentTenantId;
@@ -59,9 +67,11 @@ public class AuditLogQueryService<TDbContext>(TDbContext dbContext) where TDbCon
                 || (a.Detail != null && a.Detail.Contains(kw)));
         }
 
-        var total = await q.CountAsync(cancellationToken).ConfigureAwait(false);
-        var items = await q.OrderByDescending(a => a.StartedAt).Skip(skip).Take(take)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        var total = includeTotalCount
+            ? await q.CountAsync(cancellationToken).ConfigureAwait(false)
+            : -1;
+        var items = await q.OrderByDescending(a => a.StartedAt).ThenByDescending(a => a.Id)
+            .Skip(skip).Take(take).ToListAsync(cancellationToken).ConfigureAwait(false);
         return new PagedResultDto<AuditLogRecord> { Items = items, TotalCount = total };
     }
 }

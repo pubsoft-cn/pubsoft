@@ -23,6 +23,13 @@ public sealed class JwksClientAssertionKeyOptions
     /// </summary>
     public TimeSpan MissCacheDuration { get; set; } = TimeSpan.FromMinutes(1);
 
+    /// <summary>
+    /// Maximum distinct client ids held in the cache (default 1024). Beyond the cap the
+    /// soonest-expiring entry is evicted - bounds retained state when callers probe many
+    /// unique client ids.
+    /// </summary>
+    public int MaxCacheEntries { get; set; } = 1024;
+
     internal void Validate()
     {
         ArgumentNullException.ThrowIfNull(FetchJwks);
@@ -30,5 +37,7 @@ public sealed class JwksClientAssertionKeyOptions
             throw new ArgumentOutOfRangeException(nameof(CacheDuration), "CacheDuration must be positive.");
         if (MissCacheDuration <= TimeSpan.Zero)
             throw new ArgumentOutOfRangeException(nameof(MissCacheDuration), "MissCacheDuration must be positive.");
+        if (MaxCacheEntries <= 0)
+            throw new ArgumentOutOfRangeException(nameof(MaxCacheEntries), "MaxCacheEntries must be positive.");
     }
 }

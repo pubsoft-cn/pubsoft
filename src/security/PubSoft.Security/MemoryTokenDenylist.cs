@@ -11,6 +11,9 @@ public sealed class MemoryTokenDenylist(int maxEntries = 100_000, TimeProvider? 
     private const int MaxTokenIdLength = 128;
     private const int MaxFieldLength = 256;
 
+    private readonly int _maxEntries = maxEntries is >= 1 and <= 1_000_000
+        ? maxEntries
+        : throw new ArgumentOutOfRangeException(nameof(maxEntries), "maxEntries must be within 1-1_000_000.");
     private readonly Dictionary<string, TokenDenyEntry> _entries = new(StringComparer.Ordinal);
     private readonly List<string> _sweepBuffer = new();
     private readonly TimeProvider _timeProvider = timeProvider ?? TimeProvider.System;
@@ -29,11 +32,11 @@ public sealed class MemoryTokenDenylist(int maxEntries = 100_000, TimeProvider? 
 
         lock (_entries)
         {
-            if (!_entries.TryGetValue(entry.TokenId, out _) && _entries.Count >= maxEntries)
+            if (!_entries.TryGetValue(entry.TokenId, out _) && _entries.Count >= _maxEntries)
             {
                 SweepExpired(now);
-                if (_entries.Count >= maxEntries)
-                    throw new InvalidOperationException($"MemoryTokenDenylist is at capacity ({maxEntries}).");
+                if (_entries.Count >= _maxEntries)
+                    throw new InvalidOperationException($"MemoryTokenDenylist is at capacity ({_maxEntries}).");
             }
 
             _entries[entry.TokenId] = entry;

@@ -148,4 +148,32 @@ public sealed class RedisDistributedLockTests
                 fixture.Connection,
                 new RedisDistributedLockOptions { FenceRetention = TimeSpan.Zero }));
     }
+
+    [RedisFact]
+    public async Task FenceCounterIsPersistentByDefaultAndBoundedWhenRetentionFinite()
+    {
+        await using var fixture = await LockFixture.ConnectAsync();
+        var persistent = new RedisDistributedLock(
+            fixture.Connection, new RedisDistributedLockOptions { KeyPrefix = fixture.Prefix + "lock:" });
+        var bounded = new RedisDistributedLock(
+            fixture.Connection, new RedisDistributedLockOptions
+            {
+                KeyPrefix = fixture.Prefix + "lock:",
+                FenceRetention = TimeSpan.FromMinutes(30)
+            });
+        var db = fixture.Connection.GetDatabase();
+
+        await using (Assert.IsAssignableFrom<IFencedLockHandle>(
+            await persistent.AcquireAsync("persisted", TimeSpan.FromMinutes(1))))
+        {
+            Assert.Null(await db.KeyTimeToLiveAsync(fixture.Prefix + "lock:{persisted}:fence"));
+        }
+        Assert.Null(await db.KeyTimeToLiveAsync(fixture.Prefix + "lock:{persisted}:fence"));
+
+        await using (Assert.IsAssignableFrom<IFencedLockHandle>(
+            await bounded.AcquireAsync("bounded", TimeSpan.FromMinutes(1))))
+        {
+            Assert.NotNull(await db.KeyTimeToLiveAsync(fixture.Prefix + "lock:{bounded}:fence"));
+        }
+    }
 }

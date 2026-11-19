@@ -91,6 +91,50 @@ public sealed class JwksClientAssertionKeyProviderTests
     }
 
     [Fact]
+    public async Task CacheIsBoundedByMaxCacheEntries()
+    {
+        var provider = new JwksClientAssertionKeyProvider(new JwksClientAssertionKeyOptions
+        {
+            FetchJwks = (_, _) => Task.FromResult<string?>(null),
+            MaxCacheEntries = 4
+        });
+
+        foreach (var index in Enumerable.Range(0, 9))
+            Assert.Null(await provider.GetPublicKeyAsync($"client-{index}", "kid-1"));
+
+        var entries = (System.Collections.ICollection)typeof(JwksClientAssertionKeyProvider)
+            .GetField("_entries", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+            .GetValue(provider)!;
+        Assert.True(entries.Count <= 4, $"expected a bounded cache, got {entries.Count} entries");
+    }
+
+    [Fact]
+    public async Task MaterialStayedUsableAcrossCacheRefresh()
+    {
+        using var first = JwtSigning.CreateRsaKey("kid-1");
+        using var second = JwtSigning.CreateRsaKey("kid-2");
+        var version = 0;
+        var provider = new JwksClientAssertionKeyProvider(new JwksClientAssertionKeyOptions
+        {
+            FetchJwks = (_, _) => Task.FromResult<string?>(version == 0 ? Jwks(first) : Jwks(second)),
+            CacheDuration = TimeSpan.FromMilliseconds(60),
+            MissCacheDuration = TimeSpan.FromMilliseconds(60)
+        });
+
+        var material = await provider.GetPublicKeyAsync("c", "kid-1");
+        Assert.NotNull(material);
+
+        version = 1;
+        await Task.Delay(120); // past CacheDuration: next lookup refreshes the set
+        Assert.NotNull(await provider.GetPublicKeyAsync("c", "kid-2"));
+
+        // The material handed out before the refresh must still verify - no shared disposal.
+        var assertion = ClientAssertion.Sign(first, "c", "aud");
+        var claims = JwtSigning.ValidateAccessToken(assertion, "c", "aud", material);
+        Assert.Equal("c", claims["sub"]);
+    }
+
+    [Fact]
     public void RegistrationWiresProviderAndValidates()
     {
         var services = new ServiceCollection();

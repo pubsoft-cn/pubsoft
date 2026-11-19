@@ -66,6 +66,7 @@ public sealed class FencedExecutorTests
     {
         var sharedLock = new InProcessDistributedLock();
         await using var held = await sharedLock.AcquireAsync("k", TimeSpan.FromMinutes(1));
+        Assert.NotNull(held);
         var executor = new FencedExecutor(sharedLock);
         var ran = false;
         var attempt = executor.TryExecuteAsync("k", TimeSpan.FromMinutes(1),

@@ -10,18 +10,25 @@ namespace PubSoft.Authentication.Jwt;
 /// </summary>
 /// <remarks>
 /// Cache semantics differ from escrowed symmetric-key lanes on purpose: an expired set is never
-/// served stale - a rotated-out key must stop verifying, not linger for availability. Fetches are
-/// single-flight per client id; failed or empty results are negatively cached for
-/// <see cref="JwksClientAssertionKeyOptions.MissCacheDuration"/> to bound probing cost. JWKs
-/// without a <c>kid</c> are skipped (key ids are required for rotation); a kid-less assertion
-/// resolves only when the set holds exactly one key.
+/// served stale - a rotated-out key must stop verifying, not linger for availability. Cached sets
+/// are immutable public-parameter snapshots materialized into key material per lookup, so a
+/// refresh can never dispose a key a verifier is using. Fetches are single-flight over a fixed
+/// stripe of gates; failed or empty results are negatively cached for
+/// <see cref="JwksClientAssertionKeyOptions.MissCacheDuration"/> to bound probing cost. The cache
+/// is bounded by <see cref="JwksClientAssertionKeyOptions.MaxCacheEntries"/> - probing many unique
+/// client ids cannot grow memory without limit. JWKs without a <c>kid</c> are skipped (key ids are
+/// required for rotation); a kid-less assertion resolves only when the set holds exactly one key.
 /// </remarks>
 public sealed class JwksClientAssertionKeyProvider : IClientAssertionKeyProvider, IDisposable
 {
+    private const int LockStripes = 64;
+    private const int MaxClientIdLength = 256;
+
     private readonly JwksClientAssertionKeyOptions _options;
     private readonly TimeProvider _timeProvider;
     private readonly ConcurrentDictionary<string, CacheEntry> _entries = new(StringComparer.Ordinal);
-    private readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new(StringComparer.Ordinal);
+    private readonly SemaphoreSlim[] _locks =
+        Enumerable.Range(0, LockStripes).Select(_ => new SemaphoreSlim(1, 1)).ToArray();
 
     /// <summary>Creates the provider.</summary>
     public JwksClientAssertionKeyProvider(JwksClientAssertionKeyOptions options, TimeProvider? timeProvider = null)
@@ -36,26 +43,36 @@ public sealed class JwksClientAssertionKeyProvider : IClientAssertionKeyProvider
     public async ValueTask<RsaSigningKeyMaterial?> GetPublicKeyAsync(
         string clientId, string? keyId, CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrWhiteSpace(clientId)
+            || clientId.Length > MaxClientIdLength
+            || clientId.Any(char.IsControl))
+            return null;
+
         var entry = await GetEntryAsync(clientId, cancellationToken).ConfigureAwait(false);
         var keys = entry?.Keys;
         if (keys is null || keys.Count == 0)
             return null;
-        if (keyId is not null)
-            return keys.FirstOrDefault(k => string.Equals(k.KeyId, keyId, StringComparison.Ordinal));
-        return keys.Count == 1 ? keys[0] : null;
+        var snapshot = keyId is not null
+            ? keys.FirstOrDefault(k => string.Equals(k.KeyId, keyId, StringComparison.Ordinal))
+            : keys.Count == 1 ? keys[0] : null;
+        if (snapshot is null)
+            return null;
+        try
+        {
+            return Materialize(snapshot);
+        }
+        catch (Exception) // pubsoft:exempt PUBSOFT041 "corrupt cached parameters resolve like a miss; fail closed"
+        {
+            return null;
+        }
     }
 
     /// <inheritdoc />
     public void Dispose()
     {
-        foreach (var entry in _entries.Values)
-            if (entry.Keys is not null)
-                foreach (var material in entry.Keys)
-                    material.Dispose();
-        foreach (var gate in _locks.Values)
+        foreach (var gate in _locks)
             gate.Dispose();
         _entries.Clear();
-        _locks.Clear();
     }
 
     private async Task<CacheEntry?> GetEntryAsync(string clientId, CancellationToken cancellationToken)
@@ -64,14 +81,14 @@ public sealed class JwksClientAssertionKeyProvider : IClientAssertionKeyProvider
         if (_entries.TryGetValue(clientId, out var entry) && entry.ExpiresAt > now)
             return entry;
 
-        var gate = _locks.GetOrAdd(clientId, static _ => new SemaphoreSlim(1, 1));
+        var gate = _locks[(int)((uint)StringComparer.Ordinal.GetHashCode(clientId) % LockStripes)];
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
             if (_entries.TryGetValue(clientId, out entry) && entry.ExpiresAt > _timeProvider.GetUtcNow())
                 return entry;
 
-            IReadOnlyList<RsaSigningKeyMaterial>? keys = null;
+            IReadOnlyList<KeySnapshot>? keys = null;
             try
             {
                 var jwks = await _options.FetchJwks!(clientId, cancellationToken).ConfigureAwait(false);
@@ -84,10 +101,8 @@ public sealed class JwksClientAssertionKeyProvider : IClientAssertionKeyProvider
             var next = new CacheEntry(
                 _timeProvider.GetUtcNow() + (keys is { Count: > 0 } ? _options.CacheDuration : _options.MissCacheDuration),
                 keys);
-            if (_entries.TryRemove(clientId, out var old) && old.Keys is not null)
-                foreach (var material in old.Keys)
-                    material.Dispose();
             _entries[clientId] = next;
+            EvictOverflow(clientId);
             return next;
         }
         finally
@@ -96,7 +111,34 @@ public sealed class JwksClientAssertionKeyProvider : IClientAssertionKeyProvider
         }
     }
 
-    private static IReadOnlyList<RsaSigningKeyMaterial>? Parse(string? jwksJson)
+    // Concurrency can overshoot the cap by at most the number of in-flight refreshes -
+    // bounded by the lock stripes, which is the point of the bound.
+    private void EvictOverflow(string keepClientId)
+    {
+        if (_entries.Count <= _options.MaxCacheEntries)
+            return;
+        string? oldest = null;
+        var oldestExpiry = DateTimeOffset.MaxValue;
+        foreach (var pair in _entries)
+        {
+            if (string.Equals(pair.Key, keepClientId, StringComparison.Ordinal)
+                || pair.Value.ExpiresAt >= oldestExpiry)
+                continue;
+            oldestExpiry = pair.Value.ExpiresAt;
+            oldest = pair.Key;
+        }
+        if (oldest is not null)
+            _entries.TryRemove(oldest, out _);
+    }
+
+    private static RsaSigningKeyMaterial Materialize(KeySnapshot snapshot)
+    {
+        using var rsa = RSA.Create();
+        rsa.ImportParameters(snapshot.Parameters);
+        return JwtSigning.ImportRsaPublicKey(snapshot.KeyId, rsa);
+    }
+
+    private static IReadOnlyList<KeySnapshot>? Parse(string? jwksJson)
     {
         if (string.IsNullOrWhiteSpace(jwksJson))
             return null;
@@ -111,7 +153,7 @@ public sealed class JwksClientAssertionKeyProvider : IClientAssertionKeyProvider
             return null;
         }
 
-        var keys = new List<RsaSigningKeyMaterial>();
+        var keys = new List<KeySnapshot>();
         foreach (var jwk in set.Keys)
         {
             // GetSigningKeys() converts to RsaSecurityKey and drops the JWK view - filter the
@@ -124,14 +166,16 @@ public sealed class JwksClientAssertionKeyProvider : IClientAssertionKeyProvider
                 continue;
             try
             {
-                var rsa = RSA.Create();
-                rsa.ImportParameters(new RSAParameters
+                var parameters = new RSAParameters
                 {
                     Modulus = Base64UrlEncoder.DecodeBytes(jwk.N),
                     Exponent = Base64UrlEncoder.DecodeBytes(jwk.E),
-                });
-                keys.Add(JwtSigning.ImportRsaPublicKey(jwk.Kid, rsa));
-                rsa.Dispose(); // ImportRsaPublicKey re-imports into its own instance.
+                };
+                using var rsa = RSA.Create();
+                rsa.ImportParameters(parameters); // validate now so bad keys never reach the cache
+                if (rsa.KeySize < 2048)
+                    continue; // same floor as ImportRsaPublicKey - weak keys are not cached
+                keys.Add(new KeySnapshot(jwk.Kid, parameters));
             }
             catch (Exception) // pubsoft:exempt PUBSOFT041 "malformed JWK is skipped; an empty yield becomes a miss entry"
             {
@@ -140,5 +184,7 @@ public sealed class JwksClientAssertionKeyProvider : IClientAssertionKeyProvider
         return keys.Count > 0 ? keys : null;
     }
 
-    private sealed record CacheEntry(DateTimeOffset ExpiresAt, IReadOnlyList<RsaSigningKeyMaterial>? Keys);
+    private sealed record KeySnapshot(string KeyId, RSAParameters Parameters);
+
+    private sealed record CacheEntry(DateTimeOffset ExpiresAt, IReadOnlyList<KeySnapshot>? Keys);
 }

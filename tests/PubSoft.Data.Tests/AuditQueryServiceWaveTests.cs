@@ -74,6 +74,33 @@ public sealed class AuditQueryServiceWaveTests
         Assert.Equal(2, kw.TotalCount);
     }
 
+    [Fact]
+    public async Task SkipIsClampedAndCountCanBeSkipped()
+    {
+        var (_, s) = Build(Rec("/a"), Rec("/b"));
+
+        var deep = await s.GetListAsync(skip: int.MaxValue, includeAllTenants: true);
+        Assert.Equal(2, deep.TotalCount);
+        Assert.Empty(deep.Items); // skip clamped to MaxSkip: beyond range, not an error
+
+        var uncounted = await s.GetListAsync(includeAllTenants: true, includeTotalCount: false);
+        Assert.Equal(-1, uncounted.TotalCount);
+        Assert.Equal(2, uncounted.Items.Count);
+    }
+
+    [Fact]
+    public async Task SameTimestampRowsHaveStableIdOrdering()
+    {
+        var stamp = DateTimeOffset.UtcNow;
+        var (_, s) = Build(
+            new AuditLogRecord { Id = 100, RequestPath = "/oldest", Success = true, StatusCode = 200, StartedAt = stamp },
+            new AuditLogRecord { Id = 300, RequestPath = "/newest", Success = true, StatusCode = 200, StartedAt = stamp },
+            new AuditLogRecord { Id = 200, RequestPath = "/middle", Success = true, StatusCode = 200, StartedAt = stamp });
+
+        var r = await s.GetListAsync(includeAllTenants: true);
+        Assert.Equal(["/newest", "/middle", "/oldest"], r.Items.Select(i => i.RequestPath).ToList());
+    }
+
     // R2: missing tenant context must NOT auto-elevate to cross-tenant read.
     [Fact]
     public async Task GetListWithoutTenantContextReturnsEmptyUnlessOptedIn()

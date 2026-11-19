@@ -171,6 +171,27 @@ public sealed class RefreshTokenFamilyTests
     }
 
     [Fact]
+    public async Task SweepsDropExpiredFamiliesFromSubjectIndex()
+    {
+        var clock = new ManualClock();
+        var store = new MemoryRefreshTokenFamilyStore(maxEntries: 2, timeProvider: clock);
+        var service = new RefreshTokenFamilyService(store, new RefreshTokenFamilyOptions { TokenLifetime = TimeSpan.FromMinutes(1) }, clock);
+        await service.IssueAsync("s1");
+        await service.IssueAsync("s1");
+        clock.Advance(TimeSpan.FromMinutes(2));
+        await service.IssueAsync("s2"); // capacity pressure sweeps tokens AND the stale index entries
+
+        Assert.Equal(0, await store.RevokeSubjectAsync("s1", clock.GetUtcNow() + TimeSpan.FromDays(1)));
+    }
+
+    [Fact]
+    public void MemoryStoreRejectsInvalidCapacity()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new MemoryRefreshTokenFamilyStore(0));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new MemoryRefreshTokenFamilyStore(1_000_001));
+    }
+
+    [Fact]
     public void OptionsRejectInvalidBounds()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => new RefreshTokenFamilyService(new MemoryRefreshTokenFamilyStore(), new RefreshTokenFamilyOptions { TokenLifetime = TimeSpan.Zero }));

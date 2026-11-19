@@ -18,11 +18,17 @@ namespace PubSoft.Caching.Redis;
 /// </remarks>
 public sealed class RedisDistributedLock : IDistributedLock
 {
-    // KEYS[1] = lock key, KEYS[2] = fence key; ARGV[1] = owner token, ARGV[2] = lease ms, ARGV[3] = fence ttl ms
+    // KEYS[1] = lock key, KEYS[2] = fence key; ARGV[1] = owner token, ARGV[2] = lease ms,
+    // ARGV[3] = fence ttl ms, or -1 to keep the counter persistent (PERSIST clears any
+    // TTL left by a previously finite-retention deployment).
     private const string AcquireScript = """
         if redis.call('SET', KEYS[1], ARGV[1], 'PX', ARGV[2], 'NX') then
             local fence = redis.call('INCR', KEYS[2])
-            redis.call('PEXPIRE', KEYS[2], ARGV[3])
+            if tonumber(ARGV[3]) > 0 then
+                redis.call('PEXPIRE', KEYS[2], ARGV[3])
+            else
+                redis.call('PERSIST', KEYS[2])
+            end
             return fence
         end
         return false
@@ -80,8 +86,9 @@ public sealed class RedisDistributedLock : IDistributedLock
             ? _timeProvider.GetUtcNow() + wait
             : (DateTimeOffset?)null;
         var pollInterval = MinPollInterval;
-        var fenceTtlMilliseconds = (long)Math.Ceiling(
-            (expiry + _options.FenceRetention).TotalMilliseconds);
+        var fenceTtlMilliseconds = _options.FenceRetention == Timeout.InfiniteTimeSpan
+            ? -1L
+            : (long)Math.Ceiling((expiry + _options.FenceRetention).TotalMilliseconds);
 
         while (true)
         {

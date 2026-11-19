@@ -72,6 +72,13 @@ public sealed class TokenDenylistTests
     }
 
     [Fact]
+    public void RejectsInvalidCapacity()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new MemoryTokenDenylist(0));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new MemoryTokenDenylist(1_000_001));
+    }
+
+    [Fact]
     public void TokenDenyIdsProducesStableHash()
     {
         var a = TokenDenyIds.ForToken("token-value");
