@@ -5,8 +5,9 @@
     <Description>Optional Redis-backed replay protection for PubSoft security primitives.</Description>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="StackExchange.Redis" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="StackExchange.Redis" />
     <ProjectReference Include="../../security/PubSoft.Security/PubSoft.Security.csproj" />
   </ItemGroup>
 </Project>
