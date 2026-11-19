@@ -27,9 +27,12 @@ PubSoft.EntityFrameworkCore.Auditing.AuditEntityChangeRecord.PropertiesJson.get 
 PubSoft.EntityFrameworkCore.Auditing.AuditEntityChangeRecord.PropertiesJson.set -> void
 PubSoft.EntityFrameworkCore.Auditing.AuditEntityChangeRecord.TenantId.get -> long?
 PubSoft.EntityFrameworkCore.Auditing.AuditEntityChangeRecord.TenantId.set -> void
+PubSoft.EntityFrameworkCore.Auditing.AuditKeywordMatch
+PubSoft.EntityFrameworkCore.Auditing.AuditKeywordMatch.Prefix = 1 -> PubSoft.EntityFrameworkCore.Auditing.AuditKeywordMatch
+PubSoft.EntityFrameworkCore.Auditing.AuditKeywordMatch.Substring = 0 -> PubSoft.EntityFrameworkCore.Auditing.AuditKeywordMatch
 PubSoft.EntityFrameworkCore.Auditing.AuditLogQueryService<TDbContext>
 PubSoft.EntityFrameworkCore.Auditing.AuditLogQueryService<TDbContext>.AuditLogQueryService(TDbContext! dbContext) -> void
-PubSoft.EntityFrameworkCore.Auditing.AuditLogQueryService<TDbContext>.GetListAsync(string? entityType = null, string? subjectId = null, bool? success = null, System.DateTimeOffset? startedAfter = null, System.DateTimeOffset? startedBefore = null, string? category = null, string? action = null, string? targetType = null, string? keyword = null, int skip = 0, int take = 20, bool includeAllTenants = false, bool includeTotalCount = true, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Core.PagedResultDto<PubSoft.EntityFrameworkCore.Auditing.AuditLogRecord!>!>!
+PubSoft.EntityFrameworkCore.Auditing.AuditLogQueryService<TDbContext>.GetListAsync(string? entityType = null, string? subjectId = null, bool? success = null, System.DateTimeOffset? startedAfter = null, System.DateTimeOffset? startedBefore = null, string? category = null, string? action = null, string? targetType = null, string? keyword = null, int skip = 0, int take = 20, bool includeAllTenants = false, bool includeTotalCount = true, PubSoft.EntityFrameworkCore.Auditing.AuditKeywordMatch keywordMatch = PubSoft.EntityFrameworkCore.Auditing.AuditKeywordMatch.Substring, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<PubSoft.Core.PagedResultDto<PubSoft.EntityFrameworkCore.Auditing.AuditLogRecord!>!>!
 PubSoft.EntityFrameworkCore.Auditing.AuditLogRecord
 PubSoft.EntityFrameworkCore.Auditing.AuditLogRecord.Action.get -> string?
 PubSoft.EntityFrameworkCore.Auditing.AuditLogRecord.Action.set -> void

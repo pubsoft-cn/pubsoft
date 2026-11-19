@@ -75,6 +75,22 @@ public sealed class AuditQueryServiceWaveTests
     }
 
     [Fact]
+    public async Task PrefixKeywordMatchIsLeftAnchored()
+    {
+        var (_, s) = Build(Rec("/api/orders/1"), Rec("/api/users/2"));
+
+        var prefix = await s.GetListAsync(
+            keyword: "/api/orders", includeAllTenants: true, keywordMatch: AuditKeywordMatch.Prefix);
+        Assert.Single(prefix.Items);
+        Assert.Equal("/api/orders/1", prefix.Items[0].RequestPath);
+
+        // Interior substrings do not match under Prefix - only left-anchored hits.
+        var interior = await s.GetListAsync(
+            keyword: "orders", includeAllTenants: true, keywordMatch: AuditKeywordMatch.Prefix);
+        Assert.Empty(interior.Items);
+    }
+
+    [Fact]
     public async Task SkipIsClampedAndCountCanBeSkipped()
     {
         var (_, s) = Build(Rec("/a"), Rec("/b"));

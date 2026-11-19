@@ -13,9 +13,9 @@ public class AuditLogQueryService<TDbContext>(TDbContext dbContext) where TDbCon
     /// context is present the query returns empty unless the caller explicitly opts into the
     /// platform-level cross-tenant read. Ordering is stable: <c>StartedAt</c> descending with
     /// <c>Id</c> as the tiebreak. Pass <paramref name="includeTotalCount"/> false to skip the
-    /// exact count - <see cref="PagedResultDto{T}.TotalCount"/> then reports -1; the
-    /// <paramref name="keyword"/> filter is an unindexable substring match, so high-volume
-    /// deployments should prefer the exact filters and drop the count.</summary>
+    /// exact count - <see cref="PagedResultDto{T}.TotalCount"/> then reports -1. The
+    /// <paramref name="keyword"/> filter defaults to an unindexable substring match; pass
+    /// <see cref="AuditKeywordMatch.Prefix"/> to keep the columns indexable.</summary>
     public async Task<PagedResultDto<AuditLogRecord>> GetListAsync(
         string? entityType = null,
         string? subjectId = null,
@@ -30,6 +30,7 @@ public class AuditLogQueryService<TDbContext>(TDbContext dbContext) where TDbCon
         int take = 20,
         bool includeAllTenants = false,
         bool includeTotalCount = true,
+        AuditKeywordMatch keywordMatch = AuditKeywordMatch.Substring,
         CancellationToken cancellationToken = default)
     {
         take = Math.Clamp(take, 1, 100);
@@ -62,9 +63,13 @@ public class AuditLogQueryService<TDbContext>(TDbContext dbContext) where TDbCon
         if (!string.IsNullOrWhiteSpace(keyword))
         {
             var kw = keyword.Trim();
-            q = q.Where(a => (a.RequestPath != null && a.RequestPath.Contains(kw))
-                || (a.TargetName != null && a.TargetName.Contains(kw))
-                || (a.Detail != null && a.Detail.Contains(kw)));
+            q = keywordMatch == AuditKeywordMatch.Prefix
+                ? q.Where(a => (a.RequestPath != null && a.RequestPath.StartsWith(kw))
+                    || (a.TargetName != null && a.TargetName.StartsWith(kw))
+                    || (a.Detail != null && a.Detail.StartsWith(kw)))
+                : q.Where(a => (a.RequestPath != null && a.RequestPath.Contains(kw))
+                    || (a.TargetName != null && a.TargetName.Contains(kw))
+                    || (a.Detail != null && a.Detail.Contains(kw)));
         }
 
         var total = includeTotalCount

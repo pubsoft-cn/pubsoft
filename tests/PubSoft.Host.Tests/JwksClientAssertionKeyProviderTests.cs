@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.Extensions.DependencyInjection;
 using PubSoft.Authentication.Jwt;
 using Xunit;
@@ -12,12 +13,13 @@ public sealed class JwksClientAssertionKeyProviderTests
         using var signer = JwtSigning.CreateRsaKey("kid-1");
         var provider = Provider(_ => Task.FromResult<string?>(Jwks(signer)));
 
-        var material = await provider.GetPublicKeyAsync("svc-caller", "kid-1");
+        var key = await provider.GetPublicKeyAsync("svc-caller", "kid-1");
 
-        Assert.NotNull(material);
-        Assert.Equal("kid-1", material.KeyId);
+        Assert.NotNull(key);
+        Assert.Equal("kid-1", key.KeyId);
 
         // The JWK-imported public key must actually verify an assertion signed by the private key.
+        using var material = MaterialOf(key);
         var assertion = ClientAssertion.Sign(signer, "svc-caller", "svc-target");
         var claims = JwtSigning.ValidateAccessToken(assertion, "svc-caller", "svc-target", material);
         Assert.Equal("svc-caller", claims["sub"]);
@@ -109,7 +111,7 @@ public sealed class JwksClientAssertionKeyProviderTests
     }
 
     [Fact]
-    public async Task MaterialStayedUsableAcrossCacheRefresh()
+    public async Task ReturnedParametersStayUsableAcrossCacheRefresh()
     {
         using var first = JwtSigning.CreateRsaKey("kid-1");
         using var second = JwtSigning.CreateRsaKey("kid-2");
@@ -121,16 +123,35 @@ public sealed class JwksClientAssertionKeyProviderTests
             MissCacheDuration = TimeSpan.FromMilliseconds(60)
         });
 
-        var material = await provider.GetPublicKeyAsync("c", "kid-1");
-        Assert.NotNull(material);
+        var key = await provider.GetPublicKeyAsync("c", "kid-1");
+        Assert.NotNull(key);
 
         version = 1;
         await Task.Delay(120); // past CacheDuration: next lookup refreshes the set
         Assert.NotNull(await provider.GetPublicKeyAsync("c", "kid-2"));
 
-        // The material handed out before the refresh must still verify - no shared disposal.
+        // The parameters handed out before the refresh must still verify - immutable value data.
+        using var material = MaterialOf(key);
         var assertion = ClientAssertion.Sign(first, "c", "aud");
         var claims = JwtSigning.ValidateAccessToken(assertion, "c", "aud", material);
+        Assert.Equal("c", claims["sub"]);
+    }
+
+    [Fact]
+    public async Task ReturnedParametersAreAPrivateCopy()
+    {
+        using var signer = JwtSigning.CreateRsaKey("kid-1");
+        var provider = Provider(_ => Task.FromResult<string?>(Jwks(signer)));
+
+        var first = await provider.GetPublicKeyAsync("c", "kid-1");
+        Assert.NotNull(first);
+        first.Parameters.Modulus![0] ^= 0xFF; // callers get private arrays - mutation stays local
+
+        var second = await provider.GetPublicKeyAsync("c", "kid-1");
+        Assert.NotNull(second);
+        using var material = MaterialOf(second);
+        var claims = JwtSigning.ValidateAccessToken(
+            ClientAssertion.Sign(signer, "c", "aud"), "c", "aud", material);
         Assert.Equal("c", claims["sub"]);
     }
 
@@ -148,6 +169,13 @@ public sealed class JwksClientAssertionKeyProviderTests
 
     private static JwksClientAssertionKeyProvider Provider(Func<string, Task<string?>> fetch)
         => new(new JwksClientAssertionKeyOptions { FetchJwks = (clientId, _) => fetch(clientId) });
+
+    private static RsaSigningKeyMaterial MaterialOf(ClientAssertionPublicKey key)
+    {
+        var rsa = RSA.Create();
+        rsa.ImportParameters(key.Parameters);
+        return JwtSigning.ImportRsaPublicKey(key.KeyId, rsa);
+    }
 
     private static string Jwks(params RsaSigningKeyMaterial[] materials)
     {

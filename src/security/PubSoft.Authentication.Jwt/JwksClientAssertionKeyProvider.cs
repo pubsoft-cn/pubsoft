@@ -11,8 +11,9 @@ namespace PubSoft.Authentication.Jwt;
 /// <remarks>
 /// Cache semantics differ from escrowed symmetric-key lanes on purpose: an expired set is never
 /// served stale - a rotated-out key must stop verifying, not linger for availability. Cached sets
-/// are immutable public-parameter snapshots materialized into key material per lookup, so a
-/// refresh can never dispose a key a verifier is using. Fetches are single-flight over a fixed
+/// are immutable public-parameter snapshots handed out as private copies, so verifiers own their
+/// materialized keys outright and a refresh can never dispose a key in use. Fetches are
+/// single-flight over a fixed
 /// stripe of gates; failed or empty results are negatively cached for
 /// <see cref="JwksClientAssertionKeyOptions.MissCacheDuration"/> to bound probing cost. The cache
 /// is bounded by <see cref="JwksClientAssertionKeyOptions.MaxCacheEntries"/> - probing many unique
@@ -29,6 +30,7 @@ public sealed class JwksClientAssertionKeyProvider : IClientAssertionKeyProvider
     private readonly ConcurrentDictionary<string, CacheEntry> _entries = new(StringComparer.Ordinal);
     private readonly SemaphoreSlim[] _locks =
         Enumerable.Range(0, LockStripes).Select(_ => new SemaphoreSlim(1, 1)).ToArray();
+    private readonly object _evictionGate = new();
 
     /// <summary>Creates the provider.</summary>
     public JwksClientAssertionKeyProvider(JwksClientAssertionKeyOptions options, TimeProvider? timeProvider = null)
@@ -40,7 +42,7 @@ public sealed class JwksClientAssertionKeyProvider : IClientAssertionKeyProvider
     }
 
     /// <inheritdoc />
-    public async ValueTask<RsaSigningKeyMaterial?> GetPublicKeyAsync(
+    public async ValueTask<ClientAssertionPublicKey?> GetPublicKeyAsync(
         string clientId, string? keyId, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(clientId)
@@ -57,14 +59,14 @@ public sealed class JwksClientAssertionKeyProvider : IClientAssertionKeyProvider
             : keys.Count == 1 ? keys[0] : null;
         if (snapshot is null)
             return null;
-        try
+
+        // Private copy of the parameter arrays - a caller mutating them must not corrupt
+        // the shared cache snapshot.
+        return new ClientAssertionPublicKey(snapshot.KeyId, new RSAParameters
         {
-            return Materialize(snapshot);
-        }
-        catch (Exception) // pubsoft:exempt PUBSOFT041 "corrupt cached parameters resolve like a miss; fail closed"
-        {
-            return null;
-        }
+            Modulus = (byte[])snapshot.Parameters.Modulus!.Clone(),
+            Exponent = (byte[])snapshot.Parameters.Exponent!.Clone()
+        });
     }
 
     /// <inheritdoc />
@@ -101,8 +103,19 @@ public sealed class JwksClientAssertionKeyProvider : IClientAssertionKeyProvider
             var next = new CacheEntry(
                 _timeProvider.GetUtcNow() + (keys is { Count: > 0 } ? _options.CacheDuration : _options.MissCacheDuration),
                 keys);
-            _entries[clientId] = next;
-            EvictOverflow(clientId);
+
+            // Add + evict under one gate so concurrent refreshes on different stripes
+            // cannot overshoot the cap.
+            lock (_evictionGate)
+            {
+                _entries[clientId] = next;
+                while (_entries.Count > _options.MaxCacheEntries)
+                {
+                    var oldest = OldestEvictable(clientId);
+                    if (oldest is null || !_entries.TryRemove(oldest, out _))
+                        break;
+                }
+            }
             return next;
         }
         finally
@@ -111,12 +124,8 @@ public sealed class JwksClientAssertionKeyProvider : IClientAssertionKeyProvider
         }
     }
 
-    // Concurrency can overshoot the cap by at most the number of in-flight refreshes -
-    // bounded by the lock stripes, which is the point of the bound.
-    private void EvictOverflow(string keepClientId)
+    private string? OldestEvictable(string keepClientId)
     {
-        if (_entries.Count <= _options.MaxCacheEntries)
-            return;
         string? oldest = null;
         var oldestExpiry = DateTimeOffset.MaxValue;
         foreach (var pair in _entries)
@@ -127,15 +136,7 @@ public sealed class JwksClientAssertionKeyProvider : IClientAssertionKeyProvider
             oldestExpiry = pair.Value.ExpiresAt;
             oldest = pair.Key;
         }
-        if (oldest is not null)
-            _entries.TryRemove(oldest, out _);
-    }
-
-    private static RsaSigningKeyMaterial Materialize(KeySnapshot snapshot)
-    {
-        using var rsa = RSA.Create();
-        rsa.ImportParameters(snapshot.Parameters);
-        return JwtSigning.ImportRsaPublicKey(snapshot.KeyId, rsa);
+        return oldest;
     }
 
     private static IReadOnlyList<KeySnapshot>? Parse(string? jwksJson)

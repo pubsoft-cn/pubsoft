@@ -1,5 +1,6 @@
 using System.Collections.Frozen;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 using PubSoft.Authentication.Jwt;
 using PubSoft.Security;
 
@@ -51,9 +52,15 @@ public sealed class JwtClientAssertionVerifier : IClientAssertionVerifier
                 return ClientCredentialVerificationResult.Fail();
             var jwt = handler.ReadJwtToken(assertion);
 
-            var keyMaterial = await _keyProvider.GetPublicKeyAsync(clientId, jwt.Header.Kid, cancellationToken).ConfigureAwait(false);
-            if (keyMaterial is null)
+            var key = await _keyProvider.GetPublicKeyAsync(clientId, jwt.Header.Kid, cancellationToken).ConfigureAwait(false);
+            if (key is null)
                 return ClientCredentialVerificationResult.Fail();
+
+            // The provider hands out immutable public parameters - materialize and dispose the
+            // verification key deterministically inside this request.
+            using var rsa = RSA.Create();
+            rsa.ImportParameters(key.Parameters);
+            using var keyMaterial = JwtSigning.ImportRsaPublicKey(key.KeyId, rsa);
 
             // Issuer pinned to the claimed client id -- a token minted by another client never verifies.
             var claims = JwtSigning.ValidateAccessToken(

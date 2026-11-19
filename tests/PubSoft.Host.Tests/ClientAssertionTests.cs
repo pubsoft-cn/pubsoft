@@ -14,7 +14,7 @@ public sealed class ClientAssertionTests
     public async Task SignedAssertionVerifiesAndPassesThroughExtraClaims()
     {
         using var key = JwtSigning.CreateRsaKey("client-key-1");
-        using var publicKey = PublicMaterialOf(key);
+        var publicKey = PublicMaterialOf(key);
         var verifier = Verifier(new StubKeyProvider(publicKey));
 
         var assertion = ClientAssertion.Sign(key, "svc-caller", "svc-target");
@@ -28,7 +28,7 @@ public sealed class ClientAssertionTests
     public async Task VerificationRejectsWrongAudienceIssuerAndUnknownClient()
     {
         using var key = JwtSigning.CreateRsaKey("k1");
-        using var publicKey = PublicMaterialOf(key);
+        var publicKey = PublicMaterialOf(key);
         var verifier = Verifier(new StubKeyProvider(publicKey));
 
         var wrongAudience = ClientAssertion.Sign(key, "c", "other-service");
@@ -48,7 +48,7 @@ public sealed class ClientAssertionTests
     public async Task ReplayedJtiFailsClosed()
     {
         using var key = JwtSigning.CreateRsaKey("k1");
-        using var publicKey = PublicMaterialOf(key);
+        var publicKey = PublicMaterialOf(key);
         var verifier = Verifier(new StubKeyProvider(publicKey));
 
         // Same assertion presented twice -- the jti reservation rejects the replay.
@@ -61,7 +61,7 @@ public sealed class ClientAssertionTests
     public async Task OverlongLifetimeAndMissingIatFailClosed()
     {
         using var key = JwtSigning.CreateRsaKey("k1");
-        using var publicKey = PublicMaterialOf(key);
+        var publicKey = PublicMaterialOf(key);
         var verifier = Verifier(new StubKeyProvider(publicKey));
 
         // Signer itself refuses >5min; verifier also enforces the cap against hand-made tokens.
@@ -128,16 +128,12 @@ public sealed class ClientAssertionTests
     private static JwtClientAssertionVerifier Verifier(IClientAssertionKeyProvider provider)
         => new(provider, new ClientAssertionOptions { Audience = "svc-target" }, new MemoryNonceStore());
 
-    private static RsaSigningKeyMaterial PublicMaterialOf(RsaSigningKeyMaterial privateKey)
-    {
-        var rsa = RSA.Create();
-        rsa.ImportParameters(privateKey.Rsa.ExportParameters(false));
-        return JwtSigning.ImportRsaPublicKey(privateKey.KeyId, rsa);
-    }
+    private static ClientAssertionPublicKey PublicMaterialOf(RsaSigningKeyMaterial privateKey)
+        => new(privateKey.KeyId, privateKey.Rsa.ExportParameters(false));
 
-    private sealed class StubKeyProvider(RsaSigningKeyMaterial? key) : IClientAssertionKeyProvider
+    private sealed class StubKeyProvider(ClientAssertionPublicKey? key) : IClientAssertionKeyProvider
     {
-        public ValueTask<RsaSigningKeyMaterial?> GetPublicKeyAsync(string clientId, string? keyId, CancellationToken cancellationToken = default)
+        public ValueTask<ClientAssertionPublicKey?> GetPublicKeyAsync(string clientId, string? keyId, CancellationToken cancellationToken = default)
             => ValueTask.FromResult(key);
     }
 

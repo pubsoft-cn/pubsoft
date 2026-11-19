@@ -82,9 +82,9 @@ var hsParsed = JwtSigning.ValidateAccessToken(hsToken, issuer, audience, sym);
 
 ### Client Assertion
 
-`ClientAssertion.Sign` 签发 `private_key_jwt` 形态的 RS256 JWT（`iss`=`sub`=client id、绑定 audience、唯一 `jti`、寿命 ≤5 分钟），供调用方向校验 assertion 的服务认证。服务端经 `IClientAssertionKeyProvider` 按 clientId 解析**公钥**——注册表只存公钥，泄露也无法伪造 assertion。用 `JwtSigning.ImportRsaPublicKey` 构造纯公钥材料；服务端 verifier 见 `PubSoft.AspNetCore`。
+`ClientAssertion.Sign` 签发 `private_key_jwt` 形态的 RS256 JWT（`iss`=`sub`=client id、绑定 audience、唯一 `jti`、寿命 ≤5 分钟），供调用方向校验 assertion 的服务认证。服务端经 `IClientAssertionKeyProvider` 按 clientId 解析**公钥**——注册表只存公钥，泄露也无法伪造 assertion。实现方返回不可变 `ClientAssertionPublicKey`（key id + RSA 公钥参数的私有副本）；verifier 每次验签自行物化并释放密钥对象，边界上无可 dispose 的共享状态。服务端 verifier 见 `PubSoft.AspNetCore`。
 
-`AddPubSoftJwksClientAssertionKeyProvider` 是内置 `IClientAssertionKeyProvider` 实现：宿主注入 `FetchJwks` 委托按 clientId 返回 JWKS 文档（RFC 7517），RSA 验签公钥按 clientId 缓存（`CacheDuration` 默认 5 分钟），miss 负缓存（`MissCacheDuration` 默认 1 分钟），过期集合不复用——被轮换的公钥必须停止验签。缓存为不可变公钥参数快照、按调用物化（刷新不可能 dispose 使用中的密钥），并受 `MaxCacheEntries`（默认 1024）上限约束——探测大量唯一 clientId 不会无限占用内存。
+`AddPubSoftJwksClientAssertionKeyProvider` 是内置 `IClientAssertionKeyProvider` 实现：宿主注入 `FetchJwks` 委托按 clientId 返回 JWKS 文档（RFC 7517），RSA 验签公钥按 clientId 缓存（`CacheDuration` 默认 5 分钟），miss 负缓存（`MissCacheDuration` 默认 1 分钟），过期集合不复用——被轮换的公钥必须停止验签。缓存为不可变公钥参数快照、以私有副本下发（刷新不可能 dispose 使用中的密钥），并受 `MaxCacheEntries`（默认 1024）严格上限约束——写入与淘汰在同一门内进行，并发查找不会超限——探测大量唯一 clientId 不会无限占用内存。
 
 ### 签发侧 Key Ring
 
@@ -110,7 +110,7 @@ builder.Services.AddPubSoftJwtIssuerKeyRing(builder.Configuration);
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
-- `PubSoft.Authentication.Jwt`: `ClientAssertion` `ConfigJwtIssuerKeyRing` `IClientAssertionKeyProvider` `IJwtIssuerKeyRing` `JwtIssuerKeyRingOptions` `JwtIssuerKeyRingServiceCollectionExtensions` `JwtJwksDocument` `JwtJwksKey` `JwtSigning` `RefreshTokenGenerator` `IClientSigningKeyProvider` `RsaSigningKeyMaterial` `SymmetricSigningKeyMaterial`
+- `PubSoft.Authentication.Jwt`: `ClientAssertion` `ClientAssertionPublicKey` `ConfigJwtIssuerKeyRing` `IClientAssertionKeyProvider` `IJwtIssuerKeyRing` `JwtIssuerKeyRingOptions` `JwtIssuerKeyRingServiceCollectionExtensions` `JwtJwksDocument` `JwtJwksKey` `JwtSigning` `RefreshTokenGenerator` `IClientSigningKeyProvider` `RsaSigningKeyMaterial` `SymmetricSigningKeyMaterial`
 ## 验证
 
 ```bash
