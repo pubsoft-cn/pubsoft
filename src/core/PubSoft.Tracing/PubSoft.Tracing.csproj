@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
+    <PackageId>PubSoft.Tracing</PackageId>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Description>Bounded ActivityListener span exporter writing spans-{service}-*.jsonl files - trace/span/parent ids keep request, audit, and CDC joins intact.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../PubSoft.Logging/PubSoft.Logging.csproj" />
+  </ItemGroup>
+</Project>

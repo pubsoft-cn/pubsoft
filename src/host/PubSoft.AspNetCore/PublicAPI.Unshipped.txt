@@ -413,7 +413,7 @@ static PubSoft.AspNetCore.Authentication.RemoteClientCredentialServiceCollection
 static PubSoft.AspNetCore.Authorization.PermissionEndpointFilterExtensions.AddPubSoftPermissionAuthorization(this Microsoft.AspNetCore.Builder.RouteHandlerBuilder! endpoint) -> Microsoft.AspNetCore.Builder.RouteHandlerBuilder!
 static PubSoft.AspNetCore.Authorization.PermissionEndpointFilterExtensions.AddPubSoftPermissionAuthorization(this Microsoft.AspNetCore.Routing.RouteGroupBuilder! group) -> Microsoft.AspNetCore.Routing.RouteGroupBuilder!
 static PubSoft.AspNetCore.Authorization.PermissionMvcAuthorizationExtensions.AddPubSoftPermissionAuthorization(this Microsoft.Extensions.DependencyInjection.IMvcBuilder! mvcBuilder) -> Microsoft.Extensions.DependencyInjection.IMvcBuilder!
-static PubSoft.AspNetCore.CorrelationAmbient.Current.get -> (string! TraceId, string! SpanId)?
+static PubSoft.AspNetCore.CorrelationAmbient.Current.get -> (string! TraceId, string! SpanId, string? ParentSpanId)?
 static PubSoft.AspNetCore.CorrelationAmbient.NewSpanId() -> string!
 static PubSoft.AspNetCore.CorrelationIdMiddleware.CurrentId(Microsoft.AspNetCore.Http.HttpContext! context) -> string!
 static PubSoft.AspNetCore.CorrelationIdMiddlewareExtensions.UsePubSoftCorrelationId(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app, PubSoft.AspNetCore.CorrelationIdOptions? options = null) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!

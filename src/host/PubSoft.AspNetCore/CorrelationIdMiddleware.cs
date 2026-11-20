@@ -30,10 +30,17 @@ public sealed class CorrelationIdMiddleware
             return;
         }
 
-        var id = ResolveInbound(context) ?? context.TraceIdentifier;
+        var (id, inboundSpanId) = ResolveInbound(context);
+        id ??= context.TraceIdentifier;
         context.TraceIdentifier = id;
-        // ambient: (traceId, 本服务spanId) - 出栈 DelegatingHandler 读此续链
-        CorrelationAmbient.Current = (id, CorrelationAmbient.NewSpanId());
+        // ambient fallback triple: trace id, this request's span id (the real W3C span when
+        // an Activity exists, a fresh id otherwise), and the inbound caller's span id so the
+        // parent chain stays intact for non-Activity hops.
+        var activity = System.Diagnostics.Activity.Current;
+        var spanId = activity is { IdFormat: System.Diagnostics.ActivityIdFormat.W3C }
+            ? activity.SpanId.ToHexString()
+            : CorrelationAmbient.NewSpanId();
+        CorrelationAmbient.Current = (id, spanId, inboundSpanId);
 
         if (_options.EchoResponseHeader)
         {
@@ -48,35 +55,49 @@ public sealed class CorrelationIdMiddleware
         await _next(context).ConfigureAwait(false);
     }
 
-    /// <summary>Inbound resolution order: valid <c>traceparent</c> (take trace-id
-    /// segment) -> each configured header in order -> null (caller keeps default).</summary>
-    private string? ResolveInbound(HttpContext context)
+    /// <summary>Inbound resolution order: valid <c>traceparent</c> (trace-id + parent
+    /// span-id segments) -> each configured header in order -> null (caller keeps default).</summary>
+    private (string? Id, string? ParentSpanId) ResolveInbound(HttpContext context)
     {
         if (context.Request.Headers.TryGetValue("traceparent", out var tp)
-            && tp.Count > 0 && TryParseTraceId(tp[0], out var traceId))
-            return traceId;
+            && tp.Count > 0 && TryParseTraceParent(tp[0], out var traceId, out var spanId))
+            return (traceId, spanId);
 
         foreach (var name in _options.InboundHeaderNames)
         {
             if (context.Request.Headers.TryGetValue(name, out var v)
                 && v.Count > 0 && !string.IsNullOrWhiteSpace(v[0]))
-                return v[0]!.Trim();
+                return (v[0]!.Trim(), null);
         }
-        return null;
+        return (null, null);
     }
 
-    /// <summary>W3C <c>traceparent</c>: <c>version-traceId-spanId-flags</c>,
-    /// takes the 32-hex trace-id segment when the shape is valid.</summary>
-    private static bool TryParseTraceId(string? value, out string traceId)
+    /// <summary>W3C <c>traceparent</c>: <c>version-traceId-spanId-flags</c> -- extracts the
+    /// 32-hex trace id and the 16-hex caller span id (the parent's span, needed so downstream
+    /// spans can point their psid at a real edge).</summary>
+    private static bool TryParseTraceParent(string? value, out string traceId, out string? parentSpanId)
     {
         traceId = "";
-        if (string.IsNullOrEmpty(value) || value.Length < 35)
+        parentSpanId = null;
+        if (string.IsNullOrEmpty(value) || value.Length < 55)
             return false;
-        // 00-<32hex>-<16hex>-<2hex> - segment 1 must be 32 lowercase/uppercase hex
-        var seg = value.AsSpan(3, 32);
-        foreach (var c in seg)
+        // 00-<32hex>-<16hex>-<2hex>
+        var traceSeg = value.AsSpan(3, 32);
+        var spanSeg = value.AsSpan(36, 16);
+        var needsLower = false;
+        foreach (var c in traceSeg)
+        {
             if (!Uri.IsHexDigit(c)) return false;
-        traceId = seg.ToString().ToLowerInvariant();
+            needsLower |= c is >= 'A' and <= 'F';
+        }
+        foreach (var c in spanSeg)
+        {
+            if (!Uri.IsHexDigit(c)) return false;
+            needsLower |= c is >= 'A' and <= 'F';
+        }
+        // Lowercase only when needed - inbound traceparents are lowercase in practice.
+        traceId = needsLower ? traceSeg.ToString().ToLowerInvariant() : traceSeg.ToString();
+        parentSpanId = needsLower ? spanSeg.ToString().ToLowerInvariant() : spanSeg.ToString();
         return true;
     }
 }

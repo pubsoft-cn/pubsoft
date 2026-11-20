@@ -127,6 +127,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PubSoft.Security.EntityFram
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PubSoft.Messaging.Amqp", "src\messaging\PubSoft.Messaging.Amqp\PubSoft.Messaging.Amqp.csproj", "{953F5953-0EC5-448C-AE10-5BF36476A2C9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PubSoft.Tracing", "src\core\PubSoft.Tracing\PubSoft.Tracing.csproj", "{4D2A7B3A-D048-4721-B6B5-5E560E792569}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -773,6 +775,18 @@ Global
 		{953F5953-0EC5-448C-AE10-5BF36476A2C9}.Release|x64.Build.0 = Release|Any CPU
 		{953F5953-0EC5-448C-AE10-5BF36476A2C9}.Release|x86.ActiveCfg = Release|Any CPU
 		{953F5953-0EC5-448C-AE10-5BF36476A2C9}.Release|x86.Build.0 = Release|Any CPU
+		{4D2A7B3A-D048-4721-B6B5-5E560E792569}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D2A7B3A-D048-4721-B6B5-5E560E792569}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D2A7B3A-D048-4721-B6B5-5E560E792569}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4D2A7B3A-D048-4721-B6B5-5E560E792569}.Debug|x64.Build.0 = Debug|Any CPU
+		{4D2A7B3A-D048-4721-B6B5-5E560E792569}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4D2A7B3A-D048-4721-B6B5-5E560E792569}.Debug|x86.Build.0 = Debug|Any CPU
+		{4D2A7B3A-D048-4721-B6B5-5E560E792569}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D2A7B3A-D048-4721-B6B5-5E560E792569}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D2A7B3A-D048-4721-B6B5-5E560E792569}.Release|x64.ActiveCfg = Release|Any CPU
+		{4D2A7B3A-D048-4721-B6B5-5E560E792569}.Release|x64.Build.0 = Release|Any CPU
+		{4D2A7B3A-D048-4721-B6B5-5E560E792569}.Release|x86.ActiveCfg = Release|Any CPU
+		{4D2A7B3A-D048-4721-B6B5-5E560E792569}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -837,5 +851,6 @@ Global
 		{C0672DDC-B16F-D231-C4B5-64C737C38FC9} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{078816DA-B62B-4572-94F2-976A603D8A08} = {C0672DDC-B16F-D231-C4B5-64C737C38FC9}
 		{953F5953-0EC5-448C-AE10-5BF36476A2C9} = {1AB6002E-85EB-C75A-9828-95B8B8565E80}
+		{4D2A7B3A-D048-4721-B6B5-5E560E792569} = {8D626EA8-CB54-BC41-363A-217881BEBA6E}
 	EndGlobalSection
 EndGlobal

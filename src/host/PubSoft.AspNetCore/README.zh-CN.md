@@ -52,6 +52,8 @@ app.UsePubSoftAudit(new AuditMiddlewareOptions
 
 IP/User-Agent/Actor 采集默认关闭——评审隐私、代理、身份与保留要求后再启用。actor 映射由宿主经 `IAuditActorAccessor` 提供；本适配器不解释 claims。审计 sink 失败记日志，不替换应用响应。每条 snapshot 同时携带 ambient W3C `Activity` 的 trace id（无 Activity 时回落请求关联 id）——无需 opt-in，它是审计行与分布式 trace、CDC 事件流 join 的关联键。
 
+`UsePubSoftCorrelationId` 解析入站 `traceparent`（trace id **与**调用方 span id），在响应头回显，并向非 HTTP 流发布 ambient 兜底三元组。`CorrelationPropagationHandler` 出站 HTTP 盖 `00-{traceId}-{spanId}-{flags}`，取自 `Activity.Current`（ASP.NET server span）——下游 `psid` 始终指向本服务真实发出的 span；ambient 三元组只在无 W3C activity 时兜底。配合 `PubSoft.Tracing` 可持久化这些 id join 的 span doc。
+
 ## 签名客户端凭证
 
 `ClientCredentialOptions.ClientAssertionHeader`（默认 `X-Client-Assertion`）存在时，评估走 bearer-assertion 模式——优先级高于签名与明文两种模式。注册的 `IClientAssertionVerifier` 收到 `(clientId, assertion)`；未注册时携带该头的请求一律 401 fail-closed。`AddPubSoftJwtClientAssertionVerifier` 接入内置 RS256 `private_key_jwt` 校验：`iss`=`sub`=client id、精确 `Audience`、寿命有界（≤15 分钟）、`jti` 经 `INonceStore` 防重放（默认进程内实现——多实例部署须注册共享 store）。客户端公钥经宿主的 `IClientAssertionKeyProvider` 解析；注册表只存公钥，泄露也无法伪造凭证。assertion 是 bearer 凭证——不绑请求体，必须 TLS。

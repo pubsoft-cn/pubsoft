@@ -1,0 +1,67 @@
+#nullable enable
+override PubSoft.Tracing.SpanDoc.GetHashCode() -> int
+PubSoft.Tracing.PubSoftSpanExporter
+PubSoft.Tracing.PubSoftSpanExporter.DisposeAsync() -> System.Threading.Tasks.ValueTask
+PubSoft.Tracing.PubSoftSpanExporter.DroppedCount.get -> long
+PubSoft.Tracing.PubSoftSpanExporter.PubSoftSpanExporter(PubSoft.Tracing.PubSoftTracingOptions! options) -> void
+PubSoft.Tracing.PubSoftTracingOptions
+PubSoft.Tracing.PubSoftTracingOptions.BatchSize.get -> int
+PubSoft.Tracing.PubSoftTracingOptions.BatchSize.set -> void
+PubSoft.Tracing.PubSoftTracingOptions.Capacity.get -> int
+PubSoft.Tracing.PubSoftTracingOptions.Capacity.set -> void
+PubSoft.Tracing.PubSoftTracingOptions.Directory.get -> string?
+PubSoft.Tracing.PubSoftTracingOptions.Directory.set -> void
+PubSoft.Tracing.PubSoftTracingOptions.DocOutput.get -> System.Func<System.ReadOnlyMemory<PubSoft.Tracing.SpanDoc>, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>?
+PubSoft.Tracing.PubSoftTracingOptions.DocOutput.set -> void
+PubSoft.Tracing.PubSoftTracingOptions.IncludeBaggage.get -> bool
+PubSoft.Tracing.PubSoftTracingOptions.IncludeBaggage.set -> void
+PubSoft.Tracing.PubSoftTracingOptions.Output.get -> System.Func<System.ReadOnlyMemory<byte>, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>?
+PubSoft.Tracing.PubSoftTracingOptions.Output.set -> void
+PubSoft.Tracing.PubSoftTracingOptions.PubSoftTracingOptions() -> void
+PubSoft.Tracing.PubSoftTracingOptions.Sampling.get -> System.Diagnostics.ActivitySamplingResult
+PubSoft.Tracing.PubSoftTracingOptions.Sampling.set -> void
+PubSoft.Tracing.PubSoftTracingOptions.ServiceName.get -> string?
+PubSoft.Tracing.PubSoftTracingOptions.ServiceName.set -> void
+PubSoft.Tracing.PubSoftTracingOptions.ServiceVersion.get -> string?
+PubSoft.Tracing.PubSoftTracingOptions.ServiceVersion.set -> void
+PubSoft.Tracing.PubSoftTracingOptions.ShouldListenTo.get -> System.Func<System.Diagnostics.ActivitySource!, bool>?
+PubSoft.Tracing.PubSoftTracingOptions.ShouldListenTo.set -> void
+PubSoft.Tracing.PubSoftTracingServiceCollectionExtensions
+PubSoft.Tracing.SpanDoc
+PubSoft.Tracing.SpanDoc.Baggage.get -> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, string?>>?
+PubSoft.Tracing.SpanDoc.Baggage.init -> void
+PubSoft.Tracing.SpanDoc.Deconstruct(out System.DateTimeOffset StartedUtc, out double DurationMilliseconds, out string! TraceId, out string! SpanId, out string? ParentSpanId, out string! Name, out string! Kind, out string! Status, out string? Error, out string! ServiceName, out string? ServiceVersion, out System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, object?>>? Tags, out System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, string?>>? Baggage) -> void
+PubSoft.Tracing.SpanDoc.DurationMilliseconds.get -> double
+PubSoft.Tracing.SpanDoc.DurationMilliseconds.init -> void
+PubSoft.Tracing.SpanDoc.Equals(PubSoft.Tracing.SpanDoc other) -> bool
+PubSoft.Tracing.SpanDoc.Error.get -> string?
+PubSoft.Tracing.SpanDoc.Error.init -> void
+PubSoft.Tracing.SpanDoc.Kind.get -> string!
+PubSoft.Tracing.SpanDoc.Kind.init -> void
+PubSoft.Tracing.SpanDoc.Name.get -> string!
+PubSoft.Tracing.SpanDoc.Name.init -> void
+PubSoft.Tracing.SpanDoc.ParentSpanId.get -> string?
+PubSoft.Tracing.SpanDoc.ParentSpanId.init -> void
+PubSoft.Tracing.SpanDoc.ServiceName.get -> string!
+PubSoft.Tracing.SpanDoc.ServiceName.init -> void
+PubSoft.Tracing.SpanDoc.ServiceVersion.get -> string?
+PubSoft.Tracing.SpanDoc.ServiceVersion.init -> void
+PubSoft.Tracing.SpanDoc.SpanDoc() -> void
+PubSoft.Tracing.SpanDoc.SpanDoc(System.DateTimeOffset StartedUtc, double DurationMilliseconds, string! TraceId, string! SpanId, string? ParentSpanId, string! Name, string! Kind, string! Status, string? Error, string! ServiceName, string? ServiceVersion, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, object?>>? Tags, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, string?>>? Baggage) -> void
+PubSoft.Tracing.SpanDoc.SpanId.get -> string!
+PubSoft.Tracing.SpanDoc.SpanId.init -> void
+PubSoft.Tracing.SpanDoc.StartedUtc.get -> System.DateTimeOffset
+PubSoft.Tracing.SpanDoc.StartedUtc.init -> void
+PubSoft.Tracing.SpanDoc.Status.get -> string!
+PubSoft.Tracing.SpanDoc.Status.init -> void
+PubSoft.Tracing.SpanDoc.Tags.get -> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, object?>>?
+PubSoft.Tracing.SpanDoc.Tags.init -> void
+PubSoft.Tracing.SpanDoc.TraceId.get -> string!
+PubSoft.Tracing.SpanDoc.TraceId.init -> void
+PubSoft.Tracing.TracingFileOutput
+static PubSoft.Tracing.PubSoftTracingServiceCollectionExtensions.AddPubSoftTracing(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Tracing.PubSoftTracingOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Tracing.SpanDoc.operator !=(PubSoft.Tracing.SpanDoc left, PubSoft.Tracing.SpanDoc right) -> bool
+static PubSoft.Tracing.SpanDoc.operator ==(PubSoft.Tracing.SpanDoc left, PubSoft.Tracing.SpanDoc right) -> bool
+static PubSoft.Tracing.TracingFileOutput.ForDirectory(string! directory, string! serviceName, System.TimeProvider? timeProvider = null) -> System.Func<System.ReadOnlyMemory<byte>, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>!
+~override PubSoft.Tracing.SpanDoc.Equals(object obj) -> bool
+~override PubSoft.Tracing.SpanDoc.ToString() -> string

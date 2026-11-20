@@ -61,6 +61,8 @@ app.UsePubSoftAudit(new AuditMiddlewareOptions
 
 Every snapshot also carries the ambient W3C `Activity` trace id (falling back to the request correlation id) — it needs no opt-in, and it is the join key that correlates audit rows with distributed traces and CDC event streams.
 
+`UsePubSoftCorrelationId` resolves the inbound `traceparent` (trace id **and** caller span id), echoes the id on the response, and publishes an ambient fallback triple for non-HTTP flows. `CorrelationPropagationHandler` stamps outbound HTTP with `00-{traceId}-{spanId}-{flags}` taken from `Activity.Current` — the ASP.NET server span — so every downstream `psid` points at a span this service actually emitted; the ambient triple is only the fallback when no W3C activity exists. Pair with `PubSoft.Tracing` to persist the span docs these ids join on.
+
 IP, user-agent, and actor capture are disabled by default. Enable them only after reviewing privacy, proxy, identity, and retention requirements. The host supplies actor mapping through `IAuditActorAccessor`; this adapter does not interpret claims. Audit sink failures are logged and do not replace the application response.
 
 ## HMAC Request Validation

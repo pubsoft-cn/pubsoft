@@ -36,6 +36,7 @@
     <ProjectReference Include="../../src/core/PubSoft.Domain/PubSoft.Domain.csproj" />
     <ProjectReference Include="../../src/testing/PubSoft.Testing/PubSoft.Testing.csproj" />
     <ProjectReference Include="../../src/core/PubSoft.Resilience/PubSoft.Resilience.csproj" />
+    <ProjectReference Include="../../src/core/PubSoft.Tracing/PubSoft.Tracing.csproj" />
     <ProjectReference Include="../../src/platform/PubSoft.Resilience.Http/PubSoft.Resilience.Http.csproj" />
     <ProjectReference Include="../../src/platform/PubSoft.Caching/PubSoft.Caching.csproj" />
     <ProjectReference Include="../../src/platform/PubSoft.Caching.Redis/PubSoft.Caching.Redis.csproj" />
