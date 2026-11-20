@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.DependencyInjection;
@@ -64,6 +65,20 @@ await using (await provider.GetRequiredService<IDistributedLock>()
     if (!handled)
         return Fail("message dispatch");
 }
+
+var spans = 0;
+await using (var exporter = new PubSoft.Tracing.PubSoftSpanExporter(new PubSoft.Tracing.PubSoftTracingOptions
+             {
+                 ServiceName = "aot-smoke",
+                 Output = (_, _) => { spans++; return ValueTask.CompletedTask; }
+             }))
+{
+    using var activity = new Activity("aot-span");
+    activity.Start();
+    activity.Stop();
+}
+if (spans != 1)
+    return Fail("tracing export");
 
 Console.WriteLine("PubSoft AOT smoke passed.");
 return 0;
