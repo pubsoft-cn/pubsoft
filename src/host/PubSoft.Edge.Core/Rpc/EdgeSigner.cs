@@ -210,7 +210,7 @@ public static class EdgeSigner
     private static string ComputeMd5Hex(string payload)
     {
         var hash = MD5.HashData(Encoding.UTF8.GetBytes(payload));
-        return Convert.ToHexString(hash).ToLowerInvariant();
+        return Convert.ToHexStringLower(hash);
     }
 
     private static bool FixedTimeEquals(string a, string b)

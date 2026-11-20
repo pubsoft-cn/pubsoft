@@ -40,14 +40,16 @@ public static class JwksEndpointRouteBuilderExtensions
         var ring = endpoints.ServiceProvider.GetService<IJwtIssuerKeyRing>()
             ?? throw new InvalidOperationException(
                 "MapPubSoftJwks requires a registered IJwtIssuerKeyRing -- call AddPubSoftJwtIssuerKeyRing first.");
-        var json = JsonSerializer.Serialize(JwtSigning.ExportJwks(ring.PublishedKeys), s_jsonOptions);
+        var body = System.Text.Encoding.UTF8.GetBytes(
+            JsonSerializer.Serialize(JwtSigning.ExportJwks(ring.PublishedKeys), s_jsonOptions));
         var cacheControl = $"public, max-age={cacheMaxAgeSeconds.ToString(CultureInfo.InvariantCulture)}";
 
         RequestDelegate handler = context =>
         {
             context.Response.Headers.CacheControl = cacheControl;
             context.Response.ContentType = "application/json";
-            return context.Response.WriteAsync(json, context.RequestAborted);
+            context.Response.ContentLength = body.Length;
+            return context.Response.Body.WriteAsync(body, context.RequestAborted).AsTask();
         };
         return endpoints.MapGet(pattern, handler);
     }

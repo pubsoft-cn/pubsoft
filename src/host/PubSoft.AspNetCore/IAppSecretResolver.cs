@@ -147,7 +147,7 @@ public sealed class HmacValidationMiddleware
                 hash.AppendData(buffer, 0, bytesRead);
             }
 
-            return Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant();
+            return Convert.ToHexStringLower(hash.GetHashAndReset());
         }
         finally
         {

@@ -50,7 +50,7 @@ public static class ClientSigner
         if (body == null || body.Length == 0) return "";
         using var sha = SHA256.Create();
         var hash = sha.ComputeHash(body);
-        return Convert.ToHexString(hash).ToLowerInvariant();
+        return Convert.ToHexStringLower(hash);
     }
 
     /// <summary>Whether the timestamp parses and falls inside the accepted window.</summary>

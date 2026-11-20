@@ -75,7 +75,7 @@ public sealed class RedisNonceStore : INonceStore
         var nonceLengthOffset = sizeof(int) + scopeBytes.Length;
         BinaryPrimitives.WriteInt32BigEndian(input.AsSpan(nonceLengthOffset, sizeof(int)), nonceBytes.Length);
         nonceBytes.CopyTo(input.AsSpan(nonceLengthOffset + sizeof(int)));
-        var digest = Convert.ToHexString(SHA256.HashData(input)).ToLowerInvariant();
+        var digest = Convert.ToHexStringLower(SHA256.HashData(input));
         CryptographicOperations.ZeroMemory(scopeBytes);
         CryptographicOperations.ZeroMemory(nonceBytes);
         CryptographicOperations.ZeroMemory(input);

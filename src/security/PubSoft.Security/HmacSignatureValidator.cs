@@ -91,7 +91,7 @@ public sealed class HmacSignatureValidator
 
     /// <summary>Lowercase-hex HMAC-SHA256 of <paramref name="data"/> under <paramref name="key"/>.</summary>
     public static string ComputeHmacSha256(string key, string data)
-        => Convert.ToHexString(ComputeHmacSha256Bytes(key, data)).ToLowerInvariant();
+        => Convert.ToHexStringLower(ComputeHmacSha256Bytes(key, data));
 
     /// <summary>Lowercase-hex SHA-256 of a seekable body stream; position is preserved.</summary>
     public static string ComputeBodyHash(Stream body)
@@ -104,7 +104,7 @@ public sealed class HmacSignatureValidator
         try
         {
             body.Position = 0;
-            return Convert.ToHexString(SHA256.HashData(body)).ToLowerInvariant();
+            return Convert.ToHexStringLower(SHA256.HashData(body));
         }
         finally
         {
@@ -116,7 +116,7 @@ public sealed class HmacSignatureValidator
     public static string ComputeBodyHash(byte[] body)
     {
         ArgumentNullException.ThrowIfNull(body);
-        return Convert.ToHexString(SHA256.HashData(body)).ToLowerInvariant();
+        return Convert.ToHexStringLower(SHA256.HashData(body));
     }
 
     /// <summary>Client-side helper: builds the canonical string and returns the HMAC-SHA256 signature for it.</summary>

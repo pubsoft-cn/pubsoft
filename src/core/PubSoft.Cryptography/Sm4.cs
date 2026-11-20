@@ -93,7 +93,7 @@ public static class Sm4
     {
         var key = Convert.FromHexString(hexKey);
         var cipher = EncryptEcb(key, Encoding.UTF8.GetBytes(plaintext));
-        return Convert.ToHexString(cipher).ToLowerInvariant();
+        return Convert.ToHexStringLower(cipher);
     }
 
     /// <summary>SM4-ECB decrypt: hex key + hex ciphertext -> UTF-8 plaintext.</summary>
