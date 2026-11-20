@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace PubSoft.Auditing;
 
 
@@ -29,7 +31,10 @@ public sealed class AuditLogWriter(
                 _timeProvider.GetUtcNow(),
                 HttpMethod: null,
                 RequestPath: null,
-                Actor: entry.Actor),
+                Actor: entry.Actor,
+                // Manual entries correlate through the ambient Activity; message consumers can
+                // pass an explicit TraceId to attribute work to an upstream trace.
+                TraceId: entry.TraceId ?? Activity.Current?.TraceId.ToHexString()),
             new AuditBusinessContext(
                 entry.Business.Category,
                 entry.Business.Action,

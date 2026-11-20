@@ -45,6 +45,8 @@ public sealed class AuditLogRecord : IMultiTenant
     public string? TargetName { get; set; }
     /// <summary>Free-form detail payload.</summary>
     public string? Detail { get; set; }
+    /// <summary>W3C trace id - join key into distributed tracing and CDC event streams.</summary>
+    public string? TraceId { get; set; }
     /// <summary>Child entity-change rows.</summary>
     public ICollection<AuditEntityChangeRecord> EntityChanges { get; } = new List<AuditEntityChangeRecord>();
 }

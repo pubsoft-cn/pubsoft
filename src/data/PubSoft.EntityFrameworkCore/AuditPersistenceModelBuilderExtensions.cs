@@ -30,6 +30,8 @@ public static class AuditPersistenceModelBuilderExtensions
         builder.HasIndex(record => new { record.TenantId, record.StartedAt });
         builder.HasIndex(record => new { record.TenantId, record.Category, record.Action });
         builder.HasIndex(record => new { record.TenantId, record.SubjectId, record.StartedAt });
+        // Global join key - trace-id lookups are not tenant-prefixed, so a standalone index.
+        builder.HasIndex(record => record.TraceId);
         builder.Property(record => record.StartedAt).HasConversion(UtcTicksConverter);
         builder.Property(record => record.HttpMethod).HasMaxLength(16);
         builder.Property(record => record.RequestPath).HasMaxLength(2_048);
@@ -43,6 +45,7 @@ public static class AuditPersistenceModelBuilderExtensions
         builder.Property(record => record.TargetType).HasMaxLength(256);
         builder.Property(record => record.TargetId).HasMaxLength(256);
         builder.Property(record => record.TargetName).HasMaxLength(512);
+        builder.Property(record => record.TraceId).HasMaxLength(64);
         builder.Property(record => record.Detail).HasColumnType("text"); // utf8mb4 varchar cap is 16383 chars - text removes the ceiling; upstream truncation already bounds content
         builder.HasMany(record => record.EntityChanges)
             .WithOne(change => change.AuditLog)

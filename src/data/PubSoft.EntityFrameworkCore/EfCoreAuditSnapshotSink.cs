@@ -34,7 +34,8 @@ public sealed class EfCoreAuditSnapshotSink<TDbContext>(TDbContext dbContext, Pu
             TargetType = Truncate(snapshot.Business.TargetType, 256),
             TargetId = Truncate(snapshot.Business.TargetId, 256),
             TargetName = Truncate(snapshot.Business.TargetName, 512),
-            Detail = Truncate(snapshot.Business.Detail, 16_384)
+            Detail = Truncate(snapshot.Business.Detail, 16_384),
+            TraceId = Truncate(snapshot.Request.TraceId, 64)
         };
 
         foreach (var change in snapshot.Changes)

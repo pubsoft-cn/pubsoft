@@ -57,6 +57,8 @@ An optional `ISaveChangesHook` runs after tenant assignment and before soft-dele
 
 For durable EF storage, expose `DbSet<AuditLogRecord>` and `DbSet<AuditEntityChangeRecord>` on the derived context, call `modelBuilder.ConfigurePubSoftAuditPersistence()` after `base.OnModelCreating(modelBuilder)`, and register `AddPubSoftEfCoreAuditPersistence<AppDbContext>()`. Audit records use Snowflake `long` ids assigned by the sink — registering a shared `IIdGenerator` (`services.AddPubSoftIdGenerator(workerId)` from `PubSoft.DependencyInjection`) is a hard prerequisite; the sink resolves it eagerly and DI fails closed when it is missing. The scoped sink writes the log and its change records through the host context. Both record types implement `IMultiTenant`; `PubSoftDbContext` assigns the active tenant and applies its dynamic tenant filter. The EF model must discover both DbSets before the base scope filters are built. Persisted value JSON only contains values already admitted by the collector's opt-in/redaction policy. Outbox forwarding is not included.
 
+`AuditLogRecord.TraceId` (`varchar(64)`, standalone index) stores the W3C trace id so audit rows join directly with distributed traces and CDC event streams by `trace_id`. Existing `PubSoftAuditLogs` deployments need one host-owned migration adding the column and its index.
+
 Authenticated actor attribution is opt-in through `AuditMiddlewareOptions.CaptureActor` and a host-implemented `IAuditActorAccessor`; PubSoft does not infer claim names or administrator roles. Review that mapping and the identity retention policy per host. Do not place identity or administrator data in `Detail` as a workaround.
 
 The SQLite relational tests exercise context changes against one cached EF model, automatic tenant assignment, selective scope bypass, scope-safe repository lookup/write behavior, scoped registrations, unit-of-work saving, and soft-delete interception. This package does not provide a distributed tenant/member context, database provider, or cross-tenant authorization policy.
@@ -152,7 +154,7 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
-`Action`, `AuditLog`, `AuditLogId`, `AverageMs`, `Category`, `ChangedAt`, `ClientIp`, `Conflicts`, `Count`, `Detail`, `DurationMilliseconds`, `Enabled`, `EntityId`, `EntityType`, `ErrorCount`, `FailureCode`, `HttpMethod`, `IsAdministrator`, `MaxLatencySamplesPerTemplate`, `MaxMs`, `MaxQueryTemplates`, `Operation`, `P50Ms`, `P95Ms`, `P99Ms`, `PropertiesJson`, `QueryFingerprint`, `RequestPath`, `Rewritten`, `SampleRate`, `SkippedAmbiguous`, `SlowQueryCount`, `SlowQueryThreshold`, `StartedAt`, `StatusCode`, `SubjectId`, `SubjectName`, `Success`, `TargetId`, `TargetName`, `TargetType`, `TenantId`, `TopQueries`, `TotalErrors`, `TotalMs`, `TotalQueries`, `UserAgent`
+`Action`, `AuditLog`, `AuditLogId`, `AverageMs`, `Category`, `ChangedAt`, `ClientIp`, `Conflicts`, `Count`, `Detail`, `DurationMilliseconds`, `Enabled`, `EntityId`, `EntityType`, `ErrorCount`, `FailureCode`, `HttpMethod`, `IsAdministrator`, `MaxLatencySamplesPerTemplate`, `MaxMs`, `MaxQueryTemplates`, `Operation`, `P50Ms`, `P95Ms`, `P99Ms`, `PropertiesJson`, `QueryFingerprint`, `RequestPath`, `Rewritten`, `SampleRate`, `SkippedAmbiguous`, `SlowQueryCount`, `SlowQueryThreshold`, `StartedAt`, `StatusCode`, `SubjectId`, `SubjectName`, `Success`, `TargetId`, `TargetName`, `TargetType`, `TenantId`, `TopQueries`, `TotalErrors`, `TotalMs`, `TotalQueries`, `TraceId`, `UserAgent`
 
 <!-- pubsoft:api-surface:end -->
 

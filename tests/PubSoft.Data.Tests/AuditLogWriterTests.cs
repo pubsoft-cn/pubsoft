@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -63,6 +64,21 @@ public sealed class AuditLogWriterTests
         var snapshot = sink.Snapshots.Single();
         Assert.False(snapshot.Success);
         Assert.Equal("OperationFailed", snapshot.FailureCode);
+    }
+
+    [Fact]
+    public async Task WriterStampsExplicitTraceIdOrFallsBackToAmbientActivity()
+    {
+        var sink = new RecordingSink();
+        var writer = new AuditLogWriter(sink);
+        using var activity = new Activity("unit-test").Start();
+
+        await writer.WriteAsync(new AuditLogEntry(new AuditBusinessContext("Auth", "Login")));
+        Assert.Equal(activity.TraceId.ToHexString(), sink.Snapshots[^1].Request.TraceId);
+
+        await writer.WriteAsync(new AuditLogEntry(
+            new AuditBusinessContext("Auth", "Login"), TraceId: "explicit-tid"));
+        Assert.Equal("explicit-tid", sink.Snapshots[^1].Request.TraceId);
     }
 
     [Fact]

@@ -12,10 +12,12 @@ namespace PubSoft.Auditing;
 /// <param name="FailureCode">Machine-readable failure code.</param>
 /// <param name="Duration">Operation duration.</param>
 /// <param name="Metrics">Numeric metrics folded into the detail.</param>
+/// <param name="TraceId">W3C trace id for correlation - defaults to the ambient <c>Activity</c> when unset.</param>
 public sealed record AuditLogEntry(
     AuditBusinessContext Business,
     AuditActorContext? Actor = null,
     bool Success = true,
     string? FailureCode = null,
     TimeSpan? Duration = null,
-    IReadOnlyDictionary<string, string>? Metrics = null);
+    IReadOnlyDictionary<string, string>? Metrics = null,
+    string? TraceId = null);

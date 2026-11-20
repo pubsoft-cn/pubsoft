@@ -55,6 +55,8 @@ services.AddPubSoftUnitOfWork<AppDbContext>();
 
 持久化审计存储：派生 context 暴露 `DbSet<AuditLogRecord>`/`DbSet<AuditEntityChangeRecord>`，`base.OnModelCreating` 后调 `modelBuilder.ConfigurePubSoftAuditPersistence()`，并注册 `AddPubSoftEfCoreAuditPersistence<AppDbContext>()`。审计记录使用 sink 端赋值的 Snowflake `long` id——注册共享 `IIdGenerator`（`PubSoft.DependencyInjection` 的 `services.AddPubSoftIdGenerator(workerId)`）是硬前置，sink 构造期解析，缺失即 DI 失败。scoped sink 经宿主 context 写日志与变更记录。两种记录都实现 `IMultiTenant`；`PubSoftDbContext` 自动赋当前租户并应用动态租户过滤器。EF model 须在基类 scope 过滤器构建前发现两个 DbSet。持久化的值 JSON 只含 collector opt-in/脱敏策略已许可的值。审计 Outbox 转发由可选 `PubSoft.Auditing.Outbox` 提供。
 
+`AuditLogRecord.TraceId`（`varchar(64)`，独立索引）存 W3C trace id——审计行可直接按 `trace_id` 与分布式 trace、CDC 事件流 join。存量 `PubSoftAuditLogs` 部署需要宿主补一条加列加索引的迁移。
+
 Actor 归因经 `AuditMiddlewareOptions.CaptureActor` + 宿主实现的 `IAuditActorAccessor` opt-in——PubSoft 不推断 claim 名或管理员角色；按宿主审查该映射与身份保留策略，不要把身份/管理员数据塞进 `Detail`。
 
 ## 查询诊断

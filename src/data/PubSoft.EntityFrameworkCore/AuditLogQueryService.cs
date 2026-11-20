@@ -25,6 +25,7 @@ public class AuditLogQueryService<TDbContext>(TDbContext dbContext) where TDbCon
         string? category = null,
         string? action = null,
         string? targetType = null,
+        string? traceId = null,
         string? keyword = null,
         int skip = 0,
         int take = 20,
@@ -60,6 +61,8 @@ public class AuditLogQueryService<TDbContext>(TDbContext dbContext) where TDbCon
             q = q.Where(a => a.Action == action.Trim()); // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison - == is the translatable form"
         if (!string.IsNullOrWhiteSpace(targetType))
             q = q.Where(a => a.TargetType == targetType.Trim()); // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison - == is the translatable form"
+        if (!string.IsNullOrWhiteSpace(traceId))
+            q = q.Where(a => a.TraceId == traceId.Trim()); // pubsoft:exempt PUBSOFT004 "EF Core cannot translate string.Equals with StringComparison - == is the translatable form"
         if (!string.IsNullOrWhiteSpace(keyword))
         {
             var kw = keyword.Trim();

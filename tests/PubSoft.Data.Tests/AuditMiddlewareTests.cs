@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,6 +37,45 @@ public sealed class AuditMiddlewareTests
         Assert.Null(snapshot.Request.Actor);
         Assert.DoesNotContain("token=secret", System.Text.Json.JsonSerializer.Serialize(snapshot));
         Assert.Equal(StatusCodes.Status201Created, snapshot.StatusCode);
+    }
+
+    [Fact]
+    public async Task MiddlewareCapturesAmbientW3cTraceId()
+    {
+        var scope = new AuditScope(new AuditChangeCollector());
+        var sink = new TestAuditSnapshotSink();
+        using var services = CreateServices(scope, sink);
+        var context = CreateContext(services);
+        var middleware = new AuditMiddleware(_ =>
+        {
+            scope.SetBusiness(action: "Read");
+            return Task.CompletedTask;
+        });
+
+        using var activity = new Activity("request").Start();
+        var traceId = activity.TraceId.ToHexString();
+        await middleware.InvokeAsync(context);
+
+        Assert.Equal(traceId, Assert.Single(sink.Snapshots).Request.TraceId);
+    }
+
+    [Fact]
+    public async Task MiddlewareFallsBackToRequestCorrelationIdWithoutActivity()
+    {
+        var scope = new AuditScope(new AuditChangeCollector());
+        var sink = new TestAuditSnapshotSink();
+        using var services = CreateServices(scope, sink);
+        var context = CreateContext(services);
+        context.TraceIdentifier = "corr-req-7";
+        var middleware = new AuditMiddleware(_ =>
+        {
+            scope.SetBusiness(action: "Read");
+            return Task.CompletedTask;
+        });
+
+        await middleware.InvokeAsync(context);
+
+        Assert.Equal("corr-req-7", Assert.Single(sink.Snapshots).Request.TraceId);
     }
 
     [Fact]

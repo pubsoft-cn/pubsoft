@@ -13,7 +13,7 @@ last-reviewed: 2026-10-13
 
 ## 请求 scope 审计
 
-`AuditScope` 跟踪一次操作的审计上下文：`SetBusiness` 设业务语义（category/action/target/detail）、`MarkFailed` 标记失败、有界实体变更 collector（`AuditCollector`——默认只记变更字段名，值采集需显式 opt-in 且敏感字段脱敏）。`Finalize` 产出不可变 `AuditRequestSnapshot` 交给宿主的 `IAuditSnapshotSink`。
+`AuditScope` 跟踪一次操作的审计上下文：`SetBusiness` 设业务语义（category/action/target/detail）、`MarkFailed` 标记失败、有界实体变更 collector（`AuditCollector`——默认只记变更字段名，值采集需显式 opt-in 且敏感字段脱敏）。`Finalize` 产出不可变 `AuditRequestSnapshot` 交给宿主的 `IAuditSnapshotSink`。`AuditRequestContext.TraceId` 把调用方提供的 W3C trace id 透传到 sink——middleware 从 ambient `Activity` 填充。
 
 ## 手动业务审计
 
@@ -27,7 +27,7 @@ await writer.WriteAsync(new AuditLogEntry(
     Metrics: new Dictionary<string, string> { ["retries"] = "0" }));
 ```
 
-`Metrics` 按键序并入 `Detail`（16 KiB 上限）。手动与请求 scope 审计共用同一 sink、表、保留期与归档行为。
+`Metrics` 按键序并入 `Detail`（16 KiB 上限）。手动与请求 scope 审计共用同一 sink、表、保留期与归档行为。条目优先取 `AuditLogEntry.TraceId` 显式值，否则回落 ambient `Activity` 的 trace id——消息消费方可显式回填上游 trace 维持端到端关联。
 
 ## Actor 归因
 

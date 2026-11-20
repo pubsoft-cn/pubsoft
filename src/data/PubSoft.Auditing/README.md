@@ -13,7 +13,7 @@ Framework-independent audit primitives — no ASP.NET Core or EF Core dependency
 
 ## Request-scope auditing
 
-`AuditScope` tracks one operation's audit context: business semantics via `SetBusiness` (category/action/target/detail), failure marking (`MarkFailed`), and a bounded entity-change collector (`AuditCollector` — default captures change field names only, values require explicit opt-in and sensitive fields are masked). `Finalize` produces an immutable `AuditRequestSnapshot` handed to the host's `IAuditSnapshotSink`.
+`AuditScope` tracks one operation's audit context: business semantics via `SetBusiness` (category/action/target/detail), failure marking (`MarkFailed`), and a bounded entity-change collector (`AuditCollector` — default captures change field names only, values require explicit opt-in and sensitive fields are masked). `Finalize` produces an immutable `AuditRequestSnapshot` handed to the host's `IAuditSnapshotSink`. `AuditRequestContext.TraceId` carries the caller-supplied W3C trace id through to the sink — middleware fills it from the ambient `Activity`.
 
 ## Manual business auditing
 
@@ -27,7 +27,7 @@ await writer.WriteAsync(new AuditLogEntry(
     Metrics: new Dictionary<string, string> { ["retries"] = "0" }));
 ```
 
-`Metrics` render deterministically into `Detail` (16 KiB bound). Manual and request-scope entries share the same sink, table, retention, and archival behavior.
+`Metrics` render deterministically into `Detail` (16 KiB bound). Manual and request-scope entries share the same sink, table, retention, and archival behavior. Entries stamp `AuditLogEntry.TraceId` when set, otherwise the ambient `Activity` trace id — message consumers can pass the upstream trace id explicitly to keep end-to-end correlation.
 
 ## Actor attribution
 
@@ -52,6 +52,6 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
-`Action`, `Actor`, `AuditGetRequests`, `Business`, `CaptureValues`, `Category`, `ChangedAt`, `Changes`, `ClientIp`, `Detail`, `DisplayName`, `Duration`, `Enabled`, `EntityId`, `EntityType`, `FailureCode`, `HttpMethod`, `IgnoredEntityTypes`, `IsAdministrator`, `MaxChangedPropertiesPerEntity`, `MaxChanges`, `MaxStringValueLength`, `Metrics`, `NewValue`, `OldValue`, `Properties`, `Request`, `RequestPath`, `SensitiveProperties`, `StartedAt`, `StatusCode`, `SubjectId`, `Success`, `TargetId`, `TargetName`, `TargetType`, `UserAgent`
+`Action`, `Actor`, `AuditGetRequests`, `Business`, `CaptureValues`, `Category`, `ChangedAt`, `Changes`, `ClientIp`, `Detail`, `DisplayName`, `Duration`, `Enabled`, `EntityId`, `EntityType`, `FailureCode`, `HttpMethod`, `IgnoredEntityTypes`, `IsAdministrator`, `MaxChangedPropertiesPerEntity`, `MaxChanges`, `MaxStringValueLength`, `Metrics`, `NewValue`, `OldValue`, `Properties`, `Request`, `RequestPath`, `SensitiveProperties`, `StartedAt`, `StatusCode`, `SubjectId`, `Success`, `TargetId`, `TargetName`, `TargetType`, `TraceId`, `UserAgent`
 
 <!-- pubsoft:api-surface:end -->

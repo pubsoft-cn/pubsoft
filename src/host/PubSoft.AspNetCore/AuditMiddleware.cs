@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -41,7 +42,10 @@ public sealed class AuditMiddleware
                 ? IpNormalizer.Normalize(remoteIp.ToString())
                 : null,
             _options.CaptureUserAgent ? context.Request.Headers.UserAgent.ToString() : null,
-            GetActor(services)));
+            GetActor(services),
+            // The W3C trace id is the join key into tracing/CDC streams; fall back to the
+            // request correlation id when no ambient Activity exists.
+            Activity.Current?.TraceId.ToHexString() ?? context.TraceIdentifier));
 
         var success = false;
         try

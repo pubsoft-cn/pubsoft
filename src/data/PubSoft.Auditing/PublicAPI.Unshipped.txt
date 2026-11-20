@@ -71,10 +71,10 @@ PubSoft.Auditing.AuditLogEntry
 PubSoft.Auditing.AuditLogEntry.<Clone>$() -> PubSoft.Auditing.AuditLogEntry!
 PubSoft.Auditing.AuditLogEntry.Actor.get -> PubSoft.Auditing.AuditActorContext?
 PubSoft.Auditing.AuditLogEntry.Actor.init -> void
-PubSoft.Auditing.AuditLogEntry.AuditLogEntry(PubSoft.Auditing.AuditBusinessContext! Business, PubSoft.Auditing.AuditActorContext? Actor = null, bool Success = true, string? FailureCode = null, System.TimeSpan? Duration = null, System.Collections.Generic.IReadOnlyDictionary<string!, string!>? Metrics = null) -> void
+PubSoft.Auditing.AuditLogEntry.AuditLogEntry(PubSoft.Auditing.AuditBusinessContext! Business, PubSoft.Auditing.AuditActorContext? Actor = null, bool Success = true, string? FailureCode = null, System.TimeSpan? Duration = null, System.Collections.Generic.IReadOnlyDictionary<string!, string!>? Metrics = null, string? TraceId = null) -> void
 PubSoft.Auditing.AuditLogEntry.Business.get -> PubSoft.Auditing.AuditBusinessContext!
 PubSoft.Auditing.AuditLogEntry.Business.init -> void
-PubSoft.Auditing.AuditLogEntry.Deconstruct(out PubSoft.Auditing.AuditBusinessContext! Business, out PubSoft.Auditing.AuditActorContext? Actor, out bool Success, out string? FailureCode, out System.TimeSpan? Duration, out System.Collections.Generic.IReadOnlyDictionary<string!, string!>? Metrics) -> void
+PubSoft.Auditing.AuditLogEntry.Deconstruct(out PubSoft.Auditing.AuditBusinessContext! Business, out PubSoft.Auditing.AuditActorContext? Actor, out bool Success, out string? FailureCode, out System.TimeSpan? Duration, out System.Collections.Generic.IReadOnlyDictionary<string!, string!>? Metrics, out string? TraceId) -> void
 PubSoft.Auditing.AuditLogEntry.Duration.get -> System.TimeSpan?
 PubSoft.Auditing.AuditLogEntry.Duration.init -> void
 PubSoft.Auditing.AuditLogEntry.Equals(PubSoft.Auditing.AuditLogEntry? other) -> bool
@@ -84,6 +84,8 @@ PubSoft.Auditing.AuditLogEntry.Metrics.get -> System.Collections.Generic.IReadOn
 PubSoft.Auditing.AuditLogEntry.Metrics.init -> void
 PubSoft.Auditing.AuditLogEntry.Success.get -> bool
 PubSoft.Auditing.AuditLogEntry.Success.init -> void
+PubSoft.Auditing.AuditLogEntry.TraceId.get -> string?
+PubSoft.Auditing.AuditLogEntry.TraceId.init -> void
 PubSoft.Auditing.AuditLogWriter
 PubSoft.Auditing.AuditLogWriter.AuditLogWriter(PubSoft.Auditing.IAuditSnapshotSink! sink, System.TimeProvider? timeProvider = null) -> void
 PubSoft.Auditing.AuditLogWriter.WriteAsync(PubSoft.Auditing.AuditLogEntry! entry, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
@@ -102,10 +104,10 @@ PubSoft.Auditing.AuditRequestContext
 PubSoft.Auditing.AuditRequestContext.<Clone>$() -> PubSoft.Auditing.AuditRequestContext!
 PubSoft.Auditing.AuditRequestContext.Actor.get -> PubSoft.Auditing.AuditActorContext?
 PubSoft.Auditing.AuditRequestContext.Actor.init -> void
-PubSoft.Auditing.AuditRequestContext.AuditRequestContext(System.DateTimeOffset StartedAt, string? HttpMethod, string? RequestPath, string? ClientIp = null, string? UserAgent = null, PubSoft.Auditing.AuditActorContext? Actor = null) -> void
+PubSoft.Auditing.AuditRequestContext.AuditRequestContext(System.DateTimeOffset StartedAt, string? HttpMethod, string? RequestPath, string? ClientIp = null, string? UserAgent = null, PubSoft.Auditing.AuditActorContext? Actor = null, string? TraceId = null) -> void
 PubSoft.Auditing.AuditRequestContext.ClientIp.get -> string?
 PubSoft.Auditing.AuditRequestContext.ClientIp.init -> void
-PubSoft.Auditing.AuditRequestContext.Deconstruct(out System.DateTimeOffset StartedAt, out string? HttpMethod, out string? RequestPath, out string? ClientIp, out string? UserAgent, out PubSoft.Auditing.AuditActorContext? Actor) -> void
+PubSoft.Auditing.AuditRequestContext.Deconstruct(out System.DateTimeOffset StartedAt, out string? HttpMethod, out string? RequestPath, out string? ClientIp, out string? UserAgent, out PubSoft.Auditing.AuditActorContext? Actor, out string? TraceId) -> void
 PubSoft.Auditing.AuditRequestContext.Equals(PubSoft.Auditing.AuditRequestContext? other) -> bool
 PubSoft.Auditing.AuditRequestContext.HttpMethod.get -> string?
 PubSoft.Auditing.AuditRequestContext.HttpMethod.init -> void
@@ -113,6 +115,8 @@ PubSoft.Auditing.AuditRequestContext.RequestPath.get -> string?
 PubSoft.Auditing.AuditRequestContext.RequestPath.init -> void
 PubSoft.Auditing.AuditRequestContext.StartedAt.get -> System.DateTimeOffset
 PubSoft.Auditing.AuditRequestContext.StartedAt.init -> void
+PubSoft.Auditing.AuditRequestContext.TraceId.get -> string?
+PubSoft.Auditing.AuditRequestContext.TraceId.init -> void
 PubSoft.Auditing.AuditRequestContext.UserAgent.get -> string?
 PubSoft.Auditing.AuditRequestContext.UserAgent.init -> void
 PubSoft.Auditing.AuditRequestSnapshot

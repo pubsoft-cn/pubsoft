@@ -50,7 +50,7 @@ app.UsePubSoftAudit(new AuditMiddlewareOptions
 });
 ```
 
-IP/User-Agent/Actor 采集默认关闭——评审隐私、代理、身份与保留要求后再启用。actor 映射由宿主经 `IAuditActorAccessor` 提供；本适配器不解释 claims。审计 sink 失败记日志，不替换应用响应。
+IP/User-Agent/Actor 采集默认关闭——评审隐私、代理、身份与保留要求后再启用。actor 映射由宿主经 `IAuditActorAccessor` 提供；本适配器不解释 claims。审计 sink 失败记日志，不替换应用响应。每条 snapshot 同时携带 ambient W3C `Activity` 的 trace id（无 Activity 时回落请求关联 id）——无需 opt-in，它是审计行与分布式 trace、CDC 事件流 join 的关联键。
 
 ## 签名客户端凭证
 

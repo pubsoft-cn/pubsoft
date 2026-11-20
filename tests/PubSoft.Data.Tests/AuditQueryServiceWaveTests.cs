@@ -36,7 +36,7 @@ public sealed class AuditQueryServiceWaveTests
         return (c, new AuditLogQueryService<Ctx>(c));
     }
 
-    private static AuditLogRecord Rec(string path, bool ok = true, string? cat = null, string? act = null, long? tenant = null)
+    private static AuditLogRecord Rec(string path, bool ok = true, string? cat = null, string? act = null, long? tenant = null, string? traceId = null)
         => new()
         {
             Id = PubSoft.Testing.TestIds.Next(),
@@ -47,6 +47,7 @@ public sealed class AuditQueryServiceWaveTests
             Category = cat,
             Action = act,
             TenantId = tenant,
+            TraceId = traceId,
             StartedAt = DateTimeOffset.UtcNow
         };
 
@@ -115,6 +116,20 @@ public sealed class AuditQueryServiceWaveTests
 
         var r = await s.GetListAsync(includeAllTenants: true);
         Assert.Equal(["/newest", "/middle", "/oldest"], r.Items.Select(i => i.RequestPath).ToList());
+    }
+
+    [Fact]
+    public async Task TraceIdFilterMatchesExactly()
+    {
+        var (_, s) = Build(
+            Rec("/a", traceId: "fbe13a8493c655cdaa63f19080c322ed"),
+            Rec("/b", traceId: "0af7651916cd43ee8448eb211c80319c"),
+            Rec("/c"));
+
+        var hit = await s.GetListAsync(
+            traceId: "fbe13a8493c655cdaa63f19080c322ed", includeAllTenants: true);
+        Assert.Single(hit.Items);
+        Assert.Equal("/a", hit.Items[0].RequestPath);
     }
 
     // R2: missing tenant context must NOT auto-elevate to cross-tenant read.
