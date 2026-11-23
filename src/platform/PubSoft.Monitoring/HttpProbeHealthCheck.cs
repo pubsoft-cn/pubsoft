@@ -40,35 +40,10 @@ public sealed class HttpProbeHealthCheck : IProbeHealthCheck
             return ProbeHealth.Healthy;
 
         var httpClient = _httpClientFactory.CreateClient(MonitoringOptions.HttpClientName);
-        var successfulTargets = 0;
-
-        foreach (var target in _targets)
-        {
-            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            timeout.CancelAfter(_probeTimeout);
-
-            try
-            {
-                using var response = await httpClient.GetAsync(
-                    target,
-                    HttpCompletionOption.ResponseHeadersRead,
-                    timeout.Token).ConfigureAwait(false);
-                if (response.IsSuccessStatusCode)
-                    successfulTargets++;
-            }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-            {
-                throw;
-            }
-            catch (OperationCanceledException)
-            {
-                _logger?.LogDebug("Monitoring probe target timed out.");
-            }
-            catch (HttpRequestException)
-            {
-                _logger?.LogDebug("Monitoring probe target request failed.");
-            }
-        }
+        var outcomes = await Task.WhenAll(_targets
+            .Select(target => ProbeTargetAsync(httpClient, target, cancellationToken)))
+            .ConfigureAwait(false);
+        var successfulTargets = outcomes.Count(outcome => outcome);
 
         var successRatio = (double)successfulTargets / _targets.Length;
         var health = successRatio >= _minimumSuccessRatio ? ProbeHealth.Healthy : ProbeHealth.Unreachable;
@@ -77,5 +52,34 @@ public sealed class HttpProbeHealthCheck : IProbeHealthCheck
                 successfulTargets, _targets.Length);
 
         return health;
+    }
+
+    private async Task<bool> ProbeTargetAsync(HttpClient httpClient, Uri target, CancellationToken cancellationToken)
+    {
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(_probeTimeout);
+
+        try
+        {
+            using var response = await httpClient.GetAsync(
+                target,
+                HttpCompletionOption.ResponseHeadersRead,
+                timeout.Token).ConfigureAwait(false);
+            return response.IsSuccessStatusCode;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (OperationCanceledException)
+        {
+            _logger?.LogDebug("Monitoring probe target timed out.");
+            return false;
+        }
+        catch (HttpRequestException)
+        {
+            _logger?.LogDebug("Monitoring probe target request failed.");
+            return false;
+        }
     }
 }

@@ -72,6 +72,37 @@ public sealed class MonitoringTests
     }
 
     [Fact]
+    public async Task CheckAsyncProbesTargetsConcurrently()
+    {
+        var inFlight = 0;
+        var peak = 0;
+        var handler = new DelegateHandler(async (_, cancellationToken) =>
+        {
+            var current = Interlocked.Increment(ref inFlight);
+            int observed;
+            while (current > (observed = Volatile.Read(ref peak)))
+                if (Interlocked.CompareExchange(ref peak, current, observed) == observed)
+                    break;
+            try
+            {
+                await Task.Delay(50, cancellationToken);
+                return new HttpResponseMessage(HttpStatusCode.OK);
+            }
+            finally
+            {
+                Interlocked.Decrement(ref inFlight);
+            }
+        });
+        var check = CreateCheck(new MonitoringOptions
+        {
+            ProbeTargets = ["https://probe.test/a", "https://probe.test/b", "https://probe.test/c"]
+        }, new TestHttpClientFactory(handler));
+
+        Assert.Equal(ProbeHealth.Healthy, await check.CheckAsync());
+        Assert.Equal(3, peak);
+    }
+
+    [Fact]
     public async Task CheckAsyncPropagatesCallerCancellation()
     {
         var handler = new DelegateHandler(async (_, cancellationToken) =>

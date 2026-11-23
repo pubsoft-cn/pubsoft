@@ -26,7 +26,7 @@ services.AddPubSoftMonitoring(options =>
 });
 ```
 
-`IProbeHealthCheck` 顺序发起 GET，2xx 视为成功。默认每目标超时 3 秒、最低成功率 0.5。空目标列表不发外部请求直接报 `ProbeHealth.Healthy`——适合未配置外部依赖时，但不证明依赖可用。调用方取消传播；单目标超时与请求失败计为失败目标。URL 中勿放凭据——需要认证时配置显式 HttpClient handler。
+`IProbeHealthCheck` 并行向所有目标发起 GET，2xx 视为成功。默认每目标超时 3 秒、最低成功率 0.5。空目标列表不发外部请求直接报 `ProbeHealth.Healthy`——适合未配置外部依赖时，但不证明依赖可用。调用方取消传播；单目标超时与请求失败计为失败目标。URL 中勿放凭据——需要认证时配置显式 HttpClient handler。
 
 ## 应用检查
 

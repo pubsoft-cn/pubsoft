@@ -27,7 +27,7 @@ services.AddPubSoftMonitoring(options =>
 });
 ```
 
-The `IProbeHealthCheck` issues sequential GET requests and considers 2xx responses successful. Its default per-target timeout is three seconds and default minimum success ratio is 0.5. An empty target list reports `ProbeHealth.Healthy` without making an external request; this is useful when no external dependency is configured, but it does not prove dependency availability. Caller cancellation propagates; individual timeouts and HTTP request failures count as failed targets. Avoid placing credentials in URLs; authentication, if required, belongs in an explicitly configured HTTP client handler.
+The `IProbeHealthCheck` issues GET requests to all configured targets in parallel and considers 2xx responses successful. Its default per-target timeout is three seconds and default minimum success ratio is 0.5. An empty target list reports `ProbeHealth.Healthy` without making an external request; this is useful when no external dependency is configured, but it does not prove dependency availability. Caller cancellation propagates; individual timeouts and HTTP request failures count as failed targets. Avoid placing credentials in URLs; authentication, if required, belongs in an explicitly configured HTTP client handler.
 
 ## Application Checks
 
