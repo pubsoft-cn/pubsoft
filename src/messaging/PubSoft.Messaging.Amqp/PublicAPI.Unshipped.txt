@@ -1,4 +1,28 @@
 #nullable enable
+PubSoft.Messaging.Amqp.AmqpInboxOptions
+PubSoft.Messaging.Amqp.AmqpInboxOptions.AmqpInboxOptions() -> void
+PubSoft.Messaging.Amqp.AmqpInboxOptions.BindingKey.get -> string!
+PubSoft.Messaging.Amqp.AmqpInboxOptions.BindingKey.set -> void
+PubSoft.Messaging.Amqp.AmqpInboxOptions.BrokerUri.get -> string!
+PubSoft.Messaging.Amqp.AmqpInboxOptions.BrokerUri.set -> void
+PubSoft.Messaging.Amqp.AmqpInboxOptions.ConsumerName.get -> string!
+PubSoft.Messaging.Amqp.AmqpInboxOptions.ConsumerName.set -> void
+PubSoft.Messaging.Amqp.AmqpInboxOptions.DeclareTopology.get -> bool
+PubSoft.Messaging.Amqp.AmqpInboxOptions.DeclareTopology.set -> void
+PubSoft.Messaging.Amqp.AmqpInboxOptions.EventTypePrefix.get -> string!
+PubSoft.Messaging.Amqp.AmqpInboxOptions.EventTypePrefix.set -> void
+PubSoft.Messaging.Amqp.AmqpInboxOptions.Exchange.get -> string!
+PubSoft.Messaging.Amqp.AmqpInboxOptions.Exchange.set -> void
+PubSoft.Messaging.Amqp.AmqpInboxOptions.ExchangeType.get -> string!
+PubSoft.Messaging.Amqp.AmqpInboxOptions.ExchangeType.set -> void
+PubSoft.Messaging.Amqp.AmqpInboxOptions.PrefetchCount.get -> ushort
+PubSoft.Messaging.Amqp.AmqpInboxOptions.PrefetchCount.set -> void
+PubSoft.Messaging.Amqp.AmqpInboxOptions.Queue.get -> string!
+PubSoft.Messaging.Amqp.AmqpInboxOptions.Queue.set -> void
+PubSoft.Messaging.Amqp.AmqpInboxOptions.ReconnectDelay.get -> System.TimeSpan
+PubSoft.Messaging.Amqp.AmqpInboxOptions.ReconnectDelay.set -> void
+PubSoft.Messaging.Amqp.AmqpInboxSubscriber
+PubSoft.Messaging.Amqp.AmqpInboxSubscriber.AmqpInboxSubscriber(PubSoft.Messaging.Amqp.AmqpInboxOptions! options, PubSoft.Messaging.Outbox.IInboxMessageProcessor! inbox, System.Func<string!, string!, System.Threading.CancellationToken, System.Threading.Tasks.Task!>! handler, Microsoft.Extensions.Logging.ILogger<PubSoft.Messaging.Amqp.AmqpInboxSubscriber!>? logger = null) -> void
 PubSoft.Messaging.Amqp.AmqpOutboxDispatcher
 PubSoft.Messaging.Amqp.AmqpOutboxDispatcher.AmqpOutboxDispatcher(PubSoft.Messaging.Amqp.AmqpOutboxOptions! options, Microsoft.Extensions.Logging.ILogger<PubSoft.Messaging.Amqp.AmqpOutboxDispatcher!>? logger = null) -> void
 PubSoft.Messaging.Amqp.AmqpOutboxDispatcher.DispatchAsync(PubSoft.Messaging.Outbox.OutboxMessage! message, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!

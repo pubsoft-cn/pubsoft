@@ -10,7 +10,9 @@ last-reviewed: 2026-11-18
 AMQP 0-9-1 (RabbitMQ) transport for the PubSoft transactional outbox —
 `AmqpOutboxDispatcher` publishes `OutboxMessage` payloads to
 `{RoutingKeyPrefix}{EventType}` on a declared durable exchange, with publisher
-confirms acking broker acceptance before the outbox marks the row delivered.
+confirms acking broker acceptance before the outbox marks the row delivered;
+`AmqpInboxSubscriber` consumes them through `IInboxMessageProcessor` with
+`InboxReceipt` dedup.
 
 ## Broker requirements
 
@@ -35,7 +37,30 @@ services.AddPubSoftAmqpOutboxDispatcher(o =>
     o.Exchange = "pubsoft.outbox";                        // declared durable topic
     o.RoutingKeyPrefix = "outbox.";                       // key = prefix + EventType
 });
+
+services.AddHostedService(sp => new AmqpInboxSubscriber(
+    new AmqpInboxOptions
+    {
+        BrokerUri = "amqp://user:pass@broker:5672/vhost",
+        Queue = "order-svc.outbox.inbox",                 // durable; declared when DeclareTopology is on
+        Exchange = "pubsoft.outbox",
+        BindingKey = "outbox.#",                          // matches the publisher's routing keys
+        ConsumerName = "order-svc",                       // InboxReceipt dedup identity — per logical consumer
+        PrefetchCount = 16,
+    },
+    sp.GetRequiredService<IInboxMessageProcessor>(),
+    (eventType, payloadJson, ct) => HandleEventAsync(eventType, payloadJson, ct)));
 ```
+
+The subscriber consumes with manual ack: a delivery is acked only after
+`IInboxMessageProcessor` completes (handled or already receipted). Handler or
+processor failures nack with `requeue: true`, so the broker redelivers — bound
+poison-message redelivery loops with a dead-letter exchange or a quorum-queue
+`x-delivery-limit`. Deliveries without an `x-outbox-id` header are acked and
+dropped (not outbox traffic). `DeclareTopology = false` switches to
+externally-managed topology — the queue must then already exist and be bound.
+The reconnect loop re-subscribes after connection loss with `ReconnectDelay`
+backoff.
 
 ## Delivery guarantees and residuals
 
@@ -45,9 +70,11 @@ services.AddPubSoftAmqpOutboxDispatcher(o =>
 | Unroutable messages are not dropped silently | `mandatory` return → `InvalidOperationException`; a return racing past the confirm window is logged |
 | Consumer dedup | `x-outbox-id` header — identical contract to the MQTT transport (`PubSoft.Messaging.Outbox.OutboxHeaders`) |
 
-Residual host responsibilities: queue topology and bindings (the dispatcher
-declares only its own exchange), vhost/credential custody, consumer-side inbox
-processing, and broker-side retention policies.
+Residual host responsibilities: vhost/credential custody, the event handler
+wired to `AmqpInboxSubscriber`, dead-letter topology for poison messages, and
+broker-side retention policies. Topology declaration is opt-out — the
+subscriber declares exchange/queue/binding itself unless `DeclareTopology` is
+disabled.
 
 ## API surface
 
@@ -63,6 +90,6 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
-`BrokerUri`, `Exchange`, `ExchangeType`, `Mandatory`, `MaxPayloadBytes`, `PublishTimeout`, `RoutingKeyPrefix`
+`BindingKey`, `BrokerUri`, `ConsumerName`, `DeclareTopology`, `EventTypePrefix`, `Exchange`, `ExchangeType`, `Mandatory`, `MaxPayloadBytes`, `PrefetchCount`, `PublishTimeout`, `Queue`, `ReconnectDelay`, `RoutingKeyPrefix`
 
 <!-- pubsoft:api-surface:end -->
