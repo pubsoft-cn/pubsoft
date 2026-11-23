@@ -21,7 +21,7 @@ public sealed class LoggingResultProcessor : IResultProcessor
         if (result.Success)
             _logger?.LogInformation("Job {Name} succeeded (status={Status})", job.Name, result.StatusCode);
         else
-            _logger?.LogWarning("Job {Name} failed: {Error}", job.Name, result.ErrorMessage);
+            _logger?.LogWarning("Job {Name} failed: {Error} (status={Status})", job.Name, result.ErrorMessage, result.StatusCode);
         return Task.CompletedTask;
     }
 }

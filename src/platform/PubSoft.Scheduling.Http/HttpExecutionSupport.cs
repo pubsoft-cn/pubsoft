@@ -17,13 +17,13 @@ internal sealed class HttpExecutionSupport
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ITokenProvider? _tokenProvider;
     private readonly HttpExecutorOptions _options;
-    private readonly ILogger<HttpExecutionSupport>? _logger;
+    private readonly ILogger? _logger;
 
     public HttpExecutionSupport(
         IHttpClientFactory httpClientFactory,
         IOptions<HttpExecutorOptions> options,
         ITokenProvider? tokenProvider = null,
-        ILogger<HttpExecutionSupport>? logger = null)
+        ILogger? logger = null)
     {
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
@@ -51,12 +51,14 @@ internal sealed class HttpExecutionSupport
         {
             config = job.ExecutorConfig.Deserialize(SchedulingHttpJsonContext.Default.HttpExecutorConfig)!;
         }
-        catch (JsonException)
+        catch (JsonException exception)
         {
+            _logger?.LogDebug(exception, "HTTP executor config is not valid JSON: {Message}", exception.Message);
             return false;
         }
-        catch (InvalidOperationException)
+        catch (InvalidOperationException exception)
         {
+            _logger?.LogDebug(exception, "HTTP executor config could not be deserialized: {Message}", exception.Message);
             return false;
         }
 
@@ -211,7 +213,9 @@ internal sealed class HttpExecutionSupport
             var succeeded = config.ExpectStatusCodes.Contains(statusCode);
             if (!succeeded)
                 _logger?.LogDebug("HTTP scheduler request returned status {StatusCode}.", statusCode);
-            return (HttpAttemptResult.Response(succeeded, statusCode, stopwatch.Elapsed), null);
+            return (HttpAttemptResult.Response(
+                succeeded, statusCode, stopwatch.Elapsed,
+                succeeded ? null : $"unexpected status {statusCode}"), null);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -237,8 +241,8 @@ internal sealed record HttpAttemptResult(
     string? ErrorMessage,
     Exception? Exception)
 {
-    public static HttpAttemptResult Response(bool success, int statusCode, TimeSpan elapsed)
-        => new(success, statusCode, (int)elapsed.TotalMilliseconds, null, null);
+    public static HttpAttemptResult Response(bool success, int statusCode, TimeSpan elapsed, string? errorMessage = null)
+        => new(success, statusCode, (int)elapsed.TotalMilliseconds, errorMessage, null);
 
     public static HttpAttemptResult Failure(int statusCode, TimeSpan elapsed, string error, Exception? exception = null)
         => new(false, statusCode, (int)elapsed.TotalMilliseconds, error, exception);

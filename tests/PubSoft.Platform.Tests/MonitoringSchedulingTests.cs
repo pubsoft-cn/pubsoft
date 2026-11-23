@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PubSoft.Monitoring;
 using PubSoft.Monitoring.Scheduling;
@@ -151,6 +152,52 @@ public sealed class MonitoringSchedulingTests
     }
 
     [Fact]
+    public async Task InvalidRuleConfigurationReportsTheRuleIndexAndReason()
+    {
+        var logger = new ListLogger<AlertRuleProcessor>();
+        var processor = new AlertRuleProcessor(
+            new MemoryStateStore(),
+            new NotificationDispatcher([]),
+            new TestProbe(),
+            Options.Create(new AlertProcessorOptions { FailureThreshold = 1 }),
+            logger: logger);
+        var job = new ScheduledJob
+        {
+            Name = "test-job",
+            ResultProcessorConfig = JsonDocument.Parse("""
+                {"Rules":[{"Name":"a","Condition":"StateConfirmed","Channels":["email"]},
+                          {"Name":"a","Condition":"EveryFailure","Channels":["email"]}]}
+                """).RootElement.Clone()
+        };
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+
+        Assert.Contains(logger.Messages, message =>
+            message.Contains("Alert rule 1") && message.Contains("duplicated", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public async Task MalformedRuleJsonReportsTheJsonError()
+    {
+        var logger = new ListLogger<AlertRuleProcessor>();
+        var processor = new AlertRuleProcessor(
+            new MemoryStateStore(),
+            new NotificationDispatcher([]),
+            new TestProbe(),
+            Options.Create(new AlertProcessorOptions { FailureThreshold = 1 }),
+            logger: logger);
+        var job = new ScheduledJob
+        {
+            Name = "test-job",
+            ResultProcessorConfig = JsonDocument.Parse("""{"Rules":[{"Condition":"bogus"}]}""").RootElement.Clone()
+        };
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+
+        Assert.Contains(logger.Messages, message => message.Contains("not valid JSON", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public async Task ProcessorPropagatesCallerCancellation()
     {
         var probe = new TestProbe { Health = ProbeHealth.Healthy };
@@ -284,6 +331,18 @@ public sealed class MonitoringSchedulingTests
             Messages.Add(message);
             return Task.FromResult(Result);
         }
+    }
+
+    private sealed class ListLogger<T> : ILogger<T>
+    {
+        public List<string> Messages { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+            => Messages.Add(formatter(state, exception));
     }
 
     private sealed class MutableTimeProvider(DateTimeOffset now) : TimeProvider

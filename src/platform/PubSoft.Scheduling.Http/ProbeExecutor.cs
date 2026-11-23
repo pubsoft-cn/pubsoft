@@ -17,7 +17,7 @@ public sealed class ProbeExecutor : IJobExecutor
         ITokenProvider? tokenProvider = null,
         ILogger<ProbeExecutor>? logger = null)
     {
-        _http = new HttpExecutionSupport(httpClientFactory, options, tokenProvider);
+        _http = new HttpExecutionSupport(httpClientFactory, options, tokenProvider, logger);
         _logger = logger;
     }
 

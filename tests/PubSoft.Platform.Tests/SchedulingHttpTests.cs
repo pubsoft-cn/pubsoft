@@ -43,6 +43,20 @@ public sealed class SchedulingHttpTests
     }
 
     [Fact]
+    public async Task ProbeFailureResultCarriesTheUnexpectedStatusCode()
+    {
+        var handler = new RecordingHandler(HttpStatusCode.Unauthorized);
+        var executor = CreateProbe(handler);
+
+        var result = await executor.ExecuteAsync(
+            CreateJob(new HttpExecutorConfig { Url = "https://service.test/probe" }), default);
+
+        Assert.False(result.Success);
+        Assert.Equal((int)HttpStatusCode.Unauthorized, result.StatusCode);
+        Assert.Equal("unexpected status 401", result.ErrorMessage);
+    }
+
+    [Fact]
     public async Task ProbeNeverRetriesEvenWhenRetryPolicyIsConfigured()
     {
         var handler = new RecordingHandler(HttpStatusCode.ServiceUnavailable, HttpStatusCode.OK);

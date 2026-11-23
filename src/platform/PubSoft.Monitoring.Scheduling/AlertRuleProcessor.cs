@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -89,7 +90,7 @@ public sealed class AlertRuleProcessor : IResultProcessor
             if (wasProbeUnreachable)
                 await _stateStore.RemoveCustomStateAsync(probeKey, cancellationToken).ConfigureAwait(false);
 
-            if (!TryReadAlertRules(job.ResultProcessorConfig, out var config))
+            if (!TryReadAlertRules(job.ResultProcessorConfig, _logger, out var config))
             {
                 _logger?.LogWarning("Alert rule configuration is invalid; no alerts will be dispatched.");
                 return;
@@ -193,7 +194,7 @@ public sealed class AlertRuleProcessor : IResultProcessor
             correlationId: correlationId);
     }
 
-    private static bool TryReadAlertRules(JsonElement element, out AlertRuleConfig config)
+    private static bool TryReadAlertRules(JsonElement element, ILogger? logger, out AlertRuleConfig config)
     {
         config = new AlertRuleConfig();
         if (element.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null)
@@ -203,28 +204,50 @@ public sealed class AlertRuleProcessor : IResultProcessor
         {
             config = element.Deserialize(AlertJsonContext.Default.AlertRuleConfig)!;
         }
-        catch (JsonException)
+        catch (JsonException exception)
         {
+            logger?.LogWarning(exception, "Alert rule configuration is not valid JSON: {Message}", exception.Message);
             return false;
         }
 
-        if (config?.Rules is null || config.Rules.Count > 100)
+        if (config?.Rules is null)
+        {
+            logger?.LogWarning("Alert rule configuration has no 'Rules' array.");
             return false;
+        }
+        if (config.Rules.Count > 100)
+        {
+            logger?.LogWarning("Alert rule configuration declares {Count} rules; the limit is 100.", config.Rules.Count);
+            return false;
+        }
 
         var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        return config.Rules.All(rule => IsValidRule(rule, names));
+        for (var index = 0; index < config.Rules.Count; index++)
+        {
+            if (!IsValidRule(config.Rules[index], names, out var reason))
+            {
+                logger?.LogWarning("Alert rule {Index} ('{Name}') is invalid: {Reason}",
+                    index, config.Rules[index]?.Name, reason);
+                return false;
+            }
+        }
+        return true;
     }
 
-    private static bool IsValidRule(AlertRule? rule, HashSet<string> names)
-        => rule is not null
-            && !string.IsNullOrWhiteSpace(rule.Name)
-            && names.Add(rule.Name)
-            && Enum.IsDefined(rule.Condition)
-            && Enum.IsDefined(rule.Severity)
-            && rule.Channels is { Length: <= 20 }
-            && rule.Channels.All(channel => !string.IsNullOrWhiteSpace(channel))
-            && (rule.Throttle is null || rule.Throttle >= TimeSpan.Zero)
-            && rule.DelayThresholdMs is not < 0;
+    private static bool IsValidRule(AlertRule? rule, HashSet<string> names, [NotNullWhen(false)] out string? reason)
+    {
+        reason = null;
+        if (rule is null) { reason = "entry is null"; return false; }
+        if (string.IsNullOrWhiteSpace(rule.Name)) { reason = "Name is required"; return false; }
+        if (!names.Add(rule.Name)) { reason = "Name is duplicated"; return false; }
+        if (!Enum.IsDefined(rule.Condition)) { reason = $"Condition '{rule.Condition}' is not a declared value"; return false; }
+        if (!Enum.IsDefined(rule.Severity)) { reason = $"Severity '{rule.Severity}' is not a declared value"; return false; }
+        if (rule.Channels is not { Length: <= 20 } || rule.Channels.Any(string.IsNullOrWhiteSpace))
+        { reason = "Channels must hold at most 20 non-empty names"; return false; }
+        if (rule.Throttle is { } throttle && throttle < TimeSpan.Zero) { reason = "Throttle must not be negative"; return false; }
+        if (rule.DelayThresholdMs < 0) { reason = "DelayThresholdMs must not be negative"; return false; }
+        return true;
+    }
 
     private static string GetStableKey(string value)
         => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value)));

@@ -21,7 +21,7 @@ public sealed class ResilientExecutor : IJobExecutor
         ITokenProvider? tokenProvider = null,
         ILogger<ResilientExecutor>? logger = null)
     {
-        _http = new HttpExecutionSupport(httpClientFactory, options, tokenProvider);
+        _http = new HttpExecutionSupport(httpClientFactory, options, tokenProvider, logger);
         _circuitBreaker = circuitBreaker ?? throw new ArgumentNullException(nameof(circuitBreaker));
         _logger = logger;
     }
