@@ -28,12 +28,18 @@ public sealed class SchedulerHostedService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger?.LogInformation("Scheduler started.");
+        var schedulesLinted = false;
         while (!stoppingToken.IsCancellationRequested)
         {
             SchedulerOptions? options = null;
             try
             {
                 options = _options.CurrentValue;
+                if (!schedulesLinted)
+                {
+                    schedulesLinted = true;
+                    LogConfiguredSchedules(options);
+                }
                 await _engine.RunDueJobsAsync(options, _timeProvider.GetUtcNow(), stoppingToken).ConfigureAwait(false);
                 await Task.Delay(options.LoopInterval, _timeProvider, stoppingToken).ConfigureAwait(false);
             }
@@ -48,5 +54,18 @@ public sealed class SchedulerHostedService : BackgroundService
             }
         }
         _logger?.LogInformation("Scheduler stopped.");
+    }
+
+    /// <summary>Startup lint: echoes each job's decoded schedule and flags the classic "fires every second inside a restricted window" misconfiguration.</summary>
+    private void LogConfiguredSchedules(SchedulerOptions options)
+    {
+        foreach (var job in options.Jobs)
+        {
+            _logger?.LogInformation("Job {Name} schedule: {Schedule}", job.Name, job.Schedule.Describe());
+            if (job.Schedule.RunsEverySecondInRestrictedWindow)
+                _logger?.LogWarning(
+                    "Job {Name} fires every second inside a restricted window ({Schedule}); a sparse Seconds field was probably intended.",
+                    job.Name, job.Schedule.Describe());
+        }
     }
 }

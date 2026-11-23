@@ -101,6 +101,7 @@ PubSoft.Scheduling.ResultProcessorRegistry.ResultProcessorRegistry(System.Collec
 PubSoft.Scheduling.ScheduleMask
 PubSoft.Scheduling.ScheduleMask.DaysOfMonth.get -> uint
 PubSoft.Scheduling.ScheduleMask.DaysOfWeek.get -> byte
+PubSoft.Scheduling.ScheduleMask.Describe() -> string!
 PubSoft.Scheduling.ScheduleMask.Hours.get -> uint
 PubSoft.Scheduling.ScheduleMask.IsValid.get -> bool
 PubSoft.Scheduling.ScheduleMask.Matches(System.DateTimeOffset timestamp) -> bool

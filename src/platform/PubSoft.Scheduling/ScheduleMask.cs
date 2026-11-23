@@ -63,6 +63,12 @@ public readonly struct ScheduleMask
     public static ScheduleMask EveryDay { get; } = new(
         1UL, 1UL, 1U, DayOfMonthMask, MonthMask, DayOfWeekMask);
 
+    /// <summary>Fires every second inside a restricted window - the classic "Minutes: 1 meant every minute" misconfiguration.</summary>
+    internal bool RunsEverySecondInRestrictedWindow
+        => Seconds == FieldMask60
+            && (Minutes != FieldMask60 || Hours != FieldMask24
+                || DaysOfMonth != DayOfMonthMask || Months != MonthMask || DaysOfWeek != DayOfWeekMask);
+
     /// <summary>Whether the timestamp matches every field.</summary>
     public bool Matches(DateTimeOffset timestamp)
     {
@@ -145,10 +151,39 @@ public readonly struct ScheduleMask
         return null;
     }
 
+    /// <summary>Renders the mask as compact per-field text for logs and config review (e.g. "seconds=* minutes={0} hours=* ...").</summary>
+    public string Describe()
+        => $"seconds={DescribeField(Seconds, FieldMask60)}"
+            + $" minutes={DescribeField(Minutes, FieldMask60)}"
+            + $" hours={DescribeField(Hours, FieldMask24)}"
+            + $" days-of-month={DescribeField(DaysOfMonth, DayOfMonthMask)}"
+            + $" months={DescribeField(Months, MonthMask)}"
+            + $" days-of-week={DescribeField(DaysOfWeek, DayOfWeekMask)}";
+
     private bool DateMatches(DateTime date)
         => (Months & (1 << date.Month)) != 0
             && (DaysOfMonth & (1U << date.Day)) != 0
             && (DaysOfWeek & (1 << (int)date.DayOfWeek)) != 0;
+
+    private static string DescribeField(ulong value, ulong fullMask)
+    {
+        if (value == fullMask)
+            return "*";
+
+        var listed = new List<int>();
+        var count = 0;
+        for (var bit = 0; bit < 64; bit++)
+        {
+            if ((value & (1UL << bit)) == 0)
+                continue;
+            count++;
+            if (listed.Count < 8)
+                listed.Add(bit);
+        }
+
+        var suffix = count > listed.Count ? $",+{count - listed.Count}" : "";
+        return $"{{{string.Join(',', listed)}{suffix}}}";
+    }
 
     private static void ValidateField(ulong value, ulong allowed, string name)
     {

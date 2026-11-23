@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Configuration;
@@ -13,6 +14,17 @@ namespace PubSoft.Scheduling;
 /// </summary>
 internal static class SchedulerConfigurationBinding
 {
+    private static readonly FrozenSet<string> s_scheduleKeys = new[]
+    {
+        "Seconds", "Minutes", "Hours", "DaysOfMonth", "Months", "DaysOfWeek",
+        "EverySeconds", "EveryMinutes", "EveryHours", "Cron"
+    }.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
+
+    private static readonly FrozenSet<string> s_bitmaskScheduleKeys = new[]
+    {
+        "Seconds", "Minutes", "Hours", "DaysOfMonth", "Months", "DaysOfWeek"
+    }.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
+
     public static SchedulerOptions Bind(IConfiguration section)
     {
         var options = new SchedulerOptions();
@@ -65,15 +77,7 @@ internal static class SchedulerConfigurationBinding
 
         var schedule = section.GetSection("Schedule");
         if (schedule.Exists())
-        {
-            job.Schedule = new ScheduleMask(
-                ReadULong(schedule, "Seconds"),
-                ReadULong(schedule, "Minutes"),
-                ReadUInt(schedule, "Hours"),
-                ReadUInt(schedule, "DaysOfMonth"),
-                ReadUShort(schedule, "Months"),
-                ReadByte(schedule, "DaysOfWeek"));
-        }
+            job.Schedule = BindSchedule(section, schedule);
 
         foreach (var processor in section.GetSection("ResultProcessors").GetChildren())
         {
@@ -88,6 +92,64 @@ internal static class SchedulerConfigurationBinding
 
         return job;
     }
+
+    /// <summary>
+    /// Schedules bind from interval shortcuts (EverySeconds/EveryMinutes/EveryHours) or the six
+    /// bitmask fields - never both. Unknown keys fail loudly: a typo'd or unsupported spec
+    /// silently degrading to "never run" (or "every second") is worse than a startup error.
+    /// </summary>
+    private static ScheduleMask BindSchedule(IConfiguration jobSection, IConfigurationSection schedule)
+    {
+        if (schedule.Value is { } scalar)
+            throw InvalidSchedule(jobSection, $"scalar schedule text '{scalar}' is not supported; use EverySeconds/EveryMinutes/EveryHours or the six bitmask fields.");
+        if (schedule["Cron"] is { } cron)
+            throw InvalidSchedule(jobSection, $"cron expressions are not supported ('{cron}'); use EverySeconds/EveryMinutes/EveryHours or the six bitmask fields.");
+
+        var keys = schedule.GetChildren().Select(child => child.Key).ToArray();
+        if (keys.FirstOrDefault(key => !s_scheduleKeys.Contains(key)) is { } unknown)
+            throw InvalidSchedule(jobSection, $"unknown schedule key '{unknown}'.");
+
+        var everySeconds = ReadOptionalInt(jobSection, schedule, "EverySeconds");
+        var everyMinutes = ReadOptionalInt(jobSection, schedule, "EveryMinutes");
+        var everyHours = ReadOptionalInt(jobSection, schedule, "EveryHours");
+        var shortcuts = (everySeconds is null ? 0 : 1)
+            + (everyMinutes is null ? 0 : 1) + (everyHours is null ? 0 : 1);
+
+        if (shortcuts > 1)
+            throw InvalidSchedule(jobSection, "only one of EverySeconds/EveryMinutes/EveryHours may be set.");
+        if (shortcuts == 1 && keys.Any(s_bitmaskScheduleKeys.Contains))
+            throw InvalidSchedule(jobSection, "interval shortcuts cannot be combined with bitmask fields.");
+
+        try
+        {
+            if (everySeconds is { } seconds) return ScheduleMasks.EverySeconds(seconds);
+            if (everyMinutes is { } minutes) return ScheduleMasks.EveryMinutes(minutes);
+            if (everyHours is { } hours) return ScheduleMasks.EveryHours(hours);
+            return new ScheduleMask(
+                ReadULong(schedule, "Seconds"),
+                ReadULong(schedule, "Minutes"),
+                ReadUInt(schedule, "Hours"),
+                ReadUInt(schedule, "DaysOfMonth"),
+                ReadUShort(schedule, "Months"),
+                ReadByte(schedule, "DaysOfWeek"));
+        }
+        catch (ArgumentOutOfRangeException exception)
+        {
+            throw InvalidSchedule(jobSection, exception.Message);
+        }
+    }
+
+    private static int? ReadOptionalInt(IConfiguration jobSection, IConfiguration schedule, string key)
+    {
+        if (schedule[key] is not { } raw)
+            return null;
+        return int.TryParse(raw, out var value)
+            ? value
+            : throw InvalidSchedule(jobSection, $"'{key}' expects an integer interval, got '{raw}'.");
+    }
+
+    private static FormatException InvalidSchedule(IConfiguration section, string detail)
+        => new($"Invalid scheduler schedule (job '{section["Name"] ?? "?"}'): {detail}");
 
     private static JsonNode? ToJsonNode(IConfiguration config)
     {

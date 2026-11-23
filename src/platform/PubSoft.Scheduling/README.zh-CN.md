@@ -53,6 +53,16 @@ var weekdaysAtNine = new ScheduleMask(
 
 按当前时间戳轮询匹配；进程停止期间错过的匹配时间不会在重启后补跑。引擎不实现 cron 解析、misfire 补偿或超出所供时间戳偏移的夏令时策略。
 
+从配置绑定 job（`AddPubSoftScheduler(IConfiguration)`）时，`Schedule` 接受一个 interval 快捷键或六个位掩码字段——二者不可混用：
+
+```json
+"Schedule": { "EveryMinutes": 5 }
+"Schedule": { "Seconds": 1, "Minutes": 1, "Hours": 16777215,
+              "DaysOfMonth": 4294967294, "Months": 8190, "DaysOfWeek": 127 }
+```
+
+`EverySeconds` / `EveryMinutes` / `EveryHours` 映射到 `ScheduleMasks` 助手，是推荐写法——`"Minutes": 1` 这类裸掩码选中的是**第 0 分**，不是"每分钟"，肉眼无法 review。未知键、标量 cron 字符串、`Cron` 键、快捷/位掩码混用一律在绑定时显式报错。启动时 hosted service 会打印每个 job 解码后的 schedule（`ScheduleMask.Describe()`，形如 `seconds={0} minutes=* hours=* ...`），并在"受限窗口内每秒触发"这种经典误配上告警。
+
 ## 执行与状态
 
 引擎运行匹配当前时间戳的启用 job，受 `MaxConcurrentJobs` 限制。executor 异常成为通用失败 `JobResult`；配置的结果处理器随后顺序执行，处理器失败记日志但不阻止后续处理器或状态更新。宿主取消传播至 executor 与 processor。

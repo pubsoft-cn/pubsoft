@@ -59,6 +59,16 @@ var weekdaysAtNine = new ScheduleMask(
 
 Schedules are polled against the current timestamp; a matching time that passes while the process is stopped is not replayed after restart. The engine does not implement cron parsing, misfire compensation, or daylight-saving policy beyond the supplied timestamp offset.
 
+When binding jobs from configuration (`AddPubSoftScheduler(IConfiguration)`), a job's `Schedule` accepts either one interval shortcut or the six bitmask fields — never both:
+
+```json
+"Schedule": { "EveryMinutes": 5 }
+"Schedule": { "Seconds": 1, "Minutes": 1, "Hours": 16777215,
+              "DaysOfMonth": 4294967294, "Months": 8190, "DaysOfWeek": 127 }
+```
+
+`EverySeconds` / `EveryMinutes` / `EveryHours` map to the `ScheduleMasks` helpers and are the recommended form — raw masks like `"Minutes": 1` select *minute 0*, not "every minute", and cannot be reviewed by eye. Unknown keys, scalar cron strings, `Cron` keys, and shortcut/bitmask mixes all fail the bind with an explicit error. At startup the hosted service logs every job's decoded schedule (`ScheduleMask.Describe()`, e.g. `seconds={0} minutes=* hours=* ...`) and warns when a job fires every second inside a restricted window.
+
 ## Execution and State
 
 The engine runs enabled jobs matching the current timestamp, bounded by `MaxConcurrentJobs`. Executor exceptions become a generic failed `JobResult`; configured result processors run sequentially afterward, and processor failures are logged without preventing later processors or the state update. Host cancellation propagates through the executor and processors.
