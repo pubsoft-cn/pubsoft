@@ -35,8 +35,12 @@ PubSoft.Monitoring.Scheduling.AlertRule.DelayThresholdMs.get -> int?
 PubSoft.Monitoring.Scheduling.AlertRule.DelayThresholdMs.set -> void
 PubSoft.Monitoring.Scheduling.AlertRule.Name.get -> string!
 PubSoft.Monitoring.Scheduling.AlertRule.Name.set -> void
+PubSoft.Monitoring.Scheduling.AlertRule.Recipients.get -> string![]?
+PubSoft.Monitoring.Scheduling.AlertRule.Recipients.set -> void
 PubSoft.Monitoring.Scheduling.AlertRule.Severity.get -> PubSoft.Monitoring.Scheduling.AlertSeverity
 PubSoft.Monitoring.Scheduling.AlertRule.Severity.set -> void
+PubSoft.Monitoring.Scheduling.AlertRule.TemplateCode.get -> string?
+PubSoft.Monitoring.Scheduling.AlertRule.TemplateCode.set -> void
 PubSoft.Monitoring.Scheduling.AlertRule.Throttle.get -> System.TimeSpan?
 PubSoft.Monitoring.Scheduling.AlertRule.Throttle.set -> void
 PubSoft.Monitoring.Scheduling.AlertRuleConfig

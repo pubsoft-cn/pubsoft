@@ -18,7 +18,6 @@ services.AddPubSoftScheduler(/* job 列表 */);
 services.AddPubSoftMonitoringScheduling(options =>
 {
     options.FailureThreshold = 3;
-    options.RecoveryNoticeThrottle = TimeSpan.FromMinutes(15);
 });
 ```
 
@@ -26,6 +25,26 @@ services.AddPubSoftMonitoringScheduling(options =>
 - 恢复通知节流——抖动的探针不会刷告警通道
 - 同 job 在单 processor 实例内串行；多实例部署需外部锁（`IDistributedLock`）
 - 告警经 `PubSoft.Notifications` 通道契约分发——通道另行注册
+
+## 告警规则
+
+处理器从每个 job 的 `ResultProcessorConfig` JSON 读取规则。`Condition` 与 `Severity` 接受枚举成员名（`"StateConfirmed"`、`"Critical"` 等）或数值；某条规则无法解析或不合法时，整组规则失效并记日志（含规则索引与原因）。
+
+```json
+"ResultProcessorConfig": {
+  "Rules": [{
+    "Name": "confirmed",
+    "Condition": "StateConfirmed",
+    "Severity": "Critical",
+    "Channels": ["dingtalk", "sms"],
+    "Recipients": ["+1234567890"],
+    "TemplateCode": "ALERT_DOWN",
+    "Throttle": "00:15:00"
+  }]
+}
+```
+
+`Recipients` 与 `TemplateCode` 透传至派发的 `NotificationMessage`——消费它们的通道（如短信通道）无需宿主侧兜底配置，不消费的通道不受影响。
 
 ## 边界
 
@@ -35,4 +54,4 @@ services.AddPubSoftMonitoringScheduling(options =>
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
-- `PubSoft.Monitoring.Scheduling`: `MonitoringSchedulingOptions` `ProbeExecutionResult` `ProbeFailureState` `ProbeOutcome` `ProbeState` `ProbeStateService` `ScheduledProbeExecutor` `ProbeAlertRuleProcessor` `MonitoringSchedulingServiceCollectionExtensions`
+- `PubSoft.Monitoring.Scheduling`: `AlertConditionType` `AlertContext` `AlertProcessorOptions` `AlertRule` `AlertRuleConfig` `AlertRuleProcessor` `AlertSeverity` `JobHealthState` `MonitoringSchedulingServiceCollectionExtensions`

@@ -141,7 +141,9 @@ public sealed class MonitoringSchedulingTests
         {
             Name = "test-job",
             ResultProcessorConfig = JsonDocument.Parse("""
-                {"Rules":[{"Name":"confirmed","Condition":"StateConfirmed","Severity":"Critical","Channels":["email"]}]}
+                {"Rules":[{"Name":"confirmed","Condition":"StateConfirmed","Severity":"Critical",
+                           "Channels":["email"],"Recipients":["+1234567890"],
+                           "TemplateCode":"ALERT_DOWN","Throttle":"00:15:00"}]}
                 """).RootElement.Clone()
         };
 
@@ -149,6 +151,29 @@ public sealed class MonitoringSchedulingTests
 
         var message = Assert.Single(channel.Messages);
         Assert.Equal(NotificationSeverity.Critical, message.Severity);
+        Assert.Equal(["+1234567890"], message.Recipients);
+        Assert.Equal("ALERT_DOWN", message.TemplateCode);
+    }
+
+    [Fact]
+    public async Task RuleRecipientsAndTemplateCodeFlowToTheNotification()
+    {
+        var channel = new TestChannel("sms");
+        var processor = CreateProcessor([channel], threshold: 1);
+        var job = CreateJob(new AlertRule
+        {
+            Name = "confirmed",
+            Condition = AlertConditionType.StateConfirmed,
+            Channels = ["sms"],
+            Recipients = ["+1234567890"],
+            TemplateCode = "ALERT_DOWN"
+        });
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+
+        var message = Assert.Single(channel.Messages);
+        Assert.Equal(["+1234567890"], message.Recipients);
+        Assert.Equal("ALERT_DOWN", message.TemplateCode);
     }
 
     [Fact]

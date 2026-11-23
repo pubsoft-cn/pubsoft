@@ -188,7 +188,9 @@ public sealed class AlertRuleProcessor : IResultProcessor
         var correlationId = $"monitoring:{GetStableKey(context.Job.Name)}:{GetStableKey(rule.Name)}:{context.Current.ExecutedAt.UtcTicks}";
         return new NotificationMessage(
             content,
+            recipients: rule.Recipients,
             title: title,
+            templateCode: rule.TemplateCode,
             severity: severity,
             source: "monitoring",
             correlationId: correlationId);
@@ -244,6 +246,8 @@ public sealed class AlertRuleProcessor : IResultProcessor
         if (!Enum.IsDefined(rule.Severity)) { reason = $"Severity '{rule.Severity}' is not a declared value"; return false; }
         if (rule.Channels is not { Length: <= 20 } || rule.Channels.Any(string.IsNullOrWhiteSpace))
         { reason = "Channels must hold at most 20 non-empty names"; return false; }
+        if (rule.Recipients is { Length: > 50 } || rule.Recipients?.Any(string.IsNullOrWhiteSpace) == true)
+        { reason = "Recipients must hold at most 50 non-empty entries"; return false; }
         if (rule.Throttle is { } throttle && throttle < TimeSpan.Zero) { reason = "Throttle must not be negative"; return false; }
         if (rule.DelayThresholdMs < 0) { reason = "DelayThresholdMs must not be negative"; return false; }
         return true;

@@ -12,6 +12,10 @@ public sealed class AlertRule
     public AlertSeverity Severity { get; set; } = AlertSeverity.Warning;
     /// <summary>Notification channels to dispatch through.</summary>
     public string[] Channels { get; set; } = [];
+    /// <summary>Optional recipients forwarded to the dispatched notification (e.g. SMS numbers); null means the channel decides.</summary>
+    public string[]? Recipients { get; set; }
+    /// <summary>Optional channel template code forwarded to the dispatched notification.</summary>
+    public string? TemplateCode { get; set; }
     /// <summary>Minimum interval between repeats of the same rule firing.</summary>
     public TimeSpan? Throttle { get; set; }
     /// <summary>Duration bound in ms for the slow-response condition.</summary>
