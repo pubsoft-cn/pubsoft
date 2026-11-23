@@ -132,6 +132,25 @@ public sealed class MonitoringSchedulingTests
     }
 
     [Fact]
+    public async Task StringEnumRuleConfigurationDeserializesAndFires()
+    {
+        var channel = new TestChannel("email");
+        var processor = CreateProcessor([channel], threshold: 1);
+        var job = new ScheduledJob
+        {
+            Name = "test-job",
+            ResultProcessorConfig = JsonDocument.Parse("""
+                {"Rules":[{"Name":"confirmed","Condition":"StateConfirmed","Severity":"Critical","Channels":["email"]}]}
+                """).RootElement.Clone()
+        };
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+
+        var message = Assert.Single(channel.Messages);
+        Assert.Equal(NotificationSeverity.Critical, message.Severity);
+    }
+
+    [Fact]
     public async Task ProcessorPropagatesCallerCancellation()
     {
         var probe = new TestProbe { Health = ProbeHealth.Healthy };
