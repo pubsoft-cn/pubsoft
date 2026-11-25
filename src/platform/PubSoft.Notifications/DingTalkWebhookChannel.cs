@@ -37,6 +37,8 @@ public sealed class DingTalkWebhookChannel : INotificationChannel
         var text = message.Title is not null
             ? $"**{message.Title}**\n\n{message.Content}"
             : message.Content;
+        if (!string.IsNullOrEmpty(_options.KeywordPrefix))
+            text = _options.KeywordPrefix + text;
 
         var payload = new JsonObject
         {
@@ -93,6 +95,14 @@ public sealed class DingTalkWebhookOptions
     public string WebhookUrl { get; set; } = "";
     /// <summary>Optional HMAC secret for signed webhooks.</summary>
     public string Secret { get; set; } = "";
+
+    /// <summary>
+    /// Optional prefix prepended verbatim to every message body. DingTalk custom robots configured
+    /// with the "keyword" security mode reject any message that does not contain the keyword;
+    /// set this to the keyword (e.g. <c>"alert "</c>) so every notification passes. The value is
+    /// prepended as-is -- include any desired separator in it.
+    /// </summary>
+    public string KeywordPrefix { get; set; } = "";
 
     /// <summary>
     /// Permits a plaintext <c>http</c> webhook URL. Signed DingTalk requests embed the

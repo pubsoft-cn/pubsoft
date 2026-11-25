@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -13,8 +14,12 @@ namespace PubSoft.Monitoring.Scheduling;
 /// <summary>Result processor evaluating declared alert rules against job-run health transitions and dispatching to notification channels.</summary>
 public sealed class AlertRuleProcessor : IResultProcessor
 {
+    /// <summary>Result-processor name jobs declare in <see cref="ScheduledJob.ResultProcessors"/> to opt into alert rules.</summary>
+    public const string ProcessorName = "AlertRules";
+
     private static readonly JsonSerializerOptions s_jsonOptions = new(JsonSerializerDefaults.Web);
     private const int MaxJobLocks = 4_096;
+    private const string OutageStartKey = "monitoring-env:v1:outage-start";
     private readonly IStateStore _stateStore;
     private readonly NotificationDispatcher _dispatcher;
     private readonly IProbeHealthCheck _probeHealthCheck;
@@ -23,6 +28,8 @@ public sealed class AlertRuleProcessor : IResultProcessor
     private readonly ILogger<AlertRuleProcessor>? _logger;
     /// <summary>Per-job mutex table keyed by jobKey -- capped with lazy eviction of idle entries so job names cannot grow it unboundedly.</summary>
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _jobLocks = new(StringComparer.Ordinal);
+    /// <summary>Executions suppressed during the current egress outage, observed by this instance only.</summary>
+    private int _suppressedDuringOutage;
 
     /// <summary>Creates the processor; <paramref name="timeProvider"/> defaults to the system clock.</summary>
     public AlertRuleProcessor(
@@ -37,17 +44,17 @@ public sealed class AlertRuleProcessor : IResultProcessor
         _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
         _probeHealthCheck = probeHealthCheck ?? throw new ArgumentNullException(nameof(probeHealthCheck));
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
-        if (!_options.IsValid())
+        if (!_options.IsValid(out var optionsError))
             throw new OptionsValidationException(
                 nameof(AlertProcessorOptions),
                 typeof(AlertProcessorOptions),
-                ["FailureThreshold must be positive."]); // pubsoft:exempt PUBSOFT025 "single-use validation failure message - cold path"
+                [optionsError!]); // pubsoft:exempt PUBSOFT025 "single-use validation failure message - cold path"
         _timeProvider = timeProvider ?? TimeProvider.System;
         _logger = logger;
     }
 
     /// <inheritdoc />
-    public string Name => "AlertRules";
+    public string Name => ProcessorName;
 
     /// <inheritdoc />
     public async Task ProcessAsync(ScheduledJob job, JobResult result, CancellationToken cancellationToken)
@@ -67,6 +74,7 @@ public sealed class AlertRuleProcessor : IResultProcessor
             if (probeHealth == ProbeHealth.Unreachable)
             {
                 await SetStateAsync(probeKey, true, cancellationToken).ConfigureAwait(false);
+                await RecordOutageTickAsync(cancellationToken).ConfigureAwait(false);
                 _logger?.LogWarning("Monitoring probe is unreachable; scheduler alerts are suppressed.");
                 return;
             }
@@ -89,10 +97,14 @@ public sealed class AlertRuleProcessor : IResultProcessor
 
             if (wasProbeUnreachable)
                 await _stateStore.RemoveCustomStateAsync(probeKey, cancellationToken).ConfigureAwait(false);
+            if (_options.Environment.Enabled)
+                await ReportOutageRecoveryAsync(cancellationToken).ConfigureAwait(false);
+            if (_options.PendingAlerts.Enabled)
+                await FlushPendingAlertsAsync(jobKey, cancellationToken).ConfigureAwait(false);
 
-            if (!TryReadAlertRules(job.ResultProcessorConfig, _logger, out var config))
+            if (!TryReadAlertRules(job.ResultProcessorConfig, _logger, out var config, job.Name))
             {
-                _logger?.LogWarning("Alert rule configuration is invalid; no alerts will be dispatched.");
+                _logger?.LogWarning("Alert rule configuration for job {Job} is invalid; no alerts will be dispatched.", job.Name);
                 return;
             }
 
@@ -118,15 +130,21 @@ public sealed class AlertRuleProcessor : IResultProcessor
 
                 var message = BuildMessage(rule, context);
                 var delivered = false;
+                List<string>? failedChannels = null;
                 foreach (var channel in rule.Channels)
                 {
                     var dispatchResult = await _dispatcher.DispatchAsync(channel, message, cancellationToken)
                         .ConfigureAwait(false);
-                    delivered |= dispatchResult.Success;
+                    if (dispatchResult.Success)
+                        delivered = true;
+                    else if (_options.PendingAlerts.Enabled)
+                        (failedChannels ??= []).Add(channel);
                 }
 
                 if (delivered && rule.Throttle is { } throttle && throttle > TimeSpan.Zero)
                     await SetStateAsync(throttleKey, _timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false);
+                if (failedChannels is { } failed)
+                    await RecordPendingAlertsAsync(jobKey, message, failed, cancellationToken).ConfigureAwait(false);
             }
         }
         finally
@@ -164,14 +182,52 @@ public sealed class AlertRuleProcessor : IResultProcessor
             _ => false
         };
 
+    /// <summary>Validates and deserializes the alert rules of one job; also called by <see cref="AlertRuleLintHostedService"/> at startup. <paramref name="jobName"/> scopes the log messages when provided.</summary>
+    internal static bool TryReadAlertRules(JsonElement element, ILogger? logger, out AlertRuleConfig config, string? jobName = null)
+    {
+        config = new AlertRuleConfig();
+        if (element.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null)
+            return true;
+
+        var jobFragment = jobName is null ? string.Empty : $" for job '{jobName}'";
+        try
+        {
+            config = element.Deserialize(AlertJsonContext.Default.AlertRuleConfig)!;
+        }
+        catch (JsonException exception)
+        {
+            logger?.LogWarning(exception, "Alert rule configuration{JobFragment} is not valid JSON: {Message}", jobFragment, exception.Message);
+            LogUnparseableRules(element, logger, jobFragment);
+            return false;
+        }
+
+        if (config?.Rules is null)
+        {
+            logger?.LogWarning("Alert rule configuration{JobFragment} has no 'Rules' array.", jobFragment);
+            return false;
+        }
+        if (config.Rules.Count > 100)
+        {
+            logger?.LogWarning("Alert rule configuration{JobFragment} declares {Count} rules; the limit is 100.", jobFragment, config.Rules.Count);
+            return false;
+        }
+
+        var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        for (var index = 0; index < config.Rules.Count; index++)
+        {
+            if (!IsValidRule(config.Rules[index], names, out var reason))
+            {
+                logger?.LogWarning("Alert rule {Index} ('{Name}'){JobFragment} is invalid: {Reason}",
+                    index, config.Rules[index]?.Name, jobFragment, reason);
+                return false;
+            }
+        }
+        return true;
+    }
+
     private static NotificationMessage BuildMessage(AlertRule rule, AlertContext context)
     {
-        var severity = rule.Severity switch
-        {
-            AlertSeverity.Critical => NotificationSeverity.Critical,
-            AlertSeverity.Warning => NotificationSeverity.Warning,
-            _ => NotificationSeverity.Info
-        };
+        var severity = MapSeverity(rule.Severity);
         var title = rule.Condition switch
         {
             AlertConditionType.StateConfirmed => $"[CRITICAL] {context.Job.Name} failure confirmed",
@@ -186,54 +242,49 @@ public sealed class AlertRuleProcessor : IResultProcessor
             ? $"State: {context.FromState} -> {context.ToState}; status: {context.Current.StatusCode}; delay: {context.Current.DelayMs} ms."
             : $"State: {context.FromState} -> {context.ToState}; status: {context.Current.StatusCode}; job execution failed.";
         var correlationId = $"monitoring:{GetStableKey(context.Job.Name)}:{GetStableKey(rule.Name)}:{context.Current.ExecutedAt.UtcTicks}";
+        var templateParameters = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["job"] = context.Job.Name,
+            ["status"] = context.Current.StatusCode.ToString(CultureInfo.InvariantCulture),
+            ["state"] = StateName(context.ToState),
+            ["severity"] = SeverityName(rule.Severity)
+        };
+        if (rule.TemplateParameters is { } declared)
+            foreach (var (key, value) in declared)
+                templateParameters[key] = value;
         return new NotificationMessage(
             content,
             recipients: rule.Recipients,
             title: title,
             templateCode: rule.TemplateCode,
+            templateParameters: templateParameters,
             severity: severity,
             source: "monitoring",
             correlationId: correlationId);
     }
 
-    private static bool TryReadAlertRules(JsonElement element, ILogger? logger, out AlertRuleConfig config)
+    /// <summary>After a whole-config parse failure, retries each rule entry so the log names the offending indexes; bounded like the rule count cap.</summary>
+    private static void LogUnparseableRules(JsonElement element, ILogger? logger, string jobFragment)
     {
-        config = new AlertRuleConfig();
-        if (element.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null)
-            return true;
-
-        try
+        if (logger is null
+            || !element.TryGetProperty("Rules", out var rules)
+            || rules.ValueKind != JsonValueKind.Array)
+            return;
+        var index = 0;
+        foreach (var ruleElement in rules.EnumerateArray())
         {
-            config = element.Deserialize(AlertJsonContext.Default.AlertRuleConfig)!;
-        }
-        catch (JsonException exception)
-        {
-            logger?.LogWarning(exception, "Alert rule configuration is not valid JSON: {Message}", exception.Message);
-            return false;
-        }
-
-        if (config?.Rules is null)
-        {
-            logger?.LogWarning("Alert rule configuration has no 'Rules' array.");
-            return false;
-        }
-        if (config.Rules.Count > 100)
-        {
-            logger?.LogWarning("Alert rule configuration declares {Count} rules; the limit is 100.", config.Rules.Count);
-            return false;
-        }
-
-        var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        for (var index = 0; index < config.Rules.Count; index++)
-        {
-            if (!IsValidRule(config.Rules[index], names, out var reason))
+            if (index >= 100)
+                break;
+            try
             {
-                logger?.LogWarning("Alert rule {Index} ('{Name}') is invalid: {Reason}",
-                    index, config.Rules[index]?.Name, reason);
-                return false;
+                ruleElement.Deserialize(AlertJsonContext.Default.AlertRule);
             }
+            catch (JsonException exception)
+            {
+                logger.LogWarning(exception, "Alert rule {Index}{JobFragment} could not be deserialized: {Message}", index, jobFragment, exception.Message);
+            }
+            index++;
         }
-        return true;
     }
 
     private static bool IsValidRule(AlertRule? rule, HashSet<string> names, [NotNullWhen(false)] out string? reason)
@@ -248,13 +299,159 @@ public sealed class AlertRuleProcessor : IResultProcessor
         { reason = "Channels must hold at most 20 non-empty names"; return false; }
         if (rule.Recipients is { Length: > 50 } || rule.Recipients?.Any(string.IsNullOrWhiteSpace) == true)
         { reason = "Recipients must hold at most 50 non-empty entries"; return false; }
+        if (rule.TemplateParameters is { Count: > 50 } || rule.TemplateParameters?.Keys.Any(string.IsNullOrWhiteSpace) == true)
+        { reason = "TemplateParameters must hold at most 50 entries with non-empty keys"; return false; }
         if (rule.Throttle is { } throttle && throttle < TimeSpan.Zero) { reason = "Throttle must not be negative"; return false; }
         if (rule.DelayThresholdMs < 0) { reason = "DelayThresholdMs must not be negative"; return false; }
         return true;
     }
 
+    private static NotificationSeverity MapSeverity(AlertSeverity severity) => severity switch
+    {
+        AlertSeverity.Critical => NotificationSeverity.Critical,
+        AlertSeverity.Warning => NotificationSeverity.Warning,
+        _ => NotificationSeverity.Info
+    };
+
+    private static string StateName(JobHealthState state) => state switch
+    {
+        JobHealthState.Healthy => nameof(JobHealthState.Healthy),
+        JobHealthState.Suspicious => nameof(JobHealthState.Suspicious),
+        JobHealthState.Unhealthy => nameof(JobHealthState.Unhealthy),
+        _ => "Unknown"
+    };
+
+    private static string SeverityName(AlertSeverity severity) => severity switch
+    {
+        AlertSeverity.Info => nameof(AlertSeverity.Info),
+        AlertSeverity.Warning => nameof(AlertSeverity.Warning),
+        AlertSeverity.Critical => nameof(AlertSeverity.Critical),
+        _ => "Unknown"
+    };
+
+    /// <summary>Marks one suppressed execution and, on the first unreachable tick of an outage, persists the outage start and optionally attempts the immediate alert.</summary>
+    private async Task RecordOutageTickAsync(CancellationToken cancellationToken)
+    {
+        if (_options.Environment is not { Enabled: true })
+            return;
+        Interlocked.Increment(ref _suppressedDuringOutage);
+        var start = await GetStateAsync<DateTimeOffset>(OutageStartKey, cancellationToken).ConfigureAwait(false);
+        if (start is not null)
+            return;
+        var now = _timeProvider.GetUtcNow();
+        await SetStateAsync(OutageStartKey, now, cancellationToken).ConfigureAwait(false);
+        if (_options.Environment.SendImmediate)
+            await DispatchEnvironmentAlertAsync(
+                $"Monitoring egress unreachable since {now:HH:mm} UTC; job alerts are suppressed until it recovers.",
+                now,
+                new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["windowStart"] = now.ToString("O", CultureInfo.InvariantCulture)
+                },
+                cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>On probe recovery, closes the persisted outage window and dispatches the delayed summary once per window.</summary>
+    private async Task ReportOutageRecoveryAsync(CancellationToken cancellationToken)
+    {
+        var start = await GetStateAsync<DateTimeOffset>(OutageStartKey, cancellationToken).ConfigureAwait(false);
+        if (start is not { } started)
+            return;
+        await _stateStore.RemoveCustomStateAsync(OutageStartKey, cancellationToken).ConfigureAwait(false);
+        var suppressed = Interlocked.Exchange(ref _suppressedDuringOutage, 0);
+        var now = _timeProvider.GetUtcNow();
+        var duration = now - started;
+        if (duration < _options.Environment.MinUnreachableDuration)
+        {
+            _logger?.LogInformation(
+                "Monitoring egress outage lasted {Duration}; below the alert threshold of {Threshold}.",
+                duration, _options.Environment.MinUnreachableDuration);
+            return;
+        }
+        await DispatchEnvironmentAlertAsync(
+            $"Monitoring egress outage {started:HH:mm}-{now:HH:mm} UTC ({duration.TotalMinutes:F0} min); {suppressed} job executions suppressed on this instance.",
+            started,
+            new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["windowStart"] = started.ToString("O", CultureInfo.InvariantCulture),
+                ["windowMinutes"] = duration.TotalMinutes.ToString("F0", CultureInfo.InvariantCulture),
+                ["suppressedCount"] = suppressed.ToString(CultureInfo.InvariantCulture)
+            },
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>Dispatches an environment alert; the correlation id derives from the outage window so duplicate detections collapse through dispatcher deduplication.</summary>
+    private async Task DispatchEnvironmentAlertAsync(
+        string content, DateTimeOffset outageStart, IReadOnlyDictionary<string, string> templateParameters, CancellationToken cancellationToken)
+    {
+        var message = new NotificationMessage(
+            content,
+            title: "[ENV] monitoring egress outage",
+            templateParameters: templateParameters,
+            severity: MapSeverity(_options.Environment.Severity),
+            source: "monitoring-env",
+            correlationId: $"monitoring-env:{outageStart.ToString("yyyyMMddHHmm", CultureInfo.InvariantCulture)}");
+        foreach (var channel in _options.Environment.Channels)
+            await _dispatcher.DispatchAsync(channel, message, cancellationToken).ConfigureAwait(false);
+    }
+
     private static string GetStableKey(string value)
         => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
+
+    /// <summary>Retries alerts that no channel could deliver, oldest first; expired entries are dropped. Pending state lives in the job's state store, so durability follows the store implementation.</summary>
+    private async Task FlushPendingAlertsAsync(string jobKey, CancellationToken cancellationToken)
+    {
+        var pendingKey = GetStateKey(jobKey, "pending-alerts");
+        var pending = await _stateStore.GetCustomStateAsync<List<PendingAlert>>(pendingKey, cancellationToken).ConfigureAwait(false);
+        if (pending is not { Count: > 0 })
+            return;
+
+        var now = _timeProvider.GetUtcNow();
+        var survivors = new List<PendingAlert>();
+        foreach (var entry in pending)
+        {
+            if (now - entry.FirstFailedAt > _options.PendingAlerts.Expiry)
+            {
+                _logger?.LogWarning(
+                    "Dropping expired pending alert for channel {Channel} (correlation {CorrelationId}, first failed {FirstFailedAt}, {Attempts} attempts).",
+                    entry.Channel, entry.CorrelationId, entry.FirstFailedAt, entry.Attempts);
+                continue;
+            }
+            var result = await _dispatcher.DispatchAsync(entry.Channel, entry.ToMessage(), cancellationToken).ConfigureAwait(false);
+            if (result.Success)
+                _logger?.LogInformation(
+                    "Resent previously undelivered alert to channel {Channel} (correlation {CorrelationId}).",
+                    entry.Channel, entry.CorrelationId);
+            else
+                survivors.Add(entry with { Attempts = entry.Attempts + 1 });
+        }
+
+        if (survivors.Count == 0)
+            await _stateStore.RemoveCustomStateAsync(pendingKey, cancellationToken).ConfigureAwait(false);
+        else
+            await _stateStore.SetCustomStateAsync(pendingKey, survivors, _options.PendingAlerts.Expiry, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task RecordPendingAlertsAsync(string jobKey, NotificationMessage message, List<string> failedChannels, CancellationToken cancellationToken)
+    {
+        var pendingKey = GetStateKey(jobKey, "pending-alerts");
+        var pending = await _stateStore.GetCustomStateAsync<List<PendingAlert>>(pendingKey, cancellationToken).ConfigureAwait(false) ?? [];
+        var now = _timeProvider.GetUtcNow();
+        foreach (var channel in failedChannels)
+        {
+            pending.RemoveAll(entry => string.Equals(entry.Channel, channel, StringComparison.Ordinal)
+                && string.Equals(entry.CorrelationId, message.CorrelationId, StringComparison.Ordinal));
+            pending.Add(PendingAlert.FromMessage(channel, message, now));
+        }
+        while (pending.Count > _options.PendingAlerts.MaxEntries)
+        {
+            _logger?.LogWarning(
+                "Pending alert backlog exceeds {MaxEntries}; dropping the oldest entry (correlation {CorrelationId}).",
+                _options.PendingAlerts.MaxEntries, pending[0].CorrelationId);
+            pending.RemoveAt(0);
+        }
+        await _stateStore.SetCustomStateAsync(pendingKey, pending, _options.PendingAlerts.Expiry, cancellationToken).ConfigureAwait(false);
+    }
 
     private static string GetStateKey(string jobKey, string stateName)
         => $"monitoring-alert:v1:{jobKey}:{stateName}";
@@ -295,4 +492,41 @@ public sealed class AlertRuleProcessor : IResultProcessor
     }
 
     private sealed record StateValue<T>(T Value) where T : struct;
+
+    private sealed record PendingAlert(
+        string Channel,
+        string Content,
+        string? Title,
+        string[] Recipients,
+        string? TemplateCode,
+        Dictionary<string, string>? TemplateParameters,
+        NotificationSeverity Severity,
+        string? CorrelationId,
+        DateTimeOffset FirstFailedAt,
+        int Attempts)
+    {
+        public static PendingAlert FromMessage(string channel, NotificationMessage message, DateTimeOffset firstFailedAt)
+            => new(
+                channel,
+                message.Content,
+                message.Title,
+                message.Recipients?.ToArray() ?? [],
+                message.TemplateCode,
+                message.TemplateParameters is null ? null : new Dictionary<string, string>(message.TemplateParameters, StringComparer.Ordinal),
+                message.Severity,
+                message.CorrelationId,
+                firstFailedAt,
+                0);
+
+        public NotificationMessage ToMessage()
+            => new(
+                Content,
+                recipients: Recipients,
+                title: Title,
+                templateCode: TemplateCode,
+                templateParameters: TemplateParameters,
+                severity: Severity,
+                source: "monitoring",
+                correlationId: CorrelationId);
+    }
 }

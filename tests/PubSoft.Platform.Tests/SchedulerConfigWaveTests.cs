@@ -1,5 +1,7 @@
+using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using PubSoft.Scheduling;
+using PubSoft.Scheduling.Http;
 using Xunit;
 
 namespace PubSoft.Core.Tests;
@@ -99,6 +101,40 @@ public sealed class SchedulerConfigWaveTests
                 ["Jobs:0:Schedule"] = "*/5 * * * *",
             }).Build();
         Assert.Throws<FormatException>(() => SchedulerConfigurationBinding.Bind(scalar));
+    }
+
+    [Fact]
+    public void ToJsonElementPreservesNumericLookingStrings()
+    {
+        var cfg = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["ExecutorConfig:Headers:Tid"] = "8000",
+                ["ExecutorConfig:Headers:Pad"] = "007",
+                ["ExecutorConfig:Headers:Plus"] = "+1234567890",
+                ["ExecutorConfig:Headers:Flag"] = "true",
+                ["ExecutorConfig:Headers:Floaty"] = "12.50",
+                ["ExecutorConfig:Timeout"] = "00:00:30",
+                ["ExecutorConfig:ExpectStatusCodes:0"] = "401",
+            }).Build();
+
+        var element = SchedulerConfigurationBinding.ToJsonElement(cfg.GetSection("ExecutorConfig"));
+
+        Assert.Equal(JsonValueKind.Number, element.GetProperty("Headers").GetProperty("Tid").ValueKind);
+        Assert.Equal(JsonValueKind.String, element.GetProperty("Headers").GetProperty("Pad").ValueKind);
+        Assert.Equal(JsonValueKind.String, element.GetProperty("Headers").GetProperty("Plus").ValueKind);
+        Assert.Equal(JsonValueKind.True, element.GetProperty("Headers").GetProperty("Flag").ValueKind);
+        Assert.Equal(JsonValueKind.String, element.GetProperty("Headers").GetProperty("Floaty").ValueKind);
+        Assert.Equal(JsonValueKind.Number, element.GetProperty("ExpectStatusCodes")[0].ValueKind);
+
+        var config = element.Deserialize(SchedulingHttpJsonContext.Default.HttpExecutorConfig)!;
+        Assert.Equal("8000", config.Headers["Tid"]);
+        Assert.Equal("007", config.Headers["Pad"]);
+        Assert.Equal("+1234567890", config.Headers["Plus"]);
+        Assert.Equal("true", config.Headers["Flag"]);
+        Assert.Equal("12.50", config.Headers["Floaty"]);
+        Assert.Equal([401], config.ExpectStatusCodes);
+        Assert.Equal(TimeSpan.FromSeconds(30), config.Timeout);
     }
 
     [Fact]

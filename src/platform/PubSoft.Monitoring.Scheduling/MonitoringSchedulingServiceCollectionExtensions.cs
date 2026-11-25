@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using PubSoft.Scheduling;
 
 namespace PubSoft.Monitoring.Scheduling;
@@ -19,6 +20,7 @@ public static class MonitoringSchedulingServiceCollectionExtensions
             .ValidateOnStart();
         services.TryAddSingleton<TimeProvider>(TimeProvider.System);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IResultProcessor, AlertRuleProcessor>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, AlertRuleLintHostedService>());
         return services;
     }
 }

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -71,6 +72,132 @@ public sealed class MonitoringSchedulingTests
         });
         await processor.ProcessAsync(failureJob, FailedResult(4), default);
         Assert.Single(channel.Messages);
+    }
+
+    [Fact]
+    public async Task EnvironmentWatchdogAlertsOnRecoveryAfterQualifyingOutage()
+    {
+        var clock = new MutableTimeProvider(DateTimeOffset.Parse("2026-10-01T00:00:00Z"));
+        var probe = new TestProbe { Health = ProbeHealth.Healthy };
+        var envChannel = new TestChannel("envops");
+        var processor = CreateProcessor([envChannel], probe, threshold: 1, timeProvider: clock,
+            configure: options => options.Environment = new EnvironmentAlertOptions
+            {
+                Enabled = true,
+                MinUnreachableDuration = TimeSpan.FromMinutes(2),
+                Channels = ["envops"],
+                Severity = AlertSeverity.Critical
+            });
+        var job = CreateJob();
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+        probe.Health = ProbeHealth.Unreachable;
+        await processor.ProcessAsync(job, FailedResult(2), default);
+        await processor.ProcessAsync(job, FailedResult(3), default);
+        clock.Advance(TimeSpan.FromMinutes(3));
+        probe.Health = ProbeHealth.Healthy;
+        await processor.ProcessAsync(job, SuccessfulResult(4), default);
+
+        var message = Assert.Single(envChannel.Messages);
+        Assert.Equal(NotificationSeverity.Critical, message.Severity);
+        Assert.Equal("monitoring-env", message.Source);
+        Assert.Contains("egress outage", message.Content);
+        Assert.Equal("2", message.TemplateParameters["suppressedCount"]);
+        Assert.Equal("3", message.TemplateParameters["windowMinutes"]);
+    }
+
+    [Fact]
+    public async Task EnvironmentWatchdogSkipsSummaryBelowMinDuration()
+    {
+        var clock = new MutableTimeProvider(DateTimeOffset.Parse("2026-10-01T00:00:00Z"));
+        var probe = new TestProbe { Health = ProbeHealth.Unreachable };
+        var envChannel = new TestChannel("envops");
+        var processor = CreateProcessor([envChannel], probe, threshold: 1, timeProvider: clock,
+            configure: options => options.Environment = new EnvironmentAlertOptions
+            {
+                Enabled = true,
+                MinUnreachableDuration = TimeSpan.FromMinutes(2),
+                Channels = ["envops"]
+            });
+        var job = CreateJob();
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+        clock.Advance(TimeSpan.FromMinutes(1));
+        probe.Health = ProbeHealth.Healthy;
+        await processor.ProcessAsync(job, SuccessfulResult(2), default);
+
+        Assert.Empty(envChannel.Messages);
+    }
+
+    [Fact]
+    public async Task EnvironmentWatchdogReportsOnceAcrossMultipleJobs()
+    {
+        var clock = new MutableTimeProvider(DateTimeOffset.Parse("2026-10-01T00:00:00Z"));
+        var probe = new TestProbe { Health = ProbeHealth.Healthy };
+        var envChannel = new TestChannel("envops");
+        var processor = CreateProcessor([envChannel], probe, threshold: 1, timeProvider: clock,
+            configure: options => options.Environment = new EnvironmentAlertOptions
+            {
+                Enabled = true,
+                MinUnreachableDuration = TimeSpan.FromMinutes(1),
+                Channels = ["envops"]
+            });
+        var jobA = CreateJob();
+        var jobB = CreateJob();
+        jobB.Name = "job-b";
+
+        probe.Health = ProbeHealth.Unreachable;
+        await processor.ProcessAsync(jobA, FailedResult(1), default);
+        await processor.ProcessAsync(jobB, FailedResult(2), default);
+        clock.Advance(TimeSpan.FromMinutes(5));
+        probe.Health = ProbeHealth.Healthy;
+        await processor.ProcessAsync(jobA, SuccessfulResult(3), default);
+        await processor.ProcessAsync(jobB, SuccessfulResult(4), default);
+
+        var message = Assert.Single(envChannel.Messages);
+        Assert.Equal("2", message.TemplateParameters["suppressedCount"]);
+    }
+
+    [Fact]
+    public async Task EnvironmentWatchdogImmediateAlertFiresOncePerOutage()
+    {
+        var probe = new TestProbe { Health = ProbeHealth.Unreachable };
+        var envChannel = new TestChannel("envops");
+        var processor = CreateProcessor([envChannel], probe, threshold: 1,
+            configure: options => options.Environment = new EnvironmentAlertOptions
+            {
+                Enabled = true,
+                MinUnreachableDuration = TimeSpan.FromMinutes(2),
+                Channels = ["envops"],
+                SendImmediate = true
+            });
+        var job = CreateJob();
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+        await processor.ProcessAsync(job, FailedResult(2), default);
+
+        var message = Assert.Single(envChannel.Messages);
+        Assert.Contains("unreachable since", message.Content);
+    }
+
+    [Fact]
+    public void EnvironmentWatchdogEnabledWithoutChannelsFailsValidation()
+        => Assert.Throws<OptionsValidationException>(() => CreateProcessor([new TestChannel("envops")],
+            configure: options => options.Environment = new EnvironmentAlertOptions { Enabled = true }));
+
+    [Fact]
+    public async Task EnvironmentWatchdogDisabledByDefaultStaysSilent()
+    {
+        var probe = new TestProbe { Health = ProbeHealth.Unreachable };
+        var envChannel = new TestChannel("envops");
+        var processor = CreateProcessor([envChannel], probe, threshold: 1);
+        var job = CreateJob();
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+        probe.Health = ProbeHealth.Healthy;
+        await processor.ProcessAsync(job, SuccessfulResult(2), default);
+
+        Assert.Empty(envChannel.Messages);
     }
 
     [Fact]
@@ -177,6 +304,225 @@ public sealed class MonitoringSchedulingTests
     }
 
     [Fact]
+    public async Task RuleTemplateParametersFlowWithBuiltInsAndOverrideWins()
+    {
+        var channel = new TestChannel("sms");
+        var processor = CreateProcessor([channel], threshold: 1);
+        var job = CreateJob(new AlertRule
+        {
+            Name = "confirmed",
+            Condition = AlertConditionType.StateConfirmed,
+            Channels = ["sms"],
+            TemplateParameters = new Dictionary<string, string> { ["code"] = "8000", ["job"] = "declared-name" }
+        });
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+
+        var message = Assert.Single(channel.Messages);
+        Assert.Equal("8000", message.TemplateParameters["code"]);
+        Assert.Equal("declared-name", message.TemplateParameters["job"]);
+        Assert.Equal("503", message.TemplateParameters["status"]);
+        Assert.Equal("Unhealthy", message.TemplateParameters["state"]);
+    }
+
+    [Fact]
+    public async Task RuleTemplateParametersDeserializeFromJson()
+    {
+        var channel = new TestChannel("sms");
+        var processor = CreateProcessor([channel], threshold: 1);
+        var job = new ScheduledJob
+        {
+            Name = "test-job",
+            ResultProcessorConfig = JsonDocument.Parse("""
+                {"Rules":[{"Name":"confirmed","Condition":"StateConfirmed","Channels":["sms"],
+                           "TemplateParameters":{"code":"8000","product":"demo-app"}}]}
+                """).RootElement.Clone()
+        };
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+
+        var message = Assert.Single(channel.Messages);
+        Assert.Equal("8000", message.TemplateParameters["code"]);
+        Assert.Equal("demo-app", message.TemplateParameters["product"]);
+    }
+
+    [Fact]
+    public async Task TemplateParametersNumericValuesSurviveConfigurationMaterialization()
+    {
+        var cfg = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Jobs:0:Name"] = "test-job",
+                ["Jobs:0:ResultProcessorConfig:Rules:0:Name"] = "confirmed",
+                ["Jobs:0:ResultProcessorConfig:Rules:0:Condition"] = "StateConfirmed",
+                ["Jobs:0:ResultProcessorConfig:Rules:0:Channels:0"] = "sms",
+                ["Jobs:0:ResultProcessorConfig:Rules:0:TemplateParameters:code"] = "8000",
+            }).Build();
+        var bound = SchedulerConfigurationBinding.Bind(cfg);
+        var channel = new TestChannel("sms");
+        var processor = CreateProcessor([channel], threshold: 1);
+
+        await processor.ProcessAsync(bound.Jobs[0], FailedResult(1), default);
+
+        var message = Assert.Single(channel.Messages);
+        Assert.Equal("8000", message.TemplateParameters["code"]);
+    }
+
+    [Fact]
+    public async Task UnparseableRuleEntryReportsItsIndex()
+    {
+        var logger = new ListLogger<AlertRuleProcessor>();
+        var processor = new AlertRuleProcessor(
+            new MemoryStateStore(),
+            new NotificationDispatcher([]),
+            new TestProbe(),
+            Options.Create(new AlertProcessorOptions { FailureThreshold = 1 }),
+            logger: logger);
+        var job = new ScheduledJob
+        {
+            Name = "test-job",
+            ResultProcessorConfig = JsonDocument.Parse("""
+                {"Rules":[{"Name":"ok","Condition":"StateConfirmed","Channels":["email"]},
+                          {"Name":"bad","Throttle":{"x":1}}]}
+                """).RootElement.Clone()
+        };
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+
+        Assert.Contains(logger.Messages, message => message.Contains("Alert rule 1"));
+    }
+
+    [Fact]
+    public async Task PendingAlertResendsUndeliveredMessageOnNextExecution()
+    {
+        var channel = new TestChannel("dingtalk") { Result = NotificationResult.Fail("down") };
+        var processor = CreateProcessor([channel], threshold: 1,
+            configure: options => options.PendingAlerts.Enabled = true);
+        var job = CreateJob(new AlertRule
+        {
+            Name = "confirmed",
+            Condition = AlertConditionType.StateConfirmed,
+            Channels = ["dingtalk"]
+        });
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+        Assert.Single(channel.Messages);
+
+        channel.Result = NotificationResult.Ok();
+        await processor.ProcessAsync(job, SuccessfulResult(2), default);
+
+        Assert.Equal(2, channel.SendCount);
+        Assert.Equal(2, channel.Messages.Count);
+        Assert.Equal(channel.Messages[0].CorrelationId, channel.Messages[1].CorrelationId);
+    }
+
+    [Fact]
+    public async Task UndeliveredAlertIsNotRetriedWhenPendingDisabled()
+    {
+        var channel = new TestChannel("dingtalk") { Result = NotificationResult.Fail("down") };
+        var processor = CreateProcessor([channel], threshold: 1);
+        var job = CreateJob(new AlertRule
+        {
+            Name = "confirmed",
+            Condition = AlertConditionType.StateConfirmed,
+            Channels = ["dingtalk"]
+        });
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+        channel.Result = NotificationResult.Ok();
+        await processor.ProcessAsync(job, SuccessfulResult(2), default);
+
+        Assert.Equal(1, channel.SendCount);
+    }
+
+    [Fact]
+    public async Task PendingAlertRecordsOnlyTheFailedChannels()
+    {
+        var delivered = new TestChannel("email");
+        var failing = new TestChannel("dingtalk") { Result = NotificationResult.Fail("down") };
+        var processor = CreateProcessor([delivered, failing], threshold: 1,
+            configure: options => options.PendingAlerts.Enabled = true);
+        var job = CreateJob(new AlertRule
+        {
+            Name = "confirmed",
+            Condition = AlertConditionType.StateConfirmed,
+            Channels = ["dingtalk", "email"]
+        });
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+        failing.Result = NotificationResult.Ok();
+        await processor.ProcessAsync(job, SuccessfulResult(2), default);
+
+        Assert.Equal(1, delivered.SendCount);
+        Assert.Equal(2, failing.SendCount);
+    }
+
+    [Fact]
+    public async Task PendingAlertExpiresAfterConfiguredWindow()
+    {
+        var clock = new MutableTimeProvider(DateTimeOffset.Parse("2026-10-01T00:00:00Z"));
+        var logger = new ListLogger<AlertRuleProcessor>();
+        var channel = new TestChannel("dingtalk") { Result = NotificationResult.Fail("down") };
+        var processor = new AlertRuleProcessor(
+            new MemoryStateStore(clock),
+            new NotificationDispatcher([channel], timeProvider: clock),
+            new TestProbe(),
+            Options.Create(new AlertProcessorOptions
+            {
+                FailureThreshold = 1,
+                PendingAlerts = new PendingAlertOptions { Enabled = true, Expiry = TimeSpan.FromMinutes(10) }
+            }),
+            clock,
+            logger);
+        var job = CreateJob(new AlertRule
+        {
+            Name = "confirmed",
+            Condition = AlertConditionType.StateConfirmed,
+            Channels = ["dingtalk"]
+        });
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+        clock.Advance(TimeSpan.FromMinutes(9));
+        await processor.ProcessAsync(job, SuccessfulResult(2), default);
+        Assert.Equal(2, channel.SendCount);
+
+        clock.Advance(TimeSpan.FromMinutes(2));
+        channel.Result = NotificationResult.Ok();
+        await processor.ProcessAsync(job, SuccessfulResult(3), default);
+
+        Assert.Equal(2, channel.SendCount);
+        Assert.Contains(logger.Messages, message => message.Contains("Dropping expired pending alert"));
+    }
+
+    [Fact]
+    public async Task StartupLintReportsInvalidRuleWithJobName()
+    {
+        var logger = new ListLogger<AlertRuleLintHostedService>();
+        var job = CreateJob(new AlertRule
+        {
+            Name = " ",
+            Condition = AlertConditionType.StateConfirmed,
+            Channels = ["dingtalk"]
+        });
+        job.ResultProcessors.Add(AlertRuleProcessor.ProcessorName);
+        var skipped = CreateJob(new AlertRule
+        {
+            Name = " ",
+            Condition = AlertConditionType.StateConfirmed,
+            Channels = ["dingtalk"]
+        });
+        skipped.Name = "unrelated-job";
+        var lint = new AlertRuleLintHostedService(
+            Options.Create(new SchedulerOptions { Jobs = [job, skipped] }),
+            logger);
+
+        await lint.StartAsync(default);
+
+        Assert.Contains(logger.Messages, message => message.Contains("test-job") && message.Contains("invalid"));
+        Assert.DoesNotContain(logger.Messages, message => message.Contains("unrelated-job"));
+    }
+
+    [Fact]
     public async Task InvalidRuleConfigurationReportsTheRuleIndexAndReason()
     {
         var logger = new ListLogger<AlertRuleProcessor>();
@@ -268,13 +614,18 @@ public sealed class MonitoringSchedulingTests
         IEnumerable<INotificationChannel> channels,
         IProbeHealthCheck? probe = null,
         int threshold = 3,
-        TimeProvider? timeProvider = null)
-        => new(
+        TimeProvider? timeProvider = null,
+        Action<AlertProcessorOptions>? configure = null)
+    {
+        var options = new AlertProcessorOptions { FailureThreshold = threshold };
+        configure?.Invoke(options);
+        return new(
             new MemoryStateStore(timeProvider),
             new NotificationDispatcher(channels, timeProvider: timeProvider),
             probe ?? new TestProbe(),
-            Options.Create(new AlertProcessorOptions { FailureThreshold = threshold }),
+            Options.Create(options),
             timeProvider);
+    }
 
     private static ScheduledJob CreateJob(params AlertRule[] rules)
         => new()

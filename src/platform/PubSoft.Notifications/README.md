@@ -36,7 +36,7 @@ services.AddPubSoftNotifications(options =>
 });
 ```
 
-Built-in channel HTTP calls go through named `IHttpClientFactory` clients with `PubSoft.Resilience.Http` policy defaults (total timeout 10s, per-attempt 5s, one retry). Webhook URLs must be absolute `https`; non-loopback `http` fails options validation, loopback stays exempt for local development, and per-channel `AllowInsecureUrl` covers deliberate exceptions.
+Built-in channel HTTP calls go through named `IHttpClientFactory` clients with `PubSoft.Resilience.Http` policy defaults (total timeout 10s, per-attempt 5s, one retry). Webhook URLs must be absolute `https`; non-loopback `http` fails options validation, loopback stays exempt for local development, and per-channel `AllowInsecureUrl` covers deliberate exceptions. `DingTalkWebhookOptions.KeywordPrefix` prepends a fixed string verbatim to every message body — include any separator in the value — for DingTalk robots secured by the keyword mode (messages without the keyword are rejected by DingTalk).
 
 `AddPubSoftNotifications` registers `NotificationDispatcher` as a singleton. Its channel instances are resolved once and retained, so channel implementations and their dependencies must be safe for singleton use. For HTTP integrations, prefer `IHttpClientFactory`; do not inject scoped services into a channel. Channel names must be unique (case-insensitively) and non-empty.
 
@@ -93,7 +93,7 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
-`AllowInsecureUrl`, `DeduplicationWindow`, `MaximumDeduplicationEntries`, `Message`, `ProviderMessageId`, `Results`, `Secret`, `Success`, `WebhookUrl`
+`AllowInsecureUrl`, `DeduplicationWindow`, `KeywordPrefix`, `MaximumDeduplicationEntries`, `Message`, `ProviderMessageId`, `Results`, `Secret`, `Success`, `WebhookUrl`
 
 <!-- pubsoft:api-surface:end -->
 

@@ -17,9 +17,12 @@ updates:
     # Runtime-tracking families stay on the TargetFramework wave: these ship
     # with the shared framework, and a major bump ahead of it splits the
     # dependency graph for consumers (NU1605). Lift when targeting net11.
-    # Tooling-only pins (CodeAnalysis, Test.Sdk) do not track the runtime and
-    # remain free to move.
+    # Test.Sdk stays free to move. Microsoft.CodeAnalysis.* pins track the
+    # SDK compiler, not the runtime: an analyzer built against a newer
+    # CodeAnalysis than the running CSC is refused (CS9057) and breaks every
+    # project. Lift manually once the SDK's compiler reaches the version.
     ignore:
+      - dependency-name: "Microsoft.CodeAnalysis.*"
       - dependency-name: "Microsoft.Extensions.*"
         update-types: ["version-update:semver-major"]
       - dependency-name: "Microsoft.EntityFrameworkCore*"

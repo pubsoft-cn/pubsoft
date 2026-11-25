@@ -16,6 +16,8 @@ public sealed class AlertRule
     public string[]? Recipients { get; set; }
     /// <summary>Optional channel template code forwarded to the dispatched notification.</summary>
     public string? TemplateCode { get; set; }
+    /// <summary>Optional static template parameters forwarded to the dispatched notification. Entries override the built-in parameters (<c>job</c>, <c>status</c>, <c>state</c>, <c>severity</c>) on key collision.</summary>
+    public Dictionary<string, string>? TemplateParameters { get; set; }
     /// <summary>Minimum interval between repeats of the same rule firing.</summary>
     public TimeSpan? Throttle { get; set; }
     /// <summary>Duration bound in ms for the slow-response condition.</summary>

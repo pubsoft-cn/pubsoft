@@ -109,6 +109,21 @@ public sealed class NotificationsWaveTests
     }
 
     [Fact]
+    public async Task DingTalkChannelPrependsKeywordPrefix()
+    {
+        var factory = new StubFactory("{\"errcode\":0,\"errmsg\":\"ok\"}");
+        var channel = new DingTalkWebhookChannel(factory,
+            Options.Create(new DingTalkWebhookOptions { WebhookUrl = "https://oapi.dingtalk.com/robot/send?access_token=x", KeywordPrefix = "alert " }),
+            NullLogger<DingTalkWebhookChannel>.Instance);
+        var r = await channel.SendAsync(Msg());
+        Assert.True(r.Success);
+        var body = await factory.LastRequest!.Content!.ReadAsStringAsync();
+        using var doc = System.Text.Json.JsonDocument.Parse(body);
+        var content = doc.RootElement.GetProperty("text").GetProperty("content").GetString();
+        Assert.StartsWith("alert ", content);
+    }
+
+    [Fact]
     public void NotificationResultFactories()
     {
         Assert.True(NotificationResult.Ok("id1").Success);

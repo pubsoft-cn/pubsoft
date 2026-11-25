@@ -69,6 +69,8 @@ When binding jobs from configuration (`AddPubSoftScheduler(IConfiguration)`), a 
 
 `EverySeconds` / `EveryMinutes` / `EveryHours` map to the `ScheduleMasks` helpers and are the recommended form — raw masks like `"Minutes": 1` select *minute 0*, not "every minute", and cannot be reviewed by eye. Unknown keys, scalar cron strings, `Cron` keys, and shortcut/bitmask mixes all fail the bind with an explicit error. At startup the hosted service logs every job's decoded schedule (`ScheduleMask.Describe()`, e.g. `seconds={0} minutes=* hours=* ...`) and warns when a job fires every second inside a restricted window.
 
+`ExecutorConfig`/`ResultProcessorConfig` payloads re-type scalar values for typed members only on faithful round-trip: `"401"` becomes a JSON number for `ExpectStatusCodes`, while `"007"` and `"+123"` stay strings. String-typed members (header values, template parameters) accept the re-typed tokens and recover the original text, so a configured `"8000"` still arrives as the string `"8000"`. Consumers that deserialize these payloads must use the package `JsonSerializerContext`s — they carry `ScalarStringJsonConverter`; a custom `JsonSerializerOptions` without it re-introduces the number-token failure.
+
 ## Execution and State
 
 The engine runs enabled jobs matching the current timestamp, bounded by `MaxConcurrentJobs`. Executor exceptions become a generic failed `JobResult`; configured result processors run sequentially afterward, and processor failures are logged without preventing later processors or the state update. Host cancellation propagates through the executor and processors.

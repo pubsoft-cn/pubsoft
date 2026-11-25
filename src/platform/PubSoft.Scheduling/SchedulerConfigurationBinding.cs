@@ -159,8 +159,15 @@ internal static class SchedulerConfigurationBinding
             var value = config is IConfigurationSection s ? s.Value : null;
             if (value is null) return null;
             if (bool.TryParse(value, out var b)) return JsonValue.Create(b);
-            if (long.TryParse(value, out var l)) return JsonValue.Create(l);
-            if (double.TryParse(value, out var d)) return JsonValue.Create(d);
+            // Infer a number only when the round-trip is faithful: "8000" deserializes
+            // identically either way, but "007" or "+123" would lose digits/sign as a
+            // JSON number - and numeric props still read them via AllowReadingFromString.
+            if (long.TryParse(value, out var l)
+                && string.Equals(l.ToString(System.Globalization.CultureInfo.InvariantCulture), value, StringComparison.Ordinal))
+                return JsonValue.Create(l);
+            if (double.TryParse(value, out var d)
+                && string.Equals(d.ToString("G17", System.Globalization.CultureInfo.InvariantCulture), value, StringComparison.Ordinal))
+                return JsonValue.Create(d);
             return JsonValue.Create(value);
         }
 

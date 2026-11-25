@@ -1,4 +1,5 @@
 #nullable enable
+const PubSoft.Monitoring.Scheduling.AlertRuleProcessor.ProcessorName = "AlertRules" -> string!
 PubSoft.Monitoring.Scheduling.AlertConditionType
 PubSoft.Monitoring.Scheduling.AlertConditionType.EveryFailure = 6 -> PubSoft.Monitoring.Scheduling.AlertConditionType
 PubSoft.Monitoring.Scheduling.AlertConditionType.FirstFailure = 4 -> PubSoft.Monitoring.Scheduling.AlertConditionType
@@ -23,8 +24,12 @@ PubSoft.Monitoring.Scheduling.AlertContext.WasProbeUnreachable.get -> bool
 PubSoft.Monitoring.Scheduling.AlertContext.WasProbeUnreachable.init -> void
 PubSoft.Monitoring.Scheduling.AlertProcessorOptions
 PubSoft.Monitoring.Scheduling.AlertProcessorOptions.AlertProcessorOptions() -> void
+PubSoft.Monitoring.Scheduling.AlertProcessorOptions.Environment.get -> PubSoft.Monitoring.Scheduling.EnvironmentAlertOptions!
+PubSoft.Monitoring.Scheduling.AlertProcessorOptions.Environment.set -> void
 PubSoft.Monitoring.Scheduling.AlertProcessorOptions.FailureThreshold.get -> int
 PubSoft.Monitoring.Scheduling.AlertProcessorOptions.FailureThreshold.set -> void
+PubSoft.Monitoring.Scheduling.AlertProcessorOptions.PendingAlerts.get -> PubSoft.Monitoring.Scheduling.PendingAlertOptions!
+PubSoft.Monitoring.Scheduling.AlertProcessorOptions.PendingAlerts.set -> void
 PubSoft.Monitoring.Scheduling.AlertRule
 PubSoft.Monitoring.Scheduling.AlertRule.AlertRule() -> void
 PubSoft.Monitoring.Scheduling.AlertRule.Channels.get -> string![]!
@@ -41,12 +46,18 @@ PubSoft.Monitoring.Scheduling.AlertRule.Severity.get -> PubSoft.Monitoring.Sched
 PubSoft.Monitoring.Scheduling.AlertRule.Severity.set -> void
 PubSoft.Monitoring.Scheduling.AlertRule.TemplateCode.get -> string?
 PubSoft.Monitoring.Scheduling.AlertRule.TemplateCode.set -> void
+PubSoft.Monitoring.Scheduling.AlertRule.TemplateParameters.get -> System.Collections.Generic.Dictionary<string!, string!>?
+PubSoft.Monitoring.Scheduling.AlertRule.TemplateParameters.set -> void
 PubSoft.Monitoring.Scheduling.AlertRule.Throttle.get -> System.TimeSpan?
 PubSoft.Monitoring.Scheduling.AlertRule.Throttle.set -> void
 PubSoft.Monitoring.Scheduling.AlertRuleConfig
 PubSoft.Monitoring.Scheduling.AlertRuleConfig.AlertRuleConfig() -> void
 PubSoft.Monitoring.Scheduling.AlertRuleConfig.Rules.get -> System.Collections.Generic.List<PubSoft.Monitoring.Scheduling.AlertRule!>!
 PubSoft.Monitoring.Scheduling.AlertRuleConfig.Rules.set -> void
+PubSoft.Monitoring.Scheduling.AlertRuleLintHostedService
+PubSoft.Monitoring.Scheduling.AlertRuleLintHostedService.AlertRuleLintHostedService(Microsoft.Extensions.Options.IOptions<PubSoft.Scheduling.SchedulerOptions!>! options, Microsoft.Extensions.Logging.ILogger<PubSoft.Monitoring.Scheduling.AlertRuleLintHostedService!>? logger = null) -> void
+PubSoft.Monitoring.Scheduling.AlertRuleLintHostedService.StartAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+PubSoft.Monitoring.Scheduling.AlertRuleLintHostedService.StopAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 PubSoft.Monitoring.Scheduling.AlertRuleProcessor
 PubSoft.Monitoring.Scheduling.AlertRuleProcessor.AlertRuleProcessor(PubSoft.Scheduling.IStateStore! stateStore, PubSoft.Notifications.NotificationDispatcher! dispatcher, PubSoft.Monitoring.IProbeHealthCheck! probeHealthCheck, Microsoft.Extensions.Options.IOptions<PubSoft.Monitoring.Scheduling.AlertProcessorOptions!>! options, System.TimeProvider? timeProvider = null, Microsoft.Extensions.Logging.ILogger<PubSoft.Monitoring.Scheduling.AlertRuleProcessor!>? logger = null) -> void
 PubSoft.Monitoring.Scheduling.AlertRuleProcessor.Name.get -> string!
@@ -55,9 +66,29 @@ PubSoft.Monitoring.Scheduling.AlertSeverity
 PubSoft.Monitoring.Scheduling.AlertSeverity.Critical = 2 -> PubSoft.Monitoring.Scheduling.AlertSeverity
 PubSoft.Monitoring.Scheduling.AlertSeverity.Info = 0 -> PubSoft.Monitoring.Scheduling.AlertSeverity
 PubSoft.Monitoring.Scheduling.AlertSeverity.Warning = 1 -> PubSoft.Monitoring.Scheduling.AlertSeverity
+PubSoft.Monitoring.Scheduling.EnvironmentAlertOptions
+PubSoft.Monitoring.Scheduling.EnvironmentAlertOptions.Channels.get -> string![]!
+PubSoft.Monitoring.Scheduling.EnvironmentAlertOptions.Channels.set -> void
+PubSoft.Monitoring.Scheduling.EnvironmentAlertOptions.Enabled.get -> bool
+PubSoft.Monitoring.Scheduling.EnvironmentAlertOptions.Enabled.set -> void
+PubSoft.Monitoring.Scheduling.EnvironmentAlertOptions.EnvironmentAlertOptions() -> void
+PubSoft.Monitoring.Scheduling.EnvironmentAlertOptions.MinUnreachableDuration.get -> System.TimeSpan
+PubSoft.Monitoring.Scheduling.EnvironmentAlertOptions.MinUnreachableDuration.set -> void
+PubSoft.Monitoring.Scheduling.EnvironmentAlertOptions.SendImmediate.get -> bool
+PubSoft.Monitoring.Scheduling.EnvironmentAlertOptions.SendImmediate.set -> void
+PubSoft.Monitoring.Scheduling.EnvironmentAlertOptions.Severity.get -> PubSoft.Monitoring.Scheduling.AlertSeverity
+PubSoft.Monitoring.Scheduling.EnvironmentAlertOptions.Severity.set -> void
 PubSoft.Monitoring.Scheduling.JobHealthState
 PubSoft.Monitoring.Scheduling.JobHealthState.Healthy = 0 -> PubSoft.Monitoring.Scheduling.JobHealthState
 PubSoft.Monitoring.Scheduling.JobHealthState.Suspicious = 1 -> PubSoft.Monitoring.Scheduling.JobHealthState
 PubSoft.Monitoring.Scheduling.JobHealthState.Unhealthy = 2 -> PubSoft.Monitoring.Scheduling.JobHealthState
 PubSoft.Monitoring.Scheduling.MonitoringSchedulingServiceCollectionExtensions
+PubSoft.Monitoring.Scheduling.PendingAlertOptions
+PubSoft.Monitoring.Scheduling.PendingAlertOptions.Enabled.get -> bool
+PubSoft.Monitoring.Scheduling.PendingAlertOptions.Enabled.set -> void
+PubSoft.Monitoring.Scheduling.PendingAlertOptions.Expiry.get -> System.TimeSpan
+PubSoft.Monitoring.Scheduling.PendingAlertOptions.Expiry.set -> void
+PubSoft.Monitoring.Scheduling.PendingAlertOptions.MaxEntries.get -> int
+PubSoft.Monitoring.Scheduling.PendingAlertOptions.MaxEntries.set -> void
+PubSoft.Monitoring.Scheduling.PendingAlertOptions.PendingAlertOptions() -> void
 static PubSoft.Monitoring.Scheduling.MonitoringSchedulingServiceCollectionExtensions.AddPubSoftMonitoringScheduling(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Monitoring.Scheduling.AlertProcessorOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

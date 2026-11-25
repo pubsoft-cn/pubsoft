@@ -63,6 +63,8 @@ var weekdaysAtNine = new ScheduleMask(
 
 `EverySeconds` / `EveryMinutes` / `EveryHours` 映射到 `ScheduleMasks` 助手，是推荐写法——`"Minutes": 1` 这类裸掩码选中的是**第 0 分**，不是"每分钟"，肉眼无法 review。未知键、标量 cron 字符串、`Cron` 键、快捷/位掩码混用一律在绑定时显式报错。启动时 hosted service 会打印每个 job 解码后的 schedule（`ScheduleMask.Describe()`，形如 `seconds={0} minutes=* hours=* ...`），并在"受限窗口内每秒触发"这种经典误配上告警。
 
+`ExecutorConfig`/`ResultProcessorConfig` 负载中的标量值仅当转换能无损往返时才重定型：`"401"` 会变成 JSON 数字供 `ExpectStatusCodes` 这类类型化成员使用，而 `"007"`、`"+123"` 保持字符串。字符串成员（header 值、模板参数）接受这些重定型 token 并还原原文——配置的 `"8000"` 最终到达的仍是字符串 `"8000"`。消费方反序列化这些 payload 必须使用包级 `JsonSerializerContext`——它们自带 `ScalarStringJsonConverter`；未注册该 converter 的自定义 `JsonSerializerOptions` 会重新引入数字 token 失败。
+
 ## 执行与状态
 
 引擎运行匹配当前时间戳的启用 job，受 `MaxConcurrentJobs` 限制。executor 异常成为通用失败 `JobResult`；配置的结果处理器随后顺序执行，处理器失败记日志但不阻止后续处理器或状态更新。宿主取消传播至 executor 与 processor。

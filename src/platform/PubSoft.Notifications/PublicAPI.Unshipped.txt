@@ -7,6 +7,8 @@ PubSoft.Notifications.DingTalkWebhookOptions
 PubSoft.Notifications.DingTalkWebhookOptions.AllowInsecureUrl.get -> bool
 PubSoft.Notifications.DingTalkWebhookOptions.AllowInsecureUrl.set -> void
 PubSoft.Notifications.DingTalkWebhookOptions.DingTalkWebhookOptions() -> void
+PubSoft.Notifications.DingTalkWebhookOptions.KeywordPrefix.get -> string!
+PubSoft.Notifications.DingTalkWebhookOptions.KeywordPrefix.set -> void
 PubSoft.Notifications.DingTalkWebhookOptions.Secret.get -> string!
 PubSoft.Notifications.DingTalkWebhookOptions.Secret.set -> void
 PubSoft.Notifications.DingTalkWebhookOptions.WebhookUrl.get -> string!

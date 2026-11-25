@@ -2,6 +2,10 @@
 override PubSoft.Scheduling.FencedWorkContext.Equals(object? obj) -> bool
 override PubSoft.Scheduling.FencedWorkContext.GetHashCode() -> int
 override PubSoft.Scheduling.FencedWorkContext.ToString() -> string!
+override PubSoft.Scheduling.ScalarStringJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> string?
+override PubSoft.Scheduling.ScalarStringJsonConverter.ReadAsPropertyName(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> string!
+override PubSoft.Scheduling.ScalarStringJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, string! value, System.Text.Json.JsonSerializerOptions! options) -> void
+override PubSoft.Scheduling.ScalarStringJsonConverter.WriteAsPropertyName(System.Text.Json.Utf8JsonWriter! writer, string! value, System.Text.Json.JsonSerializerOptions! options) -> void
 PubSoft.Scheduling.ExecutorRegistry
 PubSoft.Scheduling.ExecutorRegistry.ExecutorRegistry(System.Collections.Generic.IEnumerable<PubSoft.Scheduling.IJobExecutor!>! executors) -> void
 PubSoft.Scheduling.ExecutorRegistry.Register(PubSoft.Scheduling.IJobExecutor! executor) -> void
@@ -98,6 +102,8 @@ PubSoft.Scheduling.ResultProcessorRegistry
 PubSoft.Scheduling.ResultProcessorRegistry.Register(PubSoft.Scheduling.IResultProcessor! processor) -> void
 PubSoft.Scheduling.ResultProcessorRegistry.Resolve(string! name) -> PubSoft.Scheduling.IResultProcessor?
 PubSoft.Scheduling.ResultProcessorRegistry.ResultProcessorRegistry(System.Collections.Generic.IEnumerable<PubSoft.Scheduling.IResultProcessor!>! processors) -> void
+PubSoft.Scheduling.ScalarStringJsonConverter
+PubSoft.Scheduling.ScalarStringJsonConverter.ScalarStringJsonConverter() -> void
 PubSoft.Scheduling.ScheduleMask
 PubSoft.Scheduling.ScheduleMask.DaysOfMonth.get -> uint
 PubSoft.Scheduling.ScheduleMask.DaysOfWeek.get -> byte
