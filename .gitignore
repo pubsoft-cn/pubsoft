@@ -6,6 +6,8 @@
 *.suo
 TestResults/
 artifacts/
+coverage-results/
+coverage-report/
 internal/
 feed/
 .env

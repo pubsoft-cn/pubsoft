@@ -13,6 +13,7 @@ jobs:
     env:
       PUBSOFT_REDIS: localhost:7000,abortConnect=false
       PUBSOFT_MYSQL: Server=localhost;User=root;Password=pubsoft-it;AllowUserVariables=True
+      PUBSOFT_AMQP: amqp://guest:guest@localhost:5673
       # Org-private token lists reach the PUBSOFT002 analyzer via env → MSBuild
       # property → CompilerVisibleProperty — never committed to the repo.
       PUBSOFT_FORBIDDEN_PATTERNS: ${{ secrets.PUBSOFT_FORBIDDEN_PATTERNS || vars.PUBSOFT_FORBIDDEN_PATTERNS }}
@@ -42,6 +43,17 @@ jobs:
           done
           docker logs pubsoft-test-mysql | tail -20
           exit 1
+      - name: Start RabbitMQ
+        # AMQP integration tests skip without a broker — running them in CI closes the
+        # coverage hole where broker-interaction defects only surface in local dev.
+        run: |
+          docker run -d --name pubsoft-test-rabbitmq -p 5673:5672 rabbitmq:4
+          for i in $(seq 1 60); do
+            if docker exec pubsoft-test-rabbitmq rabbitmqctl ping --quiet 2>/dev/null; then exit 0; fi
+            sleep 2
+          done
+          docker logs pubsoft-test-rabbitmq | tail -20
+          exit 1
       - name: Restore
         run: dotnet restore PubSoft.sln
       - name: Format check
@@ -51,22 +63,8 @@ jobs:
       - name: Test (with coverage)
         run: dotnet test PubSoft.sln --no-restore --configuration Release --collect:"XPlat Code Coverage" --settings coverage.runsettings --results-directory coverage-results
       - name: Coverage gate (>=70% union line coverage)
-        run: |
-          python3 - <<'PY'
-          import glob, sys, xml.etree.ElementTree as ET
-          lines={}
-          for f in glob.glob('coverage-results/*/coverage.cobertura.xml'):
-              for cls in ET.parse(f).getroot().iter('class'):
-                  fn=cls.get('filename','')
-                  if 'PubSoft.' not in fn or fn.startswith('tests'): continue
-                  for line in cls.iter('line'):
-                      k=(fn,line.get('number'))
-                      lines[k]=max(lines.get(k,0),int(line.get('hits',0)))
-          cov=sum(1 for v in lines.values() if v>0)
-          pct=cov*100/max(len(lines),1)
-          print(f"UNION line coverage: {cov}/{len(lines)} = {pct:.1f}%")
-          sys.exit(0 if pct >= 70 else 1)
-          PY
+        # Implementation shared with the local release gate — never diverge copies.
+        run: bash scripts/check-coverage.sh
       - name: Coverage report (ReportGenerator)
         run: |
           dotnet tool install --global dotnet-reportgenerator-globaltool
@@ -90,4 +88,4 @@ jobs:
         run: dotnet list PubSoft.sln package --vulnerable --include-transitive
       - name: Stop Redis Cluster
         if: always()
-        run: docker stop pubsoft-test-redis-cluster pubsoft-test-mysql || true
+        run: docker stop pubsoft-test-redis-cluster pubsoft-test-mysql pubsoft-test-rabbitmq || true

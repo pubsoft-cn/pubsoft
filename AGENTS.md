@@ -81,5 +81,6 @@ export PUBSOFT_MYSQL="Server=localhost;Port=3306;Database=pubsoft_test;User=root
 
 ## Push 门禁（强制）
 
-- **push 前必须跑 `bash scripts/verify-before-push.sh`** —— 与 CI 逐步骤对齐（format → ledger → build → tests），全绿才推；本地没有的 CI 步骤一律视为隐形门槛，新增 CI gate 必须同步进该脚本。
+- **push 前必须跑 `bash scripts/verify-before-push.sh`**（快门：format → ledger → build → 全 env tests），全绿才推；新增 CI gate 必须同步进门禁脚本。
+- **版本 bump/发布前必须跑 `bash scripts/verify-release.sh`**（重门：快门 + 覆盖率门 + pack/ConsumerSmoke + Native AOT consumer）——这些 CI 硬门没有重门镜像就会退化成"CI-first 才发现"，违反本地=CI 原则。
 - **push 频率收敛**：按会话/主题批量推，不逐节点推——主干上成串红 CI 是事故不是流程。
