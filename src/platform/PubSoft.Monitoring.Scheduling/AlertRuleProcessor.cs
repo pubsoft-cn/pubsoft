@@ -17,9 +17,9 @@ public sealed class AlertRuleProcessor : IResultProcessor
     /// <summary>Result-processor name jobs declare in <see cref="ScheduledJob.ResultProcessors"/> to opt into alert rules.</summary>
     public const string ProcessorName = "AlertRules";
 
-    private static readonly JsonSerializerOptions s_jsonOptions = new(JsonSerializerDefaults.Web);
     private const int MaxJobLocks = 4_096;
     private const string OutageStartKey = "monitoring-env:v1:outage-start";
+    private const string EnvPendingJobKey = "monitoring-env";
     private readonly IStateStore _stateStore;
     private readonly NotificationDispatcher _dispatcher;
     private readonly IProbeHealthCheck _probeHealthCheck;
@@ -28,6 +28,8 @@ public sealed class AlertRuleProcessor : IResultProcessor
     private readonly ILogger<AlertRuleProcessor>? _logger;
     /// <summary>Per-job mutex table keyed by jobKey -- capped with lazy eviction of idle entries so job names cannot grow it unboundedly.</summary>
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _jobLocks = new(StringComparer.Ordinal);
+    /// <summary>Serializes outage-window bookkeeping across jobs: the outage-start key is global state, so concurrent jobs must not race its read-modify-write (which would multiply the immediate alert and shift the window start).</summary>
+    private readonly SemaphoreSlim _envLock = new(1, 1);
     /// <summary>Executions suppressed during the current egress outage, observed by this instance only.</summary>
     private int _suppressedDuringOutage;
 
@@ -97,10 +99,13 @@ public sealed class AlertRuleProcessor : IResultProcessor
 
             if (wasProbeUnreachable)
                 await _stateStore.RemoveCustomStateAsync(probeKey, cancellationToken).ConfigureAwait(false);
+            if (_options.PendingAlerts.Enabled)
+            {
+                await FlushPendingAlertsAsync(jobKey, cancellationToken).ConfigureAwait(false);
+                await FlushPendingAlertsAsync(EnvPendingJobKey, cancellationToken).ConfigureAwait(false);
+            }
             if (_options.Environment.Enabled)
                 await ReportOutageRecoveryAsync(cancellationToken).ConfigureAwait(false);
-            if (_options.PendingAlerts.Enabled)
-                await FlushPendingAlertsAsync(jobKey, cancellationToken).ConfigureAwait(false);
 
             if (!TryReadAlertRules(job.ResultProcessorConfig, _logger, out var config, job.Name))
             {
@@ -121,7 +126,15 @@ public sealed class AlertRuleProcessor : IResultProcessor
             foreach (var rule in config.Rules)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (IsInhibited(rule, context) || !EvaluateCondition(rule, context))
+                if (IsInhibited(rule, context))
+                {
+                    if (EvaluateCondition(rule, context))
+                        _logger?.LogInformation(
+                            "Recovery alert rule {Rule} for job {Job} is inhibited on the first execution after probe restoration; the recovery edge is consumed, not replayed.",
+                            rule.Name, job.Name);
+                    continue;
+                }
+                if (!EvaluateCondition(rule, context))
                     continue;
 
                 var throttleKey = GetStateKey(jobKey, $"throttle:{GetStableKey(rule.Name)}");
@@ -161,9 +174,7 @@ public sealed class AlertRuleProcessor : IResultProcessor
 
     internal static bool IsInhibited(AlertRule rule, AlertContext context)
         => context.WasProbeUnreachable
-            && rule.Condition is AlertConditionType.StateRecovered or AlertConditionType.Recovered
-            || context.ProbeHealth == ProbeHealth.Unreachable
-                && rule.Condition is AlertConditionType.FirstFailure or AlertConditionType.EveryFailure;
+            && rule.Condition is AlertConditionType.StateRecovered or AlertConditionType.Recovered;
 
     internal static bool EvaluateCondition(AlertRule rule, AlertContext context)
         => rule.Condition switch
@@ -295,8 +306,8 @@ public sealed class AlertRuleProcessor : IResultProcessor
         if (!names.Add(rule.Name)) { reason = "Name is duplicated"; return false; }
         if (!Enum.IsDefined(rule.Condition)) { reason = $"Condition '{rule.Condition}' is not a declared value"; return false; }
         if (!Enum.IsDefined(rule.Severity)) { reason = $"Severity '{rule.Severity}' is not a declared value"; return false; }
-        if (rule.Channels is not { Length: <= 20 } || rule.Channels.Any(string.IsNullOrWhiteSpace))
-        { reason = "Channels must hold at most 20 non-empty names"; return false; }
+        if (rule.Channels is not { Length: >= 1 and <= 20 } || rule.Channels.Any(string.IsNullOrWhiteSpace))
+        { reason = "Channels must hold 1-20 non-empty names"; return false; }
         if (rule.Recipients is { Length: > 50 } || rule.Recipients?.Any(string.IsNullOrWhiteSpace) == true)
         { reason = "Recipients must hold at most 50 non-empty entries"; return false; }
         if (rule.TemplateParameters is { Count: > 50 } || rule.TemplateParameters?.Keys.Any(string.IsNullOrWhiteSpace) == true)
@@ -335,54 +346,76 @@ public sealed class AlertRuleProcessor : IResultProcessor
         if (_options.Environment is not { Enabled: true })
             return;
         Interlocked.Increment(ref _suppressedDuringOutage);
-        var start = await GetStateAsync<DateTimeOffset>(OutageStartKey, cancellationToken).ConfigureAwait(false);
-        if (start is not null)
-            return;
-        var now = _timeProvider.GetUtcNow();
-        await SetStateAsync(OutageStartKey, now, cancellationToken).ConfigureAwait(false);
-        if (_options.Environment.SendImmediate)
-            await DispatchEnvironmentAlertAsync(
-                $"Monitoring egress unreachable since {now:HH:mm} UTC; job alerts are suppressed until it recovers.",
-                now,
-                new Dictionary<string, string>(StringComparer.Ordinal)
-                {
-                    ["windowStart"] = now.ToString("O", CultureInfo.InvariantCulture)
-                },
-                cancellationToken).ConfigureAwait(false);
+        await _envLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            var start = await GetStateAsync<DateTimeOffset>(OutageStartKey, cancellationToken).ConfigureAwait(false);
+            if (start is not null)
+                return;
+            var now = _timeProvider.GetUtcNow();
+            await SetStateAsync(OutageStartKey, now, cancellationToken).ConfigureAwait(false);
+            if (_options.Environment.SendImmediate)
+                await DispatchEnvironmentAlertAsync(
+                    $"Monitoring egress unreachable since {now:HH:mm} UTC; job alerts are suppressed until it recovers.",
+                    now,
+                    new Dictionary<string, string>(StringComparer.Ordinal)
+                    {
+                        ["windowStart"] = now.ToString("O", CultureInfo.InvariantCulture)
+                    },
+                    immediate: true,
+                    cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            _envLock.Release();
+        }
     }
 
     /// <summary>On probe recovery, closes the persisted outage window and dispatches the delayed summary once per window.</summary>
     private async Task ReportOutageRecoveryAsync(CancellationToken cancellationToken)
     {
-        var start = await GetStateAsync<DateTimeOffset>(OutageStartKey, cancellationToken).ConfigureAwait(false);
-        if (start is not { } started)
-            return;
-        await _stateStore.RemoveCustomStateAsync(OutageStartKey, cancellationToken).ConfigureAwait(false);
-        var suppressed = Interlocked.Exchange(ref _suppressedDuringOutage, 0);
-        var now = _timeProvider.GetUtcNow();
-        var duration = now - started;
-        if (duration < _options.Environment.MinUnreachableDuration)
+        await _envLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
         {
-            _logger?.LogInformation(
-                "Monitoring egress outage lasted {Duration}; below the alert threshold of {Threshold}.",
-                duration, _options.Environment.MinUnreachableDuration);
-            return;
-        }
-        await DispatchEnvironmentAlertAsync(
-            $"Monitoring egress outage {started:HH:mm}-{now:HH:mm} UTC ({duration.TotalMinutes:F0} min); {suppressed} job executions suppressed on this instance.",
-            started,
-            new Dictionary<string, string>(StringComparer.Ordinal)
+            var start = await GetStateAsync<DateTimeOffset>(OutageStartKey, cancellationToken).ConfigureAwait(false);
+            if (start is not { } started)
+                return;
+            await _stateStore.RemoveCustomStateAsync(OutageStartKey, cancellationToken).ConfigureAwait(false);
+            var suppressed = Interlocked.Exchange(ref _suppressedDuringOutage, 0);
+            var now = _timeProvider.GetUtcNow();
+            var duration = now - started;
+            if (duration < _options.Environment.MinUnreachableDuration)
             {
-                ["windowStart"] = started.ToString("O", CultureInfo.InvariantCulture),
-                ["windowMinutes"] = duration.TotalMinutes.ToString("F0", CultureInfo.InvariantCulture),
-                ["suppressedCount"] = suppressed.ToString(CultureInfo.InvariantCulture)
-            },
-            cancellationToken).ConfigureAwait(false);
+                _logger?.LogInformation(
+                    "Monitoring egress outage lasted {Duration}; below the alert threshold of {Threshold}.",
+                    duration, _options.Environment.MinUnreachableDuration);
+                return;
+            }
+            await DispatchEnvironmentAlertAsync(
+                $"Monitoring egress outage {started:HH:mm}-{now:HH:mm} UTC ({duration.TotalMinutes:F0} min); {suppressed} job executions suppressed on this instance.",
+                started,
+                new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["windowStart"] = started.ToString("O", CultureInfo.InvariantCulture),
+                    ["windowMinutes"] = duration.TotalMinutes.ToString("F0", CultureInfo.InvariantCulture),
+                    ["suppressedCount"] = suppressed.ToString(CultureInfo.InvariantCulture)
+                },
+                immediate: false,
+                cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            _envLock.Release();
+        }
     }
 
-    /// <summary>Dispatches an environment alert; the correlation id derives from the outage window so duplicate detections collapse through dispatcher deduplication.</summary>
+    /// <summary>
+    /// Dispatches an environment alert; the correlation id derives from the outage window so duplicate detections collapse
+    /// through dispatcher deduplication, and immediate/summary carries a distinct suffix so one cannot suppress the other.
+    /// Failures of the recovery summary enter the pending backlog when enabled; immediate sends stay best-effort by design.
+    /// </summary>
     private async Task DispatchEnvironmentAlertAsync(
-        string content, DateTimeOffset outageStart, IReadOnlyDictionary<string, string> templateParameters, CancellationToken cancellationToken)
+        string content, DateTimeOffset outageStart, IReadOnlyDictionary<string, string> templateParameters, bool immediate, CancellationToken cancellationToken)
     {
         var message = new NotificationMessage(
             content,
@@ -390,9 +423,21 @@ public sealed class AlertRuleProcessor : IResultProcessor
             templateParameters: templateParameters,
             severity: MapSeverity(_options.Environment.Severity),
             source: "monitoring-env",
-            correlationId: $"monitoring-env:{outageStart.ToString("yyyyMMddHHmm", CultureInfo.InvariantCulture)}");
+            correlationId: $"monitoring-env:{outageStart.ToString("yyyyMMddHHmm", CultureInfo.InvariantCulture)}{(immediate ? ":immediate" : null)}");
+        List<string>? failedChannels = null;
         foreach (var channel in _options.Environment.Channels)
-            await _dispatcher.DispatchAsync(channel, message, cancellationToken).ConfigureAwait(false);
+        {
+            var result = await _dispatcher.DispatchAsync(channel, message, cancellationToken).ConfigureAwait(false);
+            if (result.Success)
+                continue;
+            _logger?.LogWarning(
+                "Environment alert delivery to channel {Channel} failed (correlation {CorrelationId}): {Reason}",
+                channel, message.CorrelationId, result.Message);
+            if (!immediate && _options.PendingAlerts.Enabled)
+                (failedChannels ??= []).Add(channel);
+        }
+        if (failedChannels is { } failed)
+            await RecordPendingAlertsAsync(EnvPendingJobKey, message, failed, cancellationToken).ConfigureAwait(false);
     }
 
     private static string GetStableKey(string value)
@@ -473,22 +518,19 @@ public sealed class AlertRuleProcessor : IResultProcessor
     private Task SetStateAsync<T>(string key, T value, CancellationToken cancellationToken) where T : struct
         => _stateStore.SetCustomStateAsync(key, new StateValue<T>(value), null, cancellationToken);
 
-    /// <summary>Gets or creates the per-job lock -- on capacity, evicts unheld idle semaphores first; a still-full table falls back to a temporary lock (flow unblocked, overlap isolation only weakened).</summary>
+    /// <summary>
+    /// Gets or creates the per-job lock. Entries are never evicted and the cap is strict: eviction cannot be made atomic
+    /// with a semaphore's waiters, so an evicted-but-acquired lock silently breaks overlap isolation. A full table means
+    /// job names are unbounded (a configuration error) and must surface loudly instead of degrading in silence.
+    /// </summary>
     private SemaphoreSlim GetJobLock(string jobKey)
     {
         if (_jobLocks.TryGetValue(jobKey, out var existing))
             return existing;
         if (_jobLocks.Count >= MaxJobLocks)
-            EvictIdleJobLocks();
+            throw new InvalidOperationException(
+                $"Alert processor job-lock table is full ({MaxJobLocks} entries); job names must be a bounded fixed set — dynamic job names are not supported.");
         return _jobLocks.GetOrAdd(jobKey, static _ => new SemaphoreSlim(1, 1));
-    }
-
-    /// <summary>Evicts idle lock entries (CurrentCount==1); entries currently held are skipped.</summary>
-    private void EvictIdleJobLocks()
-    {
-        foreach (var pair in _jobLocks)
-            if (pair.Value.CurrentCount == 1)
-                _jobLocks.TryRemove(pair);
     }
 
     private sealed record StateValue<T>(T Value) where T : struct;

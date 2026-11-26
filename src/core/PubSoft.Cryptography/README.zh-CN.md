@@ -49,7 +49,7 @@ AAD 从 `HasPubSoftEncryption` 写入的模型注解读，写入/迁移共用同
 
 ## 旧凭据迁移
 
-`CredentialEncryptionService` 恒写 AEAD；仅当构造时显式提供旧密钥才能读旧 AES-CBC 格式。读取结果携带 `RequiresReEncryption` + `ReplacementCiphertext`——在宿主事务中持久化替代密文，服务不自行写存储。
+`CredentialEncryptionService` 恒写 AEAD；仅当构造时显式提供旧密钥才能读旧 AES-CBC 格式。CBC 无完整性校验——被篡改的遗留密文会解出垃圾明文而不报错（仅 padding 损坏可检出）；迁移出的明文重新加密前按不可信输入对待。读取结果携带 `RequiresReEncryption` + `ReplacementCiphertext`——在宿主事务中持久化替代密文，服务不自行写存储。
 
 细节与约束见[安全与密码学](../../../docs/security-cryptography.zh-CN.md)。
 

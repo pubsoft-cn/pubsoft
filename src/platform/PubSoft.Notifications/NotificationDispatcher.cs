@@ -8,12 +8,14 @@ namespace PubSoft.Notifications;
 /// <summary>Sends messages via named channels; unknown channels fail closed.</summary>
 public sealed class NotificationDispatcher
 {
+    private static readonly TimeSpan s_sweepInterval = TimeSpan.FromMinutes(1);
     private readonly IReadOnlyDictionary<string, INotificationChannel> _channels;
     private readonly NotificationOptions _options;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly ILogger<NotificationDispatcher>? _logger;
     private readonly object _deduplicationLock = new();
     private readonly Dictionary<DeduplicationKey, DateTimeOffset?> _recent = [];
+    private DateTimeOffset _lastSweep = DateTimeOffset.MinValue;
 
     /// <summary>Creates the dispatcher.</summary>
     public NotificationDispatcher(
@@ -122,11 +124,17 @@ public sealed class NotificationDispatcher
     {
         lock (_deduplicationLock)
         {
-            foreach (var expired in _recent
-                .Where(pair => pair.Value is { } expiry && expiry <= now)
-                .Select(pair => pair.Key)
-                .ToArray())
-                _recent.Remove(expired);
+            // Expired entries never suppress (the lookup below compares the expiry), so sweeping is only needed
+            // to reclaim capacity -- throttle it instead of paying a full scan on every send.
+            if (_recent.Count >= _options.MaximumDeduplicationEntries || now - _lastSweep >= s_sweepInterval)
+            {
+                foreach (var expired in _recent
+                    .Where(pair => pair.Value is { } expiry && expiry <= now)
+                    .Select(pair => pair.Key)
+                    .ToArray())
+                    _recent.Remove(expired);
+                _lastSweep = now;
+            }
 
             if (_recent.TryGetValue(key, out var expiry))
             {

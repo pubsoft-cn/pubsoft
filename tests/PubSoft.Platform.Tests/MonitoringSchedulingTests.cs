@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -7,6 +8,7 @@ using PubSoft.Monitoring;
 using PubSoft.Monitoring.Scheduling;
 using PubSoft.Notifications;
 using PubSoft.Scheduling;
+using PubSoft.Scheduling.EntityFrameworkCore;
 using Xunit;
 
 namespace PubSoft.Core.Tests;
@@ -198,6 +200,272 @@ public sealed class MonitoringSchedulingTests
         await processor.ProcessAsync(job, SuccessfulResult(2), default);
 
         Assert.Empty(envChannel.Messages);
+    }
+
+    [Fact]
+    public async Task EnvironmentSummaryFailureIsResentWhenPendingEnabled()
+    {
+        var clock = new MutableTimeProvider(DateTimeOffset.Parse("2026-10-01T00:00:00Z"));
+        var probe = new TestProbe { Health = ProbeHealth.Healthy };
+        var envChannel = new TestChannel("envops");
+        var processor = CreateProcessor([envChannel], probe, threshold: 1, timeProvider: clock,
+            configure: options =>
+            {
+                options.Environment = new EnvironmentAlertOptions
+                {
+                    Enabled = true,
+                    MinUnreachableDuration = TimeSpan.FromMinutes(1),
+                    Channels = ["envops"]
+                };
+                options.PendingAlerts.Enabled = true;
+            });
+        var job = CreateJob();
+
+        probe.Health = ProbeHealth.Unreachable;
+        await processor.ProcessAsync(job, FailedResult(1), default);
+        clock.Advance(TimeSpan.FromMinutes(3));
+        probe.Health = ProbeHealth.Healthy;
+        envChannel.Result = NotificationResult.Fail("envops down");
+        await processor.ProcessAsync(job, SuccessfulResult(2), default);
+        Assert.Equal(1, envChannel.SendCount);
+
+        envChannel.Result = NotificationResult.Ok();
+        await processor.ProcessAsync(job, SuccessfulResult(3), default);
+
+        Assert.Equal(2, envChannel.SendCount);
+        Assert.Equal(envChannel.Messages[0].CorrelationId, envChannel.Messages[1].CorrelationId);
+    }
+
+    [Fact]
+    public async Task EnvironmentImmediateSuccessDoesNotSuppressRecoverySummary()
+    {
+        var clock = new MutableTimeProvider(DateTimeOffset.Parse("2026-10-01T00:00:00Z"));
+        var probe = new TestProbe { Health = ProbeHealth.Healthy };
+        var envChannel = new TestChannel("envops");
+        var processor = CreateProcessor([envChannel], probe, threshold: 1, timeProvider: clock,
+            configure: options => options.Environment = new EnvironmentAlertOptions
+            {
+                Enabled = true,
+                MinUnreachableDuration = TimeSpan.FromMinutes(1),
+                Channels = ["envops"],
+                SendImmediate = true
+            });
+        var job = CreateJob();
+
+        probe.Health = ProbeHealth.Unreachable;
+        await processor.ProcessAsync(job, FailedResult(1), default);
+        clock.Advance(TimeSpan.FromMinutes(2));
+        probe.Health = ProbeHealth.Healthy;
+        await processor.ProcessAsync(job, SuccessfulResult(2), default);
+
+        Assert.Equal(2, envChannel.Messages.Count);
+        Assert.NotEqual(envChannel.Messages[0].CorrelationId, envChannel.Messages[1].CorrelationId);
+        Assert.Contains("unreachable since", envChannel.Messages[0].Content);
+        Assert.Contains("egress outage", envChannel.Messages[1].Content);
+    }
+
+    [Fact]
+    public async Task EnvironmentImmediateFailureIsNotResent()
+    {
+        var clock = new MutableTimeProvider(DateTimeOffset.Parse("2026-10-01T00:00:00Z"));
+        var probe = new TestProbe { Health = ProbeHealth.Healthy };
+        var envChannel = new TestChannel("envops") { Result = NotificationResult.Fail("down") };
+        var processor = CreateProcessor([envChannel], probe, threshold: 1, timeProvider: clock,
+            configure: options =>
+            {
+                options.Environment = new EnvironmentAlertOptions
+                {
+                    Enabled = true,
+                    MinUnreachableDuration = TimeSpan.FromMinutes(1),
+                    Channels = ["envops"],
+                    SendImmediate = true
+                };
+                options.PendingAlerts.Enabled = true;
+            });
+        var job = CreateJob();
+
+        probe.Health = ProbeHealth.Unreachable;
+        await processor.ProcessAsync(job, FailedResult(1), default);
+        clock.Advance(TimeSpan.FromMinutes(2));
+        probe.Health = ProbeHealth.Healthy;
+        envChannel.Result = NotificationResult.Ok();
+        await processor.ProcessAsync(job, SuccessfulResult(2), default);
+        await processor.ProcessAsync(job, SuccessfulResult(3), default);
+
+        Assert.Single(envChannel.Messages, message => message.Content.Contains("unreachable since"));
+        Assert.Single(envChannel.Messages, message => message.Content.Contains("egress outage"));
+    }
+
+    [Fact]
+    public async Task ConcurrentOutageOnsetAcrossJobsFiresSingleImmediate()
+    {
+        var clock = new MutableTimeProvider(DateTimeOffset.Parse("2026-10-01T00:00:00Z"));
+        var probe = new TestProbe { Health = ProbeHealth.Unreachable };
+        var envChannel = new TestChannel("envops");
+        var processor = CreateProcessor([envChannel], probe, threshold: 1, timeProvider: clock,
+            configure: options => options.Environment = new EnvironmentAlertOptions
+            {
+                Enabled = true,
+                MinUnreachableDuration = TimeSpan.FromMinutes(1),
+                Channels = ["envops"],
+                SendImmediate = true
+            });
+
+        var jobs = Enumerable.Range(1, 8).Select(index =>
+        {
+            var job = CreateJob();
+            job.Name = $"test-job-{index}";
+            return job;
+        }).ToArray();
+        await Task.WhenAll(jobs.Select(job => processor.ProcessAsync(job, FailedResult(1), default)));
+
+        Assert.Single(envChannel.Messages, message => message.Content.Contains("unreachable since"));
+    }
+
+    [Fact]
+    public async Task InhibitedRecoveryAtProbeRestorationIsConsumedNotReplayed()
+    {
+        var logger = new ListLogger<AlertRuleProcessor>();
+        var channel = new TestChannel("email");
+        var probe = new TestProbe();
+        var processor = new AlertRuleProcessor(
+            new MemoryStateStore(),
+            new NotificationDispatcher([channel]),
+            probe,
+            Options.Create(new AlertProcessorOptions { FailureThreshold = 1 }),
+            logger: logger);
+        var job = CreateJob(new AlertRule
+        {
+            Name = "recovered",
+            Condition = AlertConditionType.StateRecovered,
+            Channels = ["email"]
+        });
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+        probe.Health = ProbeHealth.Unreachable;
+        await processor.ProcessAsync(job, FailedResult(2), default);
+        probe.Health = ProbeHealth.Healthy;
+        await processor.ProcessAsync(job, SuccessfulResult(3), default);
+        await processor.ProcessAsync(job, SuccessfulResult(4), default);
+
+        Assert.Empty(channel.Messages);
+        Assert.Contains(logger.Messages, message => message.Contains("inhibited"));
+    }
+
+    [Fact]
+    public async Task PendingAlertsSurviveEfCoreStateStoreSerialization()
+    {
+        await using var connection = new Microsoft.Data.Sqlite.SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var services = new ServiceCollection();
+        services.AddSingleton<PubSoft.Domain.ITenantContext>(new StubTenantContext(null));
+        services.AddDbContext<FakeDbContext>(options => options.UseSqlite(connection));
+        var provider = services.BuildServiceProvider();
+        using (var scope = provider.CreateScope())
+            scope.ServiceProvider.GetRequiredService<FakeDbContext>().Database.EnsureCreated();
+        var store = new PubSoft.Scheduling.EntityFrameworkCore.EfCoreStateStore<FakeDbContext>(
+            provider.GetRequiredService<IServiceScopeFactory>());
+
+        var channel = new TestChannel("email") { Result = NotificationResult.Fail("down") };
+        var processor = new AlertRuleProcessor(
+            store,
+            new NotificationDispatcher([channel]),
+            new TestProbe(),
+            Options.Create(new AlertProcessorOptions
+            {
+                FailureThreshold = 1,
+                PendingAlerts = new PendingAlertOptions { Enabled = true }
+            }));
+        var job = CreateJob(new AlertRule
+        {
+            Name = "every",
+            Condition = AlertConditionType.EveryFailure,
+            Channels = ["email"]
+        });
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+        Assert.Equal(1, channel.SendCount);
+
+        channel.Result = NotificationResult.Ok();
+        await processor.ProcessAsync(job, SuccessfulResult(2), default);
+
+        Assert.Equal(2, channel.SendCount);
+    }
+
+    [Fact]
+    public async Task PendingBacklogDropsOldestBeyondMaxEntries()
+    {
+        var logger = new ListLogger<AlertRuleProcessor>();
+        var channel = new TestChannel("email") { Result = NotificationResult.Fail("down") };
+        var processor = new AlertRuleProcessor(
+            new MemoryStateStore(),
+            new NotificationDispatcher([channel]),
+            new TestProbe(),
+            Options.Create(new AlertProcessorOptions
+            {
+                FailureThreshold = 1,
+                PendingAlerts = new PendingAlertOptions { Enabled = true, MaxEntries = 2 }
+            }),
+            logger: logger);
+        var job = CreateJob(new AlertRule
+        {
+            Name = "every",
+            Condition = AlertConditionType.EveryFailure,
+            Channels = ["email"]
+        });
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+        await processor.ProcessAsync(job, FailedResult(2), default);
+        await processor.ProcessAsync(job, FailedResult(3), default);
+        Assert.Equal(6, channel.SendCount);
+        Assert.Contains(logger.Messages, message => message.Contains("dropping the oldest entry"));
+
+        channel.Result = NotificationResult.Ok();
+        await processor.ProcessAsync(job, SuccessfulResult(4), default);
+
+        Assert.Equal(8, channel.SendCount);
+    }
+
+    [Fact]
+    public async Task JobLockTableExhaustionFailsLoudly()
+    {
+        var processor = CreateProcessor([new TestChannel("email")], threshold: 1);
+        for (var index = 0; index < 4096; index++)
+        {
+            var job = CreateJob();
+            job.Name = $"job-{index}";
+            await processor.ProcessAsync(job, SuccessfulResult(1), default);
+        }
+
+        var overflow = CreateJob();
+        overflow.Name = "job-overflow";
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => processor.ProcessAsync(overflow, SuccessfulResult(2), default));
+        Assert.Contains("job-lock table is full", exception.Message);
+    }
+
+    [Fact]
+    public async Task RuleWithEmptyChannelsIsRejected()
+    {
+        var logger = new ListLogger<AlertRuleProcessor>();
+        var channel = new TestChannel("email");
+        var processor = new AlertRuleProcessor(
+            new MemoryStateStore(),
+            new NotificationDispatcher([channel]),
+            new TestProbe(),
+            Options.Create(new AlertProcessorOptions { FailureThreshold = 1 }),
+            logger: logger);
+        var job = CreateJob(new AlertRule
+        {
+            Name = "no-channels",
+            Condition = AlertConditionType.StateConfirmed,
+            Channels = []
+        });
+
+        await processor.ProcessAsync(job, FailedResult(1), default);
+
+        Assert.Empty(channel.Messages);
+        Assert.Contains(logger.Messages, message => message.Contains("Channels"));
     }
 
     [Fact]
@@ -703,9 +971,26 @@ public sealed class MonitoringSchedulingTests
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            SendCount++;
-            Messages.Add(message);
+            lock (Messages)
+            {
+                SendCount++;
+                Messages.Add(message);
+            }
             return Task.FromResult(Result);
+        }
+    }
+
+    private sealed record StubTenantContext(long? TenantId) : PubSoft.Domain.ITenantContext;
+
+    private sealed class FakeDbContext : PubSoft.EntityFrameworkCore.PubSoftDbContext
+    {
+        public FakeDbContext(DbContextOptions options)
+            : base(options, new StubTenantContext(null), null, null, null) { }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.ConfigurePubSoftSchedulerState();
         }
     }
 

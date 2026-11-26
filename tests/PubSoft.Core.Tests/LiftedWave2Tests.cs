@@ -51,6 +51,14 @@ public sealed class LiftedWave2Tests
         Assert.False(ClientSigner.IsTimestampValid("not-a-number"));
     }
 
+    [Fact]
+    public void ClientSignerOutOfRangeTimestampReturnsFalse()
+    {
+        Assert.False(ClientSigner.IsTimestampValid("999999999999999"));
+        Assert.False(ClientSigner.IsTimestampValid("-999999999999999"));
+        Assert.False(ClientSigner.IsTimestampValid("253402300800000"));
+    }
+
     // ── HttpContextTenantContext ──
 
     private static HttpContextTenantContext Ctx(HttpContext http, Action<HttpContextTenantOptions>? cfg = null)

@@ -77,7 +77,7 @@ worker 只处理当前 scoped `ITenantContext` 可见的行。无 `IOutboxScopeP
 
 Outbox worker 以 lease 领取、分发、再标记已投递。进程可能在外部副作用成功后、记录投递前失败——消息会被再次投递。Inbox 保护其事务内的数据库写入；不能包含邮件、HTTP 调用或其他系统的提交——这些副作用须有自己的幂等键或持久协调策略。
 
-重试用有界指数退避 + 尝试上限；耗尽进 dead letter。lease token 阻止迟到 worker，但不能让慢外部操作可逆。监控 dead-letter 与重试计数并提供运维排查/重放流程。receipt 不会按任何计划删除：
+重试用有界指数退避 + 尝试上限；耗尽进 dead letter。`AttemptCount` 在租约认领时递增、不在派发失败时——崩溃损失的投递尝试照样计数。这是刻意的毒消息防护：在派发中途让 worker 崩溃的消息必须最终耗尽，而不是无限循环；dead letter（而非静默丢失）就是供排查与重放的设计终点。lease token 阻止迟到 worker，但不能让慢外部操作可逆。监控 dead-letter 与重试计数并提供运维排查/重放流程。receipt 不会按任何计划删除：
 
 ```csharp
 // 全租户：删除超过保留窗口的 receipt

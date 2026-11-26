@@ -109,9 +109,20 @@ public sealed class SchedulerEngine
         }
         finally
         {
-            if (instanceLock is not null)
-                await instanceLock.DisposeAsync().ConfigureAwait(false);
+            // The overlap guard is released first: a failing lock release (Redis down)
+            // must never leave the in-process guard held, which would skip this job forever.
             overlapGuard?.Release();
+            if (instanceLock is not null)
+            {
+                try
+                {
+                    await instanceLock.DisposeAsync().ConfigureAwait(false);
+                }
+                catch (Exception exception) // pubsoft:exempt PUBSOFT045 "best-effort lock release — the lease expiry is the backstop"
+                {
+                    _logger?.LogWarning(exception, "Job {Name} distributed lock release failed; the lease expires on its own.", job.Name);
+                }
+            }
         }
         stopwatch.Stop();
         _logger?.LogDebug("Job {Name} completed in {ElapsedMs}ms success={Success}",

@@ -11,6 +11,40 @@ public sealed class NotificationsTailWave2Tests
         public HttpClient CreateClient(string name) => new();
     }
 
+    private sealed class BlockingFactory : IHttpClientFactory
+    {
+        public HttpClient CreateClient(string name) => new(new BlockingHandler());
+
+        private sealed class BlockingHandler : HttpMessageHandler
+        {
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+                return new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task DingTalkChannelPropagatesCancellation()
+    {
+        var channel = new DingTalkWebhookChannel(new BlockingFactory(),
+            Microsoft.Extensions.Options.Options.Create(new DingTalkWebhookOptions { WebhookUrl = "https://d/h" }));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => channel.SendAsync(new NotificationMessage("content"), cts.Token));
+    }
+
+    [Fact]
+    public async Task TeamsChannelPropagatesCancellation()
+    {
+        var channel = new TeamsWebhookChannel(new BlockingFactory(),
+            Microsoft.Extensions.Options.Options.Create(new TeamsWebhookOptions { WebhookUrl = "https://t/h" }));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => channel.SendAsync(new NotificationMessage("content"), cts.Token));
+    }
+
     [Fact]
     public void ChannelNameConstants()
     {

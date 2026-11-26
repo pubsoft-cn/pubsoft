@@ -65,14 +65,14 @@ services.AddPubSoftMonitoringScheduling(options =>
 ```
 
 - The alert fires at **recovery** time — while egress is down, the same path cannot deliver it. The message carries the outage window and the number of suppressed job executions (also exposed as `windowStart`/`windowMinutes`/`suppressedCount` template parameters).
-- `SendImmediate` additionally attempts one early notification when the outage is first observed; it usually fails while egress is down but lands early in partial-connectivity cases. At most one attempt per outage window.
+- `SendImmediate` additionally attempts one early notification when the outage is first observed; it usually fails while egress is down but lands early in partial-connectivity cases. At most one attempt per outage window. The immediate probe is best-effort **by design** — a failure is never retried (it is strictly superseded by the recovery summary) — while the recovery summary is covered by `PendingAlerts` like any job alert. Immediate and summary use distinct correlation ids, so a successful immediate never suppresses the summary.
 - Boundaries: detection granularity is the job execution cadence — the summary goes out on the first job execution after the probe recovers. The suppressed-executions count is observed per processor instance. Outages shorter than `MinUnreachableDuration` are logged, not alerted.
 
 ## Delivery durability
 
-Alert dispatch is best-effort per channel: a rule fires on the execution where its condition holds, and a transition-edge rule (`StateConfirmed`, `StateRecovered`, ...) fires exactly once — if every channel send fails at that moment, the alert is lost. Probe suppression does not consume transitions (the health state machine freezes while the probe is unreachable and resumes on recovery), so the loss window is channel-side failures, not egress outages.
+Alert dispatch is best-effort per channel: a rule fires on the execution where its condition holds, and a transition-edge rule (`StateConfirmed`, `StateRecovered`, ...) fires exactly once — if every channel send fails at that moment, the alert is lost. Probe suppression does not consume transitions while the outage lasts (the health state machine freezes while the probe is unreachable and resumes on recovery), so the loss window is channel-side failures, not egress outages. One deliberate exception: a recovery edge (`StateRecovered`/`Recovered`) firing on the **first execution after probe restoration** is inhibited and consumed, not replayed — during the freeze no new degradation can be recorded, so such an edge almost always reports an outage artifact already covered by the environment summary rather than an independently confirmed recovery. The inhibition is logged at information level when it consumes an edge.
 
-`options.PendingAlerts` closes that window for deployments that need it (opt-in, disabled by default):
+`options.PendingAlerts` closes that window for deployments that need it (opt-in, disabled by default). It covers job rule alerts and the environment outage summary alike (the summary is persisted under a fixed pseudo-job key); the best-effort immediate probe stays uncovered on purpose:
 
 - An alert no channel could deliver is persisted per channel and retried on later job executions until it lands or `Expiry` (default 24 h) passes; `MaxEntries` (default 50) caps the per-job backlog, oldest dropped first.
 - Resends keep the original `CorrelationId`, so dispatcher deduplication collapses an overlap with a later normal fire.
@@ -80,7 +80,7 @@ Alert dispatch is best-effort per channel: a rule fires on the execution where i
 
 ## Boundaries
 
-Probe contracts, the health aggregator, and bounded-parallelism options live in [PubSoft.Monitoring](../../platform/PubSoft.Monitoring/README.md). Job scheduling semantics live in [PubSoft.Scheduling](../../platform/PubSoft.Scheduling/README.md).
+Per-job alert processing is serialized through an in-process lock table of bounded capacity; job names must be a bounded fixed set — exceeding the cap throws loudly instead of silently weakening overlap isolation. Probe contracts, the health aggregator, and bounded-parallelism options live in [PubSoft.Monitoring](../../platform/PubSoft.Monitoring/README.md). Job scheduling semantics live in [PubSoft.Scheduling](../../platform/PubSoft.Scheduling/README.md).
 
 ## Public API surface
 

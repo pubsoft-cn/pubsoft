@@ -108,7 +108,7 @@ Dispatcher transports attach `OutboxHeaders` (`x-outbox-id`, `x-outbox-aggkey`, 
 
 The Outbox worker claims with a lease, dispatches, then marks the row delivered. A process can fail after an external side effect succeeds but before delivery is recorded, so the message may be delivered again. Inbox protects database writes in its transaction; it cannot include an email, HTTP call, or another system's commit. Give those effects their own idempotency key or durable coordination strategy.
 
-Retries use bounded exponential delay and an attempt limit; exhausted messages move to dead letter. Lease tokens fence late workers, but do not make a slow external operation reversible. Monitor dead-letter and retry counts and provide an operator process for investigation/replay. Receipts are not deleted on any schedule. `InboxRetentionCleanup<TDbContext>` performs explicit bounded-batch deletion:
+Retries use bounded exponential delay and an attempt limit; exhausted messages move to dead letter. `AttemptCount` increments at lease claim, not at dispatch failure — a delivery attempt lost to a crash still counts. This is deliberate poison-message protection: a message that crashes the worker mid-dispatch must exhaust eventually instead of looping forever, and dead letter (not silent loss) is the designed destination for inspection and replay. Lease tokens fence late workers, but do not make a slow external operation reversible. Monitor dead-letter and retry counts and provide an operator process for investigation/replay. Receipts are not deleted on any schedule. `InboxRetentionCleanup<TDbContext>` performs explicit bounded-batch deletion:
 
 ```csharp
 // All tenants: delete receipts older than the retention window

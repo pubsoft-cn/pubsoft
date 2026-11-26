@@ -73,6 +73,10 @@ public sealed class DingTalkWebhookChannel : INotificationChannel
             _logger?.LogError("DingTalk failed: {ErrCode} {ErrMsg}", errcode, errmsg);
             return NotificationResult.Fail(errmsg);
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _logger?.LogError(ex, "DingTalk exception");

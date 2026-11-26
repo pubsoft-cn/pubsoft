@@ -45,6 +45,8 @@ public static class AesEncryptor
 
         var key = DeriveKey(masterKey);
         var combined = Convert.FromBase64String(encrypted);
+        if (combined.Length < 28)
+            throw new System.IO.InvalidDataException("The encrypted payload is malformed: shorter than the iv+tag envelope.");
 
         var iv = new byte[12];
         var tag = new byte[16];

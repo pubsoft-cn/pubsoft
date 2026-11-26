@@ -29,7 +29,7 @@ var plaintext = encryptor.Decrypt(ciphertext, context);
 
 ## Legacy credential migration
 
-`CredentialEncryptionService` always writes AEAD and can read the old AES-CBC format only when constructed with the explicit legacy key. Read results carry `RequiresReEncryption` + `ReplacementCiphertext` — persist the replacement in the host's transaction; the service never writes storage itself.
+`CredentialEncryptionService` always writes AEAD and can read the old AES-CBC format only when constructed with the explicit legacy key. CBC carries no integrity check — a tampered legacy ciphertext decrypts to garbage plaintext without error (only padding corruption is detected); treat migrated plaintext as untrusted until re-encrypted. Read results carry `RequiresReEncryption` + `ReplacementCiphertext` — persist the replacement in the host's transaction; the service never writes storage itself.
 
 Details and constraints: [Security and Cryptography](../../../docs/security-cryptography.md).
 

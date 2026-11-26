@@ -57,7 +57,15 @@ public static class ClientSigner
     public static bool IsTimestampValid(string timestamp, TimeProvider? timeProvider = null)
     {
         if (!long.TryParse(timestamp, out var ts)) return false;
-        var dto = DateTimeOffset.FromUnixTimeMilliseconds(ts);
+        DateTimeOffset dto;
+        try
+        {
+            dto = DateTimeOffset.FromUnixTimeMilliseconds(ts);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            return false;
+        }
         var diff = (timeProvider ?? TimeProvider.System).GetUtcNow() - dto;
         return Math.Abs(diff.TotalSeconds) <= TimestampTolerance.TotalSeconds;
     }

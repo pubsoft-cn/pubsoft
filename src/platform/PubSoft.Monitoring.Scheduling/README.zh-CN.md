@@ -65,14 +65,14 @@ services.AddPubSoftMonitoringScheduling(options =>
 ```
 
 - 告警在**恢复时刻**发出——出网中断期间同一条路径也发不出去。消息携带故障窗口与被抑制的 job 执行次数（另以 `windowStart`/`windowMinutes`/`suppressedCount` 模板参数暴露）。
-- `SendImmediate` 会在首次观测到故障时额外尝试一次即时通知——出网断开期间通常发不出去，但半通场景能提前送达。每个故障窗口最多尝试一次。
+- `SendImmediate` 会在首次观测到故障时额外尝试一次即时通知——出网断开期间通常发不出去，但半通场景能提前送达。每个故障窗口最多尝试一次。即时探测**按设计就是 best-effort**——失败后永不重试（它被恢复摘要严格取代），而恢复摘要与 job 告警一样受 `PendingAlerts` 覆盖。即时与摘要使用不同的 correlation id，即时送达成功不会吞掉摘要。
 - 边界：检测粒度为 job 执行频率——摘要在探针恢复后的首次 job 执行时发出。抑制计数按 processor 实例观测。短于 `MinUnreachableDuration` 的中断只记日志不告警。
 
 ## 投递持久性
 
-告警投递按通道 best-effort：规则在条件成立的执行上触发，转移边沿型规则（`StateConfirmed`、`StateRecovered` 等）只触发一次——若那一刻所有通道都发不出去，该告警永久丢失。探针抑制不消费转移（健康状态机在探针不可达期间冻结、恢复后续算），所以丢失窗口在**通道侧失败**，不在出网中断。
+告警投递按通道 best-effort：规则在条件成立的执行上触发，转移边沿型规则（`StateConfirmed`、`StateRecovered` 等）只触发一次——若那一刻所有通道都发不出去，该告警永久丢失。探针抑制在中断持续期间不消费转移（健康状态机在探针不可达期间冻结、恢复后续算），所以丢失窗口在**通道侧失败**，不在出网中断。有一个刻意的例外：**探针恢复后首次执行**上触发的恢复边沿（`StateRecovered`/`Recovered`）会被抑制并消费、不重放——冻结期间不会记录新的劣化，所以这种边沿几乎总是在报告已被环境摘要覆盖的中断假象，而非独立确认的恢复。抑制消费边沿时会输出 information 级日志。
 
-`options.PendingAlerts` 为需要的部署闭合该窗口（opt-in，默认关闭）：
+`options.PendingAlerts` 为需要的部署闭合该窗口（opt-in，默认关闭）。job 规则告警与环境中断摘要同样覆盖（摘要持久化在固定伪 job key 下）；best-effort 即时探测刻意不覆盖：
 
 - 无通道送达的告警按通道持久化，在后续 job 执行上重试，直到送达或超过 `Expiry`（默认 24h）；`MaxEntries`（默认 50）限制单 job 积压，最旧的先丢。
 - 补发保留原始 `CorrelationId`，与后续正常触发的重叠由 dispatcher 去重坍缩。
@@ -80,7 +80,7 @@ services.AddPubSoftMonitoringScheduling(options =>
 
 ## 边界
 
-探针契约、健康聚合器与有界并行选项在 [PubSoft.Monitoring](../../platform/PubSoft.Monitoring/README.zh-CN.md)；job 调度语义在 [PubSoft.Scheduling](../../platform/PubSoft.Scheduling/README.zh-CN.md)。
+按 job 的告警处理经由进程内锁表串行化，容量有界——job 名必须是有界固定集合；超限响亮抛错而非静默削弱重叠隔离。探针契约、健康聚合器与有界并行选项在 [PubSoft.Monitoring](../../platform/PubSoft.Monitoring/README.zh-CN.md)；job 调度语义在 [PubSoft.Scheduling](../../platform/PubSoft.Scheduling/README.zh-CN.md)。
 
 ## Public API surface
 

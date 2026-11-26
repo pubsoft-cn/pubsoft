@@ -18,6 +18,19 @@ public sealed class AesGcmEncryptorTests
     }
 
     [Fact]
+    public void StaticAesDecryptRejectsTruncatedPayload()
+    {
+        var truncated = Convert.ToBase64String(new byte[10]);
+        Assert.Throws<System.IO.InvalidDataException>(() => AesEncryptor.Decrypt(truncated, "master-key"));
+    }
+
+    [Fact]
+    public void StaticAesDecryptRoundTripsEmptyPlaintext()
+    {
+        Assert.Equal(string.Empty, AesEncryptor.Decrypt(AesEncryptor.Encrypt(string.Empty, "master-key"), "master-key"));
+    }
+
+    [Fact]
     public void Encrypt_UsesFreshNonceForEachValue()
     {
         var encryptor = new AesGcmEncryptor(new TestKeyRing("key-1", ("key-1", RandomNumberGenerator.GetBytes(32))));

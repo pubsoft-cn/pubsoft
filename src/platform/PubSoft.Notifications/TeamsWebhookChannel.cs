@@ -67,6 +67,10 @@ public sealed class TeamsWebhookChannel : INotificationChannel
             _logger?.LogError("Teams failed: {Status} {Body}", resp.StatusCode, body);
             return NotificationResult.Fail($"HTTP {(int)resp.StatusCode}: {body}");
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _logger?.LogError(ex, "Teams exception");

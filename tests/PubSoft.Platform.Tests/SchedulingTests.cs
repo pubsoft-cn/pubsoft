@@ -261,6 +261,27 @@ public sealed class SchedulingTests
     }
 
     [Fact]
+    public async Task EngineReleasesOverlapGuardWhenDistributedLockDisposeFails()
+    {
+        var executor = new TestExecutor("test", _ => Task.FromResult(new JobResult { Success = true }));
+        var engine = new SchedulerEngine(
+            new ExecutorRegistry([executor]),
+            new ResultProcessorRegistry([]),
+            new MemoryStateStore(),
+            distributedLock: new ThrowingOnDisposeLock());
+        var options = new SchedulerOptions
+        {
+            DistributedLocking = true,
+            Jobs = [new ScheduledJob { Name = "job", ExecutorType = "test", Schedule = ScheduleMask.EverySecond }]
+        };
+
+        await engine.RunDueJobsAsync(options, DateTimeOffset.UtcNow);
+        await engine.RunDueJobsAsync(options, DateTimeOffset.UtcNow.AddSeconds(1));
+
+        Assert.Equal(2, executor.ExecutionCount);
+    }
+
+    [Fact]
     public async Task MemoryStateStoreExpiresCustomEntriesUsingTimeProvider()
     {
         var clock = new MutableTimeProvider(DateTimeOffset.Parse("2026-09-30T00:00:00Z"));
@@ -473,6 +494,17 @@ public sealed class SchedulingTests
             await Task.Delay(10, cancellationToken);
             Interlocked.Decrement(ref _active);
             return new JobResult { Success = true };
+        }
+    }
+
+    private sealed class ThrowingOnDisposeLock : PubSoft.Caching.IDistributedLock
+    {
+        public Task<IAsyncDisposable?> AcquireAsync(string key, TimeSpan expiry, TimeSpan? waitTimeout = null, CancellationToken cancellationToken = default)
+            => Task.FromResult<IAsyncDisposable?>(new ThrowingHandle());
+
+        private sealed class ThrowingHandle : IAsyncDisposable
+        {
+            public ValueTask DisposeAsync() => throw new InvalidOperationException("redis down");
         }
     }
 
