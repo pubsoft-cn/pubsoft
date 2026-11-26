@@ -46,13 +46,25 @@ jobs:
       - name: Start RabbitMQ
         # AMQP integration tests skip without a broker — running them in CI closes the
         # coverage hole where broker-interaction defects only surface in local dev.
+        # --user rabbitmq is required: started as root, the entrypoint's early erlang calls can
+        # auto-generate a root-owned .erlang.cookie before the privilege drop, and the race is
+        # lost often enough that the node dies in prelaunch (cookie read eacces). Running the
+        # container as the rabbitmq user from the start removes the root user entirely.
         run: |
-          docker run -d --name pubsoft-test-rabbitmq -p 5673:5672 rabbitmq:4
+          docker run -d --name pubsoft-test-rabbitmq --user rabbitmq -p 5673:5672 rabbitmq:4
           for i in $(seq 1 60); do
-            if docker exec pubsoft-test-rabbitmq rabbitmqctl ping --quiet 2>/dev/null; then exit 0; fi
+            if ! docker inspect -f '{{.State.Running}}' pubsoft-test-rabbitmq 2>/dev/null | grep -q true; then
+              echo "rabbitmq container exited during boot"
+              docker logs pubsoft-test-rabbitmq 2>&1 | tail -30
+              exit 1
+            fi
+            if docker exec pubsoft-test-rabbitmq rabbitmqctl ping --quiet 2>/dev/null               && timeout 2 bash -c 'echo > /dev/tcp/localhost/5673' 2>/dev/null; then
+              echo "rabbitmq ready after $((i * 2))s"
+              exit 0
+            fi
             sleep 2
           done
-          docker logs pubsoft-test-rabbitmq | tail -20
+          docker logs pubsoft-test-rabbitmq 2>&1 | tail -30
           exit 1
       - name: Restore
         run: dotnet restore PubSoft.sln
