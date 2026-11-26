@@ -26,10 +26,16 @@ public sealed class AlertRuleProcessor : IResultProcessor
     private readonly AlertProcessorOptions _options;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly ILogger<AlertRuleProcessor>? _logger;
-    /// <summary>Per-job mutex table keyed by jobKey -- capped with lazy eviction of idle entries so job names cannot grow it unboundedly.</summary>
+    /// <summary>Per-job mutex table keyed by jobKey -- strict cap, never evicted (see <see cref="GetJobLock"/>).</summary>
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _jobLocks = new(StringComparer.Ordinal);
     /// <summary>Serializes outage-window bookkeeping across jobs: the outage-start key is global state, so concurrent jobs must not race its read-modify-write (which would multiply the immediate alert and shift the window start).</summary>
     private readonly SemaphoreSlim _envLock = new(1, 1);
+    /// <summary>
+    /// Serializes resend passes over the shared environment-alert backlog: concurrent jobs must not race its
+    /// read-modify-write, or a retired entry is resurrected by a stale writer and a pass overlaps itself.
+    /// Leaf lock -- never held together with <see cref="_envLock"/>; ordering is jobLock then envLock then envFlushLock.
+    /// </summary>
+    private readonly SemaphoreSlim _envFlushLock = new(1, 1);
     /// <summary>Executions suppressed during the current egress outage, observed by this instance only.</summary>
     private int _suppressedDuringOutage;
 
@@ -102,7 +108,7 @@ public sealed class AlertRuleProcessor : IResultProcessor
             if (_options.PendingAlerts.Enabled)
             {
                 await FlushPendingAlertsAsync(jobKey, cancellationToken).ConfigureAwait(false);
-                await FlushPendingAlertsAsync(EnvPendingJobKey, cancellationToken).ConfigureAwait(false);
+                await FlushEnvPendingAlertsAsync(cancellationToken).ConfigureAwait(false);
             }
             if (_options.Environment.Enabled)
                 await ReportOutageRecoveryAsync(cancellationToken).ConfigureAwait(false);
@@ -442,6 +448,41 @@ public sealed class AlertRuleProcessor : IResultProcessor
 
     private static string GetStableKey(string value)
         => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
+
+    /// <summary>
+    /// Flushes the shared environment-alert backlog at most once per <see cref="PendingAlertOptions.RetryInterval"/>.
+    /// Unlike the per-job backlog (whose cadence is the owning job's own schedule), the environment backlog is
+    /// global -- without throttling every job execution would retry it, multiplying the resend rate and, on a
+    /// persistently failing channel, turning one undelivered summary into a poison-message loop.
+    /// </summary>
+    private async Task FlushEnvPendingAlertsAsync(CancellationToken cancellationToken)
+    {
+        await _envFlushLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            var pendingKey = GetStateKey(EnvPendingJobKey, "pending-alerts");
+            var backlog = await _stateStore.GetCustomStateAsync<List<PendingAlert>>(pendingKey, cancellationToken).ConfigureAwait(false);
+            if (backlog is not { Count: > 0 })
+                return; // an empty pass is free and must not consume the retry interval
+
+            var now = _timeProvider.GetUtcNow();
+            var stampKey = GetStateKey(EnvPendingJobKey, "pending-flush-at");
+            if (_options.PendingAlerts.RetryInterval > TimeSpan.Zero)
+            {
+                var lastFlush = await GetStateAsync<DateTimeOffset>(stampKey, cancellationToken).ConfigureAwait(false);
+                if (lastFlush is not null && now - lastFlush.Value < _options.PendingAlerts.RetryInterval)
+                    return;
+            }
+            // Stamped before the pass: a crash mid-pass defers the remainder to the next interval rather
+            // than re-sending the entries that were already retried.
+            await SetStateAsync(stampKey, now, cancellationToken).ConfigureAwait(false);
+            await FlushPendingAlertsAsync(EnvPendingJobKey, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            _envFlushLock.Release();
+        }
+    }
 
     /// <summary>Retries alerts that no channel could deliver, oldest first; expired entries are dropped. Pending state lives in the job's state store, so durability follows the store implementation.</summary>
     private async Task FlushPendingAlertsAsync(string jobKey, CancellationToken cancellationToken)

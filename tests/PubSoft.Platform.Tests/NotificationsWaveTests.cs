@@ -1,5 +1,7 @@
 using System.Net;
+using System.Reflection;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -213,5 +215,59 @@ public sealed class TeamsWaveTests
 
         Assert.NotNull(provider.GetRequiredService<IOptions<TeamsWebhookOptions>>().Value);
         Assert.NotNull(provider.GetRequiredService<IOptions<DingTalkWebhookOptions>>().Value);
+    }
+}
+
+/// <summary>
+/// Guards the manual configuration binding in the channel registration extensions: the binding
+/// copies property-by-property because the reflection-based binder is not AOT-safe, so a newly
+/// added options property is silently dropped unless someone remembers the copy. Reflective in
+/// tests (not shipped), this fails whenever a public settable property does not round-trip.
+/// </summary>
+public sealed class NotificationChannelConfigurationBindingTests
+{
+    [Fact]
+    public void DingTalkConfigurationBindingCoversAllPublicProperties()
+        => AssertAllPublicPropertiesBound<DingTalkWebhookOptions>(
+            static (services, section) => services.AddDingTalkNotificationChannel(section),
+            ("WebhookUrl", "https://bot.example.com/robot/send"));
+
+    [Fact]
+    public void TeamsConfigurationBindingCoversAllPublicProperties()
+        => AssertAllPublicPropertiesBound<TeamsWebhookOptions>(
+            static (services, section) => services.AddTeamsNotificationChannel(section),
+            ("WebhookUrl", "https://bot.example.com/webhook"));
+
+    private static void AssertAllPublicPropertiesBound<TOptions>(
+        Func<IServiceCollection, IConfiguration, IServiceCollection> register,
+        params (string Key, string Value)[] fixedValues) where TOptions : class
+    {
+        var expectations = new Dictionary<string, object?>(StringComparer.Ordinal);
+        foreach (var property in typeof(TOptions).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (property.SetMethod is not { IsPublic: true } || fixedValues.Any(fixedValue => fixedValue.Key == property.Name))
+                continue;
+            expectations[property.Name] = property.PropertyType == typeof(string)
+                ? $"probe-{property.Name}"
+                : property.PropertyType == typeof(bool)
+                    ? true
+                    : throw new InvalidOperationException(
+                        $"Extend the binding guard for property type {property.PropertyType.Name} ({property.Name}).");
+        }
+
+        var configPairs = fixedValues.ToDictionary(pair => pair.Key, pair => (string?)pair.Value, StringComparer.Ordinal);
+        foreach (var pair in expectations)
+            configPairs[pair.Key] = pair.Value is bool flag ? (flag ? "true" : "false") : (string?)pair.Value;
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(configPairs).Build();
+
+        using var provider = register(new ServiceCollection(), configuration).BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<TOptions>>().Value;
+
+        foreach (var pair in expectations)
+        {
+            var actual = typeof(TOptions).GetProperty(pair.Key)!.GetValue(options);
+            Assert.True(Equals(pair.Value, actual),
+                $"Configuration key {pair.Key} never reaches the options instance - the manual binding drops it (expected {pair.Value}, got {actual ?? "null"}).");
+        }
     }
 }

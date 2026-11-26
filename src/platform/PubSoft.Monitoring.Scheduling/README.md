@@ -75,6 +75,7 @@ Alert dispatch is best-effort per channel: a rule fires on the execution where i
 `options.PendingAlerts` closes that window for deployments that need it (opt-in, disabled by default). It covers job rule alerts and the environment outage summary alike (the summary is persisted under a fixed pseudo-job key); the best-effort immediate probe stays uncovered on purpose:
 
 - An alert no channel could deliver is persisted per channel and retried on later job executions until it lands or `Expiry` (default 24 h) passes; `MaxEntries` (default 50) caps the per-job backlog, oldest dropped first.
+- A per-job backlog retries at the cadence of its owning job's own executions. The shared environment backlog instead retries at most once per `RetryInterval` (default one minute) across all jobs — without that cap every job execution would retry it, multiplying the resend rate and turning a persistently failing channel into a poison-message loop. `RetryInterval` of zero restores flush-on-every-execution.
 - Resends keep the original `CorrelationId`, so dispatcher deduplication collapses an overlap with a later normal fire.
 - Boundaries: pending state lives in the job's `IStateStore` — durability follows the store implementation (the in-memory store loses pendings on restart). Multi-instance deployments resend from whichever instance executes next; duplicates are collapsed by deduplication only inside the dedup window.
 
@@ -100,7 +101,7 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
-`Channels`, `Condition`, `Current`, `DelayThresholdMs`, `Enabled`, `Environment`, `Expiry`, `FailureThreshold`, `FromState`, `MaxEntries`, `MinUnreachableDuration`, `PendingAlerts`, `ProbeHealth`, `Recipients`, `Rules`, `SendImmediate`, `Severity`, `TemplateCode`, `TemplateParameters`, `Throttle`, `ToState`, `WasProbeUnreachable`
+`Channels`, `Condition`, `Current`, `DelayThresholdMs`, `Enabled`, `Environment`, `Expiry`, `FailureThreshold`, `FromState`, `MaxEntries`, `MinUnreachableDuration`, `PendingAlerts`, `ProbeHealth`, `Recipients`, `RetryInterval`, `Rules`, `SendImmediate`, `Severity`, `TemplateCode`, `TemplateParameters`, `Throttle`, `ToState`, `WasProbeUnreachable`
 
 <!-- pubsoft:api-surface:end -->
 

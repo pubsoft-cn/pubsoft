@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.Extensions.Configuration;
 using PubSoft.Resilience;
 using PubSoft.Resilience.Http;
 using Xunit;
@@ -73,4 +74,46 @@ public sealed class ResilienceHttpWaveTests
         Assert.True(p.ShouldRetry(new HttpRequestException("net"), 1, null)); // connection failure
         Assert.True(p.ShouldRetry(new OperationCanceledException(), 1, null)); // timeout
     }
+    [Fact]
+    public void ConfigurationBindingCoversTimeoutBudgets()
+    {
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["TimeoutMs"] = "3000",
+            ["PerAttemptTimeoutMs"] = "1000",
+        }).Build();
+        var options = new HttpResilienceOptions();
+
+        HttpResilienceServiceCollectionExtensions.BindHttpResilienceOptions(configuration, options);
+
+        Assert.Equal(TimeSpan.FromSeconds(3), options.Timeout);
+        Assert.Equal(TimeSpan.FromSeconds(1), options.PerAttemptTimeout);
+    }
+
+    [Fact]
+    public void ConfigurationBindingCoversRetryAndCircuitBreakerKeys()
+    {
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Retry:MaxRetries"] = "5",
+            ["Retry:InitialDelayMs"] = "250",
+            ["Retry:RetryOnTimeout"] = "false",
+            ["Retry:RetryOn5xx"] = "false",
+            ["Retry:RetryOnConnectionFailure"] = "false",
+            ["CircuitBreaker:FailureThreshold"] = "9",
+            ["CircuitBreaker:OpenTimeoutMs"] = "45000",
+        }).Build();
+        var options = new HttpResilienceOptions();
+
+        HttpResilienceServiceCollectionExtensions.BindHttpResilienceOptions(configuration, options);
+
+        Assert.Equal(5, options.Retry!.MaxRetries);
+        Assert.Equal(TimeSpan.FromMilliseconds(250), options.Retry.InitialDelay);
+        Assert.False(options.Retry.RetryOnTimeout);
+        Assert.False(options.Retry.RetryOn5xx);
+        Assert.False(options.Retry.RetryOnConnectionFailure);
+        Assert.Equal(9, options.CircuitBreaker!.FailureThreshold);
+        Assert.Equal(TimeSpan.FromSeconds(45), options.CircuitBreaker.OpenTimeout);
+    }
+
 }

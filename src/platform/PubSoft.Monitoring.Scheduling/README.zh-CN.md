@@ -75,6 +75,7 @@ services.AddPubSoftMonitoringScheduling(options =>
 `options.PendingAlerts` 为需要的部署闭合该窗口（opt-in，默认关闭）。job 规则告警与环境中断摘要同样覆盖（摘要持久化在固定伪 job key 下）；best-effort 即时探测刻意不覆盖：
 
 - 无通道送达的告警按通道持久化，在后续 job 执行上重试，直到送达或超过 `Expiry`（默认 24h）；`MaxEntries`（默认 50）限制单 job 积压，最旧的先丢。
+- 单 job 积压按所属 job 自身的执行节奏重试；共享环境积压则跨所有 job 每个 `RetryInterval`（默认一分钟）最多重试一次——不设上限时每个 job 执行都会重试一遍，重试频率被 job 数放大，持续失败的通道会形成毒消息循环。`RetryInterval` 为零恢复每次执行都冲刷。
 - 补发保留原始 `CorrelationId`，与后续正常触发的重叠由 dispatcher 去重坍缩。
 - 边界：pending 状态存在 job 的 `IStateStore` 中——持久性取决于 store 实现（内存 store 重启即丢）。多实例部署由下一个执行的实例补发；重复发送仅在去重窗口内被坍缩。
 

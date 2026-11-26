@@ -91,4 +91,6 @@ PubSoft.Monitoring.Scheduling.PendingAlertOptions.Expiry.set -> void
 PubSoft.Monitoring.Scheduling.PendingAlertOptions.MaxEntries.get -> int
 PubSoft.Monitoring.Scheduling.PendingAlertOptions.MaxEntries.set -> void
 PubSoft.Monitoring.Scheduling.PendingAlertOptions.PendingAlertOptions() -> void
+PubSoft.Monitoring.Scheduling.PendingAlertOptions.RetryInterval.get -> System.TimeSpan
+PubSoft.Monitoring.Scheduling.PendingAlertOptions.RetryInterval.set -> void
 static PubSoft.Monitoring.Scheduling.MonitoringSchedulingServiceCollectionExtensions.AddPubSoftMonitoringScheduling(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Monitoring.Scheduling.AlertProcessorOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

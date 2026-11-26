@@ -9,7 +9,6 @@ last-reviewed: 2026-10-13
 
 **English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/platform/PubSoft.Resilience.Http/README.zh-CN.md)
 
-
 `PubSoft.Resilience.Http` adds bounded timeout, retry, and optional circuit-breaker behavior to a named `HttpClient`. The handler does not retry unsafe methods or requests with content, and there is no unsafe-retry override.
 
 ## Registration
@@ -38,6 +37,21 @@ services.AddHttpClient("catalog", client =>
             OpenTimeout = TimeSpan.FromSeconds(30)
         };
     });
+```
+
+An `IConfiguration` overload binds the same options from a section — explicit per-key binding without the reflection-based binder (AOT-safe). Durations use flattened millisecond keys:
+
+| Key | Maps to |
+|---|---|
+| `TimeoutMs` | `Timeout` |
+| `PerAttemptTimeoutMs` | `PerAttemptTimeout` |
+| `Retry:MaxRetries` / `Retry:InitialDelayMs` / `Retry:RetryOnTimeout` / `Retry:RetryOn5xx` / `Retry:RetryOnConnectionFailure` | the `Retry` member |
+| `CircuitBreaker:FailureThreshold` / `CircuitBreaker:OpenTimeoutMs` | the `CircuitBreaker` member |
+
+```csharp
+services.AddHttpClient("catalog", client =>
+    client.BaseAddress = new Uri("https://catalog.internal/"))
+    .AddPubSoftHttpResilience(configuration.GetSection("Resilience"));
 ```
 
 The default total timeout is eight seconds; the default per-attempt timeout is five seconds. Per-attempt timeout must not exceed total timeout. The handler disables `HttpClient.Timeout` and owns these timeout budgets. Caller cancellation is propagated and is not treated as a retryable timeout.

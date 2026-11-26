@@ -71,6 +71,7 @@ public static class NotificationChannelExtensions
         {
             o.WebhookUrl = section["WebhookUrl"] ?? "";
             o.Secret = section["Secret"] ?? "";
+            o.KeywordPrefix = section["KeywordPrefix"] ?? "";
             o.AllowInsecureUrl = bool.TryParse(section["AllowInsecureUrl"], out var allow) && allow;
         });
     }

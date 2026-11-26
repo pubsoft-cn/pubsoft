@@ -239,15 +239,23 @@ public static class HttpResilienceServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentNullException.ThrowIfNull(section);
-        return builder.AddPubSoftHttpResilience(o =>
-        {
-            if (int.TryParse(section["Retry:MaxRetries"], out var mr)) { o.Retry ??= new(); o.Retry.MaxRetries = mr; }
-            if (int.TryParse(section["Retry:InitialDelayMs"], out var idl)) { o.Retry ??= new(); o.Retry.InitialDelay = TimeSpan.FromMilliseconds(idl); }
-            if (bool.TryParse(section["Retry:RetryOnTimeout"], out var rt)) { o.Retry ??= new(); o.Retry.RetryOnTimeout = rt; }
-            if (bool.TryParse(section["Retry:RetryOn5xx"], out var r5)) { o.Retry ??= new(); o.Retry.RetryOn5xx = r5; }
-            if (bool.TryParse(section["Retry:RetryOnConnectionFailure"], out var rcf)) { o.Retry ??= new(); o.Retry.RetryOnConnectionFailure = rcf; }
-            if (int.TryParse(section["CircuitBreaker:FailureThreshold"], out var ft)) { o.CircuitBreaker ??= new(); o.CircuitBreaker.FailureThreshold = ft; }
-            if (int.TryParse(section["CircuitBreaker:OpenTimeoutMs"], out var ot)) { o.CircuitBreaker ??= new(); o.CircuitBreaker.OpenTimeout = TimeSpan.FromMilliseconds(ot); }
-        });
+        return builder.AddPubSoftHttpResilience(o => BindHttpResilienceOptions(section, o));
+    }
+
+    /// <summary>
+    /// Explicit per-key binding (the reflection-based configuration binder is not AOT-safe). Timeouts use
+    /// flattened millisecond keys (<c>TimeoutMs</c>, <c>Retry:InitialDelayMs</c>, ...); unknown keys are ignored.
+    /// </summary>
+    internal static void BindHttpResilienceOptions(IConfiguration section, HttpResilienceOptions options)
+    {
+        if (int.TryParse(section["TimeoutMs"], out var t)) options.Timeout = TimeSpan.FromMilliseconds(t);
+        if (int.TryParse(section["PerAttemptTimeoutMs"], out var pat)) options.PerAttemptTimeout = TimeSpan.FromMilliseconds(pat);
+        if (int.TryParse(section["Retry:MaxRetries"], out var mr)) { options.Retry ??= new(); options.Retry.MaxRetries = mr; }
+        if (int.TryParse(section["Retry:InitialDelayMs"], out var idl)) { options.Retry ??= new(); options.Retry.InitialDelay = TimeSpan.FromMilliseconds(idl); }
+        if (bool.TryParse(section["Retry:RetryOnTimeout"], out var rt)) { options.Retry ??= new(); options.Retry.RetryOnTimeout = rt; }
+        if (bool.TryParse(section["Retry:RetryOn5xx"], out var r5)) { options.Retry ??= new(); options.Retry.RetryOn5xx = r5; }
+        if (bool.TryParse(section["Retry:RetryOnConnectionFailure"], out var rcf)) { options.Retry ??= new(); options.Retry.RetryOnConnectionFailure = rcf; }
+        if (int.TryParse(section["CircuitBreaker:FailureThreshold"], out var ft)) { options.CircuitBreaker ??= new(); options.CircuitBreaker.FailureThreshold = ft; }
+        if (int.TryParse(section["CircuitBreaker:OpenTimeoutMs"], out var ot)) { options.CircuitBreaker ??= new(); options.CircuitBreaker.OpenTimeout = TimeSpan.FromMilliseconds(ot); }
     }
 }

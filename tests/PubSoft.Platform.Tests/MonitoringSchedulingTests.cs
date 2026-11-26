@@ -297,6 +297,50 @@ public sealed class MonitoringSchedulingTests
     }
 
     [Fact]
+    public async Task EnvironmentPendingFlushIsThrottledAcrossJobExecutions()
+    {
+        var clock = new MutableTimeProvider(DateTimeOffset.Parse("2026-10-01T00:00:00Z"));
+        var probe = new TestProbe { Health = ProbeHealth.Healthy };
+        var envChannel = new TestChannel("envops") { Result = NotificationResult.Fail("envops down") };
+        var processor = CreateProcessor([envChannel], probe, threshold: 1, timeProvider: clock,
+            configure: options =>
+            {
+                options.Environment = new EnvironmentAlertOptions
+                {
+                    Enabled = true,
+                    MinUnreachableDuration = TimeSpan.FromMinutes(1),
+                    Channels = ["envops"]
+                };
+                options.PendingAlerts.Enabled = true;
+            });
+        var jobA = CreateJob();
+        jobA.Name = "job-a";
+        var jobB = CreateJob();
+        jobB.Name = "job-b";
+
+        probe.Health = ProbeHealth.Unreachable;
+        await processor.ProcessAsync(jobA, FailedResult(1), default);
+        clock.Advance(TimeSpan.FromMinutes(3));
+        probe.Health = ProbeHealth.Healthy;
+        await processor.ProcessAsync(jobA, SuccessfulResult(2), default);
+        Assert.Equal(1, envChannel.SendCount);
+
+        // the first flush pass retries the failed summary once
+        await processor.ProcessAsync(jobA, SuccessfulResult(3), default);
+        Assert.Equal(2, envChannel.SendCount);
+
+        // another job executing within the retry interval must not multiply the retry
+        await processor.ProcessAsync(jobB, SuccessfulResult(4), default);
+        await processor.ProcessAsync(jobA, SuccessfulResult(5), default);
+        Assert.Equal(2, envChannel.SendCount);
+
+        // once the retry interval elapses the next execution retries again
+        clock.Advance(TimeSpan.FromMinutes(2));
+        await processor.ProcessAsync(jobB, SuccessfulResult(6), default);
+        Assert.Equal(3, envChannel.SendCount);
+    }
+
+    [Fact]
     public async Task ConcurrentOutageOnsetAcrossJobsFiresSingleImmediate()
     {
         var clock = new MutableTimeProvider(DateTimeOffset.Parse("2026-10-01T00:00:00Z"));

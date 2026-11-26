@@ -39,6 +39,21 @@ services.AddHttpClient("catalog", client =>
     });
 ```
 
+`IConfiguration` 重载从配置节绑定同样的选项——逐键显式绑定，不依赖反射式配置绑定器（AOT 安全）。时长一律用扁平化的毫秒键：
+
+| 键 | 映射到 |
+|---|---|
+| `TimeoutMs` | `Timeout` |
+| `PerAttemptTimeoutMs` | `PerAttemptTimeout` |
+| `Retry:MaxRetries` / `Retry:InitialDelayMs` / `Retry:RetryOnTimeout` / `Retry:RetryOn5xx` / `Retry:RetryOnConnectionFailure` | `Retry` 同名成员 |
+| `CircuitBreaker:FailureThreshold` / `CircuitBreaker:OpenTimeoutMs` | `CircuitBreaker` 同名成员 |
+
+```csharp
+services.AddHttpClient("catalog", client =>
+    client.BaseAddress = new Uri("https://catalog.internal/"))
+    .AddPubSoftHttpResilience(configuration.GetSection("Resilience"));
+```
+
 默认总超时 8 秒、单次尝试 5 秒；单次不得超总超时。handler 禁用 `HttpClient.Timeout` 并接管超时预算。调用方取消正常传播，不被当作可重试超时。
 
 ## 重试安全
