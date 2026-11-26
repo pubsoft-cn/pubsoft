@@ -302,6 +302,18 @@ public sealed class AmqpInboxTests
         public ValueTask BasicPublishAsync<TProperties>(CachedString exchange, CachedString routingKey, bool mandatory,
             TProperties basicProperties, ReadOnlyMemory<byte> body, CancellationToken cancellationToken = default)
             where TProperties : IReadOnlyBasicProperties, IAmqpHeader => throw new NotImplementedException();
+        public ValueTask BasicPublishAsync<TProperties>(string exchange, string routingKey, bool mandatory,
+            TProperties basicProperties, ReadOnlyMemory<byte> body, IDisposable? publishActivity, CancellationToken cancellationToken = default)
+            where TProperties : IReadOnlyBasicProperties, IAmqpHeader => throw new NotImplementedException();
+        public ValueTask BasicPublishAsync<TProperties>(CachedString exchange, CachedString routingKey, bool mandatory,
+            TProperties basicProperties, ReadOnlyMemory<byte> body, IDisposable? publishActivity, CancellationToken cancellationToken = default)
+            where TProperties : IReadOnlyBasicProperties, IAmqpHeader => throw new NotImplementedException();
+        public ValueTask BasicPublishAsync<TProperties>(string exchange, string routingKey, bool mandatory,
+            TProperties basicProperties, System.Buffers.ReadOnlySequence<byte> body, IDisposable? publishActivity, CancellationToken cancellationToken = default)
+            where TProperties : IReadOnlyBasicProperties, IAmqpHeader => throw new NotImplementedException();
+        public ValueTask BasicPublishAsync<TProperties>(CachedString exchange, CachedString routingKey, bool mandatory,
+            TProperties basicProperties, System.Buffers.ReadOnlySequence<byte> body, IDisposable? publishActivity, CancellationToken cancellationToken = default)
+            where TProperties : IReadOnlyBasicProperties, IAmqpHeader => throw new NotImplementedException();
         public ValueTask<ulong> GetNextPublishSequenceNumberAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public ValueTask BasicRejectAsync(ulong deliveryTag, bool requeue, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<BasicGetResult?> BasicGetAsync(string queue, bool autoAck, CancellationToken cancellationToken = default) => throw new NotImplementedException();

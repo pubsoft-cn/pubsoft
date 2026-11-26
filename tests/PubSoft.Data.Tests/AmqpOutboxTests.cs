@@ -174,6 +174,26 @@ public sealed class AmqpOutboxTests
             where TProperties : IReadOnlyBasicProperties, IAmqpHeader
             => throw new NotImplementedException();
 
+        public async ValueTask BasicPublishAsync<TProperties>(string exchange, string routingKey, bool mandatory,
+            TProperties basicProperties, ReadOnlyMemory<byte> body, IDisposable? publishActivity, CancellationToken cancellationToken = default)
+            where TProperties : IReadOnlyBasicProperties, IAmqpHeader
+            => await BasicPublishAsync(exchange, routingKey, mandatory, basicProperties, body, cancellationToken).ConfigureAwait(false);
+
+        public ValueTask BasicPublishAsync<TProperties>(CachedString exchange, CachedString routingKey, bool mandatory,
+            TProperties basicProperties, ReadOnlyMemory<byte> body, IDisposable? publishActivity, CancellationToken cancellationToken = default)
+            where TProperties : IReadOnlyBasicProperties, IAmqpHeader
+            => throw new NotImplementedException();
+
+        public ValueTask BasicPublishAsync<TProperties>(string exchange, string routingKey, bool mandatory,
+            TProperties basicProperties, System.Buffers.ReadOnlySequence<byte> body, IDisposable? publishActivity, CancellationToken cancellationToken = default)
+            where TProperties : IReadOnlyBasicProperties, IAmqpHeader
+            => throw new NotImplementedException();
+
+        public ValueTask BasicPublishAsync<TProperties>(CachedString exchange, CachedString routingKey, bool mandatory,
+            TProperties basicProperties, System.Buffers.ReadOnlySequence<byte> body, IDisposable? publishActivity, CancellationToken cancellationToken = default)
+            where TProperties : IReadOnlyBasicProperties, IAmqpHeader
+            => throw new NotImplementedException();
+
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
         public ValueTask<ulong> GetNextPublishSequenceNumberAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
