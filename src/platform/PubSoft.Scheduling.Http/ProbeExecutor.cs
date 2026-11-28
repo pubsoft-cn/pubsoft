@@ -25,7 +25,7 @@ public sealed class ProbeExecutor : IJobExecutor
     public string Type => "Http.Probe";
 
     /// <inheritdoc />
-    public async Task<JobResult> ExecuteAsync(ScheduledJob job, CancellationToken cancellationToken)
+    public async Task<JobResult> ExecuteAsync(ScheduledJob job, JobExecutionContext executionContext, CancellationToken cancellationToken)
     {
         if (!_http.TryReadConfig(job, out var config, out var uri, out var method))
             return new JobResult { Success = false, ErrorMessage = "Invalid HttpExecutorConfig" };

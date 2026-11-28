@@ -10,7 +10,7 @@ last-reviewed: 2026-10-13
 **English** | [简体中文](https://github.com/pubsoft-cn/pubsoft/blob/main/src/platform/PubSoft.Scheduling/README.zh-CN.md)
 
 
-`PubSoft.Scheduling` is a Generic Host background scheduler with explicit executor and result-processor contracts. The core package has no ASP.NET, EF Core, or Redis dependency. It does not provide distributed job leases, cluster mutual exclusion, durable state by default, or misfire recovery.
+`PubSoft.Scheduling` is a Generic Host background scheduler with explicit executor and result-processor contracts. The core package has no ASP.NET, EF Core, or Redis dependency. It provides opt-in distributed leases through the host lock abstraction and opt-in compressed misfire recovery; durable state still requires a persistent `IStateStore`.
 
 ## Registration
 
@@ -36,7 +36,7 @@ services.AddExecutor<ReportExecutor>();
 services.AddResultProcessor<LoggingResultProcessor>();
 ```
 
-`AddPubSoftScheduler` registers a hosted worker and `MemoryStateStore` unless the host has already registered another `IStateStore`. For multi-replica deployments set `SchedulerOptions.DistributedLocking = true` — every due job then acquires `pubsoft:sched:{jobName}` via the host's `IDistributedLock` (Redis impl in `PubSoft.Caching.Redis`); when locking is enabled but no lock is registered every job is skipped (fail-closed, not silently concurrent). `DistributedLockLease` (default 5 min) should exceed the longest expected job run. Job names must be unique case-insensitively, and every configured executor/processor name must resolve at runtime. Executors and processors are singletons; keep them thread-safe and use `IServiceScopeFactory` when scoped work such as a DbContext is required.
+`AddPubSoftScheduler` registers a hosted worker and `MemoryStateStore` unless the host has already registered another `IStateStore`. For multi-replica deployments set `SchedulerOptions.DistributedLocking = true` — every due job then acquires `pubsoft:sched:{jobName}` via the host's `IDistributedLock` (Redis impl in `PubSoft.Caching.Redis`); when locking is enabled but no lock is registered every job is skipped (fail-closed, not silently concurrent). `DistributedLockLease` (default 5 min) must exceed the longest expected execution including retries plus the result-state write. PubSoft deliberately does not auto-renew the lease: renewal can hide a stuck job and extend a lost correctness boundary indefinitely. When the acquired handle implements `IFencedLockHandle`, its fencing token is exposed to executors on `JobExecutionContext.FencingToken`; protected resources must validate that token because lease expiry alone cannot retract work already in flight. The lease is held until the result state write finishes, then released best-effort. Job names must be unique case-insensitively, and every configured executor/processor name must resolve at runtime. Executors and processors are singletons; keep them thread-safe and use `IServiceScopeFactory` when scoped work such as a DbContext is required.
 
 ## Schedule Masks
 
@@ -57,7 +57,7 @@ var weekdaysAtNine = new ScheduleMask(
         | (1 << (int)DayOfWeek.Friday));
 ```
 
-Schedules are polled against the current timestamp; a matching time that passes while the process is stopped is not replayed after restart. The engine does not implement cron parsing, misfire compensation, or daylight-saving policy beyond the supplied timestamp offset.
+Schedules are polled against the current timestamp. By default a matching time that passes while the process is stopped is ignored after restart (`JobMisfirePolicy.Ignore`). The engine does not implement cron parsing or daylight-saving policy beyond the supplied timestamp offset.
 
 When binding jobs from configuration (`AddPubSoftScheduler(IConfiguration)`), a job's `Schedule` accepts either one interval shortcut or the six bitmask fields — never both:
 
@@ -93,7 +93,9 @@ options.Jobs.Add(new ScheduledJob
 
 Retries add latency inside a single due tick; they do not replace idempotent job design, and a retried job still re-executes the whole `ExecuteAsync` body — keep attempt-level work idempotent.
 
-The default `MemoryStateStore` is process-local and volatile. It keeps last results for seven days and supports custom state with optional expiry. It is suitable for development or a single-process deployment where losing state on restart is acceptable. For persistence, use the separate `PubSoft.Scheduling.EntityFrameworkCore` package and validate its provider behavior for the production database. Persistence alone does not add a distributed lease, atomic read-modify-write, cluster exclusion, or misfire recovery.
+`JobMisfirePolicy.FireOnce` is explicit per-job opt-in recovery. When the current tick is not an exact match, the engine finds the latest scheduled occurrence at or before the tick. If that occurrence is within `SchedulerOptions.MisfireWindow` (default five minutes, maximum seven days) and the stored last result has an older `ScheduledTime`, the engine executes that latest occurrence once with `JobExecutionContext.IsMisfireRecovery = true`; older missed occurrences are compressed into the single run and are not replayed individually. With distributed locking enabled, the watermark is rechecked inside the lease before execution. Recovery requires a previous engine-written result: a job that has never executed has no trusted watermark, and memory state cannot recover across process restart. State-write failure can therefore cause a repeated side effect on the next evaluation, so misfire jobs must remain idempotent.
+
+The default `MemoryStateStore` is process-local and volatile. It keeps last results for seven days and supports custom state with optional expiry. It is suitable for development or a single-process deployment where losing state on restart is acceptable. For persistence, use the separate `PubSoft.Scheduling.EntityFrameworkCore` package and validate its provider behavior for the production database. Persistence alone still does not add atomic read-modify-write or make an external side effect exactly-once; it only lets the lease/misfire watermark survive restart.
 
 ## Fenced Workers
 
@@ -123,7 +125,7 @@ services.AddPubSoftFencedWorker("reconcile-sweep", async (ctx, ct) =>
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
-- `PubSoft.Scheduling`: `ExecutorRegistry` `IExecutorRegistry` `IJobExecutor` `IResultProcessor` `IResultProcessorRegistry` `IStateStore` `JobResult` `JobRetryPolicy` `LoggingResultProcessor` `MemoryStateStore` `ResultProcessorRegistry` `ScheduleMask` `ScheduleMasks` `ScheduledJob` `SchedulerEngine` `SchedulerHostedService` `SchedulerOptions` `SchedulerServiceCollectionExtensions`
+- `PubSoft.Scheduling`: `ExecutorRegistry` `IExecutorRegistry` `IJobExecutor` `IResultProcessor` `IResultProcessorRegistry` `IStateStore` `JobExecutionContext` `JobMisfirePolicy` `JobResult` `JobRetryPolicy` `LoggingResultProcessor` `MemoryStateStore` `ResultProcessorRegistry` `ScheduleMask` `ScheduleMasks` `ScheduledJob` `SchedulerEngine` `SchedulerHostedService` `SchedulerOptions` `SchedulerServiceCollectionExtensions`
 
 <!-- pubsoft:api-surface:start -->
 
@@ -139,7 +141,7 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
-`BackoffFactor`, `DelayMs`, `DistributedLocking`, `DistributedLockLease`, `Enabled`, `ErrorDelay`, `ErrorMessage`, `ExecutedAt`, `ExecutorConfig`, `ExecutorType`, `FencingToken`, `InitialDelay`, `Interval`, `LockExpiry`, `LockKey`, `LoopInterval`, `MaxAttempts`, `MaxConcurrentJobs`, `MaxDelay`, `MaxExecutionTime`, `Metadata`, `PreventOverlap`, `ResultProcessorConfig`, `ResultProcessors`, `Retry`, `Retryable`, `RunOnStartup`, `Schedule`, `StartedAtUtc`, `StatusCode`, `Success`, `Timeout`, `WaitTimeout`
+`BackoffFactor`, `DelayMs`, `DistributedLocking`, `DistributedLockLease`, `Enabled`, `ErrorDelay`, `ErrorMessage`, `ExecutedAt`, `ExecutorConfig`, `ExecutorType`, `FencingToken`, `InitialDelay`, `Interval`, `IsMisfireRecovery`, `LockExpiry`, `LockKey`, `LoopInterval`, `MaxAttempts`, `MaxConcurrentJobs`, `MaxDelay`, `MaxExecutionTime`, `Metadata`, `MisfirePolicy`, `MisfireWindow`, `PreventOverlap`, `ResultProcessorConfig`, `ResultProcessors`, `Retry`, `Retryable`, `RunOnStartup`, `Schedule`, `ScheduledTime`, `StartedAtUtc`, `StatusCode`, `Success`, `Timeout`, `WaitTimeout`
 
 <!-- pubsoft:api-surface:end -->
 

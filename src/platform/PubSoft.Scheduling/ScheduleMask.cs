@@ -160,6 +160,65 @@ public readonly struct ScheduleMask
             + $" months={DescribeField(Months, MonthMask)}"
             + $" days-of-week={DescribeField(DaysOfWeek, DayOfWeekMask)}";
 
+    /// <summary>Finds the latest matching instant at or before <paramref name="timestamp"/> within one year.</summary>
+    internal DateTimeOffset? LastRunAtOrBefore(DateTimeOffset timestamp)
+    {
+        if (!IsValid)
+            return null;
+
+        DateTimeOffset earliest;
+        try
+        {
+            earliest = timestamp.AddDays(-366);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            earliest = DateTimeOffset.MinValue;
+        }
+
+        var date = timestamp.Date;
+        while (date >= earliest.Date)
+        {
+            if (DateMatches(date))
+            {
+                var sameDate = date == timestamp.Date;
+                var lastHour = sameDate ? timestamp.Hour : 23;
+                for (var hour = lastHour; hour >= 0; hour--)
+                {
+                    if ((Hours & (1U << hour)) == 0)
+                        continue;
+
+                    var sameHour = sameDate && hour == timestamp.Hour;
+                    var lastMinute = sameHour ? timestamp.Minute : 59;
+                    for (var minute = lastMinute; minute >= 0; minute--)
+                    {
+                        if ((Minutes & (1UL << minute)) == 0)
+                            continue;
+
+                        var sameMinute = sameHour && minute == timestamp.Minute;
+                        var lastSecond = sameMinute ? timestamp.Second : 59;
+                        for (var second = lastSecond; second >= 0; second--)
+                        {
+                            if ((Seconds & (1UL << second)) == 0)
+                                continue;
+
+                            var candidate = new DateTimeOffset(
+                                date.Year, date.Month, date.Day, hour, minute, second, timestamp.Offset);
+                            if (candidate <= timestamp)
+                                return candidate;
+                        }
+                    }
+                }
+            }
+
+            if (date == earliest.Date)
+                break;
+            date = date.AddDays(-1);
+        }
+
+        return null;
+    }
+
     private bool DateMatches(DateTime date)
         => (Months & (1 << date.Month)) != 0
             && (DaysOfMonth & (1U << date.Day)) != 0

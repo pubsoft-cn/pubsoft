@@ -9,7 +9,7 @@ last-reviewed: 2026-10-13
 
 [English](README.md) | **简体中文**
 
-`PubSoft.Scheduling` 是 Generic Host 后台调度器，带显式执行器与结果处理器契约。核心包无 ASP.NET/EF Core/Redis 依赖。不提供分布式 job lease、集群互斥、默认持久化状态或 misfire 恢复。
+`PubSoft.Scheduling` 是 Generic Host 后台调度器，带显式执行器与结果处理器契约。核心包无 ASP.NET/EF Core/Redis 依赖。提供显式 opt-in 的分布式租约（经宿主锁抽象）与压缩式 misfire 恢复；持久化状态仍需持久化 `IStateStore`。
 
 ## 注册
 
@@ -35,7 +35,7 @@ services.AddExecutor<ReportExecutor>();
 services.AddResultProcessor<LoggingResultProcessor>();
 ```
 
-`AddPubSoftScheduler` 注册 hosted worker 与 `MemoryStateStore`（宿主已注册其他 `IStateStore` 时除外）。多副本部署设 `SchedulerOptions.DistributedLocking = true`——每个到期 job 经宿主 `IDistributedLock`（Redis 实现在 `PubSoft.Caching.Redis`）抢 `pubsoft:sched:{jobName}` 锁；开启但无锁注册时全部跳过（fail-closed 而非静默并发）。`DistributedLockLease`（默认 5min）应超过最长 job 运行时长。job 名大小写不敏感唯一；每个配置的 executor/processor 名运行时须可解析。executor 与 processor 为单例——保持线程安全，需要 DbContext 等 scoped 工作时用 `IServiceScopeFactory`。
+`AddPubSoftScheduler` 注册 hosted worker 与 `MemoryStateStore`（宿主已注册其他 `IStateStore` 时除外）。多副本部署设 `SchedulerOptions.DistributedLocking = true`——每个到期 job 经宿主 `IDistributedLock`（Redis 实现在 `PubSoft.Caching.Redis`）抢 `pubsoft:sched:{jobName}` 锁；开启但无锁注册时全部跳过（fail-closed 而非静默并发）。`DistributedLockLease`（默认 5min）必须覆盖最长执行、重试以及 result state 写入。PubSoft 刻意不自动续租——续租会掩盖卡死 job，并把已丢失的正确性边界无限延长。获取到的锁句柄实现 `IFencedLockHandle` 时，其 fencing token 会通过 `JobExecutionContext.FencingToken` 暴露给 executor；受保护资源必须校验该 token，因为 lease 到期本身无法召回已在执行的旧持有者。租约会一直持有到 result state 写完，随后 best-effort 释放。job 名大小写不敏感唯一；每个配置的 executor/processor 名运行时须可解析。executor 与 processor 为单例——保持线程安全，需要 DbContext 等 scoped 工作时用 `IServiceScopeFactory`。
 
 ## 排程位掩码
 
@@ -51,7 +51,7 @@ var weekdaysAtNine = new ScheduleMask(
         | (1 << (int)DayOfWeek.Friday));
 ```
 
-按当前时间戳轮询匹配；进程停止期间错过的匹配时间不会在重启后补跑。引擎不实现 cron 解析、misfire 补偿或超出所供时间戳偏移的夏令时策略。
+按当前时间戳轮询匹配；默认（`JobMisfirePolicy.Ignore`）进程停止期间错过的匹配时间重启后不补跑。引擎不实现 cron 解析或超出所供时间戳偏移的夏令时策略。
 
 从配置绑定 job（`AddPubSoftScheduler(IConfiguration)`）时，`Schedule` 接受一个 interval 快捷键或六个位掩码字段——二者不可混用：
 
@@ -87,7 +87,10 @@ options.Jobs.Add(new ScheduledJob
 
 重试是单次到点内的延迟兜底，不替代幂等设计；重试会整体重跑 `ExecuteAsync`——attempt 内的工作须保持幂等。
 
-默认 `MemoryStateStore` 进程内且易失——last result 保留 7 天，custom state 支持可选过期。适合开发或可接受重启丢状态的单进程部署。持久化用 `PubSoft.Scheduling.EntityFrameworkCore` 并按生产 provider 验证。持久化本身不提供分布式 lease、原子读改写、集群互斥或 misfire 恢复。
+
+`JobMisfirePolicy.FireOnce` 是按 job 显式开启的恢复策略。当前 tick 非精确匹配时，引擎找该 tick 之前最近一次计划发生点；若它仍在 `SchedulerOptions.MisfireWindow`（默认 5 分钟，上限 7 天）内，且已存 last result 的 `ScheduledTime` 更旧，则只补跑这一次，并置 `JobExecutionContext.IsMisfireRecovery = true`；更早的错过发生点压缩进这一次，不逐个回放。启用分布式锁时，租约内会复查水位线。恢复要求存在一次引擎写入的历史结果——从未执行过的 job 无可信水位线；内存状态也无法跨进程重启恢复。状态写失败可能导致下一次评估重复副作用，因此 misfire job 仍必须幂等。
+
+默认 `MemoryStateStore` 进程内且易失——last result 保留 7 天，custom state 支持可选过期。适合开发或可接受重启丢状态的单进程部署。持久化用 `PubSoft.Scheduling.EntityFrameworkCore` 并按生产 provider 验证。持久化本身仍不提供原子读改写，也不能让外部副作用 exactly-once；它只让 lease/misfire 水位线跨重启存活。
 
 ## 护栏 Worker（Fenced Worker）
 
@@ -114,7 +117,7 @@ services.AddPubSoftFencedWorker("reconcile-sweep", async (ctx, ct) =>
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
-- `PubSoft.Scheduling`: `ExecutorRegistry` `IExecutorRegistry` `IJobExecutor` `IResultProcessor` `IResultProcessorRegistry` `IStateStore` `JobResult` `JobRetryPolicy` `LoggingResultProcessor` `MemoryStateStore` `ResultProcessorRegistry` `ScheduleMask` `ScheduleMasks` `ScheduledJob` `SchedulerEngine` `SchedulerHostedService` `SchedulerOptions` `SchedulerServiceCollectionExtensions`
+- `PubSoft.Scheduling`: `ExecutorRegistry` `IExecutorRegistry` `IJobExecutor` `IResultProcessor` `IResultProcessorRegistry` `IStateStore` `JobExecutionContext` `JobMisfirePolicy` `JobResult` `JobRetryPolicy` `LoggingResultProcessor` `MemoryStateStore` `ResultProcessorRegistry` `ScheduleMask` `ScheduleMasks` `ScheduledJob` `SchedulerEngine` `SchedulerHostedService` `SchedulerOptions` `SchedulerServiceCollectionExtensions`
 
 ## 验证
 

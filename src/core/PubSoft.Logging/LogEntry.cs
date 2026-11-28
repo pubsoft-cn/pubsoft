@@ -29,7 +29,7 @@ public readonly struct LogEntry
         string source,
         string message,
         string? exceptionDetail = null,
-        long traceId = 0,
+        string? traceId = null,
         string? service = null,
         string? serviceVersion = null,
         string? serviceInstanceId = null,
@@ -49,7 +49,7 @@ public readonly struct LogEntry
         Source = source.Trim();
         Message = message.Trim();
         ExceptionDetail = exceptionDetail;
-        TraceId = traceId;
+        TraceId = TrimOrNull(traceId);
         Service = TrimOrNull(service);
         ServiceVersion = TrimOrNull(serviceVersion);
         ServiceInstanceId = TrimOrNull(serviceInstanceId);
@@ -72,7 +72,7 @@ public readonly struct LogEntry
     /// <summary>Exception detail when attached.</summary>
     public string? ExceptionDetail { get; }
     /// <summary>Correlation id.</summary>
-    public long TraceId { get; }
+    public string? TraceId { get; }
     /// <summary>Service name.</summary>
     public string? Service { get; }
     /// <summary>Service version.</summary>

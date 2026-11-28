@@ -30,7 +30,7 @@ if (!executors.TryGetValue("Http.Probe", out var probe)
 var probeResult = await probe.ExecuteAsync(CreateJob(new HttpExecutorConfig
 {
     Url = "https://probe.example.test/health"
-}), default);
+}), new JobExecutionContext(default, false, null), default);
 var resilientResult = await resilient.ExecuteAsync(CreateJob(new HttpExecutorConfig
 {
     Url = "https://service.example.test/action",
@@ -38,7 +38,7 @@ var resilientResult = await resilient.ExecuteAsync(CreateJob(new HttpExecutorCon
     Body = "{\"action\":true}",
     Retry = new RetryPolicy { MaxRetries = 1, InitialDelay = TimeSpan.Zero },
     AllowUnsafeRetries = true
-}), default);
+}), new JobExecutionContext(default, false, null), default);
 
 if (!probeResult.Success
     || probeResult.StatusCode != (int)HttpStatusCode.OK

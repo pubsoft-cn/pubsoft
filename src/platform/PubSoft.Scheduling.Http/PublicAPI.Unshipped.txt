@@ -38,11 +38,11 @@ PubSoft.Scheduling.Http.HttpExecutorOptions.UseSystemProxy.get -> bool
 PubSoft.Scheduling.Http.HttpExecutorOptions.UseSystemProxy.set -> void
 PubSoft.Scheduling.Http.HttpExecutorServiceCollectionExtensions
 PubSoft.Scheduling.Http.ProbeExecutor
-PubSoft.Scheduling.Http.ProbeExecutor.ExecuteAsync(PubSoft.Scheduling.ScheduledJob! job, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<PubSoft.Scheduling.JobResult!>!
+PubSoft.Scheduling.Http.ProbeExecutor.ExecuteAsync(PubSoft.Scheduling.ScheduledJob! job, PubSoft.Scheduling.JobExecutionContext! executionContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<PubSoft.Scheduling.JobResult!>!
 PubSoft.Scheduling.Http.ProbeExecutor.ProbeExecutor(System.Net.Http.IHttpClientFactory! httpClientFactory, Microsoft.Extensions.Options.IOptions<PubSoft.Scheduling.Http.HttpExecutorOptions!>! options, PubSoft.Tokens.ITokenProvider? tokenProvider = null, Microsoft.Extensions.Logging.ILogger<PubSoft.Scheduling.Http.ProbeExecutor!>? logger = null) -> void
 PubSoft.Scheduling.Http.ProbeExecutor.Type.get -> string!
 PubSoft.Scheduling.Http.ResilientExecutor
-PubSoft.Scheduling.Http.ResilientExecutor.ExecuteAsync(PubSoft.Scheduling.ScheduledJob! job, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<PubSoft.Scheduling.JobResult!>!
+PubSoft.Scheduling.Http.ResilientExecutor.ExecuteAsync(PubSoft.Scheduling.ScheduledJob! job, PubSoft.Scheduling.JobExecutionContext! executionContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<PubSoft.Scheduling.JobResult!>!
 PubSoft.Scheduling.Http.ResilientExecutor.ResilientExecutor(System.Net.Http.IHttpClientFactory! httpClientFactory, Microsoft.Extensions.Options.IOptions<PubSoft.Scheduling.Http.HttpExecutorOptions!>! options, PubSoft.Resilience.CircuitBreaker! circuitBreaker, PubSoft.Tokens.ITokenProvider? tokenProvider = null, Microsoft.Extensions.Logging.ILogger<PubSoft.Scheduling.Http.ResilientExecutor!>? logger = null) -> void
 PubSoft.Scheduling.Http.ResilientExecutor.Type.get -> string!
 PubSoft.Scheduling.Http.TokenRef

@@ -2,6 +2,9 @@
 override PubSoft.Scheduling.FencedWorkContext.Equals(object? obj) -> bool
 override PubSoft.Scheduling.FencedWorkContext.GetHashCode() -> int
 override PubSoft.Scheduling.FencedWorkContext.ToString() -> string!
+override PubSoft.Scheduling.JobExecutionContext.Equals(object? obj) -> bool
+override PubSoft.Scheduling.JobExecutionContext.GetHashCode() -> int
+override PubSoft.Scheduling.JobExecutionContext.ToString() -> string!
 override PubSoft.Scheduling.ScalarStringJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> string?
 override PubSoft.Scheduling.ScalarStringJsonConverter.ReadAsPropertyName(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> string!
 override PubSoft.Scheduling.ScalarStringJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, string! value, System.Text.Json.JsonSerializerOptions! options) -> void
@@ -47,7 +50,7 @@ PubSoft.Scheduling.IExecutorRegistry.Resolve(string! executorType) -> PubSoft.Sc
 PubSoft.Scheduling.IFencedExecutor
 PubSoft.Scheduling.IFencedExecutor.TryExecuteAsync(string! lockKey, System.TimeSpan lockExpiry, System.Func<PubSoft.Scheduling.FencedWorkContext!, System.Threading.CancellationToken, System.Threading.Tasks.Task!>! work, System.TimeSpan waitTimeout = default(System.TimeSpan), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
 PubSoft.Scheduling.IJobExecutor
-PubSoft.Scheduling.IJobExecutor.ExecuteAsync(PubSoft.Scheduling.ScheduledJob! job, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<PubSoft.Scheduling.JobResult!>!
+PubSoft.Scheduling.IJobExecutor.ExecuteAsync(PubSoft.Scheduling.ScheduledJob! job, PubSoft.Scheduling.JobExecutionContext! executionContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<PubSoft.Scheduling.JobResult!>!
 PubSoft.Scheduling.IJobExecutor.Type.get -> string!
 PubSoft.Scheduling.IResultProcessor
 PubSoft.Scheduling.IResultProcessor.Name.get -> string!
@@ -61,6 +64,20 @@ PubSoft.Scheduling.IStateStore.GetLastResultAsync(string! jobName, System.Thread
 PubSoft.Scheduling.IStateStore.RemoveCustomStateAsync(string! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 PubSoft.Scheduling.IStateStore.SetCustomStateAsync<T>(string! key, T! value, System.TimeSpan? expiry, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 PubSoft.Scheduling.IStateStore.UpdateStateAsync(string! jobName, PubSoft.Scheduling.JobResult! result, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+PubSoft.Scheduling.JobExecutionContext
+PubSoft.Scheduling.JobExecutionContext.<Clone>$() -> PubSoft.Scheduling.JobExecutionContext!
+PubSoft.Scheduling.JobExecutionContext.Deconstruct(out System.DateTimeOffset ScheduledTime, out bool IsMisfireRecovery, out long? FencingToken) -> void
+PubSoft.Scheduling.JobExecutionContext.Equals(PubSoft.Scheduling.JobExecutionContext? other) -> bool
+PubSoft.Scheduling.JobExecutionContext.FencingToken.get -> long?
+PubSoft.Scheduling.JobExecutionContext.FencingToken.init -> void
+PubSoft.Scheduling.JobExecutionContext.IsMisfireRecovery.get -> bool
+PubSoft.Scheduling.JobExecutionContext.IsMisfireRecovery.init -> void
+PubSoft.Scheduling.JobExecutionContext.JobExecutionContext(System.DateTimeOffset ScheduledTime, bool IsMisfireRecovery, long? FencingToken) -> void
+PubSoft.Scheduling.JobExecutionContext.ScheduledTime.get -> System.DateTimeOffset
+PubSoft.Scheduling.JobExecutionContext.ScheduledTime.init -> void
+PubSoft.Scheduling.JobMisfirePolicy
+PubSoft.Scheduling.JobMisfirePolicy.FireOnce = 1 -> PubSoft.Scheduling.JobMisfirePolicy
+PubSoft.Scheduling.JobMisfirePolicy.Ignore = 0 -> PubSoft.Scheduling.JobMisfirePolicy
 PubSoft.Scheduling.JobResult
 PubSoft.Scheduling.JobResult.DelayMs.get -> int
 PubSoft.Scheduling.JobResult.DelayMs.init -> void
@@ -68,11 +85,15 @@ PubSoft.Scheduling.JobResult.ErrorMessage.get -> string?
 PubSoft.Scheduling.JobResult.ErrorMessage.init -> void
 PubSoft.Scheduling.JobResult.ExecutedAt.get -> System.DateTimeOffset
 PubSoft.Scheduling.JobResult.ExecutedAt.init -> void
+PubSoft.Scheduling.JobResult.IsMisfireRecovery.get -> bool
+PubSoft.Scheduling.JobResult.IsMisfireRecovery.init -> void
 PubSoft.Scheduling.JobResult.JobResult() -> void
 PubSoft.Scheduling.JobResult.Metadata.get -> System.Collections.Generic.Dictionary<string!, object?>!
 PubSoft.Scheduling.JobResult.Metadata.init -> void
 PubSoft.Scheduling.JobResult.Retryable.get -> bool
 PubSoft.Scheduling.JobResult.Retryable.init -> void
+PubSoft.Scheduling.JobResult.ScheduledTime.get -> System.DateTimeOffset?
+PubSoft.Scheduling.JobResult.ScheduledTime.init -> void
 PubSoft.Scheduling.JobResult.StatusCode.get -> int
 PubSoft.Scheduling.JobResult.StatusCode.init -> void
 PubSoft.Scheduling.JobResult.Success.get -> bool
@@ -104,6 +125,8 @@ PubSoft.Scheduling.ResultProcessorRegistry.Resolve(string! name) -> PubSoft.Sche
 PubSoft.Scheduling.ResultProcessorRegistry.ResultProcessorRegistry(System.Collections.Generic.IEnumerable<PubSoft.Scheduling.IResultProcessor!>! processors) -> void
 PubSoft.Scheduling.ScalarStringJsonConverter
 PubSoft.Scheduling.ScalarStringJsonConverter.ScalarStringJsonConverter() -> void
+PubSoft.Scheduling.ScheduledJob.MisfirePolicy.get -> PubSoft.Scheduling.JobMisfirePolicy
+PubSoft.Scheduling.ScheduledJob.MisfirePolicy.set -> void
 PubSoft.Scheduling.ScheduleMask
 PubSoft.Scheduling.ScheduleMask.DaysOfMonth.get -> uint
 PubSoft.Scheduling.ScheduleMask.DaysOfWeek.get -> byte
@@ -158,12 +181,16 @@ PubSoft.Scheduling.SchedulerOptions.LoopInterval.get -> System.TimeSpan
 PubSoft.Scheduling.SchedulerOptions.LoopInterval.set -> void
 PubSoft.Scheduling.SchedulerOptions.MaxConcurrentJobs.get -> int
 PubSoft.Scheduling.SchedulerOptions.MaxConcurrentJobs.set -> void
+PubSoft.Scheduling.SchedulerOptions.MisfireWindow.get -> System.TimeSpan
+PubSoft.Scheduling.SchedulerOptions.MisfireWindow.set -> void
 PubSoft.Scheduling.SchedulerOptions.SchedulerOptions() -> void
 PubSoft.Scheduling.SchedulerServiceCollectionExtensions
 static PubSoft.Scheduling.FencedWorkContext.operator !=(PubSoft.Scheduling.FencedWorkContext? left, PubSoft.Scheduling.FencedWorkContext? right) -> bool
 static PubSoft.Scheduling.FencedWorkContext.operator ==(PubSoft.Scheduling.FencedWorkContext? left, PubSoft.Scheduling.FencedWorkContext? right) -> bool
 static PubSoft.Scheduling.FencedWorkerServiceCollectionExtensions.AddPubSoftFencedExecutor(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Scheduling.FencedWorkerServiceCollectionExtensions.AddPubSoftFencedWorker(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! name, System.Func<PubSoft.Scheduling.FencedWorkContext!, System.Threading.CancellationToken, System.Threading.Tasks.Task!>! work, System.Action<PubSoft.Scheduling.FencedWorkerOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Scheduling.JobExecutionContext.operator !=(PubSoft.Scheduling.JobExecutionContext? left, PubSoft.Scheduling.JobExecutionContext? right) -> bool
+static PubSoft.Scheduling.JobExecutionContext.operator ==(PubSoft.Scheduling.JobExecutionContext? left, PubSoft.Scheduling.JobExecutionContext? right) -> bool
 static PubSoft.Scheduling.ScheduleMask.EveryDay.get -> PubSoft.Scheduling.ScheduleMask
 static PubSoft.Scheduling.ScheduleMask.EveryHour.get -> PubSoft.Scheduling.ScheduleMask
 static PubSoft.Scheduling.ScheduleMask.EveryMinute.get -> PubSoft.Scheduling.ScheduleMask

@@ -25,4 +25,8 @@ public sealed class JobResult
     public Dictionary<string, object?> Metadata { get; init; } = [];
     /// <summary>When the run finished.</summary>
     public DateTimeOffset ExecutedAt { get; init; } = DateTimeOffset.UtcNow;
+    /// <summary>Calendar occurrence this result belongs to; null for results written before occurrence tracking existed.</summary>
+    public DateTimeOffset? ScheduledTime { get; init; }
+    /// <summary>Whether the run was a compressed misfire recovery rather than an exact-tick execution.</summary>
+    public bool IsMisfireRecovery { get; init; }
 }

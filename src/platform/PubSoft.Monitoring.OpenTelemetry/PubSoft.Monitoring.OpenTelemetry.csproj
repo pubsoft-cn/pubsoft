@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PubSoftDocDiscipline>full</PubSoftDocDiscipline>
+    <PackageId>PubSoft.Monitoring.OpenTelemetry</PackageId>
+    <Description>Opinionated OpenTelemetry adoption glue for PubSoft monitoring signals.</Description>
+    <PackageTags>monitoring;opentelemetry;otlp;metrics;tracing</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../PubSoft.Monitoring/PubSoft.Monitoring.csproj" />
+    <PackageReference Include="OpenTelemetry" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+  </ItemGroup>
+</Project>

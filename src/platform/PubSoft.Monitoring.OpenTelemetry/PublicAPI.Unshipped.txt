@@ -1,0 +1,19 @@
+#nullable enable
+PubSoft.Monitoring.OpenTelemetry.OpenTelemetryServiceCollectionExtensions
+PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions
+PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions.AdditionalActivitySources.get -> System.Collections.Generic.List<string!>!
+PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions.AdditionalActivitySources.set -> void
+PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions.AdditionalMeters.get -> System.Collections.Generic.List<string!>!
+PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions.AdditionalMeters.set -> void
+PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions.IncludeAspNetCoreTraceInstrumentation.get -> bool
+PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions.IncludeAspNetCoreTraceInstrumentation.set -> void
+PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions.IncludeHttpClientTraceInstrumentation.get -> bool
+PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions.IncludeHttpClientTraceInstrumentation.set -> void
+PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions.OtlpEndpoint.get -> System.Uri?
+PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions.OtlpEndpoint.set -> void
+PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions.PubSoftOpenTelemetryOptions() -> void
+PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions.ServiceName.get -> string?
+PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions.ServiceName.set -> void
+PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions.ServiceVersion.get -> string?
+PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions.ServiceVersion.set -> void
+static PubSoft.Monitoring.OpenTelemetry.OpenTelemetryServiceCollectionExtensions.AddPubSoftOpenTelemetry(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<PubSoft.Monitoring.OpenTelemetry.PubSoftOpenTelemetryOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

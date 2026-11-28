@@ -45,7 +45,7 @@ sealed class SmokeExecutor : IJobExecutor
     public string Type => "smoke";
     public int ExecutionCount { get; private set; }
 
-    public Task<JobResult> ExecuteAsync(ScheduledJob job, CancellationToken cancellationToken)
+    public Task<JobResult> ExecuteAsync(ScheduledJob job, JobExecutionContext executionContext, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ExecutionCount++;

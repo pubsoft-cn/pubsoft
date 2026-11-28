@@ -11,7 +11,7 @@ public sealed class SchedulingTailWave2Tests
     private sealed class Exec(string type) : IJobExecutor
     {
         public string Type => type;
-        public Task<JobResult> ExecuteAsync(ScheduledJob job, CancellationToken ct) => Task.FromResult(new JobResult());
+        public Task<JobResult> ExecuteAsync(ScheduledJob job, JobExecutionContext executionContext, CancellationToken ct) => Task.FromResult(new JobResult());
     }
 
     private sealed class Proc(string name) : IResultProcessor

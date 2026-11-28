@@ -32,6 +32,11 @@
     <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.23.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
     <PackageVersion Include="MySql.EntityFrameworkCore" Version="10.0.12" />
+    <PackageVersion Include="OpenTelemetry" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.21.0" />
     <PackageVersion Include="MQTTnet" Version="5.2.0.1603" />
     <PackageVersion Include="RabbitMQ.Client" Version="7.3.0" />
     <PackageVersion Include="StackExchange.Redis" Version="3.4.35" />
@@ -71,6 +76,7 @@
     <PackageVersion Include="PubSoft.Modularity" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.Monitoring.Scheduling" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.Monitoring" Version="$(PubSoftVersion)" />
+    <PackageVersion Include="PubSoft.Monitoring.OpenTelemetry" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.MultiTenancy" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.Notifications" Version="$(PubSoftVersion)" />
     <PackageVersion Include="PubSoft.Outbound" Version="$(PubSoftVersion)" />

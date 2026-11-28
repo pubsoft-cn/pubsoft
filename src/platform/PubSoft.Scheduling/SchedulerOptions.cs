@@ -17,8 +17,17 @@ public sealed class SchedulerOptions
     /// instance runs a given job per tick. Fail-closed: enabled without a registered lock skips jobs.
     /// </summary>
     public bool DistributedLocking { get; set; }
-    /// <summary>Lease held per job tick; should exceed the longest expected job run.</summary>
+    /// <summary>
+    /// Lease held per job tick. It must exceed the longest expected execution including retries and
+    /// the result-state write; PubSoft deliberately does not auto-renew leases. Fencing tokens, not the
+    /// lease alone, are the correctness boundary for protected resources.
+    /// </summary>
     public TimeSpan DistributedLockLease { get; set; } = TimeSpan.FromMinutes(5);
+    /// <summary>
+    /// Maximum age of the latest missed occurrence eligible for <see cref="JobMisfirePolicy.FireOnce"/>.
+    /// Bounded at seven days because scheduler last-result state is retained for seven days.
+    /// </summary>
+    public TimeSpan MisfireWindow { get; set; } = TimeSpan.FromMinutes(5);
 
     internal bool IsValid(out string error)
     {
@@ -37,6 +46,16 @@ public sealed class SchedulerOptions
             error = "MaxConcurrentJobs must be greater than zero.";
             return false;
         }
+        if (DistributedLocking && DistributedLockLease <= TimeSpan.Zero)
+        {
+            error = "DistributedLockLease must be greater than zero.";
+            return false;
+        }
+        if (MisfireWindow <= TimeSpan.Zero || MisfireWindow > TimeSpan.FromDays(7))
+        {
+            error = "MisfireWindow must be greater than zero and no more than seven days.";
+            return false;
+        }
 
         var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var job in Jobs)
@@ -51,6 +70,11 @@ public sealed class SchedulerOptions
             if (!names.Add(job.Name))
             {
                 error = $"Job name '{job.Name}' is duplicated.";
+                return false;
+            }
+            if (!Enum.IsDefined(job.MisfirePolicy))
+            {
+                error = $"Job '{job.Name}' MisfirePolicy is not defined.";
                 return false;
             }
             if (job.Timeout is { } timeout && timeout <= TimeSpan.Zero)

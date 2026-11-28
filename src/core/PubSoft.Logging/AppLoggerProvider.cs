@@ -26,7 +26,7 @@ internal sealed class AppLoggerAdapter(string categoryName, AppLogger appLogger)
             : null;
 
     public bool IsEnabled(LogLevel logLevel)
-        => logLevel != LogLevel.None && MapLevel(logLevel) >= appLogger.MinLevel;
+        => logLevel != LogLevel.None && MapLevel(logLevel) >= appLogger.GetEffectiveMinLevel(categoryName);
 
     public void Log<TState>(
         LogLevel logLevel,

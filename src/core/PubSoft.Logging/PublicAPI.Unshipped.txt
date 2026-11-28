@@ -1,4 +1,16 @@
 #nullable enable
+override PubSoft.Logging.LogLevelOverride.Equals(object? obj) -> bool
+override PubSoft.Logging.LogLevelOverride.GetHashCode() -> int
+override PubSoft.Logging.LogLevelOverride.ToString() -> string!
+override PubSoft.Logging.LogSinkState.Equals(object? obj) -> bool
+override PubSoft.Logging.LogSinkState.GetHashCode() -> int
+override PubSoft.Logging.LogSinkState.ToString() -> string!
+PubSoft.Logging.AppLogger.AppLogger(System.Collections.Generic.IEnumerable<PubSoft.Logging.ILogSink!>! sinks, PubSoft.Logging.AppLogLevel minLevel = PubSoft.Logging.AppLogLevel.Info, int capacity = 8192, int batchSize = 128, PubSoft.Logging.LogSinkQuarantineOptions? quarantineOptions = null, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Logging.AppLogger.GetEffectiveMinLevel(string! source) -> PubSoft.Logging.AppLogLevel
+PubSoft.Logging.AppLogger.GetSinkStates() -> System.Collections.Generic.IReadOnlyList<PubSoft.Logging.LogSinkState!>!
+PubSoft.Logging.AppLogger.LevelOverrides.get -> System.Collections.Generic.IReadOnlyList<PubSoft.Logging.LogLevelOverride!>!
+PubSoft.Logging.AppLogger.LevelOverrides.set -> void
+PubSoft.Logging.AppLogger.Log(PubSoft.Logging.AppLogLevel level, string! source, string! message, string? exception = null, string? traceId = null, string? service = null, string? userId = null, string? environment = null, System.Collections.Generic.IReadOnlyDictionary<string!, object?>? context = null) -> bool
 PubSoft.Logging.AppLogLevel
 PubSoft.Logging.AppLogLevel.Debug = 1 -> PubSoft.Logging.AppLogLevel
 PubSoft.Logging.AppLogLevel.Error = 4 -> PubSoft.Logging.AppLogLevel
@@ -7,12 +19,10 @@ PubSoft.Logging.AppLogLevel.Info = 2 -> PubSoft.Logging.AppLogLevel
 PubSoft.Logging.AppLogLevel.Trace = 0 -> PubSoft.Logging.AppLogLevel
 PubSoft.Logging.AppLogLevel.Warn = 3 -> PubSoft.Logging.AppLogLevel
 PubSoft.Logging.AppLogger
-PubSoft.Logging.AppLogger.AppLogger(System.Collections.Generic.IEnumerable<PubSoft.Logging.ILogSink!>! sinks, PubSoft.Logging.AppLogLevel minLevel = PubSoft.Logging.AppLogLevel.Info, int capacity = 8192, int batchSize = 128) -> void
 PubSoft.Logging.AppLogger.Debug(string! source, string! message) -> bool
 PubSoft.Logging.AppLogger.Error(string! source, string! message, System.Exception? exception = null) -> bool
 PubSoft.Logging.AppLogger.Fatal(string! source, string! message, System.Exception? exception = null) -> bool
 PubSoft.Logging.AppLogger.Info(string! source, string! message) -> bool
-PubSoft.Logging.AppLogger.Log(PubSoft.Logging.AppLogLevel level, string! source, string! message, string? exception = null, long traceId = 0, string? service = null, string? userId = null, string? environment = null, System.Collections.Generic.IReadOnlyDictionary<string!, object?>? context = null) -> bool
 PubSoft.Logging.AppLogger.MinLevel.get -> PubSoft.Logging.AppLogLevel
 PubSoft.Logging.AppLogger.MinLevel.set -> void
 PubSoft.Logging.AppLogger.Trace(string! source, string! message) -> bool
@@ -45,7 +55,7 @@ PubSoft.Logging.LogEntry.ExceptionDetail.get -> string?
 PubSoft.Logging.LogEntry.HostName.get -> string?
 PubSoft.Logging.LogEntry.Level.get -> PubSoft.Logging.AppLogLevel
 PubSoft.Logging.LogEntry.LogEntry() -> void
-PubSoft.Logging.LogEntry.LogEntry(PubSoft.Logging.AppLogLevel level, string! source, string! message, string? exceptionDetail = null, long traceId = 0, string? service = null, string? serviceVersion = null, string? serviceInstanceId = null, string? spanId = null, string? userId = null, string? environment = null, string? hostName = null, System.Collections.Generic.IReadOnlyDictionary<string!, object?>? context = null) -> void
+PubSoft.Logging.LogEntry.LogEntry(PubSoft.Logging.AppLogLevel level, string! source, string! message, string? exceptionDetail = null, string? traceId = null, string? service = null, string? serviceVersion = null, string? serviceInstanceId = null, string? spanId = null, string? userId = null, string? environment = null, string? hostName = null, System.Collections.Generic.IReadOnlyDictionary<string!, object?>? context = null) -> void
 PubSoft.Logging.LogEntry.Message.get -> string!
 PubSoft.Logging.LogEntry.Service.get -> string?
 PubSoft.Logging.LogEntry.ServiceInstanceId.get -> string?
@@ -53,10 +63,43 @@ PubSoft.Logging.LogEntry.ServiceVersion.get -> string?
 PubSoft.Logging.LogEntry.Source.get -> string!
 PubSoft.Logging.LogEntry.SpanId.get -> string?
 PubSoft.Logging.LogEntry.TimestampUtc.get -> System.DateTimeOffset
-PubSoft.Logging.LogEntry.TraceId.get -> long
+PubSoft.Logging.LogEntry.TraceId.get -> string?
 PubSoft.Logging.LogEntry.UserId.get -> string?
 PubSoft.Logging.LoggingServiceCollectionExtensions
 abstract PubSoft.Logging.AsyncBackbone<T>.ProcessBatchAsync(System.ReadOnlyMemory<T> batch, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+PubSoft.Logging.LogLevelOverride
+PubSoft.Logging.LogLevelOverride.<Clone>$() -> PubSoft.Logging.LogLevelOverride!
+PubSoft.Logging.LogLevelOverride.Equals(PubSoft.Logging.LogLevelOverride? other) -> bool
+PubSoft.Logging.LogLevelOverride.LogLevelOverride(string! sourcePrefix, PubSoft.Logging.AppLogLevel minLevel) -> void
+PubSoft.Logging.LogLevelOverride.MinLevel.get -> PubSoft.Logging.AppLogLevel
+PubSoft.Logging.LogLevelOverride.SourcePrefix.get -> string!
+PubSoft.Logging.LogSinkQuarantineOptions
+PubSoft.Logging.LogSinkQuarantineOptions.FailureThreshold.get -> int
+PubSoft.Logging.LogSinkQuarantineOptions.FailureThreshold.set -> void
+PubSoft.Logging.LogSinkQuarantineOptions.InitialBackoff.get -> System.TimeSpan
+PubSoft.Logging.LogSinkQuarantineOptions.InitialBackoff.set -> void
+PubSoft.Logging.LogSinkQuarantineOptions.LogSinkQuarantineOptions() -> void
+PubSoft.Logging.LogSinkQuarantineOptions.MaxBackoff.get -> System.TimeSpan
+PubSoft.Logging.LogSinkQuarantineOptions.MaxBackoff.set -> void
+PubSoft.Logging.LogSinkState
+PubSoft.Logging.LogSinkState.<Clone>$() -> PubSoft.Logging.LogSinkState!
+PubSoft.Logging.LogSinkState.ConsecutiveFailures.get -> int
+PubSoft.Logging.LogSinkState.ConsecutiveFailures.init -> void
+PubSoft.Logging.LogSinkState.Equals(PubSoft.Logging.LogSinkState? other) -> bool
+PubSoft.Logging.LogSinkState.FailedBatches.get -> long
+PubSoft.Logging.LogSinkState.FailedBatches.init -> void
+PubSoft.Logging.LogSinkState.IsQuarantined.get -> bool
+PubSoft.Logging.LogSinkState.IsQuarantined.init -> void
+PubSoft.Logging.LogSinkState.LogSinkState() -> void
+PubSoft.Logging.LogSinkState.QuarantinedUntil.get -> System.DateTimeOffset?
+PubSoft.Logging.LogSinkState.QuarantinedUntil.init -> void
+PubSoft.Logging.LogSinkState.SinkName.get -> string!
+PubSoft.Logging.LogSinkState.SinkName.init -> void
+PubSoft.Logging.LogSinkState.SkippedBatches.get -> long
+PubSoft.Logging.LogSinkState.SkippedBatches.init -> void
+PubSoft.Logging.RollingFileLogSink
+PubSoft.Logging.RollingFileLogSink.RollingFileLogSink(string! directory, string! filePrefix = "app", long maxFileSizeBytes = 33554432, int? retainedFileCountLimit = 31, System.TimeSpan? retainedFileAgeLimit = null, System.TimeProvider? timeProvider = null) -> void
+PubSoft.Logging.RollingFileLogSink.WriteBatchAsync(System.ReadOnlyMemory<PubSoft.Logging.LogEntry> entries, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
 static PubSoft.Logging.AppVersion.BuildDate.get -> string?
 static PubSoft.Logging.AppVersion.BuildTime.get -> string?
 static PubSoft.Logging.AppVersion.Full.get -> string!
@@ -68,4 +111,8 @@ static PubSoft.Logging.LogContext.PushProperties(System.Collections.Generic.IEnu
 static PubSoft.Logging.LogContext.PushProperty(string! key, object? value) -> System.IDisposable!
 static PubSoft.Logging.LoggingServiceCollectionExtensions.AddPubSoftLogging(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, PubSoft.Logging.AppLogLevel minLevel = PubSoft.Logging.AppLogLevel.Info, bool enableJsonSink = false) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PubSoft.Logging.LoggingServiceCollectionExtensions.AddPubSoftLogging(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, PubSoft.Logging.AppLogger! appLogger) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PubSoft.Logging.LogLevelOverride.operator !=(PubSoft.Logging.LogLevelOverride? left, PubSoft.Logging.LogLevelOverride? right) -> bool
+static PubSoft.Logging.LogLevelOverride.operator ==(PubSoft.Logging.LogLevelOverride? left, PubSoft.Logging.LogLevelOverride? right) -> bool
+static PubSoft.Logging.LogSinkState.operator !=(PubSoft.Logging.LogSinkState? left, PubSoft.Logging.LogSinkState? right) -> bool
+static PubSoft.Logging.LogSinkState.operator ==(PubSoft.Logging.LogSinkState? left, PubSoft.Logging.LogSinkState? right) -> bool
 virtual PubSoft.Logging.AsyncBackbone<T>.OnProcessingError(System.Exception! exception, int batchCount) -> void

@@ -29,6 +29,7 @@
     <PackageReference Include="PubSoft.Notifications" VersionOverride="0.1.0-*" />
     <PackageReference Include="PubSoft.Mapping" VersionOverride="0.1.0-*" />
     <PackageReference Include="PubSoft.Monitoring" VersionOverride="0.1.0-*" />
+    <PackageReference Include="PubSoft.Monitoring.OpenTelemetry" VersionOverride="0.1.0-*" />
     <PackageReference Include="PubSoft.Monitoring.Scheduling" VersionOverride="0.1.0-*" />
     <PackageReference Include="PubSoft.MultiTenancy" VersionOverride="0.1.0-*" />
     <PackageReference Include="PubSoft.Scheduling" VersionOverride="0.1.0-*" />

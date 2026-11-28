@@ -27,7 +27,7 @@ public sealed class JsonLogSink(
         await _output(buffer.WrittenMemory, cancellationToken).ConfigureAwait(false);
     }
 
-    private static void WriteEntry(IBufferWriter<byte> buffer, LogEntry entry)
+    internal static void WriteEntry(IBufferWriter<byte> buffer, LogEntry entry)
     {
         using var writer = new Utf8JsonWriter(buffer);
         writer.WriteStartObject();
@@ -35,8 +35,7 @@ public sealed class JsonLogSink(
         writer.WriteString("level", entry.Level switch { AppLogLevel.Trace => "TRACE", AppLogLevel.Debug => "DEBUG", AppLogLevel.Warn => "WARN", AppLogLevel.Error => "ERROR", AppLogLevel.Fatal => "FATAL", _ => "INFO" });
         writer.WriteString("message", entry.Message);
         writer.WriteString("source", entry.Source);
-        if (entry.TraceId != 0)
-            writer.WriteNumber("trace_id", entry.TraceId);
+        WriteOptionalString(writer, "trace_id", entry.TraceId);
         WriteOptionalString(writer, "user_id", entry.UserId);
         WriteOptionalString(writer, "service_name", entry.Service);
         WriteOptionalString(writer, "service_version", entry.ServiceVersion);

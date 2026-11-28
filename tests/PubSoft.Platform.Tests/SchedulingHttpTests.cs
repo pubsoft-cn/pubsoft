@@ -32,7 +32,7 @@ public sealed class SchedulingHttpTests
             }
         });
 
-        var result = await executor.ExecuteAsync(job, default);
+        var result = await executor.ExecuteAsync(job, new JobExecutionContext(default, false, null), default);
 
         Assert.True(result.Success);
         Assert.Equal(200, result.StatusCode);
@@ -49,7 +49,7 @@ public sealed class SchedulingHttpTests
         var executor = CreateProbe(handler);
 
         var result = await executor.ExecuteAsync(
-            CreateJob(new HttpExecutorConfig { Url = "https://service.test/probe" }), default);
+            CreateJob(new HttpExecutorConfig { Url = "https://service.test/probe" }), new JobExecutionContext(default, false, null), default);
 
         Assert.False(result.Success);
         Assert.Equal((int)HttpStatusCode.Unauthorized, result.StatusCode);
@@ -67,7 +67,7 @@ public sealed class SchedulingHttpTests
             Retry = new RetryPolicy { MaxRetries = 2, InitialDelay = TimeSpan.Zero }
         });
 
-        var result = await executor.ExecuteAsync(job, default);
+        var result = await executor.ExecuteAsync(job, new JobExecutionContext(default, false, null), default);
 
         Assert.False(result.Success);
         Assert.Equal((int)HttpStatusCode.ServiceUnavailable, result.StatusCode);
@@ -89,7 +89,7 @@ public sealed class SchedulingHttpTests
             Timeout = TimeSpan.FromMilliseconds(20)
         });
 
-        var timeoutResult = await timeoutExecutor.ExecuteAsync(timeoutJob, default);
+        var timeoutResult = await timeoutExecutor.ExecuteAsync(timeoutJob, new JobExecutionContext(default, false, null), default);
 
         Assert.False(timeoutResult.Success);
         Assert.Equal("timeout", timeoutResult.ErrorMessage);
@@ -102,7 +102,7 @@ public sealed class SchedulingHttpTests
         var cancelExecutor = CreateProbe(cancelHandler);
         using var cancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(20));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => cancelExecutor.ExecuteAsync(
-            CreateJob(new HttpExecutorConfig { Url = "https://service.test/cancel" }), cancellation.Token));
+            CreateJob(new HttpExecutorConfig { Url = "https://service.test/cancel" }), new JobExecutionContext(default, false, null), cancellation.Token));
     }
 
     [Fact]
@@ -116,7 +116,7 @@ public sealed class SchedulingHttpTests
             Retry = new RetryPolicy { MaxRetries = 1, InitialDelay = TimeSpan.FromMilliseconds(30) }
         });
 
-        var result = await executor.ExecuteAsync(job, default);
+        var result = await executor.ExecuteAsync(job, new JobExecutionContext(default, false, null), default);
 
         Assert.True(result.Success);
         Assert.Equal((int)HttpStatusCode.OK, result.StatusCode);
@@ -136,7 +136,7 @@ public sealed class SchedulingHttpTests
             Url = "https://service.test/action",
             Body = "{\"action\":true}",
             Retry = retry
-        }), default);
+        }), new JobExecutionContext(default, false, null), default);
 
         Assert.False(defaultResult.Success);
         Assert.Equal(1, defaultHandler.RequestCount);
@@ -151,7 +151,7 @@ public sealed class SchedulingHttpTests
             Body = "{\"action\":true}",
             Retry = retry,
             AllowUnsafeRetries = true
-        }), default);
+        }), new JobExecutionContext(default, false, null), default);
 
         Assert.True(optInResult.Success);
         Assert.Equal(2, optInHandler.RequestCount);
@@ -165,8 +165,8 @@ public sealed class SchedulingHttpTests
         var executor = CreateResilient(handler, new HttpExecutorOptions { CircuitFailureThreshold = 1 });
         var job = CreateJob(new HttpExecutorConfig { Url = "https://service.test/action" });
 
-        var first = await executor.ExecuteAsync(job, default);
-        var second = await executor.ExecuteAsync(job, default);
+        var first = await executor.ExecuteAsync(job, new JobExecutionContext(default, false, null), default);
+        var second = await executor.ExecuteAsync(job, new JobExecutionContext(default, false, null), default);
 
         Assert.False(first.Success);
         Assert.Equal("circuit open", second.ErrorMessage);
@@ -197,13 +197,13 @@ public sealed class SchedulingHttpTests
             Options.Create(new HttpExecutorOptions()),
             breaker);
         var job = CreateJob(new HttpExecutorConfig { Url = "https://service.test/circuit" });
-        await executor.ExecuteAsync(job, default);
+        await executor.ExecuteAsync(job, new JobExecutionContext(default, false, null), default);
         await Task.Delay(30);
 
         using var cancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(20));
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => executor.ExecuteAsync(job, cancellation.Token));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => executor.ExecuteAsync(job, new JobExecutionContext(default, false, null), cancellation.Token));
 
-        var recovered = await executor.ExecuteAsync(job, default);
+        var recovered = await executor.ExecuteAsync(job, new JobExecutionContext(default, false, null), default);
         Assert.True(recovered.Success);
         Assert.Equal(3, handler.RequestCount);
     }
@@ -215,7 +215,7 @@ public sealed class SchedulingHttpTests
         var executor = CreateProbe(handler);
         var job = CreateJob(new HttpExecutorConfig { Url = "https://user:password@service.test/action" });
 
-        var result = await executor.ExecuteAsync(job, default);
+        var result = await executor.ExecuteAsync(job, new JobExecutionContext(default, false, null), default);
 
         Assert.False(result.Success);
         Assert.Equal("Invalid HttpExecutorConfig", result.ErrorMessage);
@@ -238,7 +238,7 @@ public sealed class SchedulingHttpTests
         var executor = CreateProbe(handler);
         var job = CreateJob(new HttpExecutorConfig { Url = url });
 
-        var result = await executor.ExecuteAsync(job, default);
+        var result = await executor.ExecuteAsync(job, new JobExecutionContext(default, false, null), default);
 
         Assert.False(result.Success);
         Assert.Equal("Invalid HttpExecutorConfig", result.ErrorMessage);
@@ -255,7 +255,7 @@ public sealed class SchedulingHttpTests
         });
         var job = CreateJob(new HttpExecutorConfig { Url = "https://evil.test/x" });
 
-        var result = await executor.ExecuteAsync(job, default);
+        var result = await executor.ExecuteAsync(job, new JobExecutionContext(default, false, null), default);
 
         Assert.False(result.Success);
         Assert.Equal("Invalid HttpExecutorConfig", result.ErrorMessage);
@@ -279,7 +279,7 @@ public sealed class SchedulingHttpTests
         })
         {
             var result = await executor.ExecuteAsync(
-                CreateJob(new HttpExecutorConfig { Url = url }), default);
+                CreateJob(new HttpExecutorConfig { Url = url }), new JobExecutionContext(default, false, null), default);
             Assert.True(result.Success, url);
         }
         Assert.Equal(3, handler.RequestCount);
@@ -340,7 +340,7 @@ public sealed class SchedulingHttpTests
         });
 
         var result = await executor.ExecuteAsync(
-            CreateJob(new HttpExecutorConfig { Url = "https://api.example.com/start" }), default);
+            CreateJob(new HttpExecutorConfig { Url = "https://api.example.com/start" }), new JobExecutionContext(default, false, null), default);
 
         Assert.False(result.Success);
         Assert.Equal("redirect target blocked", result.ErrorMessage);
@@ -356,7 +356,7 @@ public sealed class SchedulingHttpTests
         var executor = CreateProbe(handler, options: new HttpExecutorOptions { FollowRedirects = true });
 
         var result = await executor.ExecuteAsync(
-            CreateJob(new HttpExecutorConfig { Url = "https://public.test/start" }), default);
+            CreateJob(new HttpExecutorConfig { Url = "https://public.test/start" }), new JobExecutionContext(default, false, null), default);
 
         Assert.False(result.Success);
         Assert.Equal("redirect target blocked", result.ErrorMessage);
@@ -380,7 +380,7 @@ public sealed class SchedulingHttpTests
         {
             Url = "https://a.example.com/start",
             Token = new TokenRef { CredentialKey = "svc", HeaderName = "X-Service-Token" },
-        }), default);
+        }), new JobExecutionContext(default, false, null), default);
 
         Assert.True(result.Success);
         Assert.Equal(2, handler.RequestCount);
@@ -403,7 +403,7 @@ public sealed class SchedulingHttpTests
             Url = "https://a.example.com/start",
             Body = "{}",
             Token = new TokenRef { CredentialKey = "svc", HeaderName = "X-Service-Token" },
-        }), default);
+        }), new JobExecutionContext(default, false, null), default);
 
         Assert.True(result.Success);
         Assert.Equal("Bearer secret-token", handler.TokenHeaders.ElementAt(1)); // same host keeps credential
@@ -417,7 +417,7 @@ public sealed class SchedulingHttpTests
         var executor = CreateProbe(handler, options: new HttpExecutorOptions { FollowRedirects = true });
 
         var result = await executor.ExecuteAsync(
-            CreateJob(new HttpExecutorConfig { Url = "https://a.example.com/loop" }), default);
+            CreateJob(new HttpExecutorConfig { Url = "https://a.example.com/loop" }), new JobExecutionContext(default, false, null), default);
 
         Assert.False(result.Success);
         Assert.Equal("redirect limit exceeded", result.ErrorMessage);
@@ -516,7 +516,7 @@ public sealed class SchedulingHttpTests
         {
             Url = "https://a.example.com/start",
             Headers = { ["X-Custom-Key"] = "secret-value" },
-        }), default);
+        }), new JobExecutionContext(default, false, null), default);
 
         Assert.True(result.Success);
         Assert.Equal("secret-value", handler.CustomHeaders.ElementAt(0));
@@ -535,7 +535,7 @@ public sealed class SchedulingHttpTests
         {
             Url = "https://a.example.com/start",
             Headers = { ["X-Custom-Key"] = "secret-value" },
-        }), default);
+        }), new JobExecutionContext(default, false, null), default);
 
         Assert.True(result.Success);
         Assert.Equal("secret-value", handler.CustomHeaders.ElementAt(0));
@@ -554,7 +554,7 @@ public sealed class SchedulingHttpTests
         {
             Url = "https://a.example.com/start",
             Headers = { ["X-Custom-Key"] = "secret-value" },
-        }), default);
+        }), new JobExecutionContext(default, false, null), default);
 
         Assert.True(result.Success);
         Assert.Equal("secret-value", handler.CustomHeaders.ElementAt(0));
@@ -573,7 +573,7 @@ public sealed class SchedulingHttpTests
         {
             Url = "https://a.example.com/start",
             Headers = { ["X-Custom-Key"] = "secret-value" },
-        }), default);
+        }), new JobExecutionContext(default, false, null), default);
 
         Assert.True(result.Success);
         Assert.Equal("secret-value", handler.CustomHeaders.ElementAt(0));
@@ -634,7 +634,7 @@ public sealed class SchedulingHttpTests
         var executor = CreateResilient(handler, new HttpExecutorOptions { MaxResponseBytes = 64 });
 
         var result = await executor.ExecuteAsync(
-            CreateJob(new HttpExecutorConfig { Url = "https://service.test/big" }), default);
+            CreateJob(new HttpExecutorConfig { Url = "https://service.test/big" }), new JobExecutionContext(default, false, null), default);
 
         Assert.False(result.Success);
     }
@@ -649,7 +649,7 @@ public sealed class SchedulingHttpTests
         var executor = CreateResilient(handler, new HttpExecutorOptions { MaxResponseBytes = 64 });
 
         var result = await executor.ExecuteAsync(
-            CreateJob(new HttpExecutorConfig { Url = "https://service.test/ok" }), default);
+            CreateJob(new HttpExecutorConfig { Url = "https://service.test/ok" }), new JobExecutionContext(default, false, null), default);
 
         Assert.True(result.Success);
     }

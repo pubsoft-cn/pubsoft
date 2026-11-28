@@ -451,7 +451,7 @@ public sealed class SchedulingTests
         public string Type => type;
         public int ExecutionCount { get; private set; }
 
-        public Task<JobResult> ExecuteAsync(ScheduledJob job, CancellationToken cancellationToken)
+        public Task<JobResult> ExecuteAsync(ScheduledJob job, JobExecutionContext executionContext, CancellationToken cancellationToken)
         {
             ExecutionCount++;
             return execute(cancellationToken);
@@ -481,7 +481,7 @@ public sealed class SchedulingTests
         public int ExecutionCount => Volatile.Read(ref _executionCount);
         public int MaximumConcurrency => Volatile.Read(ref _maximumConcurrency);
 
-        public async Task<JobResult> ExecuteAsync(ScheduledJob job, CancellationToken cancellationToken)
+        public async Task<JobResult> ExecuteAsync(ScheduledJob job, JobExecutionContext executionContext, CancellationToken cancellationToken)
         {
             var active = Interlocked.Increment(ref _active);
             Interlocked.Increment(ref _executionCount);

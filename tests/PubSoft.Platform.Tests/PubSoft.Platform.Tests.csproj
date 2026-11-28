@@ -21,6 +21,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../../src/platform/PubSoft.Monitoring/PubSoft.Monitoring.csproj" />
+    <ProjectReference Include="../../src/platform/PubSoft.Monitoring.OpenTelemetry/PubSoft.Monitoring.OpenTelemetry.csproj" />
     <ProjectReference Include="../../src/platform/PubSoft.Monitoring.Scheduling/PubSoft.Monitoring.Scheduling.csproj" />
     <ProjectReference Include="../../src/platform/PubSoft.Caching/PubSoft.Caching.csproj" />
     <ProjectReference Include="../../src/platform/PubSoft.Caching.Redis/PubSoft.Caching.Redis.csproj" />

@@ -36,7 +36,8 @@ public static class SchedulerServiceCollectionExtensions
 
     /// <summary>
     /// Registers the scheduler bound to a configuration section (expected children:
-    /// <c>Jobs</c>, <c>LoopInterval</c>, <c>ErrorDelay</c>, <c>MaxConcurrentJobs</c>).
+    /// <c>Jobs</c>, <c>LoopInterval</c>, <c>ErrorDelay</c>, <c>MaxConcurrentJobs</c>,
+    /// <c>DistributedLocking</c>, <c>DistributedLockLease</c>, and <c>MisfireWindow</c>).
     /// Bound without the reflection-based binder so executor/result-processor JSON
     /// payloads and bitmask schedules round-trip correctly under AOT.
     /// </summary>
@@ -52,6 +53,9 @@ public static class SchedulerServiceCollectionExtensions
             o.LoopInterval = bound.LoopInterval;
             o.ErrorDelay = bound.ErrorDelay;
             o.MaxConcurrentJobs = bound.MaxConcurrentJobs;
+            o.DistributedLocking = bound.DistributedLocking;
+            o.DistributedLockLease = bound.DistributedLockLease;
+            o.MisfireWindow = bound.MisfireWindow;
         });
     }
 

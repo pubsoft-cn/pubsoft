@@ -21,12 +21,17 @@ public sealed class ScheduledJob
     public JsonElement ResultProcessorConfig { get; set; }
     /// <summary>Disabled jobs are skipped without removing them.</summary>
     public bool Enabled { get; set; } = true;
+    /// <summary>
+    /// Misfire handling for occurrences missed while the scheduler was down or unable to run them.
+    /// Default <see cref="JobMisfirePolicy.Ignore"/> preserves exact-tick-only behavior.
+    /// </summary>
+    public JobMisfirePolicy MisfirePolicy { get; set; } = JobMisfirePolicy.Ignore;
 
     /// <summary>
     /// Skips a due run while a previous run of the same job is still executing.
     /// Defaults to true: overlapping runs of one job are almost never intended.
-    /// <para>Process-local only: multiple scheduler instances sharing state can run
-    /// the same job concurrently -- distributed mutual exclusion is not provided.</para>
+    /// <para>Process-local only: multi-instance deployments must enable
+    /// <see cref="SchedulerOptions.DistributedLocking"/> for cross-instance exclusion.</para>
     /// </summary>
     public bool PreventOverlap { get; set; } = true;
 

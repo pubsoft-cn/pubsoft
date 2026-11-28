@@ -35,7 +35,9 @@ public sealed class SchedulingEfCoreStateStoreTests
             Success = false,
             StatusCode = 503,
             ErrorMessage = "failed",
-            ExecutedAt = clock.GetUtcNow()
+            ExecutedAt = clock.GetUtcNow(),
+            ScheduledTime = clock.GetUtcNow().AddMinutes(-5),
+            IsMisfireRecovery = true
         };
         await store.UpdateStateAsync("nightly", firstResult, default);
         await store.SetCustomStateAsync("counter", new StateValue(7), TimeSpan.FromSeconds(5), default);
@@ -50,6 +52,8 @@ public sealed class SchedulingEfCoreStateStoreTests
         Assert.NotNull(restored);
         Assert.Equal(503, restored.StatusCode);
         Assert.Equal("failed", restored.ErrorMessage);
+        Assert.Equal(clock.GetUtcNow().AddMinutes(-5), restored.ScheduledTime);
+        Assert.True(restored.IsMisfireRecovery);
         Assert.Equal(7, (await store.GetCustomStateAsync<StateValue>("counter", default))?.Value);
 
         clock.Advance(TimeSpan.FromSeconds(5));

@@ -35,6 +35,12 @@ internal static class SchedulerConfigurationBinding
             options.ErrorDelay = ParseDuration(section, delay, "ErrorDelay");
         if (section["MaxConcurrentJobs"] is { } max)
             options.MaxConcurrentJobs = ParseInt(section, max, "MaxConcurrentJobs");
+        if (section["DistributedLocking"] is { } distributed)
+            options.DistributedLocking = ParseBool(section, distributed, "DistributedLocking");
+        if (section["DistributedLockLease"] is { } lease)
+            options.DistributedLockLease = ParseDuration(section, lease, "DistributedLockLease");
+        if (section["MisfireWindow"] is { } misfireWindow)
+            options.MisfireWindow = ParseDuration(section, misfireWindow, "MisfireWindow");
 
         foreach (var jobSection in section.GetSection("Jobs").GetChildren())
             options.Jobs.Add(BindJob(jobSection));
@@ -63,6 +69,8 @@ internal static class SchedulerConfigurationBinding
             job.PreventOverlap = !string.Equals(overlap, "false", StringComparison.OrdinalIgnoreCase);
         if (section["Timeout"] is { } timeout)
             job.Timeout = ParseDuration(section, timeout, "Timeout");
+        if (section["MisfirePolicy"] is { } misfirePolicy)
+            job.MisfirePolicy = ParseMisfirePolicy(section, misfirePolicy);
 
         var retry = section.GetSection("Retry");
         if (retry.Exists())
@@ -235,6 +243,14 @@ internal static class SchedulerConfigurationBinding
         duration = result;
         return true;
     }
+
+    private static JobMisfirePolicy ParseMisfirePolicy(IConfiguration section, string raw)
+        => Enum.TryParse<JobMisfirePolicy>(raw, ignoreCase: true, out var policy) && Enum.IsDefined(policy)
+            ? policy
+            : throw Invalid(section, "MisfirePolicy", raw);
+
+    private static bool ParseBool(IConfiguration section, string raw, string key)
+        => bool.TryParse(raw, out var value) ? value : throw Invalid(section, key, raw);
 
     private static int ParseInt(IConfiguration section, string raw, string key)
         => int.TryParse(raw, out var v) ? v : throw Invalid(section, key, raw);
