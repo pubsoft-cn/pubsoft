@@ -37,8 +37,8 @@ public sealed class RemoteEdgeSignKeyProvider : IEdgeSignKeyProvider, IEdgeSchem
         _timeProvider = timeProvider ?? TimeProvider.System;
 
         _keys = LocalKeyMap();
-        _ = RefreshAsync();
-        _refreshTimer = new Timer(_ => _ = RefreshAsync(), null, _options.RefreshInterval, _options.RefreshInterval);
+        _ = RefreshAsync(); // pubsoft:exempt PUBSOFT062 "RefreshAsync catches all fetch failures into degraded-state fields"
+        _refreshTimer = new Timer(_ => _ = RefreshAsync(), null, _options.RefreshInterval, _options.RefreshInterval); // pubsoft:exempt PUBSOFT062 "RefreshAsync catches all fetch failures into degraded-state fields"
     }
 
     /// <inheritdoc />

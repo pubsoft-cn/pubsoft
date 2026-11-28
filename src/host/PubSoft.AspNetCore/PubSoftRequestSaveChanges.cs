@@ -71,7 +71,7 @@ public sealed class PubSoftRequestSaveChanges : ISaveChangesBoundary
             _saveTask = completion.Task;
         }
 
-        _ = CompleteSaveAsync(callbacks, cancellationToken, completion);
+        _ = CompleteSaveAsync(callbacks, cancellationToken, completion); // pubsoft:exempt PUBSOFT062 "exceptions are captured into the returned completion task"
         return completion.Task;
     }
 

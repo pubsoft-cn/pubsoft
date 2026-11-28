@@ -69,7 +69,7 @@ public sealed class ParallelHealthCheckAggregator
             return (check.Name, AppHealthCheckResult.Unhealthy("Health check failed."));
         }
 
-        _ = ReleaseConcurrencyWhenCompletedAsync(checkTask, timeoutSource);
+        _ = ReleaseConcurrencyWhenCompletedAsync(checkTask, timeoutSource); // pubsoft:exempt PUBSOFT062 "check task failure is captured in its result entry; the helper only performs cleanup"
         try
         {
             var result = await checkTask.WaitAsync(timeoutToken).ConfigureAwait(false);
