@@ -74,6 +74,11 @@ Deduplication applies only when the message has a `CorrelationId` and `Deduplica
 
 The default window is five minutes and the default capacity is 10,000 entries. Expired entries are reclaimed during later eligible dispatches (a non-empty correlation ID while deduplication is enabled). When capacity is full, a new correlated dispatch fails closed rather than sending without deduplication. This state belongs to the singleton dispatcher in one process; it is not shared across instances or persisted across restarts. Use provider/application idempotency for durable or distributed guarantees.
 
+
+## Persistence Evaluation
+
+Durable notification persistence is intentionally not built into this package. The dispatcher is an immediate webhook sender with bounded process-local deduplication; restart loses pending intent and dedupe state. Adding a database-backed retry queue here would duplicate the transactional outbox's leasing, retry, dead-letter, and tenant-isolation machinery. Critical notification intent should therefore be persisted through `PubSoft.Messaging.Outbox` (or a host-owned durable scheduler) and replayed into `INotificationDispatcher`; non-critical operational alerts can rely on the producer's next evaluation cycle, as `PubSoft.Monitoring.Scheduling` does for environment alerts.
+
 ## Public API surface
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._

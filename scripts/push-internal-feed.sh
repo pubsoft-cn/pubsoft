@@ -14,7 +14,8 @@ API_KEY="${NUGET_API_KEY:?set NUGET_API_KEY}"
 PACK_DIR="${1:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/feed}"
 LEDGER="$PACK_DIR/.pushed-waves"
 
-wave="$(ls "$PACK_DIR"/PubSoft.*.nupkg 2>/dev/null | head -1 | xargs -r basename | \
+first_package="$(ls "$PACK_DIR"/PubSoft.*.nupkg 2>/dev/null | head -1 | xargs -r basename || true)"
+wave="$(printf '%s' "${first_package%.nupkg}" | \
   grep -oE '[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z][0-9A-Za-z.-]*)?$' || true)"
 if [ -n "$wave" ] && grep -qxF "$wave" "$LEDGER" 2>/dev/null; then
   echo "REFUSED: wave ${wave} was already pushed from ${PACK_DIR}." >&2

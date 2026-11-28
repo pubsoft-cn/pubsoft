@@ -18,6 +18,16 @@ last-reviewed: 2026-11-09
 
 刚推送后的 NU1102 还可能是缓存抖动：`dotnet restore --no-cache` 重试先行，再排查其他。
 
+## 未发布的正确性强化波次
+
+- **破坏性：outbox 事件契约键现为必填。** `IOutboxPublisher.PublishAsync` 必须显式传 `eventType`——CLR 全名回退已移除。按 CLR 类型名匹配 inbox 路由的消费者须迁移到稳定键（审计快照用 `pubsoft.auditing.snapshot.v1`），或升级前排空 outbox。
+- **破坏性（行为）：MQTT inbox 确认改为手动。** `MqttInboxSubscriber` 关闭 MQTTnet 自动确认，仅在 inbox 登记加 handler 完成后确认。handler 失败现在触发 broker 重投而非静默丢失——依赖原先失败即丢弃行为的消费者必须能处理重投（inbox 去重使其安全）。
+- **Edge 信封 wire 格式钉死。** `EdgeAuthScheme` 成员无论序列化命名策略如何均序列化为 `hmac`/`session`/`none`/`md5`；新的源生成信封路径与反射路径字节一致。大小写不敏感解析的消费者不受影响。
+- **Logging sink 失败行为变更。** 连续批次抛异常的 sink 现在按倍增退避隔离，不再每批重试；被跳过批次直接丢弃。依赖每批重试的宿主应监控 `GetSinkStates()`。
+- Redis refresh-token family 消费修复 Redis Cluster 语义：缺失的 token 记录不再能被 consume race 重建。
+- HTTP 弹性：429/408 重试仍为显式 opt-in；合法 `Retry-After` 作为下限在总超时预算内生效；滚动失败率熔断为 opt-in。
+- AMQP/MQTT 重连延迟默认带 ±20% 有界抖动（`ReconnectJitterRatio`，设 0 恢复固定节拍）。
+
 ## post-alpha.16 加固（外部审计波次）
 
 - **作用域删除收紧（R1）。** 租户/成员作用域下，删除 `TenantId`/`MemberId` 为空的实体现在与其他越权写一样抛错——此前空作用域 ID 绕过删除保护，作用域调用方可触及宿主共享记录。

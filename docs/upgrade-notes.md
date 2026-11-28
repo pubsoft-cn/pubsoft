@@ -18,6 +18,16 @@ Consumers on `dev.*` need the internal feed in `packageSources` **and** a `packa
 
 Right after a push, an NU1102 may also be stale-cache jitter: retry with `dotnet restore --no-cache` before debugging anything else.
 
+## unreleased correctness hardening waves
+
+- **Breaking: outbox event contract keys are now mandatory.** `IOutboxPublisher.PublishAsync` requires the explicit `eventType` argument - the CLR full-name fallback is gone. Consumers matching inbox routing on CLR type names must migrate to the stable keys (audit snapshots use `pubsoft.auditing.snapshot.v1`) or drain the outbox before upgrading.
+- **Breaking (behavioral): MQTT inbox acknowledgement is now manual.** `MqttInboxSubscriber` disables MQTTnet auto-ack and acknowledges only after inbox admission plus handler completion. Handler failures now cause broker redelivery instead of silent loss - consumers that relied on the previous drop-on-failure behavior must handle redeliveries (inbox dedup makes them safe).
+- **Edge envelope wire format pinned.** `EdgeAuthScheme` members serialize as `hmac`/`session`/`none`/`md5` regardless of serializer naming policy; the new source-generated envelope path is byte-identical to the reflection path. Consumers parsing scheme names case-insensitively are unaffected.
+- **Logging sink failure behavior changed.** A sink throwing on consecutive batches is now quarantined with doubling backoff instead of retried every batch; skipped batches are dropped. Hosts depending on every-batch retry for a flaky sink should monitor `GetSinkStates()`.
+- Redis refresh-token family consumption fixed for Redis Cluster: missing token records can no longer be recreated by a consume race.
+- HTTP resilience: 429/408 retries remain opt-in; valid `Retry-After` is honored as a floor within the total timeout budget; rolling failure-ratio circuit mode is opt-in.
+- AMQP/MQTT reconnect delays now carry +-20% bounded jitter by default (`ReconnectJitterRatio`, set 0 for the previous fixed cadence).
+
 ## post-alpha.16 hardening (external audit wave)
 
 - **Scoped delete tightens (R1).** Under a tenant/member scope, deleting an entity whose `TenantId`/`MemberId` is null now throws like any other out-of-scope write - previously null scope ids bypassed the delete guard and scoped callers could hit host-shared rows.

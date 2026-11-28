@@ -67,6 +67,11 @@ if (!result.Success) { /* 应用宿主运维策略；本包不重试 */ }
 
 默认窗口 5 分钟、容量上限 10,000。过期项在后续符合条件的分发中回收；容量满时新的带 correlation 分发 fail closed（不改为无去重发送）。状态属单进程单例 dispatcher——不跨实例共享、不跨重启持久。持久或分布式保证请用 provider/应用幂等。
 
+
+## 持久化评估结论
+
+本包刻意不内置通知持久化。dispatcher 是立即发送 webhook 的组件，只带 bounded 进程内去重；重启会丢失待发送意图与去重状态。若在此加入数据库重试队列，会重复 transactional outbox 的租约、重试、死信与租户隔离机制。关键通知意图应经 `PubSoft.Messaging.Outbox`（或宿主自有持久化调度器）持久化后再回放给 `INotificationDispatcher`；非关键运行告警可依赖生产侧下一轮评估补发，`PubSoft.Monitoring.Scheduling` 的环境告警即采用该模式。
+
 ## Public API surface
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_

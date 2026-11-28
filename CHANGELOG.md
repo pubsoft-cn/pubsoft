@@ -3,6 +3,130 @@
 All notable changes to PubSoft packages. Format follows [Keep a Changelog](https://keepachangelog.com/);
 versioning follows semver during the 0.x alpha line — breaking changes are called out explicitly.
 
+## [0.1.0-alpha.24] — 2026-11-28
+
+### Breaking
+- **Outbox event contract keys are mandatory.** `IOutboxPublisher.PublishAsync` requires the explicit `eventType` argument — the CLR full-name fallback is removed. Audit snapshot events use the stable key `pubsoft.auditing.snapshot.v1`; consumers matching CLR type names must migrate or drain the outbox first.
+- **MQTT inbox acknowledgement is manual.** `MqttInboxSubscriber` acknowledges only after inbox admission plus handler completion; handler failures now redeliver instead of being silently dropped.
+- **Logging sink failure behavior.** Repeatedly throwing sinks are quarantined with doubling backoff instead of retried every batch; skipped batches drop. Monitor via `GetSinkStates()`.
+
+### Added
+- `IOutboxEventSerializer` seam for explicit JSON policy and source-generated metadata on trimmed/AOT hosts.
+- `EfCoreTransactionExecutor` — fail-closed single-DbContext transaction primitive with explicit commit-verification probes.
+- `OutboxWorkerStatusTracker` — low-cardinality worker status snapshot (poll lifecycle, consecutive failures, batch outcomes) for host health wiring.
+- Edge client source-generated envelope context + `JsonTypeInfo` response seam; `EdgeAuthScheme` wire names pinned byte-identical across paths.
+- `LogSinkQuarantineOptions`/`LogSinkState` diagnostics.
+- Rolling failure-ratio circuit-breaker mode (opt-in), bounded retry jitter, bounded `Retry-After` honoring within the total timeout budget.
+- `BoundedJitter` + `ReconnectJitterRatio` (default 0.2) on AMQP/MQTT inbox reconnects.
+- Analyzer wave 3: PUBSOFT059-062 (`GC.Collect`, vacuous rows-affected checks, ignored `TryParse`, discarded fire-and-forget tasks).
+
+### Security
+- Redis refresh-token family consumption fixed for Redis Cluster: the family key is passed explicitly to the atomic consume script; missing token records can no longer be recreated by a consume race.
+
+## [0.1.0-alpha.23] — 2026-11-26
+
+### Fixed
+- Configuration-binding and environment-alert resend gaps closed from business feedback.
+- Durability and correctness gaps closed from the full-surface defect review.
+- RabbitMQ CI node boots as the rabbitmq user so it survives prelaunch.
+
+### Changed
+- CI: tiered gates, shared coverage gate, AMQP integration coverage; pre-push gate mirrors the CI integration-test environment.
+
+## [0.1.0-alpha.22] — 2026-11-25
+
+### Added
+- Notification and alerting robustness wave; alert rule recipients and template code pass-through.
+- AMQP inbox subscriber completing the AMQP consume path.
+- Readable scheduler configuration binding with startup lint.
+
+### Fixed
+- HTTP probe health checks run in parallel.
+- Config parse and HTTP failure diagnostics surfaced.
+- String-enum alert rule deserialization in `AlertJsonContext`.
+
+## [0.1.0-alpha.21] — 2026-11-20
+
+### Added
+- W3C correlation propagation and `PubSoft.Tracing` span exporter.
+- Audit rows stamped with the ambient W3C trace id.
+- Native AOT consumer smoke covers `PubSoft.Tracing`.
+
+### Fixed
+- Hot-path allocations trimmed in signing, logging and JWKS paths.
+- Audit hardening rounds: lifecycle, bounds, fencing monotonicity, strict JWKS bounds, caller-owned key lifetime, indexable keyword.
+
+### Security
+- Transitive `Logging.Abstractions` pinned via direct references.
+
+## [0.1.0-alpha.20] — 2026-11-18
+
+### Added
+- Fenced executor and periodic worker over distributed locks.
+- Configuration-driven cache provider selection.
+- AMQP outbox dispatcher with publisher-confirm delivery.
+- EF paging extension and wired slow-query interceptor.
+- Edge sign-key pool status surface for readiness.
+- Startup validation checks with detailed options errors and non-empty config read.
+
+### Fixed
+- Machine token signing-key validation measures UTF-8 byte length.
+
+## [0.1.0-alpha.19] — 2026-11-14
+
+### Changed
+- Dependency servicing wave: Microsoft 10.0.15 + StackExchange.Redis 3.4.35.
+
+### Fixed
+- Allow-list README examples use documentation prefixes instead of private networks.
+
+## [0.1.0-alpha.18] — 2026-11-14
+
+### Added
+- Allow-list gate primitives with explicit empty policy.
+- Configure-request hook on token credentials; caller-auth configure hook on the remote client credential verifier.
+- JWKS client-assertion key provider.
+- Remote edge sign-key provider with registry refresh and local fallback.
+
+### Changed
+- Analyzer wave 2 (PUBSOFT056-058) plus IDE0005/CA53xx quality gates.
+
+### Fixed
+- HTTP factory-client disposal, exported-types guard, ordinal string compare.
+
+## [0.1.0-alpha.17] — 2026-11-11
+
+### Added
+- Portable EF security stores with isolated consumer smoke.
+- Refresh family rotation and token denylist with memory/Redis/EF stores.
+- Client credential upgrades: remote verifier and RS256 assertions.
+- JWT issuer signing keyring with hosted JWKS endpoint.
+
+### Security
+- Audit wave: fail-closed scoped delete and audit query, migrator compare-and-swap, diagnostics isolation.
+
+### Fixed
+- Migrator keyset pagination; audit capture-flags startup warning.
+
+## [0.1.0-alpha.16] — 2026-11-10
+
+### Breaking
+- `AuditMiddlewareOptions` capture flags (`CaptureClientIp`/`CaptureUserAgent`/`CaptureActor`) default off — see upgrade notes for the silent forensic-data-loss warning.
+- `AesGcmEncryptor.Decrypt` throws `PubSoftDecryptionException` (a `CryptographicException` subclass); exact-type catches must migrate.
+
+### Added
+- Metadata-bound encryption column migrator.
+- Typed decryption failures, key rotation, config registration and startup probe.
+- Startup diagnostics pipeline with upgrade notes.
+- Dual version stream (`alpha.*` releases / `dev.*` internal iterations).
+
+### Changed
+- Review-hardening analyzers PUBSOFT045-054 + DocsTool unified ledger CLI; doc governance sweeps.
+
+### Fixed
+- `Use*` middleware null-options startup crash (PUBSOFT055).
+- External review round: key validation, OAuth appid, rate-limit races.
+
 ## [0.1.0-alpha.14] — 2026-11-14
 
 ### Breaking
