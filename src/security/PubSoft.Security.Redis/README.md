@@ -12,7 +12,7 @@ last-reviewed: 2026-10-13
 
 `PubSoft.Security.Redis` implements the `PubSoft.Security.INonceStore` contract for deployments that validate HMAC requests across multiple application instances. A nonce is reserved with one Redis `SET` using `NX` and a TTL; Redis Cluster routes each key independently. Concurrent attempts for the same scope and nonce produce at most one accepted reservation while the key exists.
 
-The adapter hashes the length-delimited scope and nonce before constructing the Redis key, so raw app IDs/nonces are not stored in key names. Configure a deployment-specific `KeyPrefix` and Redis database. All instances that must share replay protection must use the same Redis cluster, database, and prefix. A single-key Lua operation reads Redis server time and atomically sets the remaining TTL only if the absolute acceptance expiry is still in the future; synchronized clocks across application and Redis hosts remain an operational requirement.
+The adapter hashes the length-delimited scope and nonce before constructing the Redis key, so raw app IDs/nonces are not stored in key names. Configure a deployment-specific `KeyPrefix` and Redis database. All instances that must share replay protection must use the same Redis deployment (any topology - standalone/Sentinel/Cluster are semantically equivalent), database, and prefix. A single-key Lua operation reads Redis server time and atomically sets the remaining TTL only if the absolute acceptance expiry is still in the future; synchronized clocks across application and Redis hosts remain an operational requirement.
 
 ## Registration
 

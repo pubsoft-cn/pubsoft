@@ -2,7 +2,7 @@
 const PubSoft.Tokens.MachineTokenProvider.ServiceKey = "machine" -> string!
 PubSoft.Tokens.HttpTokenProvider
 PubSoft.Tokens.HttpTokenProvider.GetTokenAsync(string! credentialKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string?>!
-PubSoft.Tokens.HttpTokenProvider.HttpTokenProvider(System.Net.Http.IHttpClientFactory! httpClientFactory, PubSoft.Caching.ICache! cache, Microsoft.Extensions.Options.IOptionsMonitor<PubSoft.Tokens.TokenManagerOptions!>! options, System.TimeProvider? timeProvider = null, Microsoft.Extensions.Logging.ILogger<PubSoft.Tokens.HttpTokenProvider!>? logger = null) -> void
+PubSoft.Tokens.HttpTokenProvider.HttpTokenProvider(System.Net.Http.IHttpClientFactory! httpClientFactory, PubSoft.Caching.ICache! cache, Microsoft.Extensions.Options.IOptionsMonitor<PubSoft.Tokens.TokenManagerOptions!>! options, System.TimeProvider? timeProvider = null, Microsoft.Extensions.Logging.ILogger<PubSoft.Tokens.HttpTokenProvider!>? logger = null, PubSoft.Caching.IDistributedLock? distributedLock = null) -> void
 PubSoft.Tokens.HttpTokenProvider.InvalidateAsync(string! credentialKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 PubSoft.Tokens.ITokenProvider
 PubSoft.Tokens.ITokenProvider.GetTokenAsync(string! credentialKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string?>!

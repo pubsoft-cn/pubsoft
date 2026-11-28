@@ -75,6 +75,10 @@ using var request = new HttpRequestMessage(HttpMethod.Get, "/invoices")
 
 The handler invalidates the cached token and retries at most once. When opted in, it buffers the request content in memory to make the retry possible. Only use this for operations whose application semantics are idempotent, and keep replayable request bodies bounded. If refreshing fails, the original 401 is returned and no second request is sent.
 
+## Distributed Refresh Coordination
+
+Single-flight refresh is process-local by default. When an `IDistributedLock` is registered in the container (the Redis caching package registers `RedisDistributedLock`), `HttpTokenProvider` automatically upgrades refresh to cross-instance single-flight: the winner instance fetches while contenders wait one fetch cycle and then read the winner's cache write, so a shared-cache deployment no longer multiplies token-endpoint traffic by instance count. Contenders that wait a full lease without a fresh token appearing fail closed (null) rather than duplicate-fetching. Without a distributed lock the behavior is unchanged - process-local single-flight only, which the multi-instance noise tradeoff documented before.
+
 ## Public API surface
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._

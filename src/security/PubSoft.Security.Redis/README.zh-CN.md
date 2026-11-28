@@ -11,7 +11,7 @@ last-reviewed: 2026-10-13
 
 `PubSoft.Security.Redis` 实现 `PubSoft.Security.INonceStore` 契约，用于多实例部署的 HMAC 请求验证。nonce 以单条 Redis `SET NX` + TTL 原子占用；Redis Cluster 下各 key 独立路由。同 scope+nonce 的并发占用在 key 存活期内至多成功一次。
 
-适配器在构造 Redis key 前对长度分隔的 scope+nonce 做哈希——原始 app ID/nonce 不进 key 名。配置部署专属的 `KeyPrefix` 与 Redis database；所有需共享重放保护的实例必须用同一 Redis cluster、同一 database、同一前缀。单条 Lua 读取 Redis 服务器时间并仅在绝对接受窗口尚未过期时原子设置剩余 TTL——应用与 Redis 主机的时钟同步仍是运维要求。
+适配器在构造 Redis key 前对长度分隔的 scope+nonce 做哈希——原始 app ID/nonce 不进 key 名。配置部署专属的 `KeyPrefix` 与 Redis database；所有需共享重放保护的实例必须指向同一 Redis 部署、同一 database、同一前缀（拓扑形态不限——单点/Sentinel/Cluster 语义等价）。单条 Lua 读取 Redis 服务器时间并仅在绝对接受窗口尚未过期时原子设置剩余 TTL——应用与 Redis 主机的时钟同步仍是运维要求。
 
 ## 注册
 

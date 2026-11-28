@@ -29,7 +29,7 @@ public sealed class EncryptionMigratorWaveTests
         private readonly byte[] _key = key;
         public string ActiveKeyId { get; } = id;
         public bool TryGetKey(string keyId, out ReadOnlyMemory<byte> key)
-        { key = _key; return keyId == id; }
+        { key = _key; return keyId == ActiveKeyId; }
     }
 
     private static async Task<(Ctx, SqliteConnection, CredentialEncryptionService)> Open()
@@ -76,7 +76,7 @@ public sealed class EncryptionMigratorWaveTests
         var report = await new PubSoftEncryptionMigrator(enc).MigrateAsync(ctx, treatUndecryptableAsPlaintext: true);
         Assert.Equal(1, report.Rewritten);
         Assert.StartsWith("pubsoft:", await Read(ctx, 1));
-        Assert.Equal("real-plaintext", enc.Decrypt(await Read(ctx, 1)!, System.Text.Encoding.UTF8.GetBytes("secret:value")).Plaintext);
+        Assert.Equal("real-plaintext", enc.Decrypt((await Read(ctx, 1))!, System.Text.Encoding.UTF8.GetBytes("secret:value")).Plaintext);
     }
 
     [Fact]

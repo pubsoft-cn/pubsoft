@@ -15,7 +15,7 @@ public sealed class EncryptionStartupDiagnosticsWaveTests
         private readonly byte[] _key = key;
         public string ActiveKeyId { get; } = id;
         public bool TryGetKey(string keyId, out ReadOnlyMemory<byte> key)
-        { key = _key; return keyId == id; }
+        { key = _key; return keyId == ActiveKeyId; }
     }
 
     private static ServiceProvider Build(bool withService)

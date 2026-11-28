@@ -21,6 +21,7 @@ public sealed class HttpTokenProvider : ITokenProvider
     private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly ILogger<HttpTokenProvider>? _logger;
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _refreshLocks = new(StringComparer.Ordinal);
+    private readonly IDistributedLock? _distributedLock;
 
     /// <summary>Creates the provider.</summary>
     public HttpTokenProvider(
@@ -28,13 +29,15 @@ public sealed class HttpTokenProvider : ITokenProvider
         ICache cache,
         IOptionsMonitor<TokenManagerOptions> options,
         TimeProvider? timeProvider = null,
-        ILogger<HttpTokenProvider>? logger = null)
+        ILogger<HttpTokenProvider>? logger = null,
+        IDistributedLock? distributedLock = null)
     {
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _timeProvider = timeProvider ?? TimeProvider.System;
         _logger = logger;
+        _distributedLock = distributedLock;
     }
 
     /// <inheritdoc />
@@ -59,6 +62,28 @@ public sealed class HttpTokenProvider : ITokenProvider
             cached = await GetFreshTokenAsync(cacheKey, credential, cancellationToken).ConfigureAwait(false);
             if (cached is not null)
                 return cached.Value;
+
+            if (_distributedLock is not null)
+            {
+                // cross-instance single-flight: the winner fetches; contenders wait one fetch
+                // cycle then read the winner's cache write instead of hitting the endpoint again
+                var lease = credential.Timeout + TimeSpan.FromSeconds(5);
+                await using var guard = await _distributedLock
+                    .AcquireAsync(GetRefreshLockKey(credentialKey), lease, lease, cancellationToken)
+                    .ConfigureAwait(false);
+                if (guard is null)
+                {
+                    cached = await GetFreshTokenAsync(cacheKey, credential, cancellationToken).ConfigureAwait(false);
+                    if (cached is not null)
+                        return cached.Value;
+                    _logger?.LogWarning("Token refresh lock is held elsewhere and no fresh token appeared; failing closed.");
+                    return null;
+                }
+
+                cached = await GetFreshTokenAsync(cacheKey, credential, cancellationToken).ConfigureAwait(false);
+                if (cached is not null)
+                    return cached.Value;
+            }
 
             var fetched = await FetchTokenAsync(credential, cancellationToken).ConfigureAwait(false);
             if (fetched is null)
@@ -232,6 +257,9 @@ public sealed class HttpTokenProvider : ITokenProvider
 
     private static string GetCacheKey(string credentialKey)
         => $"pubsoft:token:{Convert.ToHexString(Encoding.UTF8.GetBytes(credentialKey))}";
+
+    private static string GetRefreshLockKey(string credentialKey)
+        => $"pubsoft:token:refresh:{Convert.ToHexString(Encoding.UTF8.GetBytes(credentialKey))}";
 
     private sealed record TokenEntry(string Value, DateTimeOffset ExpiresAt, DateTimeOffset RefreshAt);
     private sealed record FetchedToken(string Value, TimeSpan? ExpiresIn);

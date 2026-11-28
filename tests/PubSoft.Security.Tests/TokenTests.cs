@@ -417,12 +417,86 @@ public sealed class TokenTests
         Assert.Null(await provider.GetTokenAsync("primary"));
     }
 
+
+    [Fact]
+    public async Task ConcurrentRefreshAcrossInstancesFetchesOnceWhenDistributedLockPresent()
+    {
+        var fetches = 0;
+        var handler = new CountingHandler(() => Interlocked.Increment(ref fetches));
+        var cache = new RecordingCache();
+        var distributedLock = new PubSoft.Caching.InProcessDistributedLock();
+        var credential = new TokenCredential
+        {
+            Url = "https://tokens.example.test/issue",
+            Method = "GET",
+            TokenPath = "token",
+            Expiry = TimeSpan.FromMinutes(30),
+            RefreshBefore = TimeSpan.FromMinutes(5),
+            Timeout = TimeSpan.FromSeconds(10)
+        };
+        // two providers sharing one cache+lock simulate two host instances mid-refresh storm
+        var providerA = CreateProvider(handler, cache, credential, distributedLock: distributedLock);
+        var providerB = CreateProvider(handler, cache, credential, distributedLock: distributedLock);
+
+        var tasks = Enumerable.Range(0, 8).Select(i =>
+            (i % 2 == 0 ? providerA : providerB).GetTokenAsync("primary")).ToArray();
+        var tokens = await Task.WhenAll(tasks);
+
+        Assert.All(tokens, token => Assert.Equal("tok", token));
+        Assert.Equal(1, fetches);
+    }
+
+    [Fact]
+    public async Task LockContenderReadsWinnerTokenInsteadOfFetching()
+    {
+        // slow endpoint: instance A holds the fetch; instance B must wait then read the winner's
+        // cache write rather than issue a duplicate request
+        var fetches = 0;
+        var handler = new CountingHandler(() =>
+        {
+            Interlocked.Increment(ref fetches);
+            Thread.Sleep(300);
+        });
+        var cache = new RecordingCache();
+        var distributedLock = new PubSoft.Caching.InProcessDistributedLock();
+        var credential = new TokenCredential
+        {
+            Url = "https://tokens.example.test/issue",
+            Method = "GET",
+            TokenPath = "token",
+            Expiry = TimeSpan.FromMinutes(30),
+            RefreshBefore = TimeSpan.FromMinutes(5),
+            Timeout = TimeSpan.FromSeconds(10)
+        };
+        var providerA = CreateProvider(handler, cache, credential, distributedLock: distributedLock);
+        var providerB = CreateProvider(handler, cache, credential, distributedLock: distributedLock);
+
+        var first = providerA.GetTokenAsync("primary");
+        await Task.Delay(50); // let A win the lock before B arrives
+        var second = await providerB.GetTokenAsync("primary");
+        var winner = await first;
+
+        Assert.Equal("tok", winner);
+        Assert.Equal("tok", second);
+        Assert.Equal(1, fetches);
+    }
+
+    private sealed class CountingHandler(Action onFetch) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            onFetch();
+            return Task.FromResult(JsonResponse("{\"token\":\"tok\"}"));
+        }
+    }
+
     private static HttpTokenProvider CreateProvider(
         HttpMessageHandler handler,
         ICache cache,
         TokenCredential credential,
         TimeProvider? timeProvider = null,
-        ILogger<HttpTokenProvider>? logger = null)
+        ILogger<HttpTokenProvider>? logger = null,
+        PubSoft.Caching.IDistributedLock? distributedLock = null)
     {
         var options = new TokenManagerOptions();
         options.Credentials["primary"] = credential;
@@ -431,7 +505,8 @@ public sealed class TokenTests
             cache,
             new TestOptionsMonitor<TokenManagerOptions>(options),
             timeProvider,
-            logger);
+            logger,
+            distributedLock);
     }
 
     private static HttpResponseMessage JsonResponse(string json)

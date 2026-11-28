@@ -34,13 +34,9 @@ public sealed class RedisRefreshTokenFamilyStore : IRefreshTokenFamilyStore
         if ttl < tonumber(ARGV[2]) then redis.call('PEXPIRE', KEYS[1], ARGV[2]) end
         """;
 
-    // Atomic consume on the token key; derives the same-slot family marker key by swapping
-    // the ':tok:<hash>' suffix for ':fam'. Returns 0 consumed, 1 already-consumed/missing,
-    // 2 family-revoked.
     private const string ConsumeScript = """
-        if not redis.call('EXISTS', KEYS[1]) == 1 then return 1 end
-        local famkey = string.gsub(KEYS[1], ':tok:%w+$', ':fam')
-        if redis.call('EXISTS', famkey) == 1 then return 2 end
+        if redis.call('EXISTS', KEYS[1]) ~= 1 then return 1 end
+        if redis.call('EXISTS', KEYS[2]) == 1 then return 2 end
         if redis.call('HGET', KEYS[1], 'used') == '1' then return 1 end
         redis.call('HSET', KEYS[1], 'used', '1')
         return 0
@@ -128,7 +124,7 @@ public sealed class RedisRefreshTokenFamilyStore : IRefreshTokenFamilyStore
             return RefreshConsumeResult.AlreadyConsumed;
 
         var result = (long)(await Db().ScriptEvaluateAsync(ConsumeScript,
-            keys: new RedisKey[] { TokenKey(familyId, tokenHash) },
+            keys: new RedisKey[] { TokenKey(familyId, tokenHash), FamilyKey(familyId) },
             values: Array.Empty<RedisValue>()).ConfigureAwait(false));
 
         return result switch

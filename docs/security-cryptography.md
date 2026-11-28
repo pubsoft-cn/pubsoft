@@ -35,7 +35,7 @@ var plaintext = encryptor.Decrypt(encrypted, context);
 
 The same context bytes are required for decryption. A mismatched context, modified ciphertext/tag, malformed envelope, unavailable key, or key that is not exactly 32 bytes fails closed. Use a unique key id for each key version and retain old keys in the key ring until their ciphertexts have been rotated. Never derive encryption keys from passwords or use a built-in default key.
 
-`IEncryptionKeyRing` is an integration contract, not a secret store. Applications must implement it using their approved secret manager or key-management service. The `MemoryNonceStore`/test key ring examples are not substitutes for production key storage.
+`IEncryptionKeyRing` is an integration contract, not a secret store. Applications must implement it using their approved secret manager or key-management service. Test/example key ring implementations are not substitutes for production key storage. Nonce-store selection is a separate decision driven by instance count, not by key-management posture: process-local stores are legitimate for single-instance deployments, while multi-instance deployments need a shared atomic store (see the hosting docs).
 
 ## Legacy Credential Migration
 

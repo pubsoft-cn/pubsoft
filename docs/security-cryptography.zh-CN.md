@@ -35,7 +35,7 @@ var plaintext = encryptor.Decrypt(encrypted, context);
 
 解密必须使用相同的 context 字节。context 不匹配、密文/tag 被篡改、包封格式错误、密钥不可用或密钥长度不是 32 字节——全部 fail closed。每个密钥版本使用唯一 key id，在密文轮换完成前将旧密钥保留在 key ring 中。禁止从口令派生加密密钥，禁止内置默认密钥。
 
-`IEncryptionKeyRing` 是集成契约而非密钥库——应用须用经批准的 secret manager/KMS 实现。`MemoryNonceStore`/测试 key ring 样例不是生产级密钥存储。
+`IEncryptionKeyRing` 是集成契约而非密钥库——应用须用经批准的 secret manager/KMS 实现。测试/样例 key ring 实现不是生产级密钥存储。nonce 存储选型是按实例数决定的独立问题、与密钥管理态势无关：单实例部署用进程内存储是合法形态，多实例部署需共享原子存储（见宿主文档）。
 
 ## 旧凭据迁移
 

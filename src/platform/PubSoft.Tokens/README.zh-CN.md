@@ -74,6 +74,10 @@ using var request = new HttpRequestMessage(HttpMethod.Get, "/invoices")
 
 handler 使缓存 token 失效并至多重试一次。opt-in 时把请求体缓冲进内存以支持重放——仅用于应用语义幂等的操作，可重放请求体保持有界。刷新失败则返回原 401，不发第二次请求。
 
+## 分布式刷新协调
+
+single-flight 刷新默认进程级。容器注册 `IDistributedLock` 后（Redis 缓存包注册 `RedisDistributedLock`），`HttpTokenProvider` 自动升级为跨实例 single-flight：胜出实例抓取，竞争者等待一个抓取周期后读取胜者的缓存写入——共享缓存部署的 token 端点流量不再按实例数放大。等满租约仍无新令牌的竞争者 fail-closed 返回 null，而非重复抓取。无分布式锁时行为不变——仅进程级 single-flight（即此前文档化的多实例噪音取舍）。
+
 ## Public API surface
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
