@@ -10,12 +10,14 @@ public sealed class PubSoftHttpResilienceHandler : DelegatingHandler
     private readonly HttpResilienceOptions _options;
     private readonly CircuitBreaker? _circuitBreaker;
     private readonly ILogger<PubSoftHttpResilienceHandler>? _logger;
+    private readonly TimeProvider _timeProvider;
 
-    /// <summary>Creates a handler with its resilience policy.</summary>
+    /// <summary>Creates a handler with its resilience policy and clock used for Retry-After date evaluation.</summary>
     public PubSoftHttpResilienceHandler(
         HttpResilienceOptions options,
         CircuitBreaker? circuitBreaker = null,
-        ILogger<PubSoftHttpResilienceHandler>? logger = null)
+        ILogger<PubSoftHttpResilienceHandler>? logger = null,
+        TimeProvider? timeProvider = null)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         if (!_options.IsValid())
@@ -23,6 +25,21 @@ public sealed class PubSoftHttpResilienceHandler : DelegatingHandler
 
         _circuitBreaker = circuitBreaker;
         _logger = logger;
+        _timeProvider = timeProvider ?? TimeProvider.System;
+    }
+
+    internal static TimeSpan? GetRetryAfterDelay(HttpResponseMessage response, DateTimeOffset now)
+    {
+        ArgumentNullException.ThrowIfNull(response);
+        var retryAfter = response.Headers.RetryAfter;
+        if (retryAfter?.Delta is { } delta)
+            return delta > TimeSpan.Zero ? delta : null;
+        if (retryAfter?.Date is { } date)
+        {
+            var delay = date - now;
+            return delay > TimeSpan.Zero ? delay : null;
+        }
+        return null;
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(
@@ -36,6 +53,7 @@ public sealed class PubSoftHttpResilienceHandler : DelegatingHandler
             throw new HttpRequestException("The HTTP circuit is open.");
 
         var completed = false;
+        var startedAt = _timeProvider.GetUtcNow();
         using var totalTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         totalTimeout.CancelAfter(_options.Timeout);
 
@@ -106,9 +124,6 @@ public sealed class PubSoftHttpResilienceHandler : DelegatingHandler
                 if (!CanRetry(request)
                     || _options.Retry?.ShouldRetry(null, attempt, (int)response.StatusCode) != true)
                 {
-                    // 熔断只统计服务端故障（5xx/408/429/超时/连接失败）。
-                    // 其余 4xx 是业务拒绝（参数错误/凭证失效/资源不存在）--远端仍在正常响应，
-                    // 重置连续失败计数，避免客户端错误烧穿熔断器连坐其它请求。
                     var status = (int)response.StatusCode;
                     if (status >= 500 || status == 408 || status == 429)
                         RecordFailure(circuitKey);
@@ -118,10 +133,20 @@ public sealed class PubSoftHttpResilienceHandler : DelegatingHandler
                     return response;
                 }
 
+                var now = _timeProvider.GetUtcNow();
+                var retryAfter = GetRetryAfterDelay(response, now);
+                var remainingTotalTimeout = _options.Timeout - (now - startedAt);
+                if (retryAfter >= remainingTotalTimeout)
+                {
+                    RecordFailure(circuitKey);
+                    completed = true;
+                    return response;
+                }
+
                 response.Dispose();
                 _logger?.LogDebug("HTTP resilience retry {Attempt} for {Host} after status {StatusCode}.",
                     attempt, circuitKey, (int)response.StatusCode);
-                await DelayBeforeRetryAsync(circuitKey, attempt, totalTimeout.Token, cancellationToken).ConfigureAwait(false);
+                await DelayBeforeRetryAsync(circuitKey, attempt, totalTimeout.Token, cancellationToken, retryAfter).ConfigureAwait(false);
             }
         }
         finally
@@ -135,10 +160,13 @@ public sealed class PubSoftHttpResilienceHandler : DelegatingHandler
         string circuitKey,
         int attempt,
         CancellationToken timeoutToken,
-        CancellationToken callerToken)
+        CancellationToken callerToken,
+        TimeSpan? serverMinimumDelay = null)
     {
         var retry = _options.Retry!;
-        var delay = retry.GetDelay(attempt);
+        var delay = retry.GetDelayWithJitter(attempt);
+        if (serverMinimumDelay is { } minimum && minimum > delay)
+            delay = minimum;
         try
         {
             await Task.Delay(delay, timeoutToken).ConfigureAwait(false);
@@ -205,15 +233,22 @@ public static class HttpResilienceServiceCollectionExtensions
             {
                 MaxRetries = options.Retry.MaxRetries,
                 InitialDelay = options.Retry.InitialDelay,
+                JitterRatio = options.Retry.JitterRatio,
                 RetryOnTimeout = options.Retry.RetryOnTimeout,
                 RetryOn5xx = options.Retry.RetryOn5xx,
+                RetryOnRequestTimeout = options.Retry.RetryOnRequestTimeout,
+                RetryOnTooManyRequests = options.Retry.RetryOnTooManyRequests,
                 RetryOnConnectionFailure = options.Retry.RetryOnConnectionFailure
             };
         options.CircuitBreaker = options.CircuitBreaker is null
             ? null
             : new CircuitBreakerOptions
             {
+                Mode = options.CircuitBreaker.Mode,
                 FailureThreshold = options.CircuitBreaker.FailureThreshold,
+                FailureRatio = options.CircuitBreaker.FailureRatio,
+                MinimumThroughput = options.CircuitBreaker.MinimumThroughput,
+                SamplingDuration = options.CircuitBreaker.SamplingDuration,
                 OpenTimeout = options.CircuitBreaker.OpenTimeout
             };
 
@@ -225,7 +260,8 @@ public static class HttpResilienceServiceCollectionExtensions
         builder.AddHttpMessageHandler(provider => new PubSoftHttpResilienceHandler(
             options,
             circuitBreaker,
-            provider.GetService<ILogger<PubSoftHttpResilienceHandler>>()));
+            provider.GetService<ILogger<PubSoftHttpResilienceHandler>>(),
+            provider.GetService<TimeProvider>()));
         return builder;
     }
 
@@ -252,10 +288,17 @@ public static class HttpResilienceServiceCollectionExtensions
         if (int.TryParse(section["PerAttemptTimeoutMs"], out var pat)) options.PerAttemptTimeout = TimeSpan.FromMilliseconds(pat);
         if (int.TryParse(section["Retry:MaxRetries"], out var mr)) { options.Retry ??= new(); options.Retry.MaxRetries = mr; }
         if (int.TryParse(section["Retry:InitialDelayMs"], out var idl)) { options.Retry ??= new(); options.Retry.InitialDelay = TimeSpan.FromMilliseconds(idl); }
+        if (double.TryParse(section["Retry:JitterRatio"], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var jr)) { options.Retry ??= new(); options.Retry.JitterRatio = jr; }
         if (bool.TryParse(section["Retry:RetryOnTimeout"], out var rt)) { options.Retry ??= new(); options.Retry.RetryOnTimeout = rt; }
         if (bool.TryParse(section["Retry:RetryOn5xx"], out var r5)) { options.Retry ??= new(); options.Retry.RetryOn5xx = r5; }
+        if (bool.TryParse(section["Retry:RetryOnRequestTimeout"], out var rrt)) { options.Retry ??= new(); options.Retry.RetryOnRequestTimeout = rrt; }
+        if (bool.TryParse(section["Retry:RetryOnTooManyRequests"], out var rtmr)) { options.Retry ??= new(); options.Retry.RetryOnTooManyRequests = rtmr; }
         if (bool.TryParse(section["Retry:RetryOnConnectionFailure"], out var rcf)) { options.Retry ??= new(); options.Retry.RetryOnConnectionFailure = rcf; }
+        if (Enum.TryParse<CircuitBreakerMode>(section["CircuitBreaker:Mode"], ignoreCase: true, out var mode)) { options.CircuitBreaker ??= new(); options.CircuitBreaker.Mode = mode; }
         if (int.TryParse(section["CircuitBreaker:FailureThreshold"], out var ft)) { options.CircuitBreaker ??= new(); options.CircuitBreaker.FailureThreshold = ft; }
+        if (double.TryParse(section["CircuitBreaker:FailureRatio"], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var fr)) { options.CircuitBreaker ??= new(); options.CircuitBreaker.FailureRatio = fr; }
+        if (int.TryParse(section["CircuitBreaker:MinimumThroughput"], out var mt)) { options.CircuitBreaker ??= new(); options.CircuitBreaker.MinimumThroughput = mt; }
+        if (int.TryParse(section["CircuitBreaker:SamplingDurationMs"], out var sd)) { options.CircuitBreaker ??= new(); options.CircuitBreaker.SamplingDuration = TimeSpan.FromMilliseconds(sd); }
         if (int.TryParse(section["CircuitBreaker:OpenTimeoutMs"], out var ot)) { options.CircuitBreaker ??= new(); options.CircuitBreaker.OpenTimeout = TimeSpan.FromMilliseconds(ot); }
     }
 }

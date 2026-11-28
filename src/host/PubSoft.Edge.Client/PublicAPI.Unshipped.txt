@@ -1,13 +1,16 @@
 #nullable enable
 PubSoft.Edge.EdgeClient
 PubSoft.Edge.EdgeClient.BuildRequest(string! method, object? parameters) -> PubSoft.Edge.EdgeRpcRequest!
+PubSoft.Edge.EdgeClient.BuildRequest(string! method, System.Text.Json.JsonElement parameters) -> PubSoft.Edge.EdgeRpcRequest!
 PubSoft.Edge.EdgeClient.EdgeClient(System.Net.Http.HttpClient! http, string! clientId, PubSoft.Edge.EdgeAuthScheme scheme = PubSoft.Edge.EdgeAuthScheme.None, string! path = "/rpc") -> void
 PubSoft.Edge.EdgeClient.EdgeClient(System.Net.Http.HttpClient! http, string! clientId, string! secretKey, PubSoft.Edge.EdgeAuthScheme scheme = PubSoft.Edge.EdgeAuthScheme.Hmac, string! path = "/rpc") -> void
 PubSoft.Edge.EdgeClient.EdgeClient(System.Net.Http.HttpClient! http, string! clientId, string! sessionKey) -> void
 PubSoft.Edge.EdgeClient.EdgeClient(System.Net.Http.HttpClient! http, string! clientId, string! sessionKey, string! path) -> void
 PubSoft.Edge.EdgeClient.GetSignPayload(string! method, object? parameters) -> string?
 PubSoft.Edge.EdgeClient.InvokeAsync<T>(string! method, object? parameters, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<T?>!
+PubSoft.Edge.EdgeClient.InvokeAsync<T>(string! method, System.Text.Json.JsonElement parameters, System.Text.Json.Serialization.Metadata.JsonTypeInfo<T>! responseTypeInfo, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<T?>!
 PubSoft.Edge.EdgeClient.InvokeVoidAsync(string! method, object? parameters, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+PubSoft.Edge.EdgeClient.InvokeVoidAsync(string! method, System.Text.Json.JsonElement parameters, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 PubSoft.Edge.EdgeClient.LastRequestId.get -> string?
 PubSoft.Edge.EdgeClientExtensions
 PubSoft.Edge.EdgeRpcException

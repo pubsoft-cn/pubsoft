@@ -97,10 +97,17 @@ public sealed class ResilienceHttpWaveTests
         {
             ["Retry:MaxRetries"] = "5",
             ["Retry:InitialDelayMs"] = "250",
+            ["Retry:JitterRatio"] = "0.35",
             ["Retry:RetryOnTimeout"] = "false",
             ["Retry:RetryOn5xx"] = "false",
+            ["Retry:RetryOnRequestTimeout"] = "true",
+            ["Retry:RetryOnTooManyRequests"] = "true",
             ["Retry:RetryOnConnectionFailure"] = "false",
+            ["CircuitBreaker:Mode"] = "RollingFailureRatio",
             ["CircuitBreaker:FailureThreshold"] = "9",
+            ["CircuitBreaker:FailureRatio"] = "0.65",
+            ["CircuitBreaker:MinimumThroughput"] = "21",
+            ["CircuitBreaker:SamplingDurationMs"] = "12000",
             ["CircuitBreaker:OpenTimeoutMs"] = "45000",
         }).Build();
         var options = new HttpResilienceOptions();
@@ -109,10 +116,17 @@ public sealed class ResilienceHttpWaveTests
 
         Assert.Equal(5, options.Retry!.MaxRetries);
         Assert.Equal(TimeSpan.FromMilliseconds(250), options.Retry.InitialDelay);
+        Assert.Equal(0.35, options.Retry.JitterRatio);
         Assert.False(options.Retry.RetryOnTimeout);
         Assert.False(options.Retry.RetryOn5xx);
+        Assert.True(options.Retry.RetryOnRequestTimeout);
+        Assert.True(options.Retry.RetryOnTooManyRequests);
         Assert.False(options.Retry.RetryOnConnectionFailure);
-        Assert.Equal(9, options.CircuitBreaker!.FailureThreshold);
+        Assert.Equal(CircuitBreakerMode.RollingFailureRatio, options.CircuitBreaker!.Mode);
+        Assert.Equal(9, options.CircuitBreaker.FailureThreshold);
+        Assert.Equal(0.65, options.CircuitBreaker.FailureRatio);
+        Assert.Equal(21, options.CircuitBreaker.MinimumThroughput);
+        Assert.Equal(TimeSpan.FromSeconds(12), options.CircuitBreaker.SamplingDuration);
         Assert.Equal(TimeSpan.FromSeconds(45), options.CircuitBreaker.OpenTimeout);
     }
 

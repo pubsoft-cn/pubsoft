@@ -18,5 +18,12 @@ public sealed class HttpResilienceOptions
             && PerAttemptTimeout <= Timeout
             && (Retry is null || (Retry.MaxRetries >= 0 && Retry.InitialDelay >= TimeSpan.Zero))
             && (CircuitBreaker is null
-                || (CircuitBreaker.FailureThreshold > 0 && CircuitBreaker.OpenTimeout > TimeSpan.Zero));
+                || (Enum.IsDefined(CircuitBreaker.Mode)
+                    && CircuitBreaker.FailureThreshold > 0
+                    && CircuitBreaker.OpenTimeout > TimeSpan.Zero
+                    && (CircuitBreaker.Mode != CircuitBreakerMode.RollingFailureRatio
+                        || (CircuitBreaker.FailureRatio > 0
+                            && CircuitBreaker.FailureRatio <= 1
+                            && CircuitBreaker.MinimumThroughput > 0
+                            && CircuitBreaker.SamplingDuration > TimeSpan.Zero))));
 }

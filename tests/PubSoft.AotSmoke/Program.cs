@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using PubSoft.Caching;
@@ -7,8 +6,9 @@ using PubSoft.Domain;
 using PubSoft.Events;
 using PubSoft.Mapping;
 using PubSoft.Messaging;
+using PubSoft.Authentication.Jwt;
+using PubSoft.Logging;
 using PubSoft.OAuth;
-using PubSoft.Testing;
 
 // Exercises the AOT-compatible leaf packages end-to-end under a real native publish.
 // Serialization uses a source-generated context, matching the documented host contract.
@@ -65,6 +65,30 @@ await using (await provider.GetRequiredService<IDistributedLock>()
     if (!handled)
         return Fail("message dispatch");
 }
+
+var signingKey = JwtSigning.CreateSymmetricKey("aot-smoke-key");
+var accessToken = JwtSigning.CreateAccessToken(
+    signingKey,
+    "aot-smoke",
+    "aot-api",
+    new Dictionary<string, string> { ["sub"] = "smoke-subject" },
+    TimeSpan.FromMinutes(5));
+var tokenClaims = JwtSigning.ValidateAccessToken(accessToken, "aot-smoke", "aot-api", signingKey);
+if (!tokenClaims.TryGetValue("sub", out var subject) || subject != "smoke-subject")
+    return Fail("jwt roundtrip");
+
+var jsonLogBytes = new List<byte>();
+await using (var logger = new AppLogger(
+    [new JsonLogSink((payload, _) =>
+    {
+        jsonLogBytes.AddRange(payload.ToArray());
+        return ValueTask.CompletedTask;
+    })]))
+{
+    logger.Info("aot-smoke", "logging smoke");
+}
+if (!System.Text.Encoding.UTF8.GetString(jsonLogBytes.ToArray()).Contains("logging smoke", StringComparison.Ordinal))
+    return Fail("json logging");
 
 var spans = 0;
 await using (var exporter = new PubSoft.Tracing.PubSoftSpanExporter(new PubSoft.Tracing.PubSoftTracingOptions

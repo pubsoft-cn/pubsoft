@@ -12,12 +12,23 @@ PubSoft.Resilience.CircuitBreaker.State.Closed = 0 -> PubSoft.Resilience.Circuit
 PubSoft.Resilience.CircuitBreaker.State.HalfOpen = 2 -> PubSoft.Resilience.CircuitBreaker.State
 PubSoft.Resilience.CircuitBreaker.State.Open = 1 -> PubSoft.Resilience.CircuitBreaker.State
 PubSoft.Resilience.CircuitBreaker.TryAcquire(string! host) -> bool
+PubSoft.Resilience.CircuitBreakerMode
+PubSoft.Resilience.CircuitBreakerMode.ConsecutiveFailures = 0 -> PubSoft.Resilience.CircuitBreakerMode
+PubSoft.Resilience.CircuitBreakerMode.RollingFailureRatio = 1 -> PubSoft.Resilience.CircuitBreakerMode
 PubSoft.Resilience.CircuitBreakerOptions
 PubSoft.Resilience.CircuitBreakerOptions.CircuitBreakerOptions() -> void
+PubSoft.Resilience.CircuitBreakerOptions.FailureRatio.get -> double
+PubSoft.Resilience.CircuitBreakerOptions.FailureRatio.set -> void
 PubSoft.Resilience.CircuitBreakerOptions.FailureThreshold.get -> int
 PubSoft.Resilience.CircuitBreakerOptions.FailureThreshold.set -> void
+PubSoft.Resilience.CircuitBreakerOptions.MinimumThroughput.get -> int
+PubSoft.Resilience.CircuitBreakerOptions.MinimumThroughput.set -> void
+PubSoft.Resilience.CircuitBreakerOptions.Mode.get -> PubSoft.Resilience.CircuitBreakerMode
+PubSoft.Resilience.CircuitBreakerOptions.Mode.set -> void
 PubSoft.Resilience.CircuitBreakerOptions.OpenTimeout.get -> System.TimeSpan
 PubSoft.Resilience.CircuitBreakerOptions.OpenTimeout.set -> void
+PubSoft.Resilience.CircuitBreakerOptions.SamplingDuration.get -> System.TimeSpan
+PubSoft.Resilience.CircuitBreakerOptions.SamplingDuration.set -> void
 PubSoft.Resilience.LoadBalanceStrategy
 PubSoft.Resilience.LoadBalanceStrategy.PowerOfTwoChoices = 2 -> PubSoft.Resilience.LoadBalanceStrategy
 PubSoft.Resilience.LoadBalanceStrategy.Random = 1 -> PubSoft.Resilience.LoadBalanceStrategy
@@ -29,15 +40,22 @@ PubSoft.Resilience.LoadBalancer.LoadBalancer() -> void
 PubSoft.Resilience.LoadBalancer.SelectHost(System.Collections.Generic.IReadOnlyList<string!>! hosts, PubSoft.Resilience.LoadBalanceStrategy strategy = PubSoft.Resilience.LoadBalanceStrategy.RoundRobin) -> string!
 PubSoft.Resilience.RetryPolicy
 PubSoft.Resilience.RetryPolicy.GetDelay(int attempt) -> System.TimeSpan
+PubSoft.Resilience.RetryPolicy.GetDelayWithJitter(int attempt) -> System.TimeSpan
 PubSoft.Resilience.RetryPolicy.InitialDelay.get -> System.TimeSpan
 PubSoft.Resilience.RetryPolicy.InitialDelay.set -> void
+PubSoft.Resilience.RetryPolicy.JitterRatio.get -> double
+PubSoft.Resilience.RetryPolicy.JitterRatio.set -> void
 PubSoft.Resilience.RetryPolicy.MaxRetries.get -> int
 PubSoft.Resilience.RetryPolicy.MaxRetries.set -> void
 PubSoft.Resilience.RetryPolicy.RetryOn5xx.get -> bool
 PubSoft.Resilience.RetryPolicy.RetryOn5xx.set -> void
 PubSoft.Resilience.RetryPolicy.RetryOnConnectionFailure.get -> bool
 PubSoft.Resilience.RetryPolicy.RetryOnConnectionFailure.set -> void
+PubSoft.Resilience.RetryPolicy.RetryOnRequestTimeout.get -> bool
+PubSoft.Resilience.RetryPolicy.RetryOnRequestTimeout.set -> void
 PubSoft.Resilience.RetryPolicy.RetryOnTimeout.get -> bool
 PubSoft.Resilience.RetryPolicy.RetryOnTimeout.set -> void
+PubSoft.Resilience.RetryPolicy.RetryOnTooManyRequests.get -> bool
+PubSoft.Resilience.RetryPolicy.RetryOnTooManyRequests.set -> void
 PubSoft.Resilience.RetryPolicy.RetryPolicy() -> void
 PubSoft.Resilience.RetryPolicy.ShouldRetry(System.Exception? exception, int attempt, int? statusCode) -> bool

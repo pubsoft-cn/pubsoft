@@ -25,6 +25,18 @@ var dto = await client.InvokeAsync<MyDto>("demo.ping", new { itemId = 1 });
 - `LastRequestId` — correlation id sent with the last call (echoed as `requestId`)
 - `BuildRequest` / `GetSignPayload` — debugging helpers
 
+## Trimmed/Native AOT consumption
+
+The `object?` parameters / parameterless-`T` overloads serialize through runtime-type reflection. Trimmed or Native AOT callers use the explicit-metadata path: pre-serialize params with the caller's own source-generated context and pass response metadata — the envelope itself is serialized through the package-owned `EdgeEnvelopeJsonContext` without reflection:
+
+```csharp
+var parameters = JsonSerializer.SerializeToElement(dto, AppJsonContext.Default.MyParamsDto);
+var result = await client.InvokeAsync("demo.ping", parameters, AppJsonContext.Default.MyResultDto);
+await client.InvokeVoidAsync("demo.notify", parameters);
+```
+
+`JsonElement` params sign identically to their object equivalents: canonicalization operates on the element directly, so a pre-serialized payload cannot drift from its signature. `EdgeAuthScheme` member wire names are pinned (`hmac`/`session`/`none`/`md5`), independent of serializer naming-policy drift.
+
 ## API surface
 
 <!-- pubsoft:api-surface:start -->

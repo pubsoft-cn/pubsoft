@@ -4,6 +4,7 @@ PubSoft.Edge.EdgeAuthScheme.Hmac = 0 -> PubSoft.Edge.EdgeAuthScheme
 PubSoft.Edge.EdgeAuthScheme.Md5 = 3 -> PubSoft.Edge.EdgeAuthScheme
 PubSoft.Edge.EdgeAuthScheme.None = 2 -> PubSoft.Edge.EdgeAuthScheme
 PubSoft.Edge.EdgeAuthScheme.Session = 1 -> PubSoft.Edge.EdgeAuthScheme
+PubSoft.Edge.EdgeEnvelopeJsonContext
 PubSoft.Edge.EdgeError
 PubSoft.Edge.EdgeErrorCodes
 PubSoft.Edge.EdgeJsonOptions

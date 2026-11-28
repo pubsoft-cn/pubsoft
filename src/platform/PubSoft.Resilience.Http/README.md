@@ -45,8 +45,8 @@ An `IConfiguration` overload binds the same options from a section — explicit 
 |---|---|
 | `TimeoutMs` | `Timeout` |
 | `PerAttemptTimeoutMs` | `PerAttemptTimeout` |
-| `Retry:MaxRetries` / `Retry:InitialDelayMs` / `Retry:RetryOnTimeout` / `Retry:RetryOn5xx` / `Retry:RetryOnConnectionFailure` | the `Retry` member |
-| `CircuitBreaker:FailureThreshold` / `CircuitBreaker:OpenTimeoutMs` | the `CircuitBreaker` member |
+| `Retry:MaxRetries` / `Retry:InitialDelayMs` / `Retry:JitterRatio` / `Retry:RetryOnTimeout` / `Retry:RetryOn5xx` / `Retry:RetryOnRequestTimeout` / `Retry:RetryOnTooManyRequests` / `Retry:RetryOnConnectionFailure` | the `Retry` member |
+| `CircuitBreaker:Mode` / `CircuitBreaker:FailureThreshold` / `CircuitBreaker:FailureRatio` / `CircuitBreaker:MinimumThroughput` / `CircuitBreaker:SamplingDurationMs` / `CircuitBreaker:OpenTimeoutMs` | the `CircuitBreaker` member |
 
 ```csharp
 services.AddHttpClient("catalog", client =>
@@ -58,13 +58,13 @@ The default total timeout is eight seconds; the default per-attempt timeout is f
 
 ## Retry Safety
 
-Retries are limited to requests with no content and one of these methods: GET, HEAD, OPTIONS, or TRACE. The retry policy can select 5xx responses, connection failures, and timeouts; 4xx responses are not retried. `MaxRetries` counts retries after the initial attempt. Backoff doubles from `InitialDelay` and is capped at 30 seconds; all delays still consume the total timeout budget. Intermediate retry responses are disposed.
+Retries are limited to requests with no content and one of these methods: GET, HEAD, OPTIONS, or TRACE. The retry policy can select 5xx responses, connection failures, and timeouts; HTTP 408/429 retries require explicit `RetryOnRequestTimeout` / `RetryOnTooManyRequests` opt-in, and other 4xx responses are not retried. `MaxRetries` counts retries after the initial attempt. Backoff doubles from `InitialDelay`, is capped at 30 seconds, and the handler applies bounded symmetric jitter (`JitterRatio`, default ±20%). A valid `Retry-After` header on a retryable response is treated as a minimum delay: the effective wait is the larger of backoff-with-jitter and `Retry-After`. If that minimum cannot fit even the total timeout budget, the handler returns the response instead of retrying. All delays still consume the total timeout budget. Intermediate retry responses are disposed.
 
 The method/body safety check cannot establish application-level idempotency. Only enable retries for endpoints whose semantics are safe to repeat. POST/PUT/DELETE and any request carrying content are never retried by this handler, even if a retry policy is configured. Use a separate, explicitly reviewed design if a non-safe operation needs replay; do not assume this handler can be overridden through options.
 
 ## Circuit Breaker
 
-When configured, the breaker is keyed by request host. Successful responses close/reset the host's failure state; failed responses, exhausted transport/timeouts, and total-timeout failures count toward the threshold. An open breaker rejects the request with `HttpRequestException`. Caller cancellation releases a half-open probe so a canceled request does not strand the breaker. Breaker state is in process and tied to the handler's `CircuitBreaker` instance; it is not a distributed coordination mechanism.
+When configured, the breaker is keyed by request host. Successful responses close/reset the host's failure state; failed responses, exhausted transport/timeouts, and total-timeout failures count toward the threshold. HTTP 5xx, 408, and 429 count as failures; other 4xx responses count as healthy responses because the remote peer is responding normally. The default consecutive-count mode is intentionally simple. High-traffic clients that can produce noisy 429 bursts (for example a broken caller loop) should explicitly opt into `CircuitBreakerMode.RollingFailureRatio` and tune `FailureRatio`, `MinimumThroughput`, and `SamplingDuration`; this reduces host-wide false positives without hiding a sustained failure majority. An open breaker rejects the request with `HttpRequestException`. Caller cancellation releases a half-open probe so a canceled request does not strand the breaker. Breaker state is in process and tied to the handler's `CircuitBreaker` instance; it is not a distributed coordination mechanism.
 
 ## Public API surface
 

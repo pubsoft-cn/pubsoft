@@ -1,11 +1,12 @@
 using System.Net;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using PubSoft.Edge;
 using Xunit;
 
 namespace PubSoft.Core.Tests;
 
-public sealed class EdgeClientTests
+public sealed partial class EdgeClientTests
 {
     private sealed class StubHttp(Func<HttpRequestMessage, HttpResponseMessage> handler) : HttpMessageHandler
     {
@@ -113,4 +114,84 @@ public sealed class EdgeClientTests
         Assert.Contains("ping", stub.LastBody);
         Assert.NotNull(client.LastRequestId);
     }
+    [Fact]
+    public void EnvelopeContextProducesIdenticalWireJson()
+    {
+        var request = new EdgeRpcRequest
+        {
+            ClientId = "cid",
+            Method = "user.get",
+            Scheme = EdgeAuthScheme.Hmac,
+            Credential = "sig",
+            Timestamp = 1700000000000,
+            Nonce = "n",
+            RequestId = "r1",
+            Params = JsonSerializer.SerializeToElement(new { id = 1, name = "x" }),
+        };
+
+        var reflectionJson = JsonSerializer.Serialize(request, EdgeJsonOptions.Default);
+        var generatedJson = JsonSerializer.Serialize(request, EdgeEnvelopeJsonContext.Default.EdgeRpcRequest);
+
+        Assert.Equal(reflectionJson, generatedJson);
+        Assert.Contains("\"scheme\":\"hmac\"", generatedJson);
+    }
+
+    [Fact]
+    public void JsonElementParamsProduceSameSignatureAsObjectParams()
+    {
+        const string method = "user.get";
+        const long timestamp = 1700000000000;
+        const string nonce = "nonce";
+        const string requestId = "rid";
+        var objectParams = new { id = 1, name = "x" };
+        var elementParams = JsonSerializer.SerializeToElement(objectParams, EdgeJsonOptions.Default);
+
+        var objectSignature = EdgeSigner.SignHmac(method, timestamp, nonce, requestId, objectParams, "secret");
+        var elementSignature = EdgeSigner.SignHmac(method, timestamp, nonce, requestId, elementParams, "secret");
+
+        Assert.Equal(objectSignature, elementSignature);
+    }
+
+    [Fact]
+    public async Task InvokeAsyncWithJsonElementParamsAndTypeInfoRoundtrips()
+    {
+        var stub = new StubHttp(_ => JsonResponse(new
+        {
+            ok = true,
+            code = "0",
+            message = "",
+            data = new { name = "n1" },
+        }));
+        var client = new EdgeClient(new HttpClient(stub) { BaseAddress = new Uri("https://edge.test") }, "cid", "secret", EdgeAuthScheme.Hmac);
+        var parameters = JsonSerializer.SerializeToElement(new { id = 7 }, EdgeJsonOptions.Default);
+
+        var result = await client.InvokeAsync("user.get", parameters, TestJsonContext.Default.UserDto);
+
+        Assert.Equal("n1", result!.Name);
+        Assert.NotNull(stub.LastBody);
+        using var body = JsonDocument.Parse(stub.LastBody!);
+        Assert.Equal(7, body.RootElement.GetProperty("params").GetProperty("id").GetInt32());
+    }
+
+    [Fact]
+    public async Task InvokeVoidWithJsonElementParamsSendsRequest()
+    {
+        var stub = new StubHttp(_ => JsonResponse(new { ok = true, code = "0", message = "" }));
+        var client = new EdgeClient(new HttpClient(stub) { BaseAddress = new Uri("https://edge.test") }, "cid", "secret");
+        var parameters = JsonSerializer.SerializeToElement(new { t = 2 }, EdgeJsonOptions.Default);
+
+        await client.InvokeVoidAsync("ping", parameters);
+
+        Assert.Contains("ping", stub.LastBody);
+    }
+
+    public sealed record UserDto
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; init; } = string.Empty;
+    }
+
+    [JsonSourceGenerationOptions(JsonSerializerDefaults.Web)]
+    [JsonSerializable(typeof(UserDto))]
+    public sealed partial class TestJsonContext : JsonSerializerContext;
 }

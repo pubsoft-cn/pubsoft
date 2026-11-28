@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace PubSoft.Edge;
@@ -73,21 +74,47 @@ public sealed class EdgeClient
     /// <summary>Invokes an Edge RPC (auto-signs; throws on error responses).</summary>
     public async Task<T?> InvokeAsync<T>(string method, object? parameters, CancellationToken ct = default)
     {
-        var rpcResponse = await SendAsync(method, parameters, ct).ConfigureAwait(false);
+        var rpcResponse = await SendAsync(method, ToParamsElement(parameters), ct).ConfigureAwait(false);
         if (rpcResponse.Data is null || !rpcResponse.Data.HasValue)
             return default;
 
         return rpcResponse.Data.Value.Deserialize<T>(EdgeJsonOptions.Default);
     }
 
+    /// <summary>
+    /// Invokes an Edge RPC with pre-serialized parameters and explicit response metadata - the
+    /// reflection-free path for trimmed/AOT callers. Serialize params with the caller's own
+    /// source-generated context (or use <see cref="JsonElement"/> values directly) and pass a
+    /// <see cref="JsonTypeInfo{T}"/> covering the response payload type.
+    /// </summary>
+    public async Task<T?> InvokeAsync<T>(string method, JsonElement parameters, JsonTypeInfo<T> responseTypeInfo, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(responseTypeInfo);
+        var rpcResponse = await SendAsync(method, parameters, ct).ConfigureAwait(false);
+        if (rpcResponse.Data is null || !rpcResponse.Data.HasValue)
+            return default;
+
+        return rpcResponse.Data.Value.Deserialize(responseTypeInfo);
+    }
+
     /// <summary>Invokes an Edge RPC without a return value.</summary>
     public async Task InvokeVoidAsync(string method, object? parameters, CancellationToken ct = default)
+    {
+        await SendAsync(method, ToParamsElement(parameters), ct).ConfigureAwait(false);
+    }
+
+    /// <summary>Invokes an Edge RPC without a return value, using pre-serialized parameters.</summary>
+    public async Task InvokeVoidAsync(string method, JsonElement parameters, CancellationToken ct = default)
     {
         await SendAsync(method, parameters, ct).ConfigureAwait(false);
     }
 
     /// <summary>Builds a signed request without sending (debug/testing).</summary>
     public EdgeRpcRequest BuildRequest(string method, object? parameters)
+        => BuildRequest(method, ToParamsElement(parameters));
+
+    /// <summary>Builds a signed request from pre-serialized parameters without sending.</summary>
+    public EdgeRpcRequest BuildRequest(string method, JsonElement parameters)
     {
         var requestId = Guid.NewGuid().ToString("N");
         var timestamp = _timeProvider.GetUtcNow().ToUnixTimeMilliseconds();
@@ -102,7 +129,7 @@ public sealed class EdgeClient
                 Credential = _sessionKey!,
                 Timestamp = timestamp,
                 RequestId = requestId,
-                Params = ToParamsElement(parameters),
+                Params = parameters,
             };
         }
 
@@ -115,7 +142,7 @@ public sealed class EdgeClient
                 Scheme = EdgeAuthScheme.None,
                 Timestamp = timestamp,
                 RequestId = requestId,
-                Params = ToParamsElement(parameters),
+                Params = parameters,
             };
         }
 
@@ -133,7 +160,7 @@ public sealed class EdgeClient
             Timestamp = timestamp,
             Nonce = nonce,
             RequestId = requestId,
-            Params = ToParamsElement(parameters),
+            Params = parameters,
         };
     }
 
@@ -146,16 +173,16 @@ public sealed class EdgeClient
             : null;
     }
 
-    private async Task<EdgeRpcResponse> SendAsync(string method, object? parameters, CancellationToken ct)
+    private async Task<EdgeRpcResponse> SendAsync(string method, JsonElement parameters, CancellationToken ct)
     {
         var request = BuildRequest(method, parameters);
         LastRequestId = request.RequestId;
 
-        using var response = await _http.PostAsJsonAsync(_path, request, EdgeJsonOptions.Default, ct).ConfigureAwait(false);
+        using var response = await _http.PostAsJsonAsync(_path, request, EdgeEnvelopeJsonContext.Default.EdgeRpcRequest, ct).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
             throw new EdgeRpcException(((int)response.StatusCode).ToString(System.Globalization.CultureInfo.InvariantCulture), $"HTTP {response.StatusCode}", method);
 
-        var rpcResponse = await response.Content.ReadFromJsonAsync<EdgeRpcResponse>(EdgeJsonOptions.Default, ct).ConfigureAwait(false);
+        var rpcResponse = await response.Content.ReadFromJsonAsync(EdgeEnvelopeJsonContext.Default.EdgeRpcResponse, ct).ConfigureAwait(false);
         if (rpcResponse is null || !rpcResponse.Ok)
             throw new EdgeRpcException(rpcResponse?.Code ?? "0", rpcResponse?.Message ?? "Unknown error", method);
 

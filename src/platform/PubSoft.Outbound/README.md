@@ -40,6 +40,10 @@ Register the request assembly with `AddOutboundContracts(options => options.Asse
 
 `ApiFieldAttribute.IsEncrypted` is descriptive metadata only. It does not encrypt or redact values. Do not place secrets in request contracts unless a provider explicitly handles them securely; header-source exclusion is only a parameter-builder behavior, not a general data-loss-prevention boundary.
 
+## Trimming and Native AOT boundary
+
+Assembly scanning, contract metadata discovery, request building, response mapping, and runtime-typed JSON conversion use reflection. The public entry points carry `RequiresUnreferencedCode` / `RequiresDynamicCode` annotations. They are **not** a supported Native AOT execution path today; the package-level `IsAotCompatible` marker covers only the non-reflection primitives and analyzer visibility, not these annotated contract-mapping APIs. Hosts that require Native AOT must not depend on assembly scanning or runtime contract mapping until an explicitly source-generated metadata path exists. The Native AOT smoke consumer therefore exercises non-reflection packages but deliberately does not execute these annotated outbound paths.
+
 ## Public API surface
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._

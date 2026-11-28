@@ -41,6 +41,10 @@ public sealed class ReadRecordRequest : IApiRequest<ReadRecordResponse>, IContra
 
 `ApiFieldAttribute.IsEncrypted` 仅为描述性元数据——不加密不脱敏。request 契约中不应放密钥，除非 provider 明确安全处理；header-source 排除仅是参数构建器行为，不是通用防泄漏边界。
 
+## Trimming 与 Native AOT 边界
+
+程序集扫描、契约元数据发现、request 构建、response 映射与 runtime-typed JSON 转换使用反射。相关公开入口带有 `RequiresUnreferencedCode` / `RequiresDynamicCode` 标注；它们目前**不是**受支持的 Native AOT 执行路径。包级 `IsAotCompatible` 只覆盖非反射 primitive 与 analyzer 可见性，不代表这些已标注的 contract-mapping API 可 AOT。需要 Native AOT 的宿主在显式 source-generated metadata 路径出现之前，不得依赖程序集扫描或运行时契约映射。因此 Native AOT smoke consumer 会执行非反射包路径，但刻意不执行这些已标注的 outbound 路径。
+
 ## Public API surface
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_

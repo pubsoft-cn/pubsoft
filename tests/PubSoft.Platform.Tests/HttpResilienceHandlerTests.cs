@@ -123,6 +123,143 @@ public sealed class HttpResilienceHandlerTests
     }
 
     [Fact]
+    public void RetryAfterParsingSupportsDeltaAndHttpDate()
+    {
+        var now = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        using var deltaResponse = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+        deltaResponse.Headers.RetryAfter = new System.Net.Http.Headers.RetryConditionHeaderValue(TimeSpan.FromSeconds(2));
+        Assert.Equal(TimeSpan.FromSeconds(2), PubSoftHttpResilienceHandler.GetRetryAfterDelay(deltaResponse, now));
+
+        using var dateResponse = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+        dateResponse.Headers.RetryAfter = new System.Net.Http.Headers.RetryConditionHeaderValue(now.AddSeconds(3));
+        Assert.Equal(TimeSpan.FromSeconds(3), PubSoftHttpResilienceHandler.GetRetryAfterDelay(dateResponse, now));
+
+        using var pastResponse = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+        pastResponse.Headers.RetryAfter = new System.Net.Http.Headers.RetryConditionHeaderValue(now.AddSeconds(-3));
+        Assert.Null(PubSoftHttpResilienceHandler.GetRetryAfterDelay(pastResponse, now));
+    }
+
+    [Fact]
+    public async Task HonorsRetryAfterAsMinimumDelayBeforeRetrying()
+    {
+        var firstResponse = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+        firstResponse.Headers.RetryAfter = new System.Net.Http.Headers.RetryConditionHeaderValue(TimeSpan.FromSeconds(1));
+        var calls = 0;
+        var inner = new RecordingHandler(_ => Task.FromResult(
+            Interlocked.Increment(ref calls) == 1 ? firstResponse : new HttpResponseMessage(HttpStatusCode.OK)));
+        using var client = new HttpClient(CreateHandler(inner, new HttpResilienceOptions
+        {
+            Timeout = TimeSpan.FromSeconds(3),
+            PerAttemptTimeout = TimeSpan.FromSeconds(1),
+            Retry = new RetryPolicy
+            {
+                MaxRetries = 1,
+                InitialDelay = TimeSpan.Zero,
+                JitterRatio = 0
+            }
+        }));
+
+        var started = System.Diagnostics.Stopwatch.GetTimestamp();
+        using var response = await client.GetAsync("https://service.test/rate-limited");
+        var elapsed = System.Diagnostics.Stopwatch.GetElapsedTime(started);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(2, inner.RequestCount);
+        Assert.True(elapsed >= TimeSpan.FromMilliseconds(850), $"Retry-After minimum was not honored; elapsed={elapsed}");
+    }
+
+    [Fact]
+    public async Task DoesNotRetryWhenRetryAfterCannotFitWithinTotalBudget()
+    {
+        var firstResponse = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+        firstResponse.Headers.RetryAfter = new System.Net.Http.Headers.RetryConditionHeaderValue(TimeSpan.FromSeconds(5));
+        var inner = new RecordingHandler(_ => Task.FromResult(firstResponse));
+        using var client = new HttpClient(CreateHandler(inner, new HttpResilienceOptions
+        {
+            Timeout = TimeSpan.FromMilliseconds(300),
+            PerAttemptTimeout = TimeSpan.FromMilliseconds(200),
+            Retry = new RetryPolicy
+            {
+                MaxRetries = 1,
+                InitialDelay = TimeSpan.Zero,
+                JitterRatio = 0
+            }
+        }));
+
+        using var response = await client.GetAsync("https://service.test/unavailable");
+
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        Assert.Equal(1, inner.RequestCount);
+    }
+
+    [Fact]
+    public async Task DoesNotRetryWhenRetryAfterCannotFitRemainingTotalBudget()
+    {
+        var firstResponse = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+        firstResponse.Headers.RetryAfter = new System.Net.Http.Headers.RetryConditionHeaderValue(TimeSpan.FromMilliseconds(300));
+        var calls = 0;
+        var inner = new RecordingHandler(async cancellationToken =>
+        {
+            if (Interlocked.Increment(ref calls) == 1)
+            {
+                await Task.Delay(250, cancellationToken);
+                return firstResponse;
+            }
+            return new HttpResponseMessage(HttpStatusCode.OK);
+        });
+        using var client = new HttpClient(CreateHandler(inner, new HttpResilienceOptions
+        {
+            Timeout = TimeSpan.FromMilliseconds(500),
+            PerAttemptTimeout = TimeSpan.FromMilliseconds(400),
+            Retry = new RetryPolicy
+            {
+                MaxRetries = 1,
+                InitialDelay = TimeSpan.Zero,
+                JitterRatio = 0
+            }
+        }));
+
+        using var response = await client.GetAsync("https://service.test/unavailable");
+
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        Assert.Equal(1, inner.RequestCount);
+    }
+
+    [Fact]
+    public async Task CircuitCounts429AsFailureButBusiness4xxAsHealthyResponse()
+    {
+        var rateLimitedBreaker = new CircuitBreaker
+        {
+            Options = new CircuitBreakerOptions { FailureThreshold = 1 }
+        };
+        var rateLimitedInner = new RecordingHandler(_ => Task.FromResult(new HttpResponseMessage((HttpStatusCode)429)));
+        using var rateLimitedClient = new HttpClient(CreateHandler(
+            rateLimitedInner,
+            new HttpResilienceOptions { CircuitBreaker = rateLimitedBreaker.Options },
+            rateLimitedBreaker));
+
+        using var rateLimited = await rateLimitedClient.GetAsync("https://service.test/rate-limited");
+
+        Assert.Equal((HttpStatusCode)429, rateLimited.StatusCode);
+        Assert.Equal(CircuitBreaker.State.Open, rateLimitedBreaker.GetState("service.test"));
+
+        var businessBreaker = new CircuitBreaker
+        {
+            Options = new CircuitBreakerOptions { FailureThreshold = 1 }
+        };
+        var businessInner = new RecordingHandler(_ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.BadRequest)));
+        using var businessClient = new HttpClient(CreateHandler(
+            businessInner,
+            new HttpResilienceOptions { CircuitBreaker = businessBreaker.Options },
+            businessBreaker));
+
+        using var business = await businessClient.GetAsync("https://service.test/invalid");
+
+        Assert.Equal(HttpStatusCode.BadRequest, business.StatusCode);
+        Assert.Equal(CircuitBreaker.State.Closed, businessBreaker.GetState("service.test"));
+    }
+
+    [Fact]
     public async Task TotalTimeoutCancelsRequestAndRecordsCircuitFailure()
     {
         var breaker = new CircuitBreaker
@@ -171,6 +308,23 @@ public sealed class HttpResilienceHandlerTests
 
         Assert.Throws<ArgumentException>(() => services.AddHttpClient("invalid")
             .AddPubSoftHttpResilience(options => options.PerAttemptTimeout = TimeSpan.FromSeconds(9)));
+        Assert.Throws<ArgumentException>(() => services.AddHttpClient("invalid-ratio")
+            .AddPubSoftHttpResilience(options =>
+            {
+                options.CircuitBreaker = new CircuitBreakerOptions
+                {
+                    Mode = CircuitBreakerMode.RollingFailureRatio,
+                    FailureRatio = double.NaN
+                };
+            }));
+        Assert.Throws<ArgumentException>(() => services.AddHttpClient("invalid-mode")
+            .AddPubSoftHttpResilience(options =>
+            {
+                options.CircuitBreaker = new CircuitBreakerOptions
+                {
+                    Mode = (CircuitBreakerMode)42
+                };
+            }));
     }
 
     private static PubSoftHttpResilienceHandler CreateHandler(
