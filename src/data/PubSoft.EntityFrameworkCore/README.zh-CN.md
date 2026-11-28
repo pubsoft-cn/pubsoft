@@ -59,6 +59,28 @@ services.AddPubSoftUnitOfWork<AppDbContext>();
 
 Actor 归因经 `AuditMiddlewareOptions.CaptureActor` + 宿主实现的 `IAuditActorAccessor` opt-in——PubSoft 不推断 claim 名或管理员角色；按宿主审查该映射与身份保留策略，不要把身份/管理员数据塞进 `Detail`。
 
+## 可重试事务
+
+`EfCoreTransactionExecutor` 把一个 scoped `DbContext` 操作包进显式 EF `IDbContextTransaction`，并经 provider 的 EF execution strategy 执行。边界刻意收窄：单 DbContext、单数据库事务；不支持 ambient `TransactionScope`，也不承诺分布式/多 context 原子性。
+
+```csharp
+await EfCoreTransactionExecutor.ExecuteInTransactionAsync(
+    dbContext,
+    async (db, ct) =>
+    {
+        db.Orders.Add(order);
+        await db.SaveChangesAsync(ct);
+    },
+    verifySucceeded: async (db, ct) =>
+        await db.Orders.AnyAsync(o => o.Id == order.Id, ct),
+    isolationLevel: IsolationLevel.ReadCommitted,
+    cancellationToken: ct);
+```
+
+operation 委托必须 retry-safe。重试前 executor 会清空 context `ChangeTracker`（失败尝试后也会清空），因此委托每次调用都必须重新读取或重新应用全部变更。commit 前的 transient failure 可由 provider strategy 重试；需要时在 provider 上配置重试策略（例如 `EnableRetryOnFailure`）。commit 结果不确定时由 `verifySucceeded` 判断事务是否已确认提交。缺少该 probe 时 executor 抛 `EfCoreTransactionCommitVerificationException`，而不是盲目重试一个可能已经提交的事务。
+
+同一 context 的嵌套 executor 调用会加入根逻辑事务，且不能选择不同隔离级别。跨另一个 DbContext 的嵌套调用 fail-closed。已存在的 `DbContext` 事务或 ambient `TransactionScope` 同样 fail-closed——应把 executor 调用作为事务根。
+
 ## 查询诊断
 
 互补两件，均由 `AddPubSoftDbQueryDiagnostics()` 注册：
@@ -111,7 +133,7 @@ await auditWriter.WriteAsync(new AuditLogEntry(
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
-- `PubSoft.EntityFrameworkCore`: `AuditChangeCaptureHook` `DbQueryDiagnostics` `DbQueryDiagnosticsOptions` `DbQueryDiagnosticsServiceCollectionExtensions` `EncryptionModelBuilderExtensions` `DiagnosticSnapshot` `EfCorePermissionGrantManager<TDbContext>` `EfCorePermissionGrantProvider<TDbContext>` `EfCoreQueryExtensions` `EfCoreRepository<TEntity, TKey, TDbContext>` `EfCoreRoleDataScopeProvider<TDbContext>` `EfCoreServiceCollectionExtensions` `IEfCoreRepository<TEntity, TKey>` `IPubSoftUnitOfWork<TDbContext>` `ISaveChangesHook` `IdentityModelBuilderExtensions` `PermissionGrantModelBuilderExtensions` `PubSoftDbContext` `PubSoftUnitOfWork<TDbContext>` `QuerySnapshot` `RoleDataScopeModelBuilderExtensions` `TenantModelBuilderExtensions`
+- `PubSoft.EntityFrameworkCore`: `AuditChangeCaptureHook` `DbQueryDiagnostics` `DbQueryDiagnosticsOptions` `DbQueryDiagnosticsServiceCollectionExtensions` `EncryptionModelBuilderExtensions` `DiagnosticSnapshot` `EfCorePermissionGrantManager<TDbContext>` `EfCorePermissionGrantProvider<TDbContext>` `EfCoreQueryExtensions` `EfCoreRepository<TEntity, TKey, TDbContext>` `EfCoreRoleDataScopeProvider<TDbContext>` `EfCoreTransactionCommitVerificationException` `EfCoreTransactionExecutor` `EfCoreServiceCollectionExtensions` `IEfCoreRepository<TEntity, TKey>` `IPubSoftUnitOfWork<TDbContext>` `ISaveChangesHook` `IdentityModelBuilderExtensions` `PermissionGrantModelBuilderExtensions` `PubSoftDbContext` `PubSoftUnitOfWork<TDbContext>` `QuerySnapshot` `RoleDataScopeModelBuilderExtensions` `TenantModelBuilderExtensions`
 - `PubSoft.EntityFrameworkCore.Auditing`: `AuditEntityChangeRecord` `AuditKeywordMatch` `AuditLogQueryService` `AuditLogRecord` `AuditPersistenceModelBuilderExtensions` `AuditPersistenceServiceCollectionExtensions` `AuditRetentionCleanup<TDbContext>` `EfCoreAuditSnapshotSink<TDbContext>`
 - `PubSoft.EntityFrameworkCore.Migrations`: `DatabaseMigrationService` `DatabaseMigrationServiceCollectionExtensions` `EfCoreDatabaseSchemaMigrator<TDbContext>` `IDataSeeder` `IDatabaseMigrationService` `IDatabaseSchemaMigrator`
 

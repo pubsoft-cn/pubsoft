@@ -1,4 +1,8 @@
+using System.Text;
 using Microsoft.Extensions.DependencyInjection;
+using MQTTnet;
+using MQTTnet.Packets;
+using MQTTnet.Protocol;
 using PubSoft.Messaging.Mqtt;
 using PubSoft.Messaging.Outbox;
 using Xunit;
@@ -108,6 +112,122 @@ public sealed class MqttInboxTests
             new MqttInboxOptions { ConsumerName = " " }, null!, (_, _, _) => Task.CompletedTask));
         Assert.Throws<ArgumentNullException>(() => new MqttInboxSubscriber(
             new MqttInboxOptions(), null!, (_, _, _) => Task.CompletedTask));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new MqttInboxSubscriber(
+            new MqttInboxOptions { ConsumerName = "tests", ReconnectJitterRatio = double.NaN }, null!, (_, _, _) => Task.CompletedTask));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new MqttInboxSubscriber(
+            new MqttInboxOptions { ConsumerName = "tests", ReconnectJitterRatio = 1.5 }, null!, (_, _, _) => Task.CompletedTask));
+    }
+
+    [Fact]
+    public async Task SuccessfulInboxProcessingAcksAfterHandlerCompletion()
+    {
+        var handlerCompleted = false;
+        var inbox = new FakeInboxMessageProcessor(async (_, _, handler, ct) => { await handler(ct); return true; });
+        var subscriber = new MqttInboxSubscriber(
+            new MqttInboxOptions { ConsumerName = "tests" },
+            inbox,
+            (_, _, _) =>
+            {
+                handlerCompleted = true;
+                return Task.CompletedTask;
+            });
+        var acknowledgements = 0;
+        var args = CreateReceivedArgs(42, (_, _) =>
+        {
+            acknowledgements++;
+            return Task.CompletedTask;
+        });
+
+        await InvokeHandleAsync(subscriber, args);
+
+        Assert.True(handlerCompleted);
+        Assert.False(args.AutoAcknowledge);
+        Assert.True(args.IsHandled);
+        Assert.False(args.ProcessingFailed);
+        Assert.Equal(1, acknowledgements);
+    }
+
+    [Fact]
+    public async Task FailedInboxProcessingLeavesMessageUnacknowledged()
+    {
+        var inbox = new FakeInboxMessageProcessor((_, _, _, _) => throw new InvalidOperationException("inbox failure"));
+        var subscriber = new MqttInboxSubscriber(
+            new MqttInboxOptions { ConsumerName = "tests" },
+            inbox,
+            (_, _, _) => Task.CompletedTask);
+        var acknowledgements = 0;
+        var args = CreateReceivedArgs(43, (_, _) =>
+        {
+            acknowledgements++;
+            return Task.CompletedTask;
+        });
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => InvokeHandleAsync(subscriber, args));
+
+        Assert.False(args.AutoAcknowledge);
+        Assert.True(args.ProcessingFailed);
+        Assert.Equal(0, acknowledgements);
+    }
+
+    [Fact]
+    public async Task MessageWithoutOutboxIdIsAcknowledgedAndDropped()
+    {
+        var inbox = new FakeInboxMessageProcessor((_, _, _, _) => throw new InvalidOperationException("must not be called"));
+        var subscriber = new MqttInboxSubscriber(
+            new MqttInboxOptions { ConsumerName = "tests" },
+            inbox,
+            (_, _, _) => Task.CompletedTask);
+        var acknowledgements = 0;
+        var args = CreateReceivedArgs(null, (_, _) =>
+        {
+            acknowledgements++;
+            return Task.CompletedTask;
+        });
+
+        await InvokeHandleAsync(subscriber, args);
+
+        Assert.False(args.AutoAcknowledge);
+        Assert.Equal(1, acknowledgements);
+    }
+
+    private sealed class FakeInboxMessageProcessor(
+        Func<string, long, Func<CancellationToken, Task>, CancellationToken, Task<bool>> invoke) : IInboxMessageProcessor
+    {
+        public Task<bool> ProcessOnceAsync(
+            string consumerName,
+            long messageId,
+            Func<CancellationToken, Task> handler,
+            CancellationToken cancellationToken = default)
+            => invoke(consumerName, messageId, handler, cancellationToken);
+    }
+
+    private static MqttApplicationMessageReceivedEventArgs CreateReceivedArgs(
+        long? messageId,
+        Func<MqttApplicationMessageReceivedEventArgs, CancellationToken, Task> acknowledgeHandler)
+    {
+        var applicationMessage = new MqttApplicationMessage
+        {
+            Topic = "outbox/tests.event.v1",
+            PayloadSegment = new ArraySegment<byte>(Encoding.UTF8.GetBytes("{}")),
+            QualityOfServiceLevel = MqttQualityOfServiceLevel.AtLeastOnce,
+            UserProperties = new List<MqttUserProperty>()
+        };
+        if (messageId.HasValue)
+            applicationMessage.UserProperties.Add(new MqttUserProperty(MqttInboxHeaders.OutboxMessageId, new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes(messageId.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)))));
+        var publishPacket = new MqttPublishPacket
+        {
+            Topic = applicationMessage.Topic,
+            QualityOfServiceLevel = MqttQualityOfServiceLevel.AtLeastOnce
+        };
+        return new MqttApplicationMessageReceivedEventArgs("tests", applicationMessage, publishPacket, acknowledgeHandler);
+    }
+
+    private static Task InvokeHandleAsync(MqttInboxSubscriber subscriber, MqttApplicationMessageReceivedEventArgs args)
+    {
+        var method = typeof(MqttInboxSubscriber).GetMethod(
+            "HandleAsync",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+        return (Task)method.Invoke(subscriber, new object[] { args, CancellationToken.None })!;
     }
 }
 

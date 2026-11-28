@@ -13,6 +13,9 @@ public sealed class OutboxAuditSnapshotSink<TDbContext>(
     /// <summary>Outbox target module name.</summary>
     public const string TargetModule = "PubSoft.Auditing";
 
+    /// <summary>Stable versioned outbox contract key for audit snapshot events.</summary>
+    public const string SnapshotEventType = "pubsoft.auditing.snapshot.v1";
+
     /// <inheritdoc />
     public async ValueTask WriteAsync(
         AuditRequestSnapshot snapshot,
@@ -23,6 +26,7 @@ public sealed class OutboxAuditSnapshotSink<TDbContext>(
         await outboxPublisher.PublishAsync(
                 new AuditSnapshotOutboxEvent(1, snapshot),
                 targetModule: TargetModule,
+                eventType: SnapshotEventType,
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

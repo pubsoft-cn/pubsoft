@@ -20,6 +20,7 @@ services.AddPubSoftAuditOutbox<AppDbContext>();
 - The versioned snapshot payload stages into the same scoped `DbContext` that owns the request's business transaction — audit and business writes commit atomically.
 - Delivery to the audit store is at-least-once; the host must run an `IOutboxDispatcher` + idempotent consumer that persists snapshots.
 - This sink does not bind to previously committed transactions — it only covers work saved in the current scope.
+- Snapshot events are published with the stable outbox contract key `pubsoft.auditing.snapshot.v1` (`OutboxAuditSnapshotSink<TDbContext>.SnapshotEventType`), not the CLR type name. Consumers keyed to the older CLR-name compatibility shape must be migrated or the outbox drained before deploying this version.
 
 ## Boundaries
 

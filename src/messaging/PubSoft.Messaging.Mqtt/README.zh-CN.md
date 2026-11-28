@@ -62,3 +62,13 @@ services.AddHostedService(sp => new MqttInboxSubscriber(
 
 投递语义：QoS1 at-least-once + `InboxReceipt` 等效 exactly-once。
 无 offset/回放语义——需要持久事件日志与回放请用专职 MQ（Kafka / NATS JetStream）。
+
+### 确认与失败语义
+
+`MqttInboxSubscriber` 会关闭 MQTTnet 自动确认，仅在 inbox 登记与业务 handler
+都完成后才发送 PUBACK/PUBREC。handler 或 inbox 失败时 MQTT 包保持未确认；MQTT
+没有 NACK 包，因此 broker 重投通常依赖重连/会话状态，而不是立即 requeue。
+持续性 poison message 因而可能需要宿主侧运维介入（修复消费者并重连/恢复会话）。
+重连延迟带有有界对称抖动（`ReconnectJitterRatio`，默认 0.2 即 80%-120% 区间），broker 重启后副本群不会同步重连；比率设 0 可恢复固定节拍。
+订阅器不会把失败的 outbox 消息静默确认后丢弃。缺少有效 `x-outbox-id` 的消息仍按
+文档化策略 fail-fast 丢弃：它无法被安全去重。

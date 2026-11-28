@@ -56,18 +56,59 @@ worker 为 opt-in。`IOutboxDispatcher` 注册归宿主；不要为同一 worker
 await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 dbContext.Orders.Add(order);
 await outboxPublisher.PublishAsync(new OrderPlaced(order.Id),
-    targetModule: "billing", aggregateKey: order.Id.ToString(), cancellationToken: cancellationToken);
+    targetModule: "billing",
+    aggregateKey: order.Id.ToString(),
+    eventType: "orders.order-placed.v1",
+    cancellationToken: cancellationToken);
 await dbContext.SaveChangesAsync(cancellationToken);
 await transaction.CommitAsync(cancellationToken);
 ```
 
 publisher 不保存不提交。业务数据已在另一事务/context 提交时，本 API 不会追溯使两次写原子。
 
+## 事件契约键与 Payload 序列化
+
+持久事件必须显式传 `eventType`。它会写入 outbox 行，并被内置 MQTT/AMQP dispatcher 用于 topic/routing-key 派生——应把它视为跨服务消息契约的一部分，而不是 CLR 实现细节：
+
+```csharp
+await outboxPublisher.PublishAsync(
+    new OrderPlaced(order.Id),
+    eventType: "orders.order-placed.v1",
+    cancellationToken: cancellationToken);
+```
+
+显式键有边界：最长 256 字符；不允许空白/控制字符、传输通配符（`*`、`#`、`+`）或前导 `$`。CLR type-name 推断被刻意禁止：它会把路由耦合到重构/程序集名，嵌套 CLR 类型名也可能对传输不安全。仍按旧 CLR-name 行匹配的消费者必须先迁移，或先排空/版本化既有消息后再部署该版本。
+
+payload 默认用 System.Text.Json。需要显式 JSON 策略、或 trimmed/AOT 部署需要源生成 metadata 的宿主，可注册 `IOutboxEventSerializer`；scoped publisher 存在该注册时会解析使用：
+
+```csharp
+services.AddSingleton<IOutboxEventSerializer>(
+    new OutboxEventJsonSerializer(new JsonSerializerOptions
+    {
+        TypeInfoResolver = AppJsonContext.Default,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    }));
+```
+
+serializer 必须覆盖所有经 outbox 发布的事件类型。实现刻意按运行时事件类型序列化；非法/空 payload 与超限序列化结果仍 fail-closed。
+
 ## 租户 Scope
 
-worker 只处理当前 scoped `ITenantContext` 可见的行。无 `IOutboxScopeProvider` 时每轮轮询用一个普通 DI scope——即单租户上下文。多租户宿主须注册 `IOutboxScopeProvider`，为 host 与每个待处理租户产出正确初始化的 async scope。本包不发现租户、不决定 worker 有权枚举哪些租户。
+worker 只处理当前 scoped `ITenantContext` 可见的行。无 `IOutboxScopeProvider` 时每轮轮询用一个普通 DI scope——即单租户上下文。多租户宿主既可注册自有 provider，也可显式启用 catalog-backed helper：
 
-示例 catalog 与 initializer 是宿主契约而非 PubSoft API；每个 yield 的 scope 由 worker 释放，`ITenantContext` 须在解析 `OutboxProcessor` 前初始化。
+```csharp
+services.AddScoped<ScopedTenantContext>();
+services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<ScopedTenantContext>());
+services.AddPubSoftTenantOutboxScopeProvider(options =>
+{
+    options.IncludeHostScope = true;
+    options.MaxTenantsPerPoll = 256;
+});
+```
+
+`TenantOutboxScopeProvider` 在短生命周期 catalog scope 中解析宿主的 `ITenantAppService`，只枚举启用租户，按确定性顺序创建每租户隔离 async scope，并在 yield 前完成初始化；scope 由 worker 释放。`MaxTenantsPerPoll` 有界——超限会让本轮失败，而不是静默跳过租户。`ScopedTenantOutboxScopeInitializer` 要求处理 scope 内 `ITenantContext` 可解析为 `ScopedTenantContext`。这里刻意不使用 AsyncLocal 的 `AmbientTenantContext`：producer 侧的 ambient 变更不会可靠流入消费 async-enumerator yield 的 worker 控制流。
+
+helper 不负责租户 catalog 授权，也不定义租户生命周期规则。`ITenantAppService.GetListAsync` 仍是宿主实现且未分页的契约，catalog 实现必须保证启用租户规模在运营边界内。自定义租户上下文可替换 `IOutboxTenantScopeInitializer`；自定义发现/授权规则可整体替换 `IOutboxScopeProvider`。
 
 ## Inbox 与投递语义
 
@@ -90,11 +131,15 @@ await cleanup.DeleteProcessedBeforeAsync(retention, tenantKey: tenant.TenantKey)
 
 启用清理前按最大重放/重投递窗口与隐私义务定保留期；调用节奏（cron、宿主 job）归宿主。审计侧对应原语是 `PubSoft.EntityFrameworkCore` 的 `AuditRetentionCleanup`（另支持 export-before-delete 归档）。
 
+## Worker 状态与健康接线
+
+`OutboxWorkerStatusTracker` 以单例注册，记录轮询生命周期与批次结果：最近轮询开始/完成时间、连续迭代失败次数（含异常类型名）、最近非空批次的认领/投递计数、累计投递/派发失败总数。空轮询不覆盖批次计数器，快照始终描述最近一次非空认领。快照刻意保持低基数——只有异常类型名、不含消息文本；计数跨租户聚合——`Snapshot()` 输出可安全暴露到 health 端点或 metrics 而不泄漏 payload 或租户键。宿主在其上自建健康检查：`ConsecutivePollFailures` 非零、或 `LastPollCompletedUtc` 超过宿主选定的轮询间隔倍数时报告 degraded。投递计数只是运维信号、不构成 exactly-once 证据——派发与标记投递之间崩溃仍会重投。
+
 ## Public API surface
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
-- `PubSoft.Messaging.Outbox`: `EfCoreInboxMessageProcessor<TDbContext>` `IInboxMessageProcessor` `IOutboxDispatcher` `IOutboxMessageStore` `IOutboxPublisher` `IOutboxScopeProvider` `InboxOutboxDispatcher` `InboxReceipt` `InboxRetentionCleanup<TDbContext>` `OutboxDeadLetterPolicy` `OutboxMessage` `OutboxMessageStatus` `OutboxModelBuilderExtensions` `OutboxOptions` `OutboxProcessor` `OutboxPublisher` `OutboxServiceCollectionExtensions` `PubSoftMessagingOutboxMarker`
+- `PubSoft.Messaging.Outbox`: `EfCoreInboxMessageProcessor<TDbContext>` `IInboxMessageProcessor` `IOutboxDispatcher` `IOutboxEventSerializer` `IOutboxMessageStore` `IOutboxPublisher` `IOutboxScopeProvider` `InboxOutboxDispatcher` `InboxReceipt` `InboxRetentionCleanup<TDbContext>` `OutboxDeadLetterPolicy` `OutboxEventJsonSerializer` `OutboxMessage` `OutboxMessageStatus` `OutboxModelBuilderExtensions` `OutboxOptions` `OutboxProcessor` `OutboxPublisher` `OutboxServiceCollectionExtensions` `PubSoftMessagingOutboxMarker`
 
 ## 验证
 

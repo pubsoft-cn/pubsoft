@@ -7,13 +7,15 @@ namespace PubSoft.Messaging.Outbox;
 public sealed class OutboxProcessor(
     IOutboxStore store,
     IOutboxDispatcher dispatcher,
-    ILogger<OutboxProcessor>? logger = null)
+    ILogger<OutboxProcessor>? logger = null,
+    OutboxWorkerStatusTracker? statusTracker = null)
 {
     /// <summary>Claims and dispatches one batch; returns the delivered count.</summary>
     public async Task<int> ProcessBatchAsync(CancellationToken cancellationToken = default)
     {
         var messages = await store.ClaimBatchAsync(cancellationToken).ConfigureAwait(false);
         var delivered = 0;
+        var dispatchFailures = 0;
         foreach (var message in messages)
         {
             var leaseToken = message.LeaseToken
@@ -31,11 +33,14 @@ public sealed class OutboxProcessor(
             catch (Exception exception)
             {
                 var errorCode = exception.GetType().Name;
+                dispatchFailures++;
                 await store.MarkFailedAsync(message.Id, leaseToken, errorCode, cancellationToken).ConfigureAwait(false);
                 logger?.LogWarning("Outbox dispatch failed ({ExceptionType}).", errorCode);
             }
         }
 
+        if (messages.Count > 0)
+            statusTracker?.RecordBatchCompleted(messages.Count, delivered, dispatchFailures);
         return delivered;
     }
 }

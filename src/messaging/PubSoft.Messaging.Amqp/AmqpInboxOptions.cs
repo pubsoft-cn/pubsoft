@@ -24,6 +24,12 @@ public sealed class AmqpInboxOptions
     public ushort PrefetchCount { get; set; } = 16;
     /// <summary>Reconnect delay after a broker disconnect or channel failure.</summary>
     public TimeSpan ReconnectDelay { get; set; } = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// Bounded symmetric jitter ratio applied to <see cref="ReconnectDelay"/> so replicas do not
+    /// reconnect in lockstep after a broker restart. 0 disables jitter; 0.2 samples the 80%-120% band.
+    /// </summary>
+    public double ReconnectJitterRatio { get; set; } = 0.2;
     /// <summary>Prefix stripped from the routing key to derive the event type; empty -> full key used.</summary>
     public string EventTypePrefix { get; set; } = "outbox.";
 
@@ -43,6 +49,8 @@ public sealed class AmqpInboxOptions
         ArgumentOutOfRangeException.ThrowIfEqual(PrefetchCount, (ushort)0);
         if (ReconnectDelay < TimeSpan.Zero)
             throw new ArgumentOutOfRangeException(nameof(ReconnectDelay), "Reconnect delay must not be negative.");
+        if (!double.IsFinite(ReconnectJitterRatio) || ReconnectJitterRatio is < 0 or > 1)
+            throw new ArgumentOutOfRangeException(nameof(ReconnectJitterRatio), "Reconnect jitter ratio must be a finite value between 0 and 1.");
         ArgumentNullException.ThrowIfNull(EventTypePrefix);
         return (AmqpInboxOptions)MemberwiseClone();
     }

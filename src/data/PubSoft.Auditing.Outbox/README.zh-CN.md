@@ -20,6 +20,7 @@ services.AddPubSoftAuditOutbox<AppDbContext>();
 - 版本化 snapshot payload 与请求业务事务共用同一 scoped `DbContext`——审计与业务写入原子提交
 - 到审计存储的投递为 at-least-once；宿主须运行 `IOutboxDispatcher` + 幂等消费者持久化 snapshot
 - 该 sink 不绑定此前已提交的事务——只覆盖当前 scope 内保存的工作
+- snapshot 事件使用稳定 outbox 契约键 `pubsoft.auditing.snapshot.v1`（`OutboxAuditSnapshotSink<TDbContext>.SnapshotEventType`），而不是 CLR 类型名。仍按旧 CLR-name 兼容形态匹配的消费者必须先迁移，或先排空 outbox 后再部署该版本。
 
 ## 边界
 

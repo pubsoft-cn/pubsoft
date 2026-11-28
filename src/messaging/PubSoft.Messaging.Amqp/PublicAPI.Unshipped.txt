@@ -21,6 +21,8 @@ PubSoft.Messaging.Amqp.AmqpInboxOptions.Queue.get -> string!
 PubSoft.Messaging.Amqp.AmqpInboxOptions.Queue.set -> void
 PubSoft.Messaging.Amqp.AmqpInboxOptions.ReconnectDelay.get -> System.TimeSpan
 PubSoft.Messaging.Amqp.AmqpInboxOptions.ReconnectDelay.set -> void
+PubSoft.Messaging.Amqp.AmqpInboxOptions.ReconnectJitterRatio.get -> double
+PubSoft.Messaging.Amqp.AmqpInboxOptions.ReconnectJitterRatio.set -> void
 PubSoft.Messaging.Amqp.AmqpInboxSubscriber
 PubSoft.Messaging.Amqp.AmqpInboxSubscriber.AmqpInboxSubscriber(PubSoft.Messaging.Amqp.AmqpInboxOptions! options, PubSoft.Messaging.Outbox.IInboxMessageProcessor! inbox, System.Func<string!, string!, System.Threading.CancellationToken, System.Threading.Tasks.Task!>! handler, Microsoft.Extensions.Logging.ILogger<PubSoft.Messaging.Amqp.AmqpInboxSubscriber!>? logger = null) -> void
 PubSoft.Messaging.Amqp.AmqpOutboxDispatcher

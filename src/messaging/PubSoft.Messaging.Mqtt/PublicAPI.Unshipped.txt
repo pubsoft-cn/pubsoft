@@ -1,4 +1,6 @@
 #nullable enable
+PubSoft.Messaging.Mqtt.MqttInboxOptions.ReconnectJitterRatio.get -> double
+PubSoft.Messaging.Mqtt.MqttInboxOptions.ReconnectJitterRatio.set -> void
 PubSoft.Messaging.Mqtt.MqttOutboxDispatcher
 PubSoft.Messaging.Mqtt.MqttOutboxDispatcher.DisposeAsync() -> System.Threading.Tasks.ValueTask
 PubSoft.Messaging.Mqtt.MqttOutboxDispatcher.DispatchAsync(PubSoft.Messaging.Outbox.OutboxMessage! message, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!

@@ -32,7 +32,7 @@ public sealed class CatalogItem : FullAuditedAggregateRoot
 
 ## Scope 契约
 
-`IMultiTenant`/`IMemberScoped`/`ISoftDelete` 描述实体字段；`ITenantContext`/`IMemberScopeContext` 为只读 scope 契约——本包不决定其填充方式。租户/成员的选择、可信来源与授权归宿主。
+`IMultiTenant`/`IMemberScoped`/`ISoftDelete` 描述实体字段；`ITenantContext`/`IMemberScopeContext` 为只读 scope 契约——本包不决定其填充方式。`ScopedTenantContext` 是面向 worker 自有 DI scope 的一次性可变 `ITenantContext`，其初始化可跨 async 控制流交接存活。租户/成员的选择、可信来源与授权归宿主。
 
 `DataScopeDimensionRegistry` 按序数不区分大小写存储维度名，`Dimensions` 返回只读快照，注册线程安全且拒绝空名；`DataScopeDimension` 将 allowed IDs 防御性复制为只读集合：
 
@@ -63,4 +63,4 @@ var scope = new DataScopeDimension(
 
 _Generated from `PublicAPI.Unshipped.txt`（由 PublicApiAnalyzers 强制执行）。_
 
-- `PubSoft.Domain`: `AggregateRoot<TKey>` `AmbientMemberScopeContext` `AmbientTenantContext` `AuditedAggregateRoot` `AuditedEntity<TKey>` `CreationAuditedAggregateRoot` `CreationAuditedEntity<TKey>` `DataScopeAccessEvaluator` `DataScopeDimension` `DataScopeDimensionRegistry` `Entity<TKey>` `FullAuditedAggregateRoot` `FullAuditedEntity<TKey>` `IDataScopeDimensionRegistry` `IMemberScopeContext` `IMemberScoped` `IMultiTenant` `IPubSoftSaveParticipant` `IReadOnlyRepository<TEntity, TKey>` `IRepository<TEntity, TKey>` `IRoleDataScopeProvider` `ISoftDelete` `ITenantContext` `PermissionGrantRecord` `PermissionModule` `PermissionRole` `RoleDataScope` `SubjectPermissionRole` `LegacyIdMap`
+- `PubSoft.Domain`: `AggregateRoot<TKey>` `AmbientMemberScopeContext` `AmbientTenantContext` `AuditedAggregateRoot` `AuditedEntity<TKey>` `CreationAuditedAggregateRoot` `CreationAuditedEntity<TKey>` `DataScopeAccessEvaluator` `DataScopeDimension` `DataScopeDimensionRegistry` `Entity<TKey>` `FullAuditedAggregateRoot` `FullAuditedEntity<TKey>` `IDataScopeDimensionRegistry` `IMemberScopeContext` `IMemberScoped` `IMultiTenant` `IPubSoftSaveParticipant` `IReadOnlyRepository<TEntity, TKey>` `IRepository<TEntity, TKey>` `IRoleDataScopeProvider` `ISoftDelete` `ITenantContext` `ScopedTenantContext` `PermissionGrantRecord` `PermissionModule` `PermissionRole` `RoleDataScope` `SubjectPermissionRole` `LegacyIdMap`

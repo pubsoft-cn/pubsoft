@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PubSoft.Core;
 using PubSoft.Messaging.Outbox;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -85,9 +86,10 @@ public sealed class AmqpInboxSubscriber : BackgroundService
             }
             catch (Exception exception) when (!stoppingToken.IsCancellationRequested) // pubsoft:exempt PUBSOFT045 "broker lost — backoff then the loop reconnects"
             {
+                var reconnectDelay = BoundedJitter.Apply(_options.ReconnectDelay, _options.ReconnectJitterRatio);
                 _logger?.LogWarning(exception,
-                    "AMQP inbox connection lost; reconnecting in {Delay}.", _options.ReconnectDelay);
-                await Task.Delay(_options.ReconnectDelay, stoppingToken).ConfigureAwait(false);
+                    "AMQP inbox connection lost; reconnecting in {Delay}.", reconnectDelay);
+                await Task.Delay(reconnectDelay, stoppingToken).ConfigureAwait(false);
             }
         }
     }

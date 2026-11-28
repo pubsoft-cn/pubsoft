@@ -35,7 +35,7 @@ public sealed class OutboxAuditSinkWaveTests
         await sink.WriteAsync(snap);
         var msg = Assert.Single(await c.Messages.ToListAsync());
         Assert.Equal(OutboxAuditSnapshotSink<Ctx>.TargetModule, msg.TargetModule);
-        Assert.Contains("AuditSnapshotOutboxEvent", msg.EventType!);
+        Assert.Equal(OutboxAuditSnapshotSink<Ctx>.SnapshotEventType, msg.EventType);
         Assert.Contains("/api/orders", msg.PayloadJson); // snapshot serialized into payload
         Assert.Equal(OutboxMessageStatus.Pending, msg.Status);
     }

@@ -46,7 +46,7 @@ public sealed class AuditOutboxTests
         var message = await context.Set<OutboxMessage>().SingleAsync();
         Assert.Equal(42, message.TenantId);
         Assert.Equal(OutboxAuditSnapshotSink<TestAuditDbContext>.TargetModule, message.TargetModule);
-        Assert.Equal(typeof(AuditSnapshotOutboxEvent).FullName, message.EventType);
+        Assert.Equal(OutboxAuditSnapshotSink<TestAuditDbContext>.SnapshotEventType, message.EventType);
         var payload = System.Text.Json.JsonSerializer.Deserialize<AuditSnapshotOutboxEvent>(message.PayloadJson);
         Assert.NotNull(payload);
         Assert.Equal(1, payload.SchemaVersion);

@@ -57,48 +57,59 @@ The worker is opt-in. Registering `IOutboxDispatcher` is the host's responsibili
 await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 dbContext.Orders.Add(order);
 await outboxPublisher.PublishAsync(new OrderPlaced(order.Id),
-    targetModule: "billing", aggregateKey: order.Id.ToString(), cancellationToken: cancellationToken);
+    targetModule: "billing",
+    aggregateKey: order.Id.ToString(),
+    eventType: "orders.order-placed.v1",
+    cancellationToken: cancellationToken);
 await dbContext.SaveChangesAsync(cancellationToken);
 await transaction.CommitAsync(cancellationToken);
 ```
 
 The publisher does not save or commit. If business data was already committed in another transaction/context, this API does not retroactively make the two writes atomic.
 
-## Tenant Scopes
+## Event Contract Keys and Payload Serialization
 
-The worker processes only rows visible to the current scoped `ITenantContext`. With no `IOutboxScopeProvider`, each poll uses one ordinary DI scope and therefore one tenant context. Multi-tenant hosts must register an `IOutboxScopeProvider` that yields correctly initialized async scopes for the host and each tenant they intend to process. The package does not discover tenants or decide which tenants the worker is authorized to enumerate.
+`eventType` is required for durable events. It is the stable, versioned contract key written to the outbox row and reused by the built-in MQTT/AMQP dispatchers for topic/routing-key derivation. Treat it as part of the cross-service message contract, not as a CLR implementation detail:
 
 ```csharp
-using Microsoft.Extensions.DependencyInjection;
-using PubSoft.Messaging.Outbox;
-
-public sealed class TenantOutboxScopeProvider(
-    IServiceScopeFactory scopeFactory,
-    ITenantCatalog tenantCatalog) : IOutboxScopeProvider
-{
-    public async IAsyncEnumerable<AsyncServiceScope> CreateScopesAsync(
-        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        await foreach (var tenantId in tenantCatalog.GetEnabledTenantIdsAsync(cancellationToken))
-        {
-            var scope = scopeFactory.CreateAsyncScope();
-            try
-            {
-                scope.ServiceProvider.GetRequiredService<ITenantScopeInitializer>().SetTenant(tenantId);
-            }
-            catch
-            {
-                await scope.DisposeAsync();
-                throw;
-            }
-
-            yield return scope;
-        }
-    }
-}
+await outboxPublisher.PublishAsync(
+    new OrderPlaced(order.Id),
+    eventType: "orders.order-placed.v1",
+    cancellationToken: cancellationToken);
 ```
 
-The example's catalog and initializer are host contracts, not PubSoft APIs. Ensure each yielded scope is disposed by the worker and that its `ITenantContext` is initialized before resolving `OutboxProcessor`.
+Explicit keys are bounded: maximum 256 characters, no whitespace/control characters, no transport wildcard characters (`*`, `#`, `+`), and no leading `$`. CLR type-name inference is deliberately not supported: it couples routing to refactors/assembly names and can be unsafe for nested CLR type names. Consumers keyed to older CLR-name rows must be migrated or those rows drained/versioned before deploying this version.
+
+Payload serialization uses System.Text.Json by default. Hosts that need explicit JSON policy or source-generated metadata for trimmed/AOT deployments can register `IOutboxEventSerializer`; the scoped publisher resolves it when present:
+
+```csharp
+services.AddSingleton<IOutboxEventSerializer>(
+    new OutboxEventJsonSerializer(new JsonSerializerOptions
+    {
+        TypeInfoResolver = AppJsonContext.Default,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    }));
+```
+
+The serializer must cover every event type published through the outbox. It intentionally serializes using the runtime event type; invalid/empty payloads and oversized serialized payloads still fail closed.
+
+## Tenant Scopes
+
+The worker processes only rows visible to the current scoped `ITenantContext`. With no `IOutboxScopeProvider`, each poll uses one ordinary DI scope and therefore one tenant context. Multi-tenant hosts can either register their own provider or opt into the catalog-backed helper:
+
+```csharp
+services.AddScoped<ScopedTenantContext>();
+services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<ScopedTenantContext>());
+services.AddPubSoftTenantOutboxScopeProvider(options =>
+{
+    options.IncludeHostScope = true;
+    options.MaxTenantsPerPoll = 256;
+});
+```
+
+`TenantOutboxScopeProvider` resolves the host's `ITenantAppService` inside a short-lived catalog scope, enumerates enabled tenants only, sorts them deterministically, creates one isolated async scope per tenant, initializes it before yield, and lets the worker dispose that scope. `MaxTenantsPerPoll` is bounded; exceeding it fails the poll instead of silently skipping tenants. `ScopedTenantOutboxScopeInitializer` requires `ITenantContext` to resolve to `ScopedTenantContext` in the processing scope. Async-local `AmbientTenantContext` is deliberately not used here: producer-side ambient changes do not reliably flow to the worker consuming an async-enumerator yield.
+
+The helper does not authorize the tenant catalog or define tenant lifecycle rules. `ITenantAppService.GetListAsync` is still a host-implemented, unpaged contract, so the catalog implementation must keep the enabled fleet within operational bounds. Custom tenant context implementations can replace `IOutboxTenantScopeInitializer`; custom discovery/authorization rules can replace `IOutboxScopeProvider` entirely.
 
 ## Inbox and Delivery Semantics
 
@@ -121,11 +132,15 @@ await cleanup.DeleteProcessedBeforeAsync(retention, tenantKey: tenant.TenantKey)
 
 Define the retention window from the maximum replay/redelivery window and privacy obligations before enabling cleanup; invocation cadence (cron, host job) is the host's responsibility. The audit-log counterpart `AuditRetentionCleanup` in `PubSoft.EntityFrameworkCore` additionally supports archive-before-delete via an export callback.
 
+## Worker Status and Health Wiring
+
+`OutboxWorkerStatusTracker` is registered as a singleton and records poll lifecycle and batch outcomes: last poll start/completion timestamps, consecutive iteration failures with the exception type name, last non-empty batch claimed/delivered counts, and cumulative delivered/dispatch-failure totals. Empty polls do not overwrite the last-batch counters, so the snapshot keeps describing the most recent non-empty claim. The snapshot is deliberately low-cardinality — exception type names only, never message text; counts aggregate across tenant scopes — so `Snapshot()` output is safe to surface in health endpoints or metrics without leaking payloads or tenant keys. Hosts wire their own health check on top: report degraded when `ConsecutivePollFailures` is non-zero or `LastPollCompletedUtc` is older than a host-chosen multiple of the poll interval. Delivery counts are operational signals, not exactly-once evidence — a crash between dispatch and mark-delivered still redelivers.
+
 ## Public API surface
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
-- `PubSoft.Messaging.Outbox`: `EfCoreInboxMessageProcessor<TDbContext>` `EfCoreOutboxPublisher<TDbContext>` `EfCoreOutboxStore<TDbContext>` `IInboxMessageProcessor` `IOutboxDispatcher` `IOutboxPublisher` `IOutboxScopeProvider` `IOutboxStore` `InboxOutboxDispatcher` `InboxReceipt` `InboxRetentionCleanup<TDbContext>` `OutboxBackgroundService` `OutboxMessage` `OutboxMessageStatus` `OutboxModelBuilderExtensions` `OutboxOptions` `OutboxProcessor` `OutboxServiceCollectionExtensions`
+- `PubSoft.Messaging.Outbox`: `EfCoreInboxMessageProcessor<TDbContext>` `EfCoreOutboxPublisher<TDbContext>` `EfCoreOutboxStore<TDbContext>` `IInboxMessageProcessor` `IOutboxDispatcher` `IOutboxEventSerializer` `IOutboxPublisher` `IOutboxScopeProvider` `IOutboxStore` `InboxOutboxDispatcher` `InboxReceipt` `InboxRetentionCleanup<TDbContext>` `OutboxBackgroundService` `OutboxEventJsonSerializer` `OutboxMessage` `OutboxMessageStatus` `OutboxModelBuilderExtensions` `OutboxOptions` `OutboxProcessor` `OutboxServiceCollectionExtensions`
 
 <!-- pubsoft:api-surface:start -->
 
@@ -137,11 +152,12 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 |---|---|
 | `AddPubSoftOutbox` |
 | `AddPubSoftOutboxWorker` |
+| `AddPubSoftTenantOutboxScopeProvider` |
 | `ConfigurePubSoftOutbox` |
 
 **(options & records)**
 
-`AggregateKey`, `AttemptCount`, `BaseRetryDelay`, `BatchSize`, `ConsumerName`, `CorrelationId`, `DeliveredAt`, `EventType`, `LastErrorCode`, `LeaseDuration`, `LeaseExpiresAt`, `LeaseToken`, `MaxAttempts`, `MaximumPayloadCharacters`, `MaxRetryDelay`, `MessageId`, `NextAttemptAt`, `OccurredAt`, `PayloadJson`, `PollInterval`, `ProcessedAt`, `Status`, `TargetModule`, `TenantId`, `TenantKey`
+`AggregateKey`, `AttemptCount`, `BaseRetryDelay`, `BatchSize`, `ConsecutivePollFailures`, `ConsumerName`, `CorrelationId`, `DeliveredAt`, `EventType`, `IncludeHostScope`, `LastBatchClaimedCount`, `LastBatchDeliveredCount`, `LastErrorCode`, `LastErrorType`, `LastPollCompletedUtc`, `LastPollStartedUtc`, `LeaseDuration`, `LeaseExpiresAt`, `LeaseToken`, `MaxAttempts`, `MaximumPayloadCharacters`, `MaxRetryDelay`, `MaxTenantsPerPoll`, `MessageId`, `NextAttemptAt`, `OccurredAt`, `PayloadJson`, `PollInterval`, `ProcessedAt`, `Status`, `TargetModule`, `TenantId`, `TenantKey`, `TotalDelivered`, `TotalDispatchFailures`, `TotalPolls`
 
 <!-- pubsoft:api-surface:end -->
 

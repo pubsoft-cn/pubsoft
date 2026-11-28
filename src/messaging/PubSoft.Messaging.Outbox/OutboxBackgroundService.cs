@@ -10,13 +10,16 @@ public sealed class OutboxBackgroundService(
     IServiceScopeFactory scopeFactory,
     OutboxOptions options,
     ILogger<OutboxBackgroundService>? logger = null,
-    IOutboxScopeProvider? outboxScopeProvider = null) : BackgroundService
+    IOutboxScopeProvider? outboxScopeProvider = null,
+    OutboxWorkerStatusTracker? statusTracker = null) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
             var delivered = 0;
+            statusTracker?.RecordPollStarted();
+            var iterationFailed = false;
             try
             {
                 if (outboxScopeProvider is null)
@@ -44,6 +47,7 @@ public sealed class OutboxBackgroundService(
                         }
                         catch (Exception exception)
                         {
+                            iterationFailed = true;
                             logger?.LogWarning(
                                 "Outbox tenant scope iteration failed ({ExceptionType}).",
                                 exception.GetType().Name);
@@ -57,8 +61,13 @@ public sealed class OutboxBackgroundService(
             }
             catch (Exception exception)
             {
+                iterationFailed = true;
                 logger?.LogWarning("Outbox worker iteration failed ({ExceptionType}).", exception.GetType().Name);
+                statusTracker?.RecordPollFailure(exception.GetType().Name);
             }
+
+            if (!iterationFailed)
+                statusTracker?.RecordPollSucceeded();
 
             if (delivered == 0)
             {

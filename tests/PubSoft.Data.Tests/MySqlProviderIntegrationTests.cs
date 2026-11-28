@@ -59,7 +59,7 @@ public sealed class MySqlProviderIntegrationTests
         {
             await setup.Database.EnsureCreatedAsync();
             await new EfCoreOutboxPublisher<IntegrationDbContext>(setup, PubSoft.Testing.TestIds.Shared)
-                .PublishAsync(new TestEvent(1));
+                .PublishAsync(new TestEvent(1), "tests.test-event.v1");
             await setup.SaveChangesAsync();
         }
 
@@ -86,7 +86,7 @@ public sealed class MySqlProviderIntegrationTests
         await using var context = new IntegrationDbContext(options, new TestTenantContext(73));
         await context.Database.EnsureCreatedAsync();
         await new EfCoreOutboxPublisher<IntegrationDbContext>(context, PubSoft.Testing.TestIds.Shared, outboxOptions, clock)
-            .PublishAsync(new TestEvent(7));
+            .PublishAsync(new TestEvent(7), "tests.test-event.v1");
         await context.SaveChangesAsync();
         var store = new EfCoreOutboxStore<IntegrationDbContext>(context, outboxOptions, clock);
 

@@ -50,7 +50,7 @@ public sealed class OutboxTests
             seedScope.ServiceProvider.GetRequiredService<MutableTenantContext>().TenantId = tenantId;
             var context = seedScope.ServiceProvider.GetRequiredService<OutboxDbContext>();
             await new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared)
-                .PublishAsync(new OrderPlaced((int)tenantId));
+                .PublishAsync(new OrderPlaced((int)tenantId), "orders.order-placed.v1");
             await context.SaveChangesAsync();
         }
 
@@ -109,7 +109,7 @@ public sealed class OutboxTests
         var order = new OrderRecord { Id = 5, Name = "created" };
         context.Orders.Add(order);
 
-        var messageId = await publisher.PublishAsync(new OrderPlaced(5), "billing", "order:5");
+        var messageId = await publisher.PublishAsync(new OrderPlaced(5), "orders.order-placed.v1", targetModule: "billing", aggregateKey: "order:5");
 
         Assert.Empty(await context.Orders.IgnoreQueryFilters().ToListAsync());
         Assert.Empty(await context.OutboxMessages.IgnoreQueryFilters().ToListAsync());
@@ -137,14 +137,14 @@ public sealed class OutboxTests
         {
             await otherTenant.Database.EnsureCreatedAsync();
             otherTenantMessageId = await new EfCoreOutboxPublisher<OutboxDbContext>(otherTenant, PubSoft.Testing.TestIds.Shared)
-                .PublishAsync(new OrderPlaced(41));
+                .PublishAsync(new OrderPlaced(41), "orders.order-placed.v1");
             await otherTenant.SaveChangesAsync();
         }
 
         await using (var currentTenant = new OutboxDbContext(options, new TenantContext(73)))
         {
             var currentTenantMessageId = await new EfCoreOutboxPublisher<OutboxDbContext>(currentTenant, PubSoft.Testing.TestIds.Shared)
-                .PublishAsync(new OrderPlaced(73));
+                .PublishAsync(new OrderPlaced(73), "orders.order-placed.v1");
             await currentTenant.SaveChangesAsync();
 
             var claimed = Assert.Single(await new EfCoreOutboxStore<OutboxDbContext>(currentTenant)
@@ -167,7 +167,7 @@ public sealed class OutboxTests
         var options = new DbContextOptionsBuilder<OutboxDbContext>().UseSqlite(connection).Options;
         await using var context = new OutboxDbContext(options, new TenantContext(73));
         await context.Database.EnsureCreatedAsync();
-        await new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared).PublishAsync(new OrderPlaced(75));
+        await new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared).PublishAsync(new OrderPlaced(75), "orders.order-placed.v1");
         await context.SaveChangesAsync();
         var message = await context.OutboxMessages.SingleAsync();
         var dispatcher = new TestInboxOutboxDispatcher(
@@ -312,7 +312,7 @@ public sealed class OutboxTests
         await using (var transaction = await context.Database.BeginTransactionAsync())
         {
             context.Orders.Add(new OrderRecord { Id = 6, Name = "rolled back" });
-            await new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared).PublishAsync(new OrderPlaced(6));
+            await new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared).PublishAsync(new OrderPlaced(6), "orders.order-placed.v1");
             await context.SaveChangesAsync();
             await transaction.RollbackAsync();
         }
@@ -333,7 +333,7 @@ public sealed class OutboxTests
         await using var context = new OutboxDbContext(options, new TenantContext(73));
         await context.Database.EnsureCreatedAsync();
         await new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared, outboxOptions, clock)
-            .PublishAsync(new OrderPlaced(7));
+            .PublishAsync(new OrderPlaced(7), "orders.order-placed.v1");
         await context.SaveChangesAsync();
         var store = new EfCoreOutboxStore<OutboxDbContext>(context, outboxOptions, clock);
 
@@ -368,7 +368,7 @@ public sealed class OutboxTests
         await using var context = new OutboxDbContext(options, new TenantContext(73));
         await context.Database.EnsureCreatedAsync();
         await new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared, outboxOptions, clock)
-            .PublishAsync(new OrderPlaced(70));
+            .PublishAsync(new OrderPlaced(70), "orders.order-placed.v1");
         await context.SaveChangesAsync();
         var store = new EfCoreOutboxStore<OutboxDbContext>(context, outboxOptions, clock);
 
@@ -409,7 +409,7 @@ public sealed class OutboxTests
         await using var context = new OutboxDbContext(options, new TenantContext(73));
         await context.Database.EnsureCreatedAsync();
         await new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared, outboxOptions, clock)
-            .PublishAsync(new OrderPlaced(8));
+            .PublishAsync(new OrderPlaced(8), "orders.order-placed.v1");
         await context.SaveChangesAsync();
         var store = new EfCoreOutboxStore<OutboxDbContext>(context, outboxOptions, clock);
 
@@ -445,7 +445,7 @@ public sealed class OutboxTests
         await using var context = new OutboxDbContext(options, new TenantContext(73));
         await context.Database.EnsureCreatedAsync();
         await new EfCoreOutboxPublisher<OutboxDbContext>(context, PubSoft.Testing.TestIds.Shared, outboxOptions, clock)
-            .PublishAsync(new OrderPlaced(9));
+            .PublishAsync(new OrderPlaced(9), "orders.order-placed.v1");
         await context.SaveChangesAsync();
         var store = new EfCoreOutboxStore<OutboxDbContext>(context, outboxOptions, clock);
 

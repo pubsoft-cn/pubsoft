@@ -3,6 +3,7 @@ using MQTTnet;
 using MQTTnet.Packets;
 using MQTTnet.Protocol;
 using Microsoft.Extensions.Hosting;
+using PubSoft.Core;
 using PubSoft.Messaging.Outbox;
 
 namespace PubSoft.Messaging.Mqtt;
@@ -61,7 +62,7 @@ public sealed class MqttInboxSubscriber : BackgroundService
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
             catch (Exception) when (!stoppingToken.IsCancellationRequested) // pubsoft:exempt PUBSOFT045 "broker lost — backoff then the loop reconnects"
             {
-                await Task.Delay(_options.ReconnectDelay, stoppingToken).ConfigureAwait(false);
+                await Task.Delay(BoundedJitter.Apply(_options.ReconnectDelay, _options.ReconnectJitterRatio), stoppingToken).ConfigureAwait(false);
             }
         }
     }
@@ -83,17 +84,32 @@ public sealed class MqttInboxSubscriber : BackgroundService
 
     private async Task HandleAsync(MqttApplicationMessageReceivedEventArgs e, CancellationToken ct)
     {
-        var messageId = ExtractMessageId(e.ApplicationMessage);
-        if (messageId is null)
-            return; // not an outbox message - ack and drop
-        var eventType = e.ApplicationMessage.Topic.StartsWith(_options.EventTypePrefix, StringComparison.Ordinal)
-            ? e.ApplicationMessage.Topic[_options.EventTypePrefix.Length..]
-            : e.ApplicationMessage.Topic;
-        var payload = e.ApplicationMessage.Payload.IsEmpty ? "" : Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
-        await _inbox.ProcessOnceAsync(
-            _options.ConsumerName,
-            messageId.Value,
-            token => _handler(eventType, payload, token),
-            ct).ConfigureAwait(false);
+        e.AutoAcknowledge = false;
+        try
+        {
+            var messageId = ExtractMessageId(e.ApplicationMessage);
+            if (messageId is null)
+            {
+                await e.AcknowledgeAsync(ct).ConfigureAwait(false);
+                return;
+            }
+
+            var eventType = e.ApplicationMessage.Topic.StartsWith(_options.EventTypePrefix, StringComparison.Ordinal)
+                ? e.ApplicationMessage.Topic[_options.EventTypePrefix.Length..]
+                : e.ApplicationMessage.Topic;
+            var payload = e.ApplicationMessage.Payload.IsEmpty ? "" : Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+            await _inbox.ProcessOnceAsync(
+                _options.ConsumerName,
+                messageId.Value,
+                token => _handler(eventType, payload, token),
+                ct).ConfigureAwait(false);
+            e.IsHandled = true;
+            await e.AcknowledgeAsync(ct).ConfigureAwait(false);
+        }
+        catch
+        {
+            e.ProcessingFailed = true;
+            throw;
+        }
     }
 }

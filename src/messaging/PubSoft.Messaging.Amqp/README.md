@@ -60,7 +60,7 @@ poison-message redelivery loops with a dead-letter exchange or a quorum-queue
 dropped (not outbox traffic). `DeclareTopology = false` switches to
 externally-managed topology — the queue must then already exist and be bound.
 The reconnect loop re-subscribes after connection loss with `ReconnectDelay`
-backoff.
+backoff. The reconnect delay carries bounded symmetric jitter (`ReconnectJitterRatio`, default 0.2 = the 80%-120% band) so a replica fleet does not reconnect in lockstep after a broker restart; set the ratio to 0 for a deterministic cadence.
 
 ## Delivery guarantees and residuals
 
@@ -90,6 +90,6 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
-`BindingKey`, `BrokerUri`, `ConsumerName`, `DeclareTopology`, `EventTypePrefix`, `Exchange`, `ExchangeType`, `Mandatory`, `MaxPayloadBytes`, `PrefetchCount`, `PublishTimeout`, `Queue`, `ReconnectDelay`, `RoutingKeyPrefix`
+`BindingKey`, `BrokerUri`, `ConsumerName`, `DeclareTopology`, `EventTypePrefix`, `Exchange`, `ExchangeType`, `Mandatory`, `MaxPayloadBytes`, `PrefetchCount`, `PublishTimeout`, `Queue`, `ReconnectDelay`, `ReconnectJitterRatio`, `RoutingKeyPrefix`
 
 <!-- pubsoft:api-surface:end -->

@@ -18,6 +18,7 @@ using PubSoft.Messaging.Outbox;
 using PubSoft.Messaging;
 using PubSoft.Mapping;
 using PubSoft.Monitoring;
+using PubSoft.Monitoring.OpenTelemetry;
 using PubSoft.Monitoring.Scheduling;
 using PubSoft.MultiTenancy;
 using PubSoft.Scheduling;
@@ -129,10 +130,14 @@ if (!typeof(AuditSnapshotOutboxEvent).IsSealed || !typeof(OutboxAuditSnapshotSin
     throw new InvalidOperationException("Audit Outbox package smoke check failed.");
 if (!typeof(AuditLogRecord).IsSealed || !typeof(EfCoreAuditSnapshotSink<>).IsGenericTypeDefinition)
     throw new InvalidOperationException("EF audit persistence package smoke check failed.");
+if (!typeof(EfCoreTransactionExecutor).IsAbstract || !typeof(EfCoreTransactionCommitVerificationException).IsSealed)
+    throw new InvalidOperationException("EF transaction executor smoke check failed.");
 if (!typeof(IDomainEventDispatcher).IsInterface || !typeof(DomainEventBackgroundService).IsSealed)
     throw new InvalidOperationException("Events package smoke check failed.");
 if (!typeof(IOutboxPublisher).IsInterface || !typeof(OutboxMessage).IsSealed)
     throw new InvalidOperationException("Outbox package smoke check failed.");
+if (!typeof(IOutboxEventSerializer).IsInterface || !typeof(OutboxEventJsonSerializer).IsSealed)
+    throw new InvalidOperationException("Outbox serializer package smoke check failed.");
 if (!typeof(IOutboxScopeProvider).IsInterface)
     throw new InvalidOperationException("Outbox tenant scope provider smoke check failed.");
 if (!typeof(IInboxMessageProcessor).IsInterface || !typeof(InboxReceipt).IsSealed)
@@ -159,6 +164,8 @@ if (!typeof(CachedHealthCheckAggregator).IsSealed)
     throw new InvalidOperationException("Cached health aggregation smoke check failed.");
 if (!typeof(ParallelHealthCheckAggregator).IsSealed)
     throw new InvalidOperationException("Parallel health aggregation smoke check failed.");
+if (!typeof(OpenTelemetryServiceCollectionExtensions).IsAbstract || !typeof(PubSoftOpenTelemetryOptions).IsSealed)
+    throw new InvalidOperationException("Monitoring OpenTelemetry package smoke check failed.");
 if (!typeof(AlertRuleProcessor).IsSealed || !typeof(AlertConditionType).IsEnum)
     throw new InvalidOperationException("Monitoring scheduler integration smoke check failed.");
 var tenantSmoke = new Tenant(1, "consumer", "Consumer Tenant");

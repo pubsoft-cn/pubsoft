@@ -1,4 +1,5 @@
 #nullable enable
+const PubSoft.Auditing.Outbox.OutboxAuditSnapshotSink<TDbContext>.SnapshotEventType = "pubsoft.auditing.snapshot.v1" -> string!
 PubSoft.Auditing.Outbox.AuditOutboxServiceCollectionExtensions
 PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent
 PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent.<Clone>$() -> PubSoft.Auditing.Outbox.AuditSnapshotOutboxEvent!

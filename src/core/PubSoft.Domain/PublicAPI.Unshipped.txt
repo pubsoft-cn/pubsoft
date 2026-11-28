@@ -200,6 +200,10 @@ PubSoft.Domain.RoleDataScope.ScopeId.get -> long
 PubSoft.Domain.RoleDataScope.ScopeId.set -> void
 PubSoft.Domain.RoleDataScope.TenantId.get -> long?
 PubSoft.Domain.RoleDataScope.TenantId.set -> void
+PubSoft.Domain.ScopedTenantContext
+PubSoft.Domain.ScopedTenantContext.Initialize(long? tenantId) -> void
+PubSoft.Domain.ScopedTenantContext.ScopedTenantContext() -> void
+PubSoft.Domain.ScopedTenantContext.TenantId.get -> long?
 PubSoft.Domain.SubjectPermissionRole
 PubSoft.Domain.SubjectPermissionRole.ClientCode.get -> string!
 PubSoft.Domain.SubjectPermissionRole.ClientCode.set -> void

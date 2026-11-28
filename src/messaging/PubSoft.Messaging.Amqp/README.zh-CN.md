@@ -56,8 +56,7 @@ handler 或 processor 失败会 nack + `requeue: true`，broker 会重新投递�
 重投循环用死信 exchange 或 quorum 队列 `x-delivery-limit` 收敛。缺少
 `x-outbox-id` header 的投递会被 ack 后丢弃（非 outbox 流量）。
 `DeclareTopology = false` 切换为外部托管拓扑——队列须已存在并完成绑定。
-断线后按 `ReconnectDelay` 退避重连并重新订阅。
-
+断线后按 `ReconnectDelay` 退避重连并重新订阅。 重连延迟带有有界对称抖动（`ReconnectJitterRatio`，默认 0.2 即 80%-120% 区间），broker 重启后副本群不会同步重连；比率设 0 可恢复固定节拍。
 ## 投递保障与边界
 
 | 保障 | 机制 |

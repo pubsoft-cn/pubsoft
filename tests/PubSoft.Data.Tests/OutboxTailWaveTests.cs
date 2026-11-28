@@ -33,7 +33,7 @@ public sealed class OutboxTailWaveTests
     {
         using var ctx = Db();
         var pub = new EfCoreOutboxPublisher<Ctx>(ctx, PubSoft.Testing.TestIds.Shared);
-        var id = await pub.PublishAsync(new { orderId = 1 });
+        var id = await pub.PublishAsync(new { orderId = 1 }, "tests.order-created.v1");
         await ctx.SaveChangesAsync();
         var saved = await ctx.Messages.FindAsync(id);
         Assert.NotNull(saved);
@@ -50,7 +50,7 @@ public sealed class OutboxTailWaveTests
     {
         using var ctx = Db();
         var pub = new EfCoreOutboxPublisher<Ctx>(ctx, PubSoft.Testing.TestIds.Shared);
-        var id = await pub.PublishAsync(new { orderId = 1 }, correlationId: "corr-42");
+        var id = await pub.PublishAsync(new { orderId = 1 }, "tests.order-created.v1", correlationId: "corr-42");
         await ctx.SaveChangesAsync();
         var saved = await ctx.Messages.FindAsync(id);
         Assert.Equal("corr-42", saved!.CorrelationId);
@@ -71,7 +71,7 @@ public sealed class OutboxTailWaveTests
         using var activity = source.StartActivity("op");
         Assert.NotNull(activity);
 
-        var id = await pub.PublishAsync(new { orderId = 1 });
+        var id = await pub.PublishAsync(new { orderId = 1 }, "tests.order-created.v1");
         await ctx.SaveChangesAsync();
         var saved = await ctx.Messages.FindAsync(id);
         Assert.Equal(activity!.TraceId.ToString(), saved!.CorrelationId);
@@ -80,16 +80,79 @@ public sealed class OutboxTailWaveTests
     private sealed class OrderEvent { public long OrderId { get; init; } }
 
     [Fact]
-    public async Task PublisherSerializesEventType()
+    public async Task PublisherPersistsContractKeyAndDefaultPayload()
     {
         using var ctx = Db();
         var pub = new EfCoreOutboxPublisher<Ctx>(ctx, PubSoft.Testing.TestIds.Shared);
-        var id = await pub.PublishAsync(new OrderEvent { OrderId = 9 });
+        var id = await pub.PublishAsync(new OrderEvent { OrderId = 9 }, "orders.order-created.v1");
         await ctx.SaveChangesAsync();
         var saved = await ctx.Messages.FindAsync(id);
         Assert.NotNull(saved!.EventType);
-        Assert.Contains("OrderEvent", saved.EventType);
+        Assert.Equal("orders.order-created.v1", saved.EventType);
         Assert.Contains("OrderId", saved.PayloadJson); // default serializer keeps PascalCase
+    }
+
+    [Fact]
+    public async Task PublisherUsesExplicitStableEventType()
+    {
+        using var ctx = Db();
+        var pub = new EfCoreOutboxPublisher<Ctx>(ctx, PubSoft.Testing.TestIds.Shared);
+        var id = await pub.PublishAsync(
+            new OrderEvent { OrderId = 11 },
+            eventType: "orders.order-created.v1");
+        await ctx.SaveChangesAsync();
+
+        var saved = await ctx.Messages.FindAsync(id);
+        Assert.Equal("orders.order-created.v1", saved!.EventType);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("bad\nkey")]
+    [InlineData("orders.order-created.*")]
+    [InlineData("orders/order-created/+")]
+    [InlineData("$orders.order-created.v1")]
+    public async Task PublisherRejectsInvalidExplicitEventType(string eventType)
+    {
+        using var ctx = Db();
+        var pub = new EfCoreOutboxPublisher<Ctx>(ctx, PubSoft.Testing.TestIds.Shared);
+
+        await Assert.ThrowsAnyAsync<ArgumentException>(() => pub.PublishAsync(
+            new OrderEvent { OrderId = 12 },
+            eventType: eventType));
+    }
+
+    [Fact]
+    public async Task PublisherRejectsTooLongExplicitEventType()
+    {
+        using var ctx = Db();
+        var pub = new EfCoreOutboxPublisher<Ctx>(ctx, PubSoft.Testing.TestIds.Shared);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => pub.PublishAsync(
+            new OrderEvent { OrderId = 13 },
+            eventType: new string('x', 257)));
+    }
+
+    [Fact]
+    public async Task PublisherUsesExplicitSerializerOptions()
+    {
+        using var ctx = Db();
+        var serializer = new OutboxEventJsonSerializer(new System.Text.Json.JsonSerializerOptions
+        {
+            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+        });
+        var pub = new EfCoreOutboxPublisher<Ctx>(
+            ctx,
+            PubSoft.Testing.TestIds.Shared,
+            eventSerializer: serializer);
+
+        var id = await pub.PublishAsync(new OrderEvent { OrderId = 14 }, eventType: "orders.order-created.v1");
+        await ctx.SaveChangesAsync();
+
+        var saved = await ctx.Messages.FindAsync(id);
+        Assert.Contains("\"orderId\"", saved!.PayloadJson);
+        Assert.DoesNotContain("\"OrderId\"", saved.PayloadJson);
     }
 
     [Fact]

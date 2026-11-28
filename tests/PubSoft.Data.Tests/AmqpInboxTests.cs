@@ -37,6 +37,10 @@ public sealed class AmqpInboxTests
             new AmqpInboxOptions { PrefetchCount = 0 }, new FakeInbox(), (_, _, _) => Task.CompletedTask));
         Assert.Throws<ArgumentNullException>(() => new AmqpInboxSubscriber(
             new AmqpInboxOptions(), null!, (_, _, _) => Task.CompletedTask));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new AmqpInboxSubscriber(
+            new AmqpInboxOptions { ReconnectJitterRatio = double.NaN }, new FakeInbox(), (_, _, _) => Task.CompletedTask));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new AmqpInboxSubscriber(
+            new AmqpInboxOptions { ReconnectJitterRatio = -0.5 }, new FakeInbox(), (_, _, _) => Task.CompletedTask));
     }
 
     [Theory]

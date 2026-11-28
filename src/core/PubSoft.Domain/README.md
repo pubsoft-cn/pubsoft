@@ -33,7 +33,7 @@ Audit base classes initialize `CreationTime` to UTC at construction. `Audited*` 
 
 ## Scope Contracts
 
-`IMultiTenant`, `IMemberScoped`, and `ISoftDelete` describe entity fields. `ITenantContext` and `IMemberScopeContext` are read-only scope contracts; this package does not determine how they are populated. Tenant/member selection, trust, and authorization remain host responsibilities.
+`IMultiTenant`, `IMemberScoped`, and `ISoftDelete` describe entity fields. `ITenantContext` and `IMemberScopeContext` are read-only scope contracts; this package does not determine how they are populated. `ScopedTenantContext` is a one-shot mutable `ITenantContext` for worker-owned DI scopes whose initialization must survive handoff across async control flows. Tenant/member selection, trust, and authorization remain host responsibilities.
 
 `DataScopeDimensionRegistry` stores dimension names using ordinal case-insensitive matching. `Dimensions` returns a read-only snapshot; registration is thread-safe and rejects empty names. `DataScopeDimension` defensively copies allowed IDs into a read-only collection:
 
@@ -60,7 +60,7 @@ The dimension snapshot and `RoleDataScope.IsAll` are descriptive data only. They
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
-- `PubSoft.Domain`: `AggregateRoot<TKey>` `AmbientMemberScopeContext` `AmbientTenantContext` `AuditedAggregateRoot` `AuditedEntity<TKey>` `CreationAuditedAggregateRoot` `CreationAuditedEntity<TKey>` `DataScopeAccessEvaluator` `DataScopeDimension` `DataScopeDimensionRegistry` `Entity<TKey>` `FullAuditedAggregateRoot` `FullAuditedEntity<TKey>` `IDataScopeDimensionRegistry` `IMemberScopeContext` `IMemberScoped` `IMultiTenant` `IPubSoftSaveParticipant` `IReadOnlyRepository<TEntity, TKey>` `IRepository<TEntity, TKey>` `IRoleDataScopeProvider` `ISoftDelete` `ITenantContext` `PermissionGrantRecord` `PermissionModule` `PermissionRole` `RoleDataScope` `SubjectPermissionRole`
+- `PubSoft.Domain`: `AggregateRoot<TKey>` `AmbientMemberScopeContext` `AmbientTenantContext` `AuditedAggregateRoot` `AuditedEntity<TKey>` `CreationAuditedAggregateRoot` `CreationAuditedEntity<TKey>` `DataScopeAccessEvaluator` `DataScopeDimension` `DataScopeDimensionRegistry` `Entity<TKey>` `FullAuditedAggregateRoot` `FullAuditedEntity<TKey>` `IDataScopeDimensionRegistry` `IMemberScopeContext` `IMemberScoped` `IMultiTenant` `IPubSoftSaveParticipant` `IReadOnlyRepository<TEntity, TKey>` `IRepository<TEntity, TKey>` `IRoleDataScopeProvider` `ISoftDelete` `ITenantContext` `ScopedTenantContext` `PermissionGrantRecord` `PermissionModule` `PermissionRole` `RoleDataScope` `SubjectPermissionRole`
 
 <!-- pubsoft:api-surface:start -->
 

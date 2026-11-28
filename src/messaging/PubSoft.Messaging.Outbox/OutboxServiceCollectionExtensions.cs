@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using PubSoft.EntityFrameworkCore;
+using PubSoft.MultiTenancy;
 
 namespace PubSoft.Messaging.Outbox;
 
@@ -19,10 +20,36 @@ public static class OutboxServiceCollectionExtensions
         configure?.Invoke(options);
         var validatedOptions = options.CloneAndValidate();
         services.TryAddSingleton(validatedOptions);
-        services.TryAddScoped<IOutboxPublisher, EfCoreOutboxPublisher<TDbContext>>();
+        services.TryAddScoped<IOutboxPublisher>(provider => new EfCoreOutboxPublisher<TDbContext>(
+            provider.GetRequiredService<TDbContext>(),
+            provider.GetRequiredService<PubSoft.Core.IIdGenerator>(),
+            provider.GetRequiredService<OutboxOptions>(),
+            provider.GetService<TimeProvider>(),
+            provider.GetService<IOutboxEventSerializer>()));
         services.TryAddScoped<IOutboxStore, EfCoreOutboxStore<TDbContext>>();
         services.TryAddScoped<IInboxMessageProcessor, EfCoreInboxMessageProcessor<TDbContext>>();
         services.TryAddScoped<OutboxProcessor>();
+        services.TryAddSingleton<OutboxWorkerStatusTracker>();
+        return services;
+    }
+
+
+    /// <summary>
+    /// Registers catalog-backed tenant scope enumeration. Requires a scoped <see cref="ITenantAppService"/>
+    /// registration and a scoped tenant context resolvable as <see cref="PubSoft.Domain.ScopedTenantContext"/>.
+    /// </summary>
+    public static IServiceCollection AddPubSoftTenantOutboxScopeProvider(
+        this IServiceCollection services,
+        Action<TenantOutboxScopeOptions>? configure = null)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        var options = new TenantOutboxScopeOptions();
+        configure?.Invoke(options);
+        if (!options.IsValid(out var error))
+            throw new ArgumentException(error, nameof(configure));
+        services.TryAddSingleton(options);
+        services.TryAddSingleton<IOutboxTenantScopeInitializer, ScopedTenantOutboxScopeInitializer>();
+        services.TryAddSingleton<IOutboxScopeProvider, TenantOutboxScopeProvider>();
         return services;
     }
 

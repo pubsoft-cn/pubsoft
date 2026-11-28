@@ -40,7 +40,7 @@ var message = await context.Set<OutboxMessage>().SingleAsync();
 var payload = System.Text.Json.JsonSerializer.Deserialize<AuditSnapshotOutboxEvent>(message.PayloadJson);
 if (message.TenantId != 42
     || message.TargetModule != OutboxAuditSnapshotSink<SmokeDbContext>.TargetModule
-    || message.EventType != typeof(AuditSnapshotOutboxEvent).FullName
+    || message.EventType != OutboxAuditSnapshotSink<SmokeDbContext>.SnapshotEventType
     || payload is not { SchemaVersion: 1 }
     || payload.Snapshot.Business.Action != "transfer"
     || await context.Set<AuditLogRecord>().AnyAsync())

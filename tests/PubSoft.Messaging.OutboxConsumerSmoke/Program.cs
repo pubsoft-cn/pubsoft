@@ -15,7 +15,7 @@ var publisher = new EfCoreOutboxPublisher<SmokeDbContext>(dbContext, new PubSoft
 long rolledBackId;
 await using (var transaction = await dbContext.Database.BeginTransactionAsync())
 {
-    rolledBackId = await publisher.PublishAsync(new SmokeEvent("rolled-back", "created"));
+    rolledBackId = await publisher.PublishAsync(new SmokeEvent("rolled-back", "created"), "smoke.smoke-event.v1");
     await dbContext.SaveChangesAsync();
     await transaction.RollbackAsync();
 }
@@ -26,6 +26,7 @@ if (await dbContext.Set<OutboxMessage>().AnyAsync(message => message.Id == rolle
 
 var committedId = await publisher.PublishAsync(
     new SmokeEvent("order-42", "created"),
+    "smoke.smoke-event.v1",
     targetModule: "billing",
     aggregateKey: "order-42");
 await dbContext.SaveChangesAsync();
@@ -33,7 +34,7 @@ var persisted = await dbContext.Set<OutboxMessage>().SingleAsync(message => mess
 using var payload = JsonDocument.Parse(persisted.PayloadJson);
 if (persisted.TenantId != 17
     || persisted.Status != OutboxMessageStatus.Pending
-    || persisted.EventType != typeof(SmokeEvent).FullName
+    || persisted.EventType != "smoke.smoke-event.v1"
     || persisted.TargetModule != "billing"
     || persisted.AggregateKey != "order-42"
     || payload.RootElement.GetProperty(nameof(SmokeEvent.OrderId)).GetString() != "order-42")

@@ -65,6 +65,18 @@ Delivery semantics: QoS1 at-least-once + `InboxReceipt` exactly-once-effective.
 No offset/replay — for durable event log with replay use a dedicated broker
 (Kafka / NATS JetStream).
 
+### Acknowledgement and failure semantics
+
+`MqttInboxSubscriber` disables MQTTnet auto-acknowledgement and sends PUBACK/PUBREC
+only after inbox admission and the application handler complete. A handler or inbox
+failure leaves the MQTT packet unacknowledged; MQTT has no NACK packet, so broker
+redelivery normally depends on reconnect/session state rather than immediate requeue.
+Persistent poison messages can therefore require host-side operational intervention
+(fixing the consumer and reconnecting/recovering the session). The subscriber does
+not silently acknowledge-and-drop failed outbox messages. Messages without a valid
+`x-outbox-id` remain a documented fail-fast drop: they cannot be deduplicated safely.
+The reconnect delay carries bounded symmetric jitter (`ReconnectJitterRatio`, default 0.2 = the 80%-120% band) so a replica fleet does not reconnect in lockstep after a broker restart; set the ratio to 0 for a deterministic cadence.
+
 ## API surface
 
 <!-- pubsoft:api-surface:start -->
@@ -79,6 +91,6 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
-`BrokerUri`, `ClientId`, `ConsumerName`, `EventTypePrefix`, `MaxPayloadBytes`, `Password`, `PersistentSession`, `PublishTimeout`, `QualityOfService`, `ReconnectDelay`, `SessionExpirySeconds`, `ShareGroup`, `TopicFilter`, `TopicPrefix`, `Username`
+`BrokerUri`, `ClientId`, `ConsumerName`, `EventTypePrefix`, `MaxPayloadBytes`, `Password`, `PersistentSession`, `PublishTimeout`, `QualityOfService`, `ReconnectDelay`, `ReconnectJitterRatio`, `SessionExpirySeconds`, `ShareGroup`, `TopicFilter`, `TopicPrefix`, `Username`
 
 <!-- pubsoft:api-surface:end -->

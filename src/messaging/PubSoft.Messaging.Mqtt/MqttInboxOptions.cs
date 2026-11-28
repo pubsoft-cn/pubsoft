@@ -34,6 +34,11 @@ public sealed class MqttInboxOptions
     public uint SessionExpirySeconds { get; set; } = 86_400;
     /// <summary>Reconnect delay after a broker disconnect.</summary>
     public TimeSpan ReconnectDelay { get; set; } = TimeSpan.FromSeconds(5);
+    /// <summary>
+    /// Bounded symmetric jitter ratio applied to <see cref="ReconnectDelay"/> so replicas do not
+    /// reconnect in lockstep after a broker restart. 0 disables jitter; 0.2 samples the 80%-120% band.
+    /// </summary>
+    public double ReconnectJitterRatio { get; set; } = 0.2;
     /// <summary>Prefix stripped from the topic to derive the event type; empty -> full topic used.</summary>
     public string EventTypePrefix { get; set; } = "outbox/";
 
@@ -44,6 +49,8 @@ public sealed class MqttInboxOptions
         ArgumentException.ThrowIfNullOrWhiteSpace(TopicFilter);
         ArgumentException.ThrowIfNullOrWhiteSpace(ConsumerName);
         if (QualityOfService is < 0 or > 2) throw new ArgumentOutOfRangeException(nameof(QualityOfService));
+        if (!double.IsFinite(ReconnectJitterRatio) || ReconnectJitterRatio is < 0 or > 1)
+            throw new ArgumentOutOfRangeException(nameof(ReconnectJitterRatio), "Reconnect jitter ratio must be a finite value between 0 and 1.");
         return (MqttInboxOptions)MemberwiseClone();
     }
 }

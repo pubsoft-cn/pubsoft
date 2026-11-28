@@ -63,6 +63,28 @@ Authenticated actor attribution is opt-in through `AuditMiddlewareOptions.Captur
 
 The SQLite relational tests exercise context changes against one cached EF model, automatic tenant assignment, selective scope bypass, scope-safe repository lookup/write behavior, scoped registrations, unit-of-work saving, and soft-delete interception. This package does not provide a distributed tenant/member context, database provider, or cross-tenant authorization policy.
 
+## Retryable Transactions
+
+`EfCoreTransactionExecutor` wraps one scoped `DbContext` operation in an explicit EF `IDbContextTransaction` and executes it through the provider's EF execution strategy. It is deliberately narrow: one DbContext, one database transaction, no ambient `TransactionScope`, and no distributed/multi-context atomicity claim.
+
+```csharp
+await EfCoreTransactionExecutor.ExecuteInTransactionAsync(
+    dbContext,
+    async (db, ct) =>
+    {
+        db.Orders.Add(order);
+        await db.SaveChangesAsync(ct);
+    },
+    verifySucceeded: async (db, ct) =>
+        await db.Orders.AnyAsync(o => o.Id == order.Id, ct),
+    isolationLevel: IsolationLevel.ReadCommitted,
+    cancellationToken: ct);
+```
+
+The operation delegate must be retry-safe. Before retry attempts the executor clears the context `ChangeTracker` (and also clears it after failed attempts), so the delegate must re-read or re-apply every change on each invocation. Transient failures before commit can be retried by the provider strategy; configure the provider retrying strategy (for example `EnableRetryOnFailure`) where appropriate. If commit outcome is ambiguous, `verifySucceeded` decides whether the transaction is known to have committed. Without that probe the executor throws `EfCoreTransactionCommitVerificationException` instead of blindly retrying a possibly committed transaction.
+
+Nested executor calls on the same context join the root logical transaction and cannot choose a different isolation level. Nested calls on another DbContext fail closed. A pre-existing `DbContext` transaction or ambient `TransactionScope` also fails closed; make the executor call the transaction root instead.
+
 ## Query Diagnostics
 
 Two complementary pieces, both registered by `AddPubSoftDbQueryDiagnostics()`:
@@ -115,7 +137,7 @@ Manual entries flow through the same `IAuditSnapshotSink` pipeline as middleware
 
 _Generated from `PublicAPI.Unshipped.txt` (enforced by PublicApiAnalyzers)._
 
-- `PubSoft.EntityFrameworkCore`: `AuditChangeCaptureHook` `DbQueryDiagnostics` `DbQueryDiagnosticsOptions` `DbQueryDiagnosticsServiceCollectionExtensions` `EncryptionModelBuilderExtensions` `DiagnosticSnapshot` `EfCorePermissionGrantManager<TDbContext>` `EfCorePermissionGrantProvider<TDbContext>` `EfCoreQueryExtensions` `EfCoreRepository<TEntity, TKey, TDbContext>` `EfCoreRoleDataScopeProvider<TDbContext>` `EfCoreServiceCollectionExtensions` `IEfCoreRepository<TEntity, TKey>` `IPubSoftUnitOfWork<TDbContext>` `ISaveChangesHook` `IdentityModelBuilderExtensions` `PermissionGrantModelBuilderExtensions` `PubSoftDbContext` `PubSoftUnitOfWork<TDbContext>` `QuerySnapshot` `RoleDataScopeModelBuilderExtensions` `TenantModelBuilderExtensions`
+- `PubSoft.EntityFrameworkCore`: `AuditChangeCaptureHook` `DbQueryDiagnostics` `DbQueryDiagnosticsOptions` `DbQueryDiagnosticsServiceCollectionExtensions` `EncryptionModelBuilderExtensions` `DiagnosticSnapshot` `EfCorePermissionGrantManager<TDbContext>` `EfCorePermissionGrantProvider<TDbContext>` `EfCoreQueryExtensions` `EfCoreRepository<TEntity, TKey, TDbContext>` `EfCoreRoleDataScopeProvider<TDbContext>` `EfCoreTransactionCommitVerificationException` `EfCoreTransactionExecutor` `EfCoreServiceCollectionExtensions` `IEfCoreRepository<TEntity, TKey>` `IPubSoftUnitOfWork<TDbContext>` `ISaveChangesHook` `IdentityModelBuilderExtensions` `PermissionGrantModelBuilderExtensions` `PubSoftDbContext` `PubSoftUnitOfWork<TDbContext>` `QuerySnapshot` `RoleDataScopeModelBuilderExtensions` `TenantModelBuilderExtensions`
 - `PubSoft.EntityFrameworkCore.Auditing`: `AuditEntityChangeRecord` `AuditKeywordMatch` `AuditLogQueryService` `AuditLogRecord` `AuditPersistenceModelBuilderExtensions` `AuditPersistenceServiceCollectionExtensions` `AuditRetentionCleanup<TDbContext>` `EfCoreAuditSnapshotSink<TDbContext>`
 - `PubSoft.EntityFrameworkCore.Migrations`: `DatabaseMigrationService` `DatabaseMigrationServiceCollectionExtensions` `EfCoreDatabaseSchemaMigrator<TDbContext>` `IDataSeeder` `IDatabaseMigrationService` `IDatabaseSchemaMigrator`
 
@@ -154,7 +176,7 @@ Machine-maintained public surface (regenerate: `dotnet run --project tools/PubSo
 
 **(options & records)**
 
-`Action`, `AuditLog`, `AuditLogId`, `AverageMs`, `Category`, `ChangedAt`, `ClientIp`, `Conflicts`, `Count`, `Detail`, `DurationMilliseconds`, `Enabled`, `EntityId`, `EntityType`, `ErrorCount`, `FailureCode`, `HttpMethod`, `IsAdministrator`, `MaxLatencySamplesPerTemplate`, `MaxMs`, `MaxQueryTemplates`, `Operation`, `P50Ms`, `P95Ms`, `P99Ms`, `PropertiesJson`, `QueryFingerprint`, `RequestPath`, `Rewritten`, `SampleRate`, `SkippedAmbiguous`, `SlowQueryCount`, `SlowQueryThreshold`, `StartedAt`, `StatusCode`, `SubjectId`, `SubjectName`, `Success`, `TargetId`, `TargetName`, `TargetType`, `TenantId`, `TopQueries`, `TotalErrors`, `TotalMs`, `TotalQueries`, `TraceId`, `UserAgent`
+`Action`, `AuditLog`, `AuditLogId`, `AverageMs`, `Category`, `ChangedAt`, `ClientIp`, `Conflicts`, `Count`, `Detail`, `DurationMilliseconds`, `Enabled`, `EntityId`, `EntityType`, `ErrorCount`, `FailureCode`, `HelpLink`, `HResult`, `HttpMethod`, `IsAdministrator`, `MaxLatencySamplesPerTemplate`, `MaxMs`, `MaxQueryTemplates`, `Operation`, `P50Ms`, `P95Ms`, `P99Ms`, `PropertiesJson`, `QueryFingerprint`, `RequestPath`, `Rewritten`, `SampleRate`, `SkippedAmbiguous`, `SlowQueryCount`, `SlowQueryThreshold`, `Source`, `StartedAt`, `StatusCode`, `SubjectId`, `SubjectName`, `Success`, `TargetId`, `TargetName`, `TargetType`, `TenantId`, `TopQueries`, `TotalErrors`, `TotalMs`, `TotalQueries`, `TraceId`, `UserAgent`
 
 <!-- pubsoft:api-surface:end -->
 
